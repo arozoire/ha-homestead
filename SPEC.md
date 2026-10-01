@@ -21,6 +21,16 @@
 | Lingua | v1 in italiano, struttura traduzioni HA pronta per FR/EN | Estendibile |
 | Foto | Salvate in HA (`/media/homestead/`) | Incluse nel backup HA |
 | Nome | "HA Homestead" | Confermato |
+| Raccolto | kg o pezzi + stima € opzionale + **indice di annata** | Serve capire subito se l'anno è buono o "fa pena" |
+| Aiuole | Gerarchia di **zone interne** (stile aree HA), **non** aree HA vere | Principio: non sporcare HA |
+| Entità HA | Poche entità aggregate di default; device per pianta solo opt-in | Coerente con "non sporcare HA" |
+| Attrezzi prestati | Messo nel backlog idee, non pianificato | Buona idea ma non prioritaria |
+
+## 0bis. Principio guida: non sporcare HA
+
+- Nessuna area, piano, etichetta o zona HA creata automaticamente.
+- Entità HA ridotte al minimo utile (vedi §6); il dettaglio vive nel pannello.
+- Disinstallazione pulita: rimuovendo l'integrazione non restano residui.
 
 ## 1. Obiettivo
 
@@ -85,6 +95,20 @@ Fuori v1: calendario semine, regole meteo, produzione, lista spesa, inventario s
 | foto, note | |
 | fase lunare | calcolata automaticamente alla data (solo registrazione) |
 
+### Zona (`zone`) — aiuole e settori
+Concetto simile alle aree HA, ma **interno** all'integrazione.
+
+| Campo | Note |
+|---|---|
+| id, nome, zona padre | gerarchia libera: Giardino > Orto > Aiuola 3 |
+| tipo | orto, frutteto, aiuola fiori, serra, vaso, prato… |
+| geometria | poligono sulla mappa |
+| superficie | calcolata dal poligono |
+| esposizione, tipo suolo | opzionali |
+| area HA collegata | **opzionale**, solo riferimento a un'area esistente (es. "Giardino"), mai creata |
+
+Una zona ospita nel tempo colture diverse: lo storico per stagione abilita la **rotazione** (v3).
+
 ### Spesa (`expense`)
 | Campo | Note |
 |---|---|
@@ -104,6 +128,28 @@ Fuori v1: calendario semine, regole meteo, produzione, lista spesa, inventario s
 
 Utile in seguito: un'attività richiede attrezzi → "per potare il melo ti serve il seghetto, che è da affilare".
 
+## 4bis. Raccolto e indice di annata (v4)
+
+### Registro raccolto (`harvest`)
+| Campo | Note |
+|---|---|
+| data, pianta o zona | |
+| quantità + unità | kg o pezzi |
+| valore € stimato | **opzionale**, inserito dall'utente |
+| voto qualità 1–5 | gusto, calibro, sanità |
+| note, foto | |
+
+### Indice di annata
+Per pianta/zona/coltura e per anno, due componenti:
+
+| Componente | Calcolo | Lettura |
+|---|---|---|
+| Quantità | quantità anno / mediana anni precedenti | 1,0 = anno normale; 0,4 = anno scarso |
+| Qualità | media dei voti 1–5 dell'anno | |
+| **Indice annata** | combinazione delle due → scala semplice (es. 🟢 buona / 🟡 media / 🔴 da dimenticare) | Leggibile a colpo d'occhio |
+
+Primo anno senza storico: solo qualità. Gli eventi meteo estremi (gelate tardive, grandine, siccità) vengono collegati automaticamente all'annata per spiegarla.
+
 ## 5. Fonti dati colturali (da validare)
 
 | Fonte | Contenuto | Licenza/stato | Uso previsto |
@@ -121,7 +167,8 @@ Principio: **adattatori** per fonte + cache locale + possibilità di correzione 
 
 | Elemento | Come |
 |---|---|
-| Ogni albero | **Device** HA con entità (età, giorni dall'ultima potatura, prossima azione) |
+| Entità di default | Poche e aggregate: n. piante, prossima azione, spesa anno, indice annata |
+| Device per pianta | **Opt-in** per piante scelte (es. alberi importanti), mai automatico |
 | Mappa | Attributi lat/lon → visibile anche nella card mappa nativa |
 | To-do | Entità `todo.giardino` (v2) |
 | Calendario | Entità `calendar.giardino` (v2) |
@@ -136,7 +183,7 @@ Principio: **adattatori** per fonte + cache locale + possibilità di correzione 
 | v1 | Piante + import tassonomia/caratteristiche, mappa importata, spese, attrezzi |
 | v2 | Diario eventi (potatura, trattamento, concimazione), to-do e calendario HA, bilancio mensile/annuale |
 | v3 | Inventario semi (lotti, germinabilità per età), calendario semine da fonti open, lista spesa |
-| v4 | Motore regole meteo ("si può potare?"), registro produzione (kg/pezzi) |
+| v4 | Motore regole meteo ("si può potare?"), registro produzione + indice annata (§4bis) |
 | v5 | Analisi pluriennali (rese, correlazioni incl. luna), multi-utente, pubblicazione HACS |
 
 ## 8. Mappa — come ottenerla
@@ -149,8 +196,13 @@ Principio: **adattatori** per fonte + cache locale + possibilità di correzione 
 
 Ogni punto/poligono importato viene abbinato a una pianta (per nome o manualmente).
 
-## 9. Domande aperte
+## 9. Backlog idee (non pianificate)
 
-1. Ricavi: valorizzare la produzione a prezzo di mercato (opzionale) o solo quantità?
-2. Gruppi di ortaggi: la stessa aiuola cambia coltura ogni stagione → gestire rotazioni dalla v3?
-3. Attrezzi condivisi/prestati: da tracciare?
+- Attrezzi prestati/condivisi (a chi, quando, rientro).
+- Correlazioni fase lunare ↔ risultati (dati già registrati da v1).
+- Contributo comunitario delle correzioni ai dati colturali.
+
+## 10. Domande aperte
+
+1. Indice annata: i pesi quantità/qualità fissi o configurabili?
+2. Rotazione: regole classiche per famiglia botanica (solanacee, brassicacee…) o solo storico visibile?
