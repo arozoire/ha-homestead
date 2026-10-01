@@ -16,6 +16,11 @@
 | Luna | Non è una regola: è un **dato registrato** su ogni evento | Correlazioni analizzabili a posteriori, utile ad altri utenti |
 | Economia | Bilancio mensile/annuale centrato sulle **spese**; ricavi opzionali | I guadagni sono difficili da valorizzare |
 | Utenti | v1 mono-utente, design pronto per multi-utente/pubblicazione | Ambizione futura |
+| Formato mappa | Import **KML + GeoJSON**; in più posizionamento a clic nel pannello | L'autore non conosce i tool di mappa: serve un'alternativa interna |
+| Località | Presa dalla configurazione HA (lat/lon, altitudine, fuso) | Nessun inserimento manuale |
+| Lingua | v1 in italiano, struttura traduzioni HA pronta per FR/EN | Estendibile |
+| Foto | Salvate in HA (`/media/homestead/`) | Incluse nel backup HA |
+| Nome | "HA Homestead" | Confermato |
 
 ## 1. Obiettivo
 
@@ -38,6 +43,7 @@ Registrare tutto ciò che vive nel giardino (alberi, gruppi di ortaggi, bulbi, s
 
 ### Componenti
 
+- Località: `hass.config` (latitudine, longitudine, altitudine, fuso). Zona climatica e date medie di gelo derivate dalle coordinate (es. storico Open-Meteo), con possibilità di correzione.
 - `custom_components/homestead/` — Python: modello dati, storage, entità, servizi, regole.
 - Pannello frontend (sidebar "Giardino") — JS/Lit, servito dall'integrazione: mappa (Leaflet), schede pianta, inventario.
 - Adattatori fonti dati (§5) — moduli separati, sostituibili.
@@ -133,11 +139,18 @@ Principio: **adattatori** per fonte + cache locale + possibilità di correzione 
 | v4 | Motore regole meteo ("si può potare?"), registro produzione (kg/pezzi) |
 | v5 | Analisi pluriennali (rese, correlazioni incl. luna), multi-utente, pubblicazione HACS |
 
-## 8. Domande aperte
+## 8. Mappa — come ottenerla
 
-1. Formato mappa: Google My Maps esporta KML → ok come formato di riferimento?
-2. Zona climatica / località dell'autore (per testare i calendari).
-3. Lingua dell'interfaccia: IT, FR, EN fin da v1?
-4. Foto: in HA (`/media`) o esterne?
-5. Valuta unica (€) in v1?
-6. Nome definitivo del progetto.
+| Metodo | Strumento | Note |
+|---|---|---|
+| A | Clic sulla mappa satellitare nel pannello | Il più semplice, nessun tool esterno |
+| B | [Google My Maps](https://www.google.com/mymaps) → esporta KML | Gratuito, account Google, vista satellite |
+| C | [geojson.io](https://geojson.io) → esporta GeoJSON | Open source, senza account |
+
+Ogni punto/poligono importato viene abbinato a una pianta (per nome o manualmente).
+
+## 9. Domande aperte
+
+1. Ricavi: valorizzare la produzione a prezzo di mercato (opzionale) o solo quantità?
+2. Gruppi di ortaggi: la stessa aiuola cambia coltura ogni stagione → gestire rotazioni dalla v3?
+3. Attrezzi condivisi/prestati: da tracciare?
