@@ -32,6 +32,9 @@
     },
     "zone_cycle": {
       "message": "Una zona non può stare dentro sé stessa o dentro una sua sottozona."
+    },
+    "incomplete_position": {
+      "message": "Latitudine e longitudine vanno indicate insieme."
     }
   },
   "selector": {

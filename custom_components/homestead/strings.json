@@ -32,6 +32,9 @@
     },
     "zone_cycle": {
       "message": "A zone cannot be inside itself or one of its sub-zones."
+    },
+    "incomplete_position": {
+      "message": "Latitude and longitude must be given together."
     }
   },
   "selector": {

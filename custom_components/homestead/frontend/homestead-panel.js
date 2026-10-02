@@ -390,7 +390,7 @@ class HomesteadPanel extends HTMLElement {
 
   _fitAll() {
     const bounds = L.latLngBounds([]);
-    this._data.plantings.forEach((p) => p.latitude != null && bounds.extend([p.latitude, p.longitude]));
+    this._data.plantings.forEach((p) => hasPosition(p) && bounds.extend([p.latitude, p.longitude]));
     this._polygons.forEach((polygon) => bounds.extend(polygon.getBounds()));
     if (bounds.isValid()) this._map.fitBounds(bounds, { padding: [40, 40], maxZoom: 19 });
   }
@@ -421,7 +421,7 @@ class HomesteadPanel extends HTMLElement {
       } else {
         polygon.setLatLngs(toLatLngs(z.geometry)).setStyle(style);
       }
-      polygon.unbindTooltip().bindTooltip(z.name, { sticky: true });
+      polygon.unbindTooltip().bindTooltip(h("span", {}, z.name), { sticky: true });
     }
     for (const [id, polygon] of this._polygons) {
       if (!seen.has(id)) {
@@ -434,7 +434,7 @@ class HomesteadPanel extends HTMLElement {
   _syncMarkers() {
     const seen = new Set();
     for (const p of this._data.plantings) {
-      if (p.latitude == null || p.longitude == null) continue;
+      if (!hasPosition(p)) continue;
       seen.add(p.id);
       const selected = p.id === this._selected;
       const icon = L.divIcon({
@@ -456,7 +456,8 @@ class HomesteadPanel extends HTMLElement {
         marker.setLatLng([p.latitude, p.longitude]);
         marker.setIcon(icon);
       }
-      marker.unbindTooltip().bindTooltip(p.name, { direction: "top", offset: [0, -10] });
+      // Leaflet sets string tooltips with innerHTML: user names are always passed as elements.
+      marker.unbindTooltip().bindTooltip(h("span", {}, p.name), { direction: "top", offset: [0, -10] });
       selected ? marker.dragging.enable() : marker.dragging.disable();
       marker.setZIndexOffset(selected ? 1000 : 0);
     }
@@ -522,7 +523,7 @@ class HomesteadPanel extends HTMLElement {
     this._showMessage("");
     const p = this._planting(id) || fallback;
     this._form = p ? { ...p } : null;
-    if (p?.latitude != null) this._map.panTo([p.latitude, p.longitude]);
+    if (p && hasPosition(p)) this._map.panTo([p.latitude, p.longitude]);
     this._syncMap();
     this._drawPreview();
     this._render();
@@ -853,7 +854,7 @@ class HomesteadPanel extends HTMLElement {
 
   _positionText() {
     const f = this._form;
-    if (f.latitude == null) return "";
+    if (!hasPosition(f)) return "";
     const where = `${this.t("position")}: ${f.latitude.toFixed(6)}, ${f.longitude.toFixed(6)}`;
     return f.id ? `${where} — ${this.t("dragHint")}` : where;
   }
@@ -877,7 +878,7 @@ class HomesteadPanel extends HTMLElement {
                 "li",
                 {
                   className: p.id === this._selected ? "selected" : "",
-                  onclick: () => (p.latitude == null ? this._startPlacing(p.id) : this._select(p.id)),
+                  onclick: () => (hasPosition(p) ? this._select(p.id) : this._startPlacing(p.id)),
                 },
                 h("span", { className: "dot", style: `background:${STATUS_COLOR[p.status] || STATUS_COLOR.active}` }),
                 h(
@@ -891,7 +892,7 @@ class HomesteadPanel extends HTMLElement {
                       .filter(Boolean)
                       .join(" · "),
                   ),
-                  p.latitude == null ? h("div", { className: "sub warn" }, `📍 ${this.t("noPosition")}`) : null,
+                  hasPosition(p) ? null : h("div", { className: "sub warn" }, `📍 ${this.t("noPosition")}`),
                 ),
               ),
             ),
@@ -1126,6 +1127,10 @@ class HomesteadPanel extends HTMLElement {
       species,
     );
   }
+}
+
+function hasPosition(item) {
+  return item.latitude != null && item.longitude != null;
 }
 
 function round(value) {

@@ -125,6 +125,11 @@ def _iso(value: date | None) -> str | None:
     return value.isoformat() if value else None
 
 
+def _check_position(planting: Planting) -> None:
+    if (planting.latitude is None) != (planting.longitude is None):
+        raise ServiceValidationError(translation_domain=DOMAIN, translation_key="incomplete_position")
+
+
 def _check_ref(collection: dict, ref: str | None, key: str) -> None:
     if ref and ref not in collection:
         raise ServiceValidationError(
@@ -181,6 +186,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         if args["kind"] == PlantingKind.SINGLE:
             args["quantity"] = 1
         planting = Planting(**args)
+        _check_position(planting)
         store.data.plantings[planting.id] = planting
         if price:
             _add_expense(
@@ -206,6 +212,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         planting = replace(store.data.plantings[planting_id], **args)
         if planting.kind == PlantingKind.SINGLE:
             planting.quantity = 1
+        _check_position(planting)
         store.data.plantings[planting_id] = planting
         await store.async_save()
         return {"id": planting_id}

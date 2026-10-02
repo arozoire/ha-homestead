@@ -73,13 +73,19 @@ async def test_update_planting(hass: HomeAssistant) -> None:
     await hass.services.async_call(
         DOMAIN,
         "update_planting",
-        {"id": planting_id, "planted_on": "2024-04-23", "status": "dead", "latitude": None},
+        {
+            "id": planting_id,
+            "planted_on": "2024-04-23",
+            "status": "dead",
+            "latitude": None,
+            "longitude": None,
+        },
         blocking=True,
     )
     planting = entry.runtime_data.data.plantings[planting_id]
     assert (planting.name, planting.quantity, planting.status) == ("Melo", 5, "dead")
     assert planting.moon_phase == "full_moon"
-    assert planting.latitude is None and planting.longitude == 7.0
+    assert planting.latitude is None and planting.longitude is None
 
     await hass.services.async_call(
         DOMAIN, "update_planting", {"id": planting_id, "kind": "single"}, blocking=True
@@ -152,3 +158,17 @@ async def test_websocket_parse_map(hass: HomeAssistant, hass_ws_client) -> None:
     await ws.send_json({"id": 2, "type": "homestead/parse_map", "filename": "a.kml", "content": "bm9wZQ=="})
     result = await ws.receive_json()
     assert result["error"]["code"] == "invalid_format"
+
+
+async def test_position_needs_both_coordinates(hass: HomeAssistant) -> None:
+    await _setup(hass)
+    with pytest.raises(ServiceValidationError):
+        await _add(hass, latitude=45.0)
+    planting_id = await _add(hass, latitude=45.0, longitude=7.0)
+    with pytest.raises(ServiceValidationError):
+        await hass.services.async_call(
+            DOMAIN, "update_planting", {"id": planting_id, "longitude": None}, blocking=True
+        )
+    await hass.services.async_call(
+        DOMAIN, "update_planting", {"id": planting_id, "latitude": None, "longitude": None}, blocking=True
+    )
