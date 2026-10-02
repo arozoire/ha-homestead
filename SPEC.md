@@ -25,6 +25,11 @@
 | Aiuole | Gerarchia di **zone interne** (stile aree HA), **non** aree HA vere | Principio: non sporcare HA |
 | Entità HA | Poche entità aggregate di default; device per pianta solo opt-in | Coerente con "non sporcare HA" |
 | Attrezzi prestati | Messo nel backlog idee, non pianificato | Buona idea ma non prioritaria |
+| Pannello (v0.2) | Web component senza Lit né build, Leaflet incluso, satellite Esri + OSM | Zero dipendenze esterne, niente Google |
+| Zone sulla mappa (v0.3) | Poligono disegnato a clic (angolo per angolo); superficie calcolata; zona della pianta proposta se dentro il poligono | Metodo A di §8 esteso alle zone |
+| Import (v0.3) | KML, **KMZ** (default di Google My Maps), GeoJSON; punti → piante, poligoni → zone, linee ignorate; abbinamento per nome con scelta manuale | L'autore carica il file dal telefono quando serve |
+| Specie (v0.4) | Ricerca combinata Wikidata (nomi comuni) + GBIF (tassonomia); la specie scelta è copiata in locale con id GBIF/Wikidata e data di import | Funziona offline dopo l'import, tracciabilità come da §4 |
+| Licenza | MIT | Richiesta da HACS; la più diffusa tra le integrazioni custom |
 
 ## 0bis. Principio guida: non sporcare HA
 

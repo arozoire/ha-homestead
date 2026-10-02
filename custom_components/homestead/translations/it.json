@@ -29,6 +29,18 @@
     },
     "unknown_reference": {
       "message": "{field} sconosciuto: {value}."
+    },
+    "zone_cycle": {
+      "message": "Una zona non può stare dentro sé stessa o dentro una sua sottozona."
+    },
+    "incomplete_position": {
+      "message": "Latitudine e longitudine vanno indicate insieme."
+    },
+    "species_required": {
+      "message": "Indica la specie o collega una specie importata."
+    },
+    "sources_unavailable": {
+      "message": "GBIF e Wikidata non rispondono: riprova più tardi."
     }
   },
   "selector": {
@@ -75,6 +87,24 @@
         "needs_service": "Da manutenere",
         "broken": "Rotto"
       }
+    },
+    "planting_status": {
+      "options": {
+        "active": "Attiva",
+        "dead": "Morta",
+        "removed": "Rimossa"
+      }
+    },
+    "zone_kind": {
+      "options": {
+        "vegetable_garden": "Orto",
+        "orchard": "Frutteto",
+        "flower_bed": "Aiuola fiori",
+        "greenhouse": "Serra",
+        "pots": "Vasi",
+        "lawn": "Prato",
+        "other": "Altro"
+      }
     }
   },
   "services": {
@@ -92,15 +122,63 @@
         },
         "kind": {
           "name": "Tipo",
-          "description": "Orto, frutteto, aiuola fiori, serra…"
+          "description": "Tipo di zona."
         },
         "area_id": {
           "name": "Area Home Assistant",
           "description": "Collegamento opzionale a un'area esistente."
         },
+        "geometry": {
+          "name": "Geometria",
+          "description": "Poligono GeoJSON (coordinate longitudine, latitudine). La superficie viene calcolata."
+        },
         "notes": {
           "name": "Note",
           "description": "Note libere."
+        }
+      }
+    },
+    "update_zone": {
+      "name": "Modifica zona",
+      "description": "Modifica i campi indicati di una zona (anche il poligono).",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID della zona."
+        },
+        "name": {
+          "name": "Nome",
+          "description": "Nome della zona."
+        },
+        "parent_id": {
+          "name": "Zona padre",
+          "description": "ID della zona padre."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Tipo di zona."
+        },
+        "area_id": {
+          "name": "Area Home Assistant",
+          "description": "Collegamento opzionale a un'area esistente."
+        },
+        "geometry": {
+          "name": "Geometria",
+          "description": "Poligono GeoJSON (coordinate longitudine, latitudine). La superficie viene calcolata."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "delete_zone": {
+      "name": "Elimina zona",
+      "description": "Elimina una zona; sottozone e piante passano alla zona padre.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID della zona."
         }
       }
     },
@@ -114,7 +192,11 @@
         },
         "species": {
           "name": "Specie",
-          "description": "Nome scientifico o comune."
+          "description": "Nome scientifico o comune; facoltativo se colleghi una specie importata."
+        },
+        "taxon_id": {
+          "name": "Specie importata",
+          "description": "ID di una specie importata (servizio import_taxon); se manca la specie, usa il suo nome scientifico."
         },
         "variety": {
           "name": "Varietà",
@@ -167,6 +249,104 @@
         "notes": {
           "name": "Note",
           "description": "Note libere."
+        }
+      }
+    },
+    "update_planting": {
+      "name": "Modifica pianta",
+      "description": "Modifica i campi indicati di una pianta (anche la posizione).",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID della pianta."
+        },
+        "name": {
+          "name": "Nome",
+          "description": "Il tuo nome per questa pianta."
+        },
+        "species": {
+          "name": "Specie",
+          "description": "Nome scientifico o comune; facoltativo se colleghi una specie importata."
+        },
+        "taxon_id": {
+          "name": "Specie importata",
+          "description": "ID di una specie importata (servizio import_taxon); se manca la specie, usa il suo nome scientifico."
+        },
+        "variety": {
+          "name": "Varietà",
+          "description": "Cultivar o varietà."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Pianta singola o gruppo."
+        },
+        "quantity": {
+          "name": "Quantità",
+          "description": "Numero di piante (solo gruppi)."
+        },
+        "planted_on": {
+          "name": "Messa a dimora",
+          "description": "Data di impianto."
+        },
+        "initial_form": {
+          "name": "Forma all'impianto",
+          "description": "Cosa è stato piantato."
+        },
+        "initial_height_cm": {
+          "name": "Altezza iniziale",
+          "description": "Altezza stimata all'impianto."
+        },
+        "rootstock": {
+          "name": "Portainnesto",
+          "description": "Per alberi da frutto innestati."
+        },
+        "supplier": {
+          "name": "Fornitore",
+          "description": "Dove è stata acquistata."
+        },
+        "zone_id": {
+          "name": "Zona",
+          "description": "ID della zona."
+        },
+        "latitude": {
+          "name": "Latitudine",
+          "description": "Posizione sulla mappa."
+        },
+        "longitude": {
+          "name": "Longitudine",
+          "description": "Posizione sulla mappa."
+        },
+        "status": {
+          "name": "Stato",
+          "description": "Attiva, morta o rimossa."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "delete_planting": {
+      "name": "Elimina pianta",
+      "description": "Elimina una pianta inserita per errore. Le spese collegate restano. Per una pianta morta usa lo stato.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID della pianta."
+        }
+      }
+    },
+    "import_taxon": {
+      "name": "Importa specie",
+      "description": "Importa una specie da GBIF/Wikidata (nomi comuni, famiglia, genere) e la salva in locale. Restituisce l'id; se esiste già la aggiorna.",
+      "fields": {
+        "gbif_key": {
+          "name": "Chiave GBIF",
+          "description": "Numero della specie su gbif.org."
+        },
+        "wikidata_id": {
+          "name": "ID Wikidata",
+          "description": "Es. Q18674606."
         }
       }
     },
