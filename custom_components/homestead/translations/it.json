@@ -1,0 +1,258 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "HA Homestead",
+        "description": "Gestisci orto, frutteto e giardino. Posizione e valuta vengono prese dalle impostazioni di Home Assistant."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "HA Homestead è già configurato."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "plantings": {
+        "name": "Piante"
+      },
+      "expenses_year": {
+        "name": "Spese dell'anno"
+      },
+      "tools_needing_service": {
+        "name": "Attrezzi da manutenere"
+      }
+    }
+  },
+  "exceptions": {
+    "not_loaded": {
+      "message": "HA Homestead non è caricato."
+    },
+    "unknown_reference": {
+      "message": "{field} sconosciuto: {value}."
+    }
+  },
+  "selector": {
+    "planting_kind": {
+      "options": {
+        "single": "Pianta singola",
+        "group": "Gruppo (fila, aiuola)"
+      }
+    },
+    "initial_form": {
+      "options": {
+        "seed": "Seme",
+        "cutting": "Talea",
+        "bulb": "Bulbo",
+        "bare_root": "Radice nuda",
+        "potted": "In vaso",
+        "one_year": "Astone 1 anno",
+        "two_years": "Pianta 2 anni",
+        "other": "Altro"
+      }
+    },
+    "expense_category": {
+      "options": {
+        "plants": "Piante",
+        "seeds": "Semi",
+        "tools": "Attrezzi",
+        "fertilizers": "Concimi",
+        "treatments": "Trattamenti",
+        "water": "Acqua",
+        "other": "Altro"
+      }
+    },
+    "tool_power": {
+      "options": {
+        "manual": "Manuale",
+        "battery": "Batteria",
+        "petrol": "Benzina",
+        "electric": "Elettrico"
+      }
+    },
+    "tool_status": {
+      "options": {
+        "ok": "OK",
+        "needs_service": "Da manutenere",
+        "broken": "Rotto"
+      }
+    }
+  },
+  "services": {
+    "add_zone": {
+      "name": "Aggiungi zona",
+      "description": "Aggiunge una zona del giardino (aiuola, frutteto, serra). Le zone sono interne e non creano mai aree di Home Assistant.",
+      "fields": {
+        "name": {
+          "name": "Nome",
+          "description": "Nome della zona."
+        },
+        "parent_id": {
+          "name": "Zona padre",
+          "description": "ID della zona padre."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Orto, frutteto, aiuola fiori, serra…"
+        },
+        "area_id": {
+          "name": "Area Home Assistant",
+          "description": "Collegamento opzionale a un'area esistente."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "add_planting": {
+      "name": "Aggiungi pianta",
+      "description": "Aggiunge un albero, una pianta o un gruppo di piante.",
+      "fields": {
+        "name": {
+          "name": "Nome",
+          "description": "Il tuo nome per questa pianta."
+        },
+        "species": {
+          "name": "Specie",
+          "description": "Nome scientifico o comune."
+        },
+        "variety": {
+          "name": "Varietà",
+          "description": "Cultivar o varietà."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Pianta singola o gruppo."
+        },
+        "quantity": {
+          "name": "Quantità",
+          "description": "Numero di piante (solo gruppi)."
+        },
+        "planted_on": {
+          "name": "Messa a dimora",
+          "description": "Data di impianto."
+        },
+        "initial_form": {
+          "name": "Forma all'impianto",
+          "description": "Cosa è stato piantato."
+        },
+        "initial_height_cm": {
+          "name": "Altezza iniziale",
+          "description": "Altezza stimata all'impianto."
+        },
+        "rootstock": {
+          "name": "Portainnesto",
+          "description": "Per alberi da frutto innestati."
+        },
+        "supplier": {
+          "name": "Fornitore",
+          "description": "Dove è stata acquistata."
+        },
+        "zone_id": {
+          "name": "Zona",
+          "description": "ID della zona."
+        },
+        "latitude": {
+          "name": "Latitudine",
+          "description": "Posizione sulla mappa."
+        },
+        "longitude": {
+          "name": "Longitudine",
+          "description": "Posizione sulla mappa."
+        },
+        "price": {
+          "name": "Prezzo",
+          "description": "Prezzo d'acquisto; registrato come spesa."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "add_expense": {
+      "name": "Aggiungi spesa",
+      "description": "Registra una spesa.",
+      "fields": {
+        "amount": {
+          "name": "Importo",
+          "description": "Importo speso."
+        },
+        "category": {
+          "name": "Categoria",
+          "description": "Categoria di spesa."
+        },
+        "spent_on": {
+          "name": "Data",
+          "description": "Di default oggi."
+        },
+        "supplier": {
+          "name": "Fornitore",
+          "description": "Dove è stato acquistato."
+        },
+        "planting_id": {
+          "name": "Pianta",
+          "description": "ID della pianta collegata."
+        },
+        "tool_id": {
+          "name": "Attrezzo",
+          "description": "ID dell'attrezzo collegato."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "add_tool": {
+      "name": "Aggiungi attrezzo",
+      "description": "Aggiunge un attrezzo all'inventario.",
+      "fields": {
+        "name": {
+          "name": "Nome",
+          "description": "Nome dell'attrezzo."
+        },
+        "category": {
+          "name": "Categoria",
+          "description": "Potatura, scavo, irrigazione…"
+        },
+        "brand": {
+          "name": "Marca",
+          "description": "Marca."
+        },
+        "model": {
+          "name": "Modello",
+          "description": "Modello."
+        },
+        "purchased_on": {
+          "name": "Acquistato il",
+          "description": "Data di acquisto."
+        },
+        "power": {
+          "name": "Alimentazione",
+          "description": "Tipo di alimentazione."
+        },
+        "status": {
+          "name": "Stato",
+          "description": "Condizione attuale."
+        },
+        "next_service_on": {
+          "name": "Prossima manutenzione",
+          "description": "Prossima affilatura o tagliando."
+        },
+        "price": {
+          "name": "Prezzo",
+          "description": "Prezzo d'acquisto; registrato come spesa."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "export": {
+      "name": "Esporta dati",
+      "description": "Restituisce tutti i dati di HA Homestead."
+    }
+  }
+}

@@ -1,0 +1,200 @@
+add_zone:
+  fields:
+    name:
+      required: true
+      selector:
+        text:
+    parent_id:
+      selector:
+        text:
+    kind:
+      selector:
+        text:
+    area_id:
+      selector:
+        area:
+    notes:
+      selector:
+        text:
+          multiline: true
+
+add_planting:
+  fields:
+    name:
+      required: true
+      example: "Melo vicino al pozzo"
+      selector:
+        text:
+    species:
+      required: true
+      example: "Malus domestica"
+      selector:
+        text:
+    variety:
+      example: "Renetta"
+      selector:
+        text:
+    kind:
+      default: single
+      selector:
+        select:
+          translation_key: planting_kind
+          options:
+            - single
+            - group
+    quantity:
+      default: 1
+      selector:
+        number:
+          min: 1
+          max: 10000
+          mode: box
+    planted_on:
+      selector:
+        date:
+    initial_form:
+      selector:
+        select:
+          translation_key: initial_form
+          options:
+            - seed
+            - cutting
+            - bulb
+            - bare_root
+            - potted
+            - one_year
+            - two_years
+            - other
+    initial_height_cm:
+      selector:
+        number:
+          min: 0
+          max: 2000
+          unit_of_measurement: cm
+          mode: box
+    rootstock:
+      selector:
+        text:
+    supplier:
+      selector:
+        text:
+    zone_id:
+      selector:
+        text:
+    latitude:
+      selector:
+        number:
+          min: -90
+          max: 90
+          step: any
+          mode: box
+    longitude:
+      selector:
+        number:
+          min: -180
+          max: 180
+          step: any
+          mode: box
+    price:
+      selector:
+        number:
+          min: 0
+          step: 0.01
+          mode: box
+    notes:
+      selector:
+        text:
+          multiline: true
+
+add_expense:
+  fields:
+    amount:
+      required: true
+      selector:
+        number:
+          min: 0
+          step: 0.01
+          mode: box
+    category:
+      required: true
+      selector:
+        select:
+          translation_key: expense_category
+          options:
+            - plants
+            - seeds
+            - tools
+            - fertilizers
+            - treatments
+            - water
+            - other
+    spent_on:
+      selector:
+        date:
+    supplier:
+      selector:
+        text:
+    planting_id:
+      selector:
+        text:
+    tool_id:
+      selector:
+        text:
+    notes:
+      selector:
+        text:
+          multiline: true
+
+add_tool:
+  fields:
+    name:
+      required: true
+      example: "Seghetto da potatura"
+      selector:
+        text:
+    category:
+      selector:
+        text:
+    brand:
+      selector:
+        text:
+    model:
+      selector:
+        text:
+    purchased_on:
+      selector:
+        date:
+    power:
+      default: manual
+      selector:
+        select:
+          translation_key: tool_power
+          options:
+            - manual
+            - battery
+            - petrol
+            - electric
+    status:
+      default: ok
+      selector:
+        select:
+          translation_key: tool_status
+          options:
+            - ok
+            - needs_service
+            - broken
+    next_service_on:
+      selector:
+        date:
+    price:
+      selector:
+        number:
+          min: 0
+          step: 0.01
+          mode: box
+    notes:
+      selector:
+        text:
+          multiline: true
+
+export:

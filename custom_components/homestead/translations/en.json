@@ -1,0 +1,258 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "HA Homestead",
+        "description": "Manage your garden, orchard and homestead. Location and currency are taken from Home Assistant settings."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "HA Homestead is already configured."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "plantings": {
+        "name": "Plantings"
+      },
+      "expenses_year": {
+        "name": "Expenses this year"
+      },
+      "tools_needing_service": {
+        "name": "Tools needing service"
+      }
+    }
+  },
+  "exceptions": {
+    "not_loaded": {
+      "message": "HA Homestead is not loaded."
+    },
+    "unknown_reference": {
+      "message": "Unknown {field}: {value}."
+    }
+  },
+  "selector": {
+    "planting_kind": {
+      "options": {
+        "single": "Single plant",
+        "group": "Group (row, bed)"
+      }
+    },
+    "initial_form": {
+      "options": {
+        "seed": "Seed",
+        "cutting": "Cutting",
+        "bulb": "Bulb",
+        "bare_root": "Bare root",
+        "potted": "Potted",
+        "one_year": "One-year whip",
+        "two_years": "Two-year tree",
+        "other": "Other"
+      }
+    },
+    "expense_category": {
+      "options": {
+        "plants": "Plants",
+        "seeds": "Seeds",
+        "tools": "Tools",
+        "fertilizers": "Fertilizers",
+        "treatments": "Treatments",
+        "water": "Water",
+        "other": "Other"
+      }
+    },
+    "tool_power": {
+      "options": {
+        "manual": "Manual",
+        "battery": "Battery",
+        "petrol": "Petrol",
+        "electric": "Electric"
+      }
+    },
+    "tool_status": {
+      "options": {
+        "ok": "OK",
+        "needs_service": "Needs service",
+        "broken": "Broken"
+      }
+    }
+  },
+  "services": {
+    "add_zone": {
+      "name": "Add zone",
+      "description": "Adds a garden zone (bed, orchard, greenhouse). Zones are internal and never create Home Assistant areas.",
+      "fields": {
+        "name": {
+          "name": "Name",
+          "description": "Zone name."
+        },
+        "parent_id": {
+          "name": "Parent zone",
+          "description": "ID of the parent zone."
+        },
+        "kind": {
+          "name": "Kind",
+          "description": "Vegetable garden, orchard, flower bed, greenhouse…"
+        },
+        "area_id": {
+          "name": "Home Assistant area",
+          "description": "Optional link to an existing area."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "add_planting": {
+      "name": "Add planting",
+      "description": "Adds a tree, plant or group of plants.",
+      "fields": {
+        "name": {
+          "name": "Name",
+          "description": "Your own name for this planting."
+        },
+        "species": {
+          "name": "Species",
+          "description": "Scientific or common name."
+        },
+        "variety": {
+          "name": "Variety",
+          "description": "Cultivar or variety."
+        },
+        "kind": {
+          "name": "Kind",
+          "description": "Single plant or group."
+        },
+        "quantity": {
+          "name": "Quantity",
+          "description": "Number of plants (groups only)."
+        },
+        "planted_on": {
+          "name": "Planted on",
+          "description": "Planting date."
+        },
+        "initial_form": {
+          "name": "Initial form",
+          "description": "What was planted."
+        },
+        "initial_height_cm": {
+          "name": "Initial height",
+          "description": "Estimated height when planted."
+        },
+        "rootstock": {
+          "name": "Rootstock",
+          "description": "For grafted fruit trees."
+        },
+        "supplier": {
+          "name": "Supplier",
+          "description": "Where it was bought."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "ID of the zone."
+        },
+        "latitude": {
+          "name": "Latitude",
+          "description": "Position on the map."
+        },
+        "longitude": {
+          "name": "Longitude",
+          "description": "Position on the map."
+        },
+        "price": {
+          "name": "Price",
+          "description": "Purchase price; recorded as an expense."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "add_expense": {
+      "name": "Add expense",
+      "description": "Records an expense.",
+      "fields": {
+        "amount": {
+          "name": "Amount",
+          "description": "Amount spent."
+        },
+        "category": {
+          "name": "Category",
+          "description": "Expense category."
+        },
+        "spent_on": {
+          "name": "Date",
+          "description": "Defaults to today."
+        },
+        "supplier": {
+          "name": "Supplier",
+          "description": "Where it was bought."
+        },
+        "planting_id": {
+          "name": "Planting",
+          "description": "Related planting ID."
+        },
+        "tool_id": {
+          "name": "Tool",
+          "description": "Related tool ID."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "add_tool": {
+      "name": "Add tool",
+      "description": "Adds a tool to the inventory.",
+      "fields": {
+        "name": {
+          "name": "Name",
+          "description": "Tool name."
+        },
+        "category": {
+          "name": "Category",
+          "description": "Pruning, digging, irrigation…"
+        },
+        "brand": {
+          "name": "Brand",
+          "description": "Brand."
+        },
+        "model": {
+          "name": "Model",
+          "description": "Model."
+        },
+        "purchased_on": {
+          "name": "Purchased on",
+          "description": "Purchase date."
+        },
+        "power": {
+          "name": "Power",
+          "description": "Power source."
+        },
+        "status": {
+          "name": "Status",
+          "description": "Current condition."
+        },
+        "next_service_on": {
+          "name": "Next service",
+          "description": "Next sharpening or maintenance."
+        },
+        "price": {
+          "name": "Price",
+          "description": "Purchase price; recorded as an expense."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "export": {
+      "name": "Export data",
+      "description": "Returns all HA Homestead data."
+    }
+  }
+}
