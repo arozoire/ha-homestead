@@ -10,6 +10,7 @@ import voluptuous as vol
 from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse, callback
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN
@@ -27,6 +28,7 @@ from .models import (
     Zone,
     ZoneKind,
 )
+from .species import SourcesUnavailable, fetch_details, upsert_taxon
 from .store import HomesteadStore, get_store
 
 _opt_str = vol.Any(None, cv.string)
@@ -56,7 +58,8 @@ DELETE_ZONE_SCHEMA = vol.Schema({vol.Required("id"): cv.string})
 ADD_PLANTING_SCHEMA = vol.Schema(
     {
         vol.Required("name"): cv.string,
-        vol.Required("species"): cv.string,
+        vol.Optional("species"): cv.string,
+        vol.Optional("taxon_id"): _opt_str,
         vol.Optional("variety"): _opt_str,
         vol.Optional("kind", default=PlantingKind.SINGLE): vol.In([k.value for k in PlantingKind]),
         vol.Optional("quantity", default=1): vol.All(vol.Coerce(int), vol.Range(min=1)),
@@ -86,6 +89,16 @@ UPDATE_PLANTING_SCHEMA = vol.Schema(
 )
 
 DELETE_PLANTING_SCHEMA = vol.Schema({vol.Required("id"): cv.string})
+
+IMPORT_TAXON_SCHEMA = vol.All(
+    vol.Schema(
+        {
+            vol.Optional("gbif_key"): vol.All(vol.Coerce(int), vol.Range(min=1)),
+            vol.Optional("wikidata_id"): vol.Match(r"^Q[1-9][0-9]*$"),
+        }
+    ),
+    cv.has_at_least_one_key("gbif_key", "wikidata_id"),
+)
 
 ADD_EXPENSE_SCHEMA = vol.Schema(
     {
@@ -128,6 +141,20 @@ def _iso(value: date | None) -> str | None:
 def _check_position(planting: Planting) -> None:
     if (planting.latitude is None) != (planting.longitude is None):
         raise ServiceValidationError(translation_domain=DOMAIN, translation_key="incomplete_position")
+
+
+def _taxon_languages(hass: HomeAssistant) -> list[str]:
+    """Common names kept for the HA language plus the ones the UI is translated to."""
+    return list(dict.fromkeys([hass.config.language.split("-")[0], "it", "en", "fr"]))
+
+
+def _apply_taxon(store: HomesteadStore, args: dict[str, Any]) -> None:
+    """Without a species name, a linked taxon provides it."""
+    _check_ref(store.data.taxa, args.get("taxon_id"), "taxon_id")
+    if not args.get("species"):
+        if not args.get("taxon_id"):
+            raise ServiceValidationError(translation_domain=DOMAIN, translation_key="species_required")
+        args["species"] = store.data.taxa[args["taxon_id"]].scientific_name
 
 
 def _check_ref(collection: dict, ref: str | None, key: str) -> None:
@@ -183,6 +210,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         price = args.pop("price", None)
         args["planted_on"] = _iso(args.get("planted_on"))
         _check_ref(store.data.zones, args.get("zone_id"), "zone_id")
+        _apply_taxon(store, args)
         if args["kind"] == PlantingKind.SINGLE:
             args["quantity"] = 1
         planting = Planting(**args)
@@ -206,6 +234,13 @@ def async_register_services(hass: HomeAssistant) -> None:
         planting_id = args.pop("id")
         _check_ref(store.data.plantings, planting_id, "id")
         _check_ref(store.data.zones, args.get("zone_id"), "zone_id")
+        if "taxon_id" in args or "species" in args:
+            current = store.data.plantings[planting_id]
+            merged = {"species": current.species, "taxon_id": current.taxon_id, **args}
+            if args.get("taxon_id") and "species" not in args:
+                merged["species"] = None
+            _apply_taxon(store, merged)
+            args["species"] = merged["species"]
         if "planted_on" in args:
             args["planted_on"] = _iso(args["planted_on"])
             args["moon_phase"] = None
@@ -227,6 +262,23 @@ def async_register_services(hass: HomeAssistant) -> None:
                 expense.planting_id = None
         await store.async_save()
         return {"id": planting_id}
+
+    async def import_taxon(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        try:
+            details = await fetch_details(
+                async_get_clientsession(hass),
+                call.data.get("gbif_key"),
+                call.data.get("wikidata_id"),
+                _taxon_languages(hass),
+            )
+        except SourcesUnavailable as err:
+            raise ServiceValidationError(
+                translation_domain=DOMAIN, translation_key="sources_unavailable"
+            ) from err
+        taxon = upsert_taxon(store.data, details, dt_util.now().date().isoformat())
+        await store.async_save()
+        return {"id": taxon.id}
 
     async def add_expense(call: ServiceCall) -> ServiceResponse:
         store = _store(hass)
@@ -272,6 +324,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         ("add_planting", add_planting, ADD_PLANTING_SCHEMA, SupportsResponse.OPTIONAL),
         ("update_planting", update_planting, UPDATE_PLANTING_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_planting", delete_planting, DELETE_PLANTING_SCHEMA, SupportsResponse.OPTIONAL),
+        ("import_taxon", import_taxon, IMPORT_TAXON_SCHEMA, SupportsResponse.OPTIONAL),
         ("add_expense", add_expense, ADD_EXPENSE_SCHEMA, SupportsResponse.OPTIONAL),
         ("add_tool", add_tool, ADD_TOOL_SCHEMA, SupportsResponse.OPTIONAL),
         ("export", export, vol.Schema({}), SupportsResponse.ONLY),

@@ -80,8 +80,10 @@ add_planting:
       selector:
         text:
     species:
-      required: true
       example: "Malus domestica"
+      selector:
+        text:
+    taxon_id:
       selector:
         text:
     variety:
@@ -174,6 +176,9 @@ update_planting:
       example: "Malus domestica"
       selector:
         text:
+    taxon_id:
+      selector:
+        text:
     variety:
       example: "Renetta"
       selector:
@@ -254,6 +259,19 @@ delete_planting:
   fields:
     id:
       required: true
+      selector:
+        text:
+
+import_taxon:
+  fields:
+    gbif_key:
+      example: 3001509
+      selector:
+        number:
+          min: 1
+          mode: box
+    wikidata_id:
+      example: "Q18674606"
       selector:
         text:
 

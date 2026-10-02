@@ -2,19 +2,20 @@
 
 Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, alberi da frutto, aiuole, spese, attrezzi e, nelle prossime versioni, raccolto e consigli basati sul meteo.
 
-> Stato: **v0.3 — mappa, zone e import**. Specifiche complete in [SPEC.md](SPEC.md).
+> Stato: **v0.4 — specie da GBIF/Wikidata**. Specifiche complete in [SPEC.md](SPEC.md).
 
 ## Principio guida
 
 **Non sporcare Home Assistant**: nessuna area creata, poche entità aggregate, rimozione pulita (disinstallando l'integrazione i dati vengono cancellati).
 
-## Cosa fa oggi (v0.3)
+## Cosa fa oggi (v0.4)
 
 | Funzione | Come |
 |---|---|
 | Zone (aiuole, frutteto, serra) | Disegnate a clic nel pannello o importate; servizi `add_zone`, `update_zone`, `delete_zone`; gerarchia interna, superficie calcolata dal poligono |
 | Pannello "Giardino" | Voce nella barra laterale: mappa satellitare, piante e zone, import KML/KMZ/GeoJSON |
 | Piante e alberi | Servizi `homestead.add_planting`, `update_planting`, `delete_planting`; `add_planting` (singolo o gruppo, forma all'impianto, altezza, portainnesto, posizione, prezzo) |
+| Specie | Campo "Specie" con ricerca su **GBIF** e **Wikidata** (nome comune o scientifico); la specie scelta viene importata e salvata in locale (nomi comuni it/fr/en, famiglia, genere). Servizio `homestead.import_taxon` |
 | Fase lunare | Registrata automaticamente alla data di impianto |
 | Spese | Servizio `homestead.add_expense`; il prezzo di piante e attrezzi diventa una spesa |
 | Attrezzi | Servizio `homestead.add_tool` con stato e prossima manutenzione |
@@ -31,6 +32,8 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 | Nuova zona | Scheda *Zone* → *+ Nuova zona* → clic sugli angoli → *Fine* → nome e tipo |
 | Zona di una pianta | Proposta in automatico se la pianta cade dentro un poligono (la zona più piccola) |
 | Importare una mappa | *📂 Importa* → file `.kml`, `.kmz` (Google My Maps), `.geojson` (geojson.io) → per ogni elemento: nuovo, aggiorna esistente (abbinato per nome) o ignora |
+
+Specie: le specie già importate si trovano anche senza internet; le ricerche online restano in memoria 24 h. Home Assistant deve poter raggiungere `api.gbif.org` e `www.wikidata.org` (dati aperti, nessun account).
 
 Import: i punti diventano piante, i poligoni zone; le linee vengono ignorate. Il file si sceglie dal telefono o dal PC, max 2 MB.
 

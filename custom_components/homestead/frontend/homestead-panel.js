@@ -79,6 +79,14 @@ const TEXT = {
     skip: "Ignore",
     update: "Update “{name}”",
     tooLarge: "File too large (max 2 MB).",
+    speciesPlaceholder: "Search: apple, Malus domestica…",
+    searching: "Searching…",
+    noResults: "No species found: the text is kept as it is.",
+    offlineSpecies: "GBIF and Wikidata not reachable: only species already imported.",
+    importingTaxon: "Importing the species…",
+    linked: "Linked to",
+    unlink: "Unlink",
+    local: "imported",
   },
   it: {
     title: "Giardino",
@@ -154,6 +162,14 @@ const TEXT = {
     skip: "Ignora",
     update: "Aggiorna “{name}”",
     tooLarge: "File troppo grande (max 2 MB).",
+    speciesPlaceholder: "Cerca: melo, Malus domestica…",
+    searching: "Cerco…",
+    noResults: "Nessuna specie trovata: il testo resta così com'è.",
+    offlineSpecies: "GBIF e Wikidata non raggiungibili: solo specie già importate.",
+    importingTaxon: "Importo la specie…",
+    linked: "Collegata a",
+    unlink: "Scollega",
+    local: "importata",
   },
 };
 
@@ -222,6 +238,15 @@ const STYLE = `
   .info { color: var(--success-color, #43a047); }
   .import-row { display: grid; gap: 6px; padding: 8px 0; border-bottom: 1px solid var(--divider-color); }
   .import-row .head { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--secondary-text-color); cursor: pointer; }
+  .species { position: relative; }
+  .suggest { position: absolute; z-index: 10; left: 0; right: 0; top: 100%; margin-top: 2px; max-height: 260px;
+    overflow-y: auto; background: var(--card-background-color); border: 1px solid var(--divider-color);
+    border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,.25); }
+  .suggest button { display: block; width: 100%; text-align: left; border: none; border-radius: 0; padding: 6px 10px; }
+  .suggest button:hover, .suggest button:focus { background: var(--secondary-background-color); }
+  .suggest .msg { padding: 8px 10px; font-size: 13px; color: var(--secondary-text-color); }
+  .taxon { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--secondary-text-color); }
+  .taxon button { padding: 0 8px; font-size: 12px; }
   .pin { width: 18px; height: 18px; border-radius: 50%; border: 3px solid #fff; box-sizing: border-box;
     box-shadow: 0 0 4px rgba(0,0,0,.6); }
   .pin.selected { width: 26px; height: 26px; border-color: #ffeb3b; }
@@ -230,7 +255,8 @@ const STYLE = `
 class HomesteadPanel extends HTMLElement {
   constructor() {
     super();
-    this._data = { plantings: [], zones: [] };
+    this._data = { plantings: [], zones: [], taxa: [] };
+    this._taxaPending = new Map();
     this._markers = new Map();
     this._polygons = new Map();
     this._tab = "plantings";
@@ -258,7 +284,7 @@ class HomesteadPanel extends HTMLElement {
   }
 
   t(key, vars = {}) {
-    const lang = (this._hass.locale?.language || this._hass.language || "en").split("-")[0];
+    const lang = this._lang();
     const text = (TEXT[lang] || TEXT.en)[key] ?? TEXT.en[key] ?? key;
     return text.replace(/\{(\w+)\}/g, (_, name) => vars[name] ?? "");
   }
@@ -334,7 +360,7 @@ class HomesteadPanel extends HTMLElement {
     let first = true;
     this._unsub = this._hass.connection.subscribeMessage(
       (data) => {
-        this._data = { plantings: data.plantings || [], zones: data.zones || [] };
+        this._data = { plantings: data.plantings || [], zones: data.zones || [], taxa: data.taxa || [] };
         this._loaded = !!data.plantings;
         this._syncMap();
         if (first) this._fitAll();
@@ -350,6 +376,14 @@ class HomesteadPanel extends HTMLElement {
 
   _planting(id) {
     return this._data.plantings.find((p) => p.id === id);
+  }
+
+  _taxon(id) {
+    return this._data.taxa.find((t) => t.id === id) || this._taxaPending.get(id);
+  }
+
+  _lang() {
+    return (this._hass.locale?.language || this._hass.language || "en").split("-")[0];
   }
 
   _zone(id) {
@@ -647,6 +681,7 @@ class HomesteadPanel extends HTMLElement {
     const data = {
       name: values.name.trim(),
       species: values.species.trim(),
+      taxon_id: values.taxon_id || null,
       variety: values.variety?.trim() || null,
       kind: values.kind,
       quantity: Number(values.quantity) || 1,
@@ -888,7 +923,13 @@ class HomesteadPanel extends HTMLElement {
                   h(
                     "div",
                     { className: "sub" },
-                    [p.species, p.variety, this._zone(p.zone_id)?.name, p.kind === "group" ? `×${p.quantity}` : null]
+                    [
+                      this._taxon(p.taxon_id)?.common_names?.[this._lang()],
+                      p.species,
+                      p.variety,
+                      this._zone(p.zone_id)?.name,
+                      p.kind === "group" ? `×${p.quantity}` : null,
+                    ]
                       .filter(Boolean)
                       .join(" · "),
                   ),
@@ -992,7 +1033,7 @@ class HomesteadPanel extends HTMLElement {
         { onsubmit: (ev) => this._save(ev) },
         h("h2", {}, f.id ? this.t("editTitle") : this.t("newTitle")),
         this._field(f, "name", { required: true, maxLength: 100 }),
-        this._field(f, "species", { required: true, placeholder: "Malus domestica" }),
+        this._speciesField(f),
         this._field(f, "variety"),
         h("div", { className: "row" }, kind, quantity),
         h(
@@ -1020,6 +1061,103 @@ class HomesteadPanel extends HTMLElement {
           : null,
       ),
     ];
+  }
+
+  _speciesField(f) {
+    const hidden = h("input", { type: "hidden", name: "taxon_id", value: f.taxon_id ?? "" });
+    const list = h("div", { className: "suggest", hidden: true });
+    const linked = h("div", { className: "taxon" });
+    const input = h("input", {
+      name: "species",
+      value: f.species ?? "",
+      required: true,
+      autocomplete: "off",
+      placeholder: this.t("speciesPlaceholder"),
+    });
+    let timer = null;
+    let seq = 0;
+    const showLinked = () => {
+      const taxon = hidden.value && this._taxon(hidden.value);
+      linked.replaceChildren();
+      if (!taxon) return;
+      const common = taxon.common_names?.[this._lang()];
+      linked.append(
+        h("span", {}, `✓ ${this.t("linked")}: ${[common, taxon.scientific_name, taxon.family].filter(Boolean).join(" · ")}`),
+        h("button", { type: "button", onclick: () => ((hidden.value = ""), showLinked()) }, this.t("unlink")),
+      );
+    };
+    const message = (text) => list.replaceChildren(h("div", { className: "msg" }, text));
+    const choose = async (item) => {
+      list.hidden = true;
+      let id = item.taxon_id;
+      if (!id) {
+        message(this.t("importingTaxon"));
+        list.hidden = false;
+        const ids = Object.fromEntries(Object.entries({ gbif_key: item.gbif_key, wikidata_id: item.wikidata_id }).filter(([, v]) => v));
+        const result = await this._call("import_taxon", ids);
+        list.hidden = true;
+        if (!result) return;
+        id = result.id;
+        this._taxaPending.set(id, {
+          id,
+          scientific_name: item.scientific_name,
+          family: item.family,
+          common_names: item.common_name ? { [this._lang()]: item.common_name } : {},
+        });
+      }
+      input.value = item.scientific_name;
+      hidden.value = id;
+      showLinked();
+    };
+    const search = async () => {
+      const query = input.value.trim();
+      if (query.length < 3) {
+        list.hidden = true;
+        return;
+      }
+      const mine = ++seq;
+      message(this.t("searching"));
+      list.hidden = false;
+      let result;
+      try {
+        result = await this._hass.callWS({ type: "homestead/species/search", query, language: this._lang() });
+      } catch (err) {
+        if (mine === seq) message(err.message || String(err));
+        return;
+      }
+      if (mine !== seq) return;
+      const items = result.results.map((item) =>
+        h(
+          "button",
+          { type: "button", onmousedown: (ev) => ev.preventDefault(), onclick: () => choose(item) },
+          h("div", {}, item.common_name ? `${item.common_name} — ${item.scientific_name}` : item.scientific_name),
+          h(
+            "div",
+            { className: "sub" },
+            [item.family, item.rank, item.source === "local" ? `✓ ${this.t("local")}` : item.description || item.source]
+              .filter(Boolean)
+              .join(" · "),
+          ),
+        ),
+      );
+      list.replaceChildren(
+        ...[
+          ...items,
+          result.offline ? h("div", { className: "msg" }, this.t("offlineSpecies")) : null,
+          !items.length && !result.offline ? h("div", { className: "msg" }, this.t("noResults")) : null,
+        ].filter(Boolean),
+      );
+    };
+    input.addEventListener("input", () => {
+      hidden.value = "";
+      showLinked();
+      clearTimeout(timer);
+      timer = setTimeout(search, 400);
+    });
+    input.addEventListener("blur", () => setTimeout(() => (list.hidden = true), 150));
+    input.addEventListener("keydown", (ev) => ev.key === "Escape" && (list.hidden = true));
+    showLinked();
+    return h("label", { className: "species" }, this.t("species"), input, list, hidden, linked);
   }
 
   _renderZoneForm() {

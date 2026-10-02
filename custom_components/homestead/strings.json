@@ -35,6 +35,12 @@
     },
     "incomplete_position": {
       "message": "Latitude and longitude must be given together."
+    },
+    "species_required": {
+      "message": "Give a species or link an imported species."
+    },
+    "sources_unavailable": {
+      "message": "GBIF and Wikidata are not answering: try again later."
     }
   },
   "selector": {
@@ -186,7 +192,11 @@
         },
         "species": {
           "name": "Species",
-          "description": "Scientific or common name."
+          "description": "Scientific or common name; optional when an imported species is linked."
+        },
+        "taxon_id": {
+          "name": "Imported species",
+          "description": "ID of an imported species (import_taxon service); without a species name, its scientific name is used."
         },
         "variety": {
           "name": "Variety",
@@ -256,7 +266,11 @@
         },
         "species": {
           "name": "Species",
-          "description": "Scientific or common name."
+          "description": "Scientific or common name; optional when an imported species is linked."
+        },
+        "taxon_id": {
+          "name": "Imported species",
+          "description": "ID of an imported species (import_taxon service); without a species name, its scientific name is used."
         },
         "variety": {
           "name": "Variety",
@@ -319,6 +333,20 @@
         "id": {
           "name": "ID",
           "description": "Planting ID."
+        }
+      }
+    },
+    "import_taxon": {
+      "name": "Import species",
+      "description": "Imports a species from GBIF/Wikidata (common names, family, genus) and stores it locally. Returns its id; an existing one is updated.",
+      "fields": {
+        "gbif_key": {
+          "name": "GBIF key",
+          "description": "Species number on gbif.org."
+        },
+        "wikidata_id": {
+          "name": "Wikidata ID",
+          "description": "E.g. Q18674606."
         }
       }
     },
