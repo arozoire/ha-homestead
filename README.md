@@ -2,22 +2,34 @@
 
 Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, alberi da frutto, aiuole, spese, attrezzi e, nelle prossime versioni, raccolto e consigli basati sul meteo.
 
-> Stato: **v0.1 — scheletro**. Specifiche complete in [SPEC.md](SPEC.md).
+> Stato: **v0.2 — pannello mappa**. Specifiche complete in [SPEC.md](SPEC.md).
 
 ## Principio guida
 
 **Non sporcare Home Assistant**: nessuna area creata, poche entità aggregate, rimozione pulita (disinstallando l'integrazione i dati vengono cancellati).
 
-## Cosa fa oggi (v0.1)
+## Cosa fa oggi (v0.2)
 
 | Funzione | Come |
 |---|---|
 | Zone (aiuole, frutteto, serra) | Servizio `homestead.add_zone`, gerarchia interna |
-| Piante e alberi | Servizio `homestead.add_planting` (singolo o gruppo, forma all'impianto, altezza, portainnesto, posizione, prezzo) |
+| Pannello "Giardino" | Voce nella barra laterale: mappa satellitare, posizionamento delle piante con un clic, trascinamento, modifica ed eliminazione |
+| Piante e alberi | Servizi `homestead.add_planting`, `update_planting`, `delete_planting`; `add_planting` (singolo o gruppo, forma all'impianto, altezza, portainnesto, posizione, prezzo) |
 | Fase lunare | Registrata automaticamente alla data di impianto |
 | Spese | Servizio `homestead.add_expense`; il prezzo di piante e attrezzi diventa una spesa |
 | Attrezzi | Servizio `homestead.add_tool` con stato e prossima manutenzione |
 | Esportazione | Servizio `homestead.export` (risposta con tutti i dati) |
+
+### Pannello "Giardino"
+
+| Azione | Come |
+|---|---|
+| Nuova pianta | *+ Nuova pianta* → clic sulla mappa → compila nome e specie |
+| Posizionare una pianta esistente | Clic sulla pianta "non sulla mappa" nella lista → clic sulla mappa |
+| Spostare | Seleziona la pianta → trascina il segnaposto |
+| Stato | Verde = attiva, rosso = morta, grigio = rimossa |
+
+Mappe: satellite **Esri World Imagery** (gratuito, senza account né pubblicità) e **OpenStreetMap**. Leaflet è incluso nell'integrazione, nessuna libreria scaricata da CDN; solo le tessere della mappa arrivano da internet.
 
 Entità create: `sensor.ha_homestead_plantings`, `sensor.ha_homestead_expenses_this_year`, `sensor.ha_homestead_tools_needing_service`.
 

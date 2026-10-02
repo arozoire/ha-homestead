@@ -106,6 +106,103 @@ add_planting:
         text:
           multiline: true
 
+update_planting:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+    name:
+      example: "Melo vicino al pozzo"
+      selector:
+        text:
+    species:
+      example: "Malus domestica"
+      selector:
+        text:
+    variety:
+      example: "Renetta"
+      selector:
+        text:
+    kind:
+      selector:
+        select:
+          translation_key: planting_kind
+          options:
+            - single
+            - group
+    quantity:
+      selector:
+        number:
+          min: 1
+          max: 10000
+          mode: box
+    planted_on:
+      selector:
+        date:
+    initial_form:
+      selector:
+        select:
+          translation_key: initial_form
+          options:
+            - seed
+            - cutting
+            - bulb
+            - bare_root
+            - potted
+            - one_year
+            - two_years
+            - other
+    initial_height_cm:
+      selector:
+        number:
+          min: 0
+          max: 2000
+          unit_of_measurement: cm
+          mode: box
+    rootstock:
+      selector:
+        text:
+    supplier:
+      selector:
+        text:
+    zone_id:
+      selector:
+        text:
+    latitude:
+      selector:
+        number:
+          min: -90
+          max: 90
+          step: any
+          mode: box
+    longitude:
+      selector:
+        number:
+          min: -180
+          max: 180
+          step: any
+          mode: box
+    status:
+      selector:
+        select:
+          translation_key: planting_status
+          options:
+            - active
+            - dead
+            - removed
+    notes:
+      selector:
+        text:
+          multiline: true
+
+delete_planting:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+
 add_expense:
   fields:
     amount:

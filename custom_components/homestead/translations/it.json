@@ -75,6 +75,13 @@
         "needs_service": "Da manutenere",
         "broken": "Rotto"
       }
+    },
+    "planting_status": {
+      "options": {
+        "active": "Attiva",
+        "dead": "Morta",
+        "removed": "Rimossa"
+      }
     }
   },
   "services": {
@@ -167,6 +174,86 @@
         "notes": {
           "name": "Note",
           "description": "Note libere."
+        }
+      }
+    },
+    "update_planting": {
+      "name": "Modifica pianta",
+      "description": "Modifica i campi indicati di una pianta (anche la posizione).",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID della pianta."
+        },
+        "name": {
+          "name": "Nome",
+          "description": "Il tuo nome per questa pianta."
+        },
+        "species": {
+          "name": "Specie",
+          "description": "Nome scientifico o comune."
+        },
+        "variety": {
+          "name": "Varietà",
+          "description": "Cultivar o varietà."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Pianta singola o gruppo."
+        },
+        "quantity": {
+          "name": "Quantità",
+          "description": "Numero di piante (solo gruppi)."
+        },
+        "planted_on": {
+          "name": "Messa a dimora",
+          "description": "Data di impianto."
+        },
+        "initial_form": {
+          "name": "Forma all'impianto",
+          "description": "Cosa è stato piantato."
+        },
+        "initial_height_cm": {
+          "name": "Altezza iniziale",
+          "description": "Altezza stimata all'impianto."
+        },
+        "rootstock": {
+          "name": "Portainnesto",
+          "description": "Per alberi da frutto innestati."
+        },
+        "supplier": {
+          "name": "Fornitore",
+          "description": "Dove è stata acquistata."
+        },
+        "zone_id": {
+          "name": "Zona",
+          "description": "ID della zona."
+        },
+        "latitude": {
+          "name": "Latitudine",
+          "description": "Posizione sulla mappa."
+        },
+        "longitude": {
+          "name": "Longitudine",
+          "description": "Posizione sulla mappa."
+        },
+        "status": {
+          "name": "Stato",
+          "description": "Attiva, morta o rimossa."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "delete_planting": {
+      "name": "Elimina pianta",
+      "description": "Elimina una pianta inserita per errore. Le spese collegate restano. Per una pianta morta usa lo stato.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID della pianta."
         }
       }
     },

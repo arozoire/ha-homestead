@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import date
 from typing import Any
 
 import voluptuous as vol
-from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse, callback
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv
@@ -19,12 +19,13 @@ from .models import (
     InitialForm,
     Planting,
     PlantingKind,
+    PlantingStatus,
     Tool,
     ToolPower,
     ToolStatus,
     Zone,
 )
-from .store import HomesteadStore
+from .store import HomesteadStore, get_store
 
 _opt_str = vol.Any(None, cv.string)
 _opt_date = vol.Any(None, cv.date)
@@ -60,6 +61,20 @@ ADD_PLANTING_SCHEMA = vol.Schema(
     }
 )
 
+UPDATE_PLANTING_SCHEMA = vol.Schema(
+    {
+        vol.Required("id"): cv.string,
+        **{
+            vol.Optional(str(key)): value
+            for key, value in ADD_PLANTING_SCHEMA.schema.items()
+            if key != "price"
+        },
+        vol.Optional("status"): vol.In([s.value for s in PlantingStatus]),
+    }
+)
+
+DELETE_PLANTING_SCHEMA = vol.Schema({vol.Required("id"): cv.string})
+
 ADD_EXPENSE_SCHEMA = vol.Schema(
     {
         vol.Required("amount"): _positive,
@@ -89,9 +104,8 @@ ADD_TOOL_SCHEMA = vol.Schema(
 
 
 def _store(hass: HomeAssistant) -> HomesteadStore:
-    for entry in hass.config_entries.async_entries(DOMAIN):
-        if entry.state is ConfigEntryState.LOADED:
-            return entry.runtime_data
+    if store := get_store(hass):
+        return store
     raise ServiceValidationError(translation_domain=DOMAIN, translation_key="not_loaded")
 
 
@@ -141,6 +155,33 @@ def async_register_services(hass: HomeAssistant) -> None:
         await store.async_save()
         return {"id": planting.id}
 
+    async def update_planting(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        args: dict[str, Any] = dict(call.data)
+        planting_id = args.pop("id")
+        _check_ref(store.data.plantings, planting_id, "id")
+        _check_ref(store.data.zones, args.get("zone_id"), "zone_id")
+        if "planted_on" in args:
+            args["planted_on"] = _iso(args["planted_on"])
+            args["moon_phase"] = None
+        planting = replace(store.data.plantings[planting_id], **args)
+        if planting.kind == PlantingKind.SINGLE:
+            planting.quantity = 1
+        store.data.plantings[planting_id] = planting
+        await store.async_save()
+        return {"id": planting_id}
+
+    async def delete_planting(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        planting_id = call.data["id"]
+        _check_ref(store.data.plantings, planting_id, "id")
+        del store.data.plantings[planting_id]
+        for expense in store.data.expenses.values():
+            if expense.planting_id == planting_id:
+                expense.planting_id = None
+        await store.async_save()
+        return {"id": planting_id}
+
     async def add_expense(call: ServiceCall) -> ServiceResponse:
         store = _store(hass)
         args = dict(call.data)
@@ -181,6 +222,8 @@ def async_register_services(hass: HomeAssistant) -> None:
     for name, handler, schema, response in (
         ("add_zone", add_zone, ADD_ZONE_SCHEMA, SupportsResponse.OPTIONAL),
         ("add_planting", add_planting, ADD_PLANTING_SCHEMA, SupportsResponse.OPTIONAL),
+        ("update_planting", update_planting, UPDATE_PLANTING_SCHEMA, SupportsResponse.OPTIONAL),
+        ("delete_planting", delete_planting, DELETE_PLANTING_SCHEMA, SupportsResponse.OPTIONAL),
         ("add_expense", add_expense, ADD_EXPENSE_SCHEMA, SupportsResponse.OPTIONAL),
         ("add_tool", add_tool, ADD_TOOL_SCHEMA, SupportsResponse.OPTIONAL),
         ("export", export, vol.Schema({}), SupportsResponse.ONLY),

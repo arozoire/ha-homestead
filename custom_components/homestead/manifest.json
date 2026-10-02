@@ -1,13 +1,15 @@
 {
   "domain": "homestead",
   "name": "HA Homestead",
+  "after_dependencies": ["frontend", "panel_custom"],
   "codeowners": ["@arozoire"],
   "config_flow": true,
+  "dependencies": ["http", "websocket_api"],
   "documentation": "https://github.com/arozoire/ha-homestead",
   "integration_type": "service",
   "iot_class": "calculated",
   "issue_tracker": "https://github.com/arozoire/ha-homestead/issues",
   "requirements": [],
   "single_config_entry": true,
-  "version": "0.1.0"
+  "version": "0.2.0"
 }

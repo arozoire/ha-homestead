@@ -75,6 +75,13 @@
         "needs_service": "Needs service",
         "broken": "Broken"
       }
+    },
+    "planting_status": {
+      "options": {
+        "active": "Active",
+        "dead": "Dead",
+        "removed": "Removed"
+      }
     }
   },
   "services": {
@@ -167,6 +174,86 @@
         "notes": {
           "name": "Notes",
           "description": "Free notes."
+        }
+      }
+    },
+    "update_planting": {
+      "name": "Update planting",
+      "description": "Changes the given fields of a planting (including its position).",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Planting ID."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Your own name for this planting."
+        },
+        "species": {
+          "name": "Species",
+          "description": "Scientific or common name."
+        },
+        "variety": {
+          "name": "Variety",
+          "description": "Cultivar or variety."
+        },
+        "kind": {
+          "name": "Kind",
+          "description": "Single plant or group."
+        },
+        "quantity": {
+          "name": "Quantity",
+          "description": "Number of plants (groups only)."
+        },
+        "planted_on": {
+          "name": "Planted on",
+          "description": "Planting date."
+        },
+        "initial_form": {
+          "name": "Initial form",
+          "description": "What was planted."
+        },
+        "initial_height_cm": {
+          "name": "Initial height",
+          "description": "Estimated height when planted."
+        },
+        "rootstock": {
+          "name": "Rootstock",
+          "description": "For grafted fruit trees."
+        },
+        "supplier": {
+          "name": "Supplier",
+          "description": "Where it was bought."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "ID of the zone."
+        },
+        "latitude": {
+          "name": "Latitude",
+          "description": "Position on the map."
+        },
+        "longitude": {
+          "name": "Longitude",
+          "description": "Position on the map."
+        },
+        "status": {
+          "name": "Status",
+          "description": "Active, dead or removed."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "delete_planting": {
+      "name": "Delete planting",
+      "description": "Deletes a planting entered by mistake. Linked expenses are kept. For a dead plant use the status instead.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Planting ID."
         }
       }
     },
