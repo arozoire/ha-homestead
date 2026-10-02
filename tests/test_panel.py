@@ -1,6 +1,11 @@
+import base64
+
+import pytest
+import voluptuous as vol
 from homeassistant.components.frontend import DATA_PANELS
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ServiceValidationError
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.homestead.const import DOMAIN
@@ -89,3 +94,61 @@ async def test_delete_planting_keeps_expenses(hass: HomeAssistant) -> None:
     data = entry.runtime_data.data
     assert planting_id not in data.plantings
     assert [e.planting_id for e in data.expenses.values()] == [None]
+
+
+SQUARE = {"type": "Polygon", "coordinates": [[[7, 45], [7.001, 45], [7.001, 45.001], [7, 45.001]]]}
+
+
+async def test_zone_services(hass: HomeAssistant) -> None:
+    entry = await _setup(hass)
+    data = entry.runtime_data.data
+
+    async def call(service: str, payload: dict) -> str:
+        response = await hass.services.async_call(
+            DOMAIN, service, payload, blocking=True, return_response=True
+        )
+        return response["id"]
+
+    garden = await call("add_zone", {"name": "Giardino"})
+    orto = await call(
+        "add_zone", {"name": "Orto", "parent_id": garden, "kind": "vegetable_garden", "geometry": SQUARE}
+    )
+    bed = await call("add_zone", {"name": "Aiuola 1", "parent_id": orto})
+    assert data.zones[orto].area_m2 == pytest.approx(8760, rel=0.01)
+    assert data.zones[orto].geometry["coordinates"][0][-1] == [7, 45]
+
+    with pytest.raises(ServiceValidationError):
+        await call("update_zone", {"id": garden, "parent_id": bed})
+    with pytest.raises(vol.Invalid):
+        await call("update_zone", {"id": orto, "geometry": {"type": "Point", "coordinates": [7, 45]}})
+
+    await call("update_zone", {"id": orto, "geometry": None})
+    assert data.zones[orto].area_m2 is None
+
+    planting = await _add(hass, zone_id=orto)
+    await call("delete_zone", {"id": orto})
+    assert data.zones[bed].parent_id == garden
+    assert data.plantings[planting].zone_id == garden
+
+
+async def test_websocket_parse_map(hass: HomeAssistant, hass_ws_client) -> None:
+    await _setup(hass)
+    ws = await hass_ws_client(hass)
+    geojson = b'{"type": "Point", "coordinates": [7, 45]}'
+    await ws.send_json(
+        {
+            "id": 1,
+            "type": "homestead/parse_map",
+            "filename": "a.geojson",
+            "content": base64.b64encode(geojson).decode(),
+        }
+    )
+    result = await ws.receive_json()
+    assert result["result"] == {
+        "features": [{"name": "", "geometry": {"type": "Point", "coordinates": [7.0, 45.0]}}],
+        "skipped": 0,
+    }
+
+    await ws.send_json({"id": 2, "type": "homestead/parse_map", "filename": "a.kml", "content": "bm9wZQ=="})
+    result = await ws.receive_json()
+    assert result["error"]["code"] == "invalid_format"

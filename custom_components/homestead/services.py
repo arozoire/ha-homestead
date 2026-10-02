@@ -13,6 +13,7 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN
+from .geo import validate_polygon
 from .models import (
     Expense,
     ExpenseCategory,
@@ -24,6 +25,7 @@ from .models import (
     ToolPower,
     ToolStatus,
     Zone,
+    ZoneKind,
 )
 from .store import HomesteadStore, get_store
 
@@ -35,11 +37,21 @@ ADD_ZONE_SCHEMA = vol.Schema(
     {
         vol.Required("name"): cv.string,
         vol.Optional("parent_id"): _opt_str,
-        vol.Optional("kind"): _opt_str,
+        vol.Optional("kind"): vol.Any(None, vol.In([k.value for k in ZoneKind])),
         vol.Optional("area_id"): _opt_str,
+        vol.Optional("geometry"): vol.Any(None, validate_polygon),
         vol.Optional("notes"): _opt_str,
     }
 )
+
+UPDATE_ZONE_SCHEMA = vol.Schema(
+    {
+        vol.Required("id"): cv.string,
+        **{vol.Optional(str(key)): value for key, value in ADD_ZONE_SCHEMA.schema.items()},
+    }
+)
+
+DELETE_ZONE_SCHEMA = vol.Schema({vol.Required("id"): cv.string})
 
 ADD_PLANTING_SCHEMA = vol.Schema(
     {
@@ -133,6 +145,33 @@ def async_register_services(hass: HomeAssistant) -> None:
         await store.async_save()
         return {"id": zone.id}
 
+    async def update_zone(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        args = dict(call.data)
+        zone_id = args.pop("id")
+        _check_ref(store.data.zones, zone_id, "id")
+        parent_id = args.get("parent_id")
+        _check_ref(store.data.zones, parent_id, "parent_id")
+        if parent_id and (parent_id == zone_id or parent_id in store.data.zone_descendants(zone_id)):
+            raise ServiceValidationError(translation_domain=DOMAIN, translation_key="zone_cycle")
+        store.data.zones[zone_id] = replace(store.data.zones[zone_id], **args)
+        await store.async_save()
+        return {"id": zone_id}
+
+    async def delete_zone(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        zone_id = call.data["id"]
+        _check_ref(store.data.zones, zone_id, "id")
+        zone = store.data.zones.pop(zone_id)
+        for child in store.data.zones.values():
+            if child.parent_id == zone_id:
+                child.parent_id = zone.parent_id
+        for planting in store.data.plantings.values():
+            if planting.zone_id == zone_id:
+                planting.zone_id = zone.parent_id
+        await store.async_save()
+        return {"id": zone_id}
+
     async def add_planting(call: ServiceCall) -> ServiceResponse:
         store = _store(hass)
         args: dict[str, Any] = dict(call.data)
@@ -221,6 +260,8 @@ def async_register_services(hass: HomeAssistant) -> None:
 
     for name, handler, schema, response in (
         ("add_zone", add_zone, ADD_ZONE_SCHEMA, SupportsResponse.OPTIONAL),
+        ("update_zone", update_zone, UPDATE_ZONE_SCHEMA, SupportsResponse.OPTIONAL),
+        ("delete_zone", delete_zone, DELETE_ZONE_SCHEMA, SupportsResponse.OPTIONAL),
         ("add_planting", add_planting, ADD_PLANTING_SCHEMA, SupportsResponse.OPTIONAL),
         ("update_planting", update_planting, UPDATE_PLANTING_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_planting", delete_planting, DELETE_PLANTING_SCHEMA, SupportsResponse.OPTIONAL),

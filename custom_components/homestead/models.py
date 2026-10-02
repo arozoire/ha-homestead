@@ -8,6 +8,7 @@ from enum import StrEnum
 from typing import Any, Self
 from uuid import uuid4
 
+from .geo import polygon_area_m2
 from .moon import moon_phase
 
 
@@ -24,6 +25,16 @@ class PlantingStatus(StrEnum):
     ACTIVE = "active"
     DEAD = "dead"
     REMOVED = "removed"
+
+
+class ZoneKind(StrEnum):
+    VEGETABLE_GARDEN = "vegetable_garden"
+    ORCHARD = "orchard"
+    FLOWER_BED = "flower_bed"
+    GREENHOUSE = "greenhouse"
+    POTS = "pots"
+    LAWN = "lawn"
+    OTHER = "other"
 
 
 class InitialForm(StrEnum):
@@ -77,7 +88,12 @@ class Zone(_Record):
     parent_id: str | None = None
     kind: str | None = None
     area_id: str | None = None
+    geometry: dict[str, Any] | None = None
+    area_m2: float | None = None
     notes: str | None = None
+
+    def __post_init__(self) -> None:
+        self.area_m2 = polygon_area_m2(self.geometry)
 
 
 @dataclass(kw_only=True)
@@ -158,6 +174,12 @@ class HomesteadData:
 
     def to_dict(self) -> dict[str, list[dict[str, Any]]]:
         return {name: [r.to_dict() for r in getattr(self, name).values()] for name in _COLLECTIONS}
+
+    def zone_descendants(self, zone_id: str) -> set[str]:
+        children = {z.id for z in self.zones.values() if z.parent_id == zone_id}
+        for child in list(children):
+            children |= self.zone_descendants(child)
+        return children
 
     def active_plantings(self) -> list[Planting]:
         return [p for p in self.plantings.values() if p.status == PlantingStatus.ACTIVE]

@@ -29,6 +29,9 @@
     },
     "unknown_reference": {
       "message": "{field} sconosciuto: {value}."
+    },
+    "zone_cycle": {
+      "message": "Una zona non può stare dentro sé stessa o dentro una sua sottozona."
     }
   },
   "selector": {
@@ -82,6 +85,17 @@
         "dead": "Morta",
         "removed": "Rimossa"
       }
+    },
+    "zone_kind": {
+      "options": {
+        "vegetable_garden": "Orto",
+        "orchard": "Frutteto",
+        "flower_bed": "Aiuola fiori",
+        "greenhouse": "Serra",
+        "pots": "Vasi",
+        "lawn": "Prato",
+        "other": "Altro"
+      }
     }
   },
   "services": {
@@ -99,15 +113,63 @@
         },
         "kind": {
           "name": "Tipo",
-          "description": "Orto, frutteto, aiuola fiori, serra…"
+          "description": "Tipo di zona."
         },
         "area_id": {
           "name": "Area Home Assistant",
           "description": "Collegamento opzionale a un'area esistente."
         },
+        "geometry": {
+          "name": "Geometria",
+          "description": "Poligono GeoJSON (coordinate longitudine, latitudine). La superficie viene calcolata."
+        },
         "notes": {
           "name": "Note",
           "description": "Note libere."
+        }
+      }
+    },
+    "update_zone": {
+      "name": "Modifica zona",
+      "description": "Modifica i campi indicati di una zona (anche il poligono).",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID della zona."
+        },
+        "name": {
+          "name": "Nome",
+          "description": "Nome della zona."
+        },
+        "parent_id": {
+          "name": "Zona padre",
+          "description": "ID della zona padre."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Tipo di zona."
+        },
+        "area_id": {
+          "name": "Area Home Assistant",
+          "description": "Collegamento opzionale a un'area esistente."
+        },
+        "geometry": {
+          "name": "Geometria",
+          "description": "Poligono GeoJSON (coordinate longitudine, latitudine). La superficie viene calcolata."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "delete_zone": {
+      "name": "Elimina zona",
+      "description": "Elimina una zona; sottozone e piante passano alla zona padre.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID della zona."
         }
       }
     },

@@ -9,14 +9,68 @@ add_zone:
         text:
     kind:
       selector:
-        text:
+        select:
+          translation_key: zone_kind
+          options:
+            - vegetable_garden
+            - orchard
+            - flower_bed
+            - greenhouse
+            - pots
+            - lawn
+            - other
     area_id:
       selector:
         area:
+    geometry:
+      selector:
+        object:
     notes:
       selector:
         text:
           multiline: true
+
+update_zone:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+    name:
+      selector:
+        text:
+    parent_id:
+      selector:
+        text:
+    kind:
+      selector:
+        select:
+          translation_key: zone_kind
+          options:
+            - vegetable_garden
+            - orchard
+            - flower_bed
+            - greenhouse
+            - pots
+            - lawn
+            - other
+    area_id:
+      selector:
+        area:
+    geometry:
+      selector:
+        object:
+    notes:
+      selector:
+        text:
+          multiline: true
+
+delete_zone:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
 
 add_planting:
   fields:
