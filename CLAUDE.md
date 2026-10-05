@@ -29,6 +29,7 @@ pytest
 - v0.2 fatta: pannello "Giardino" con mappa satellitare Esri + OSM, crea/posiziona/trascina/modifica/elimina piante; servizi `update_planting`, `delete_planting`; 12 test.
 - v0.3 fatta: zone con poligono (disegno a clic, superficie, gerarchia, `update_zone`/`delete_zone`), import KML/KMZ/GeoJSON con abbinamento per nome, zona proposta in automatico; licenza MIT; 23 test.
 - v0.4 fatta: `Taxon` (specie importate in `.storage`, nessuna entità), `Planting.taxon_id`, servizio `import_taxon`, ricerca specie nel pannello; 30 test (HTTP simulato con `aioclient_mock`).
+- v0.4.1 (dopo la prima prova dal vivo): altezza pannello su `100dvh` (HA non dà altezza definita: mappa schiacciata, invisibile nell'app); ricerca specie solo regno Plantae (Wikidata verificato via chiave GBIF); dopo Salva/Elimina si torna alla lista con conferma.
 - Rete della sessione cloud: `api.gbif.org` e `www.wikidata.org` bloccati, parsing scritto sui formati documentati → da verificare dal vivo.
 - Prossimo: caratteristiche colturali (rusticità, esposizione, fioritura/raccolta) da fonti §5; tipo di pianta (albero da frutto, ortaggio…) sul taxon.
 - Prova del pannello: harness Playwright con `hass` finto (non nel repo); in CI solo i test Python.

@@ -72,6 +72,8 @@ const TEXT = {
     importApply: "Import {count}",
     importProgress: "Importing… {done}/{count}",
     importDone: "{count} elements imported.",
+    saved: "Saved: {name}",
+    deleted: "Deleted: {name}",
     point: "Point",
     polygon: "Polygon",
     newPlanting: "New planting",
@@ -155,6 +157,8 @@ const TEXT = {
     importApply: "Importa {count}",
     importProgress: "Importo… {done}/{count}",
     importDone: "{count} elementi importati.",
+    saved: "Salvato: {name}",
+    deleted: "Eliminato: {name}",
     point: "Punto",
     polygon: "Poligono",
     newPlanting: "Nuova pianta",
@@ -191,7 +195,8 @@ const h = (tag, attrs = {}, ...children) => {
 
 const STYLE = `
   :host { display: block; height: 100%; background: var(--primary-background-color); color: var(--primary-text-color); }
-  .layout { display: flex; flex-direction: column; height: 100%; }
+  /* HA gives custom panels no definite height: size on the viewport instead of 100%. */
+  .layout { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
   header { display: flex; align-items: center; gap: 8px; height: var(--header-height, 56px); padding: 0 12px;
     background: var(--app-header-background-color, var(--primary-color)); color: var(--app-header-text-color, #fff);
     box-sizing: border-box; flex: none; }
@@ -202,6 +207,7 @@ const STYLE = `
   aside { width: 360px; flex: none; overflow-y: auto; border-left: 1px solid var(--divider-color);
     background: var(--card-background-color); box-sizing: border-box; padding: 12px; }
   .narrow .body { flex-direction: column; }
+  .narrow .map { min-height: 45%; }
   .narrow aside { width: auto; height: 45%; border-left: none; border-top: 1px solid var(--divider-color); }
   .banner { position: absolute; z-index: 1000; top: 10px; left: 50%; transform: translateX(-50%);
     background: var(--primary-color); color: var(--text-primary-color, #fff); padding: 8px 12px; border-radius: 8px;
@@ -692,12 +698,12 @@ class HomesteadPanel extends HTMLElement {
     if (this._form.id) {
       data.status = values.status;
       const id = this._form.id;
-      if (await this._call("update_planting", { id, ...data })) this._select(id, { ...this._form, ...data });
+      if (await this._call("update_planting", { id, ...data })) this._saved(data.name);
     } else {
       data.latitude = round(this._form.latitude);
       data.longitude = round(this._form.longitude);
       const result = await this._call("add_planting", data);
-      if (result) this._select(result.id, { ...data, id: result.id });
+      if (result) this._saved(data.name);
     }
   }
 
@@ -716,24 +722,24 @@ class HomesteadPanel extends HTMLElement {
     };
     const id = this._zoneForm.id;
     if (id) {
-      if (await this._call("update_zone", { id, ...data })) this._selectZone(id, { ...this._zoneForm, ...data });
+      if (await this._call("update_zone", { id, ...data })) this._saved(data.name);
     } else {
       if (this._zoneForm.geometry) data.geometry = this._zoneForm.geometry;
       const result = await this._call("add_zone", data);
-      if (result) this._selectZone(result.id, { ...data, id: result.id });
+      if (result) this._saved(data.name);
     }
   }
 
   async _delete() {
     const { id, name } = this._form;
     if (!confirm(this.t("confirmDelete", { name }))) return;
-    if (await this._call("delete_planting", { id })) this._close();
+    if (await this._call("delete_planting", { id })) this._saved(name, "deleted");
   }
 
   async _deleteZone() {
     const { id, name } = this._zoneForm;
     if (!confirm(this.t("confirmDeleteZone", { name }))) return;
-    if (await this._call("delete_zone", { id })) this._close();
+    if (await this._call("delete_zone", { id })) this._saved(name, "deleted");
   }
 
   // ---------- import ----------
@@ -821,6 +827,14 @@ class HomesteadPanel extends HTMLElement {
   }
 
   // ---------- rendering ----------
+
+  /** Back to the list with a confirmation that fades after a few seconds. */
+  _saved(name, key = "saved") {
+    this._close();
+    this._showMessage(`✓ ${this.t(key, { name })}`);
+    clearTimeout(this._messageTimer);
+    this._messageTimer = setTimeout(() => this._message.text.startsWith("✓") && this._showMessage(""), 4000);
+  }
 
   _showMessage(text, error = false) {
     this._message = { text, error };

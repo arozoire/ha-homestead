@@ -23,6 +23,7 @@ class Candidate:
     common_name: str | None = None
     family: str | None = None
     rank: str | None = None
+    kingdom: str | None = None
     description: str | None = None
     gbif_key: int | None = None
     wikidata_id: str | None = None

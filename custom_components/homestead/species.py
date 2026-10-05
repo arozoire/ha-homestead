@@ -17,6 +17,9 @@ _LOGGER = logging.getLogger(__name__)
 # Wikidata first: better common names; GBIF then fills family, genus and its own names.
 SOURCES = (wikidata, gbif)
 
+# Searches like "melo" also hit worms and insects (Meloidogyne, Meloe): keep only plants.
+KINGDOMS = {"Plantae"}
+
 
 class SourcesUnavailable(Exception):
     """No source answered (offline, blocked or down)."""
@@ -49,7 +52,19 @@ async def search_remote(
                     setattr(existing, name, value)
     if failures == len(SOURCES):
         raise SourcesUnavailable
-    return list(merged.values())[:limit]
+    return (await _only_plants(session, list(merged.values())))[:limit]
+
+
+async def _only_plants(session: aiohttp.ClientSession, candidates: list[Candidate]) -> list[Candidate]:
+    """Wikidata results carry no kingdom: ask GBIF by key; without a GBIF key a taxon can't be checked."""
+    unknown = [c for c in candidates if c.kingdom is None and c.gbif_key]
+    found = await asyncio.gather(
+        *(gbif.kingdom(session, c.gbif_key) for c in unknown), return_exceptions=True
+    )
+    for candidate, result in zip(unknown, found, strict=True):
+        if isinstance(result, str):
+            candidate.kingdom = result
+    return [c for c in candidates if c.kingdom in KINGDOMS]
 
 
 def search_local(data: HomesteadData, query: str, language: str) -> list[dict[str, Any]]:
