@@ -1944,7 +1944,7 @@ class HomesteadPanel extends HTMLElement {
         recent.length
         ? this._renderTimeline(recent, !!this._diaryTarget.planting_id, this._diaryTarget)
         : h("p", { className: "hint" }, this.t("emptyDiary")),
-      events.length > recent.length
+      events.length > 5
         ? h(
             "button",
             {
@@ -1964,8 +1964,8 @@ class HomesteadPanel extends HTMLElement {
 
   _renderDiary() {
     const f = this._diaryFilter;
-    const years = [...new Set(this._data.events.map((e) => e.done_on.slice(0, 4)))].sort().reverse();
     const all = [...this._data.events, ...this._data.plantings.flatMap((p) => this._startEvents(p))];
+    const years = [...new Set(all.map((e) => e.done_on.slice(0, 4)))].sort().reverse();
     const events = all.filter((e) => {
       if (f.kind && e.kind !== f.kind) return false;
       if (f.year && !e.done_on.startsWith(f.year)) return false;
