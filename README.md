@@ -16,7 +16,8 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 | Pannello "Giardino" | Voce nella barra laterale: mappa satellitare, piante e zone, backup |
 | Piante e alberi | Servizi `homestead.add_planting`, `update_planting`, `delete_planting`; `add_planting` (singolo o gruppo, forma all'impianto, altezza, portainnesto, posizione, prezzo) |
 | Specie | Campo "Specie" con ricerca su **GBIF** e **Wikidata** (nome comune o scientifico); la specie scelta viene importata e salvata in locale (nomi comuni it/fr/en, famiglia, genere). Servizio `homestead.import_taxon` |
-| Fase lunare | Registrata automaticamente alla data di impianto |
+| Date della pianta | Origine: *già presente* (età stimata), *piantata da me* (messa a dimora + età all'impianto), *seminata da me* (semina + trapianto); l'età si aggiorna da sola |
+| Fase lunare | Registrata automaticamente alla semina e alla messa a dimora |
 | Spese | Servizio `homestead.add_expense`; il prezzo di piante e attrezzi diventa una spesa |
 | Attrezzi | Servizio `homestead.add_tool` con stato e prossima manutenzione |
 | Esportazione | Servizio `homestead.export` (risposta con tutti i dati) |

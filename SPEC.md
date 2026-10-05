@@ -29,6 +29,7 @@
 | Zone sulla mappa (v0.3) | Poligono disegnato a clic (angolo per angolo); superficie calcolata; zona della pianta proposta se dentro il poligono | Metodo A di §8 esteso alle zone |
 | Import (v0.3) | KML, **KMZ** (default di Google My Maps), GeoJSON; punti → piante, poligoni → zone, linee ignorate; abbinamento per nome con scelta manuale | L'autore carica il file dal telefono quando serve |
 | Prima prova dal vivo (v0.4.1) | Pannello a tutta altezza (mappa invisibile nell'app), ricerca specie solo piante, conferma dopo Salva | Problemi visti in HA reale |
+| Date della pianta (v0.5) | Origine + date adatte (età stimata, messa a dimora + età all'impianto, semina + trapianto); salvato l'anno di nascita stimato | Per le piante già presenti la data è ignota; un albero piantato ha già qualche anno; l'orto ha semina e trapianto |
 | Import mappa **tolto** (v0.5) | Al suo posto **backup JSON** (esporta / ripristina tutto) | Disegnare nel pannello basta; serve invece poter salvare e ripristinare i dati |
 | Specie (v0.4) | Ricerca combinata Wikidata (nomi comuni) + GBIF (tassonomia); la specie scelta è copiata in locale con id GBIF/Wikidata e data di import | Funziona offline dopo l'import, tracciabilità come da §4 |
 | Licenza | MIT | Richiesta da HACS; la più diffusa tra le integrazioni custom |
@@ -92,7 +93,9 @@ Fuori v1: calendario semine, regole meteo, produzione, lista spesa, inventario s
 | taxon | riferimento |
 | tipo asset | `singolo` (albero) o `gruppo` (fila pomodori, n. piante) |
 | quantità | 1 per singolo |
-| data messa a dimora | |
+| origine | già presente / piantata da me / seminata da me |
+| date | già presente: **età stimata**; piantata: messa a dimora + età all'impianto; seminata: semina + trapianto |
+| anno di nascita stimato | unico dato da cui si calcola l'età (si aggiorna da sola) |
 | forma all'impianto | seme, talea, radice nuda, vaso, astone 1 anno, 2 anni… |
 | altezza/diametro all'impianto | stimati |
 | portainnesto | per fruttiferi |

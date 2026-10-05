@@ -105,9 +105,27 @@ add_planting:
           min: 1
           max: 10000
           mode: box
+    origin:
+      selector:
+        select:
+          translation_key: planting_origin
+          options:
+            - existing
+            - planted
+            - sown
+    sown_on:
+      selector:
+        date:
     planted_on:
       selector:
         date:
+    birth_year:
+      example: 2015
+      selector:
+        number:
+          min: 1000
+          max: 2200
+          mode: box
     initial_form:
       selector:
         select:
@@ -196,9 +214,27 @@ update_planting:
           min: 1
           max: 10000
           mode: box
+    origin:
+      selector:
+        select:
+          translation_key: planting_origin
+          options:
+            - existing
+            - planted
+            - sown
+    sown_on:
+      selector:
+        date:
     planted_on:
       selector:
         date:
+    birth_year:
+      example: 2015
+      selector:
+        number:
+          min: 1000
+          max: 2200
+          mode: box
     initial_form:
       selector:
         select:

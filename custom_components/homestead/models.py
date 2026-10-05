@@ -21,6 +21,12 @@ class PlantingKind(StrEnum):
     GROUP = "group"
 
 
+class PlantingOrigin(StrEnum):
+    EXISTING = "existing"  # already there: only an estimated age
+    PLANTED = "planted"  # planted by the user, possibly already a few years old
+    SOWN = "sown"  # sown by the user, possibly transplanted later
+
+
 class PlantingStatus(StrEnum):
     ACTIVE = "active"
     DEAD = "dead"
@@ -120,7 +126,10 @@ class Planting(_Record):
     variety: str | None = None
     kind: str = PlantingKind.SINGLE
     quantity: int = 1
+    origin: str | None = None
+    sown_on: str | None = None
     planted_on: str | None = None
+    birth_year: int | None = None
     initial_form: str | None = None
     initial_height_cm: float | None = None
     rootstock: str | None = None
@@ -130,11 +139,19 @@ class Planting(_Record):
     longitude: float | None = None
     status: str = PlantingStatus.ACTIVE
     moon_phase: str | None = None
+    sown_moon_phase: str | None = None
     notes: str | None = None
 
     def __post_init__(self) -> None:
         if self.planted_on and not self.moon_phase:
             self.moon_phase = moon_phase(date.fromisoformat(self.planted_on))
+        if self.sown_on and not self.sown_moon_phase:
+            self.sown_moon_phase = moon_phase(date.fromisoformat(self.sown_on))
+
+    def age_years(self, today: date) -> int | None:
+        """Estimated age, from the birth year or else the sowing date."""
+        year = self.birth_year or (int(self.sown_on[:4]) if self.sown_on else None)
+        return max(today.year - year, 0) if year else None
 
 
 @dataclass(kw_only=True)

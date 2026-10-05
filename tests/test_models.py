@@ -54,3 +54,12 @@ def test_roundtrip_and_aggregates():
 def test_from_dict_ignores_unknown_fields():
     data = HomesteadData.from_dict({"tools": [{"id": "x", "name": "Vanga", "future_field": 1}]})
     assert data.tools["x"].name == "Vanga"
+
+
+def test_origin_sowing_and_age():
+    tomato = Planting(name="Pomodori", species="Solanum lycopersicum", origin="sown", sown_on="2024-04-08")
+    assert tomato.sown_moon_phase == "new_moon" and tomato.moon_phase is None
+    assert tomato.age_years(date(2026, 10, 5)) == 2
+    olive = Planting(name="Ulivo", species="Olea europaea", origin="existing", birth_year=1990)
+    assert olive.age_years(date(2026, 10, 5)) == 36
+    assert Planting(name="?", species="?").age_years(date(2026, 1, 1)) is None

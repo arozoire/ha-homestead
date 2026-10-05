@@ -43,6 +43,15 @@ const TEXT = {
     group: "Group (row, bed)",
     quantity: "Quantity",
     planted_on: "Planted on",
+    origin: "Origin",
+    existing: "Already there",
+    planted: "Planted by me",
+    sown: "Sown by me",
+    age_now: "Estimated age (years)",
+    age_at_planting: "Age when planted (years)",
+    sown_on: "Sown on",
+    transplanted_on: "Transplanted on",
+    ageYears: "~{years} y",
     zone_id: "Zone",
     parent_id: "Inside zone",
     noZone: "—",
@@ -121,6 +130,15 @@ const TEXT = {
     group: "Gruppo (fila, aiuola)",
     quantity: "Quantità",
     planted_on: "Messa a dimora",
+    origin: "Origine",
+    existing: "Già presente",
+    planted: "Piantata da me",
+    sown: "Seminata da me",
+    age_now: "Età stimata (anni)",
+    age_at_planting: "Età all'impianto (anni)",
+    sown_on: "Semina",
+    transplanted_on: "Trapianto",
+    ageYears: "~{years} anni",
     zone_id: "Zona",
     parent_id: "Dentro la zona",
     noZone: "—",
@@ -238,6 +256,8 @@ const STYLE = `
   .suggest .msg { padding: 8px 10px; font-size: 13px; color: var(--secondary-text-color); }
   .taxon { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--secondary-text-color); }
   .taxon button { padding: 0 8px; font-size: 12px; }
+  .dates { display: grid; gap: 10px; }
+  .dates [hidden] { display: none; }
   .backup { margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--divider-color); }
   .backup h3 { margin: 0 0 4px; font-size: 14px; font-weight: 500; }
   .pin { width: 18px; height: 18px; border-radius: 50%; border: 3px solid #fff; box-sizing: border-box;
@@ -623,6 +643,7 @@ class HomesteadPanel extends HTMLElement {
       kind: "single",
       quantity: 1,
       status: "active",
+      origin: "planted",
       planted_on: new Date().toISOString().slice(0, 10),
       zone_id: this._zoneAt(latlng.lat, latlng.lng),
       latitude: latlng.lat,
@@ -667,7 +688,7 @@ class HomesteadPanel extends HTMLElement {
       variety: values.variety?.trim() || null,
       kind: values.kind,
       quantity: Number(values.quantity) || 1,
-      planted_on: values.planted_on || null,
+      ...datesFromForm(values),
       zone_id: values.zone_id || null,
       notes: values.notes?.trim() || null,
     };
@@ -904,6 +925,7 @@ class HomesteadPanel extends HTMLElement {
                       this._taxon(p.taxon_id)?.common_names?.[this._lang()],
                       p.species,
                       p.variety,
+                      ageOf(p) ? this.t("ageYears", { years: ageOf(p) }) : null,
                       this._zone(p.zone_id)?.name,
                       p.kind === "group" ? `×${p.quantity}` : null,
                     ]
@@ -1012,12 +1034,8 @@ class HomesteadPanel extends HTMLElement {
         this._speciesField(f),
         this._field(f, "variety"),
         h("div", { className: "row" }, kind, quantity),
-        h(
-          "div",
-          { className: "row" },
-          this._field(f, "planted_on", { type: "date" }),
-          this._selectField(f, "zone_id", this._zoneOptions()),
-        ),
+        this._datesFields(f),
+        this._selectField(f, "zone_id", this._zoneOptions()),
         f.id ? this._selectField(f, "status", ["active", "dead", "removed"].map((s) => [s, this.t(s)])) : null,
         this._notes(f),
         (this._positionEl = h("div", { className: "hint" }, this._positionText())),
@@ -1136,6 +1154,47 @@ class HomesteadPanel extends HTMLElement {
     return h("label", { className: "species" }, this.t("species"), input, list, hidden, linked);
   }
 
+  /** Origin decides which dates make sense: an estimated age, a planting date or sowing + transplant. */
+  _datesFields(f) {
+    const year = new Date().getFullYear();
+    const plantedYear = f.planted_on ? Number(f.planted_on.slice(0, 4)) : null;
+    const values = {
+      origin: f.origin || (f.sown_on ? "sown" : f.planted_on ? "planted" : f.birth_year ? "existing" : "planted"),
+      age_now: f.birth_year ? year - f.birth_year : "",
+      age_at_planting: f.birth_year && plantedYear ? plantedYear - f.birth_year : "",
+      planted_on: f.planted_on,
+      sown_on: f.sown_on,
+      transplanted_on: f.planted_on,
+    };
+    const age = { type: "number", min: 0, max: 500, step: 1, inputMode: "numeric" };
+    const groups = {
+      existing: h("div", { className: "row" }, this._field(values, "age_now", age)),
+      planted: h(
+        "div",
+        { className: "row" },
+        this._field(values, "planted_on", { type: "date" }),
+        this._field(values, "age_at_planting", age),
+      ),
+      sown: h(
+        "div",
+        { className: "row" },
+        this._field(values, "sown_on", { type: "date" }),
+        this._field(values, "transplanted_on", { type: "date" }),
+      ),
+    };
+    const origin = this._selectField(values, "origin", ["existing", "planted", "sown"].map((o) => [o, this.t(o)]));
+    const show = () => {
+      const current = origin.querySelector("select").value;
+      for (const [name, group] of Object.entries(groups)) {
+        group.hidden = name !== current;
+        group.querySelectorAll("input").forEach((input) => (input.disabled = name !== current));
+      }
+    };
+    origin.addEventListener("change", show);
+    show();
+    return h("div", { className: "dates" }, origin, ...Object.values(groups));
+  }
+
   _renderZoneForm() {
     const z = this._zoneForm;
     const exclude = z.id ? new Set([z.id, ...this._zoneDescendants(z.id)]) : new Set();
@@ -1171,6 +1230,37 @@ class HomesteadPanel extends HTMLElement {
       ),
     ];
   }
+}
+
+/** Disabled inputs (other origins) are not in the form data, so absent dates become null. */
+function datesFromForm(values) {
+  const year = new Date().getFullYear();
+  const number = (value) => (value === undefined || value === "" ? null : Number(value));
+  if (values.origin === "existing") {
+    const age = number(values.age_now);
+    return { origin: "existing", sown_on: null, planted_on: null, birth_year: age == null ? null : year - age };
+  }
+  if (values.origin === "sown") {
+    return {
+      origin: "sown",
+      sown_on: values.sown_on || null,
+      planted_on: values.transplanted_on || null,
+      birth_year: values.sown_on ? Number(values.sown_on.slice(0, 4)) : null,
+    };
+  }
+  const plantedOn = values.planted_on || null;
+  const age = number(values.age_at_planting);
+  return {
+    origin: "planted",
+    sown_on: null,
+    planted_on: plantedOn,
+    birth_year: plantedOn && age != null ? Number(plantedOn.slice(0, 4)) - age : null,
+  };
+}
+
+function ageOf(planting) {
+  const year = planting.birth_year || (planting.sown_on ? Number(planting.sown_on.slice(0, 4)) : null);
+  return year ? Math.max(new Date().getFullYear() - year, 0) : null;
 }
 
 function hasPosition(item) {

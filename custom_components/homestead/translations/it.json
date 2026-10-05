@@ -105,6 +105,13 @@
         "lawn": "Prato",
         "other": "Altro"
       }
+    },
+    "planting_origin": {
+      "options": {
+        "existing": "Già presente",
+        "planted": "Piantata da me",
+        "sown": "Seminata da me"
+      }
     }
   },
   "services": {
@@ -210,9 +217,21 @@
           "name": "Quantità",
           "description": "Numero di piante (solo gruppi)."
         },
+        "origin": {
+          "name": "Origine",
+          "description": "Già presente, piantata o seminata da te."
+        },
+        "sown_on": {
+          "name": "Semina",
+          "description": "Data di semina; la fase lunare viene registrata."
+        },
         "planted_on": {
           "name": "Messa a dimora",
-          "description": "Data di impianto."
+          "description": "Data di messa a dimora o di trapianto."
+        },
+        "birth_year": {
+          "name": "Anno di nascita stimato",
+          "description": "Anno di semina o d'innesto stimato: serve a calcolare l'età."
         },
         "initial_form": {
           "name": "Forma all'impianto",
@@ -284,9 +303,21 @@
           "name": "Quantità",
           "description": "Numero di piante (solo gruppi)."
         },
+        "origin": {
+          "name": "Origine",
+          "description": "Già presente, piantata o seminata da te."
+        },
+        "sown_on": {
+          "name": "Semina",
+          "description": "Data di semina; la fase lunare viene registrata."
+        },
         "planted_on": {
           "name": "Messa a dimora",
-          "description": "Data di impianto."
+          "description": "Data di messa a dimora o di trapianto."
+        },
+        "birth_year": {
+          "name": "Anno di nascita stimato",
+          "description": "Anno di semina o d'innesto stimato: serve a calcolare l'età."
         },
         "initial_form": {
           "name": "Forma all'impianto",
