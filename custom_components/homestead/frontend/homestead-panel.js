@@ -1637,8 +1637,27 @@ class HomesteadPanel extends HTMLElement {
     }
   }
 
-  _date(iso) {
-    return iso ? new Date(`${iso}T12:00:00`).toLocaleDateString(this._lang()) : "";
+  _date(iso, withYear = true) {
+    if (!iso) return "";
+    const [y, m, d] = iso.slice(0, 10).split("-");
+    const order = this._dateOrder();
+    if (order === "YMD") return withYear ? `${y}-${m}-${d}` : `${m}-${d}`;
+    const parts = order === "MDY" ? [m, d] : [d, m];
+    return [...parts, ...(withYear ? [y] : [])].join("/");
+  }
+
+  // Follows the HA profile "Date format"; with "language" an English UI stays day-first unless it is en-US.
+  _dateOrder() {
+    const setting = this._hass.locale?.date_format;
+    if (["DMY", "MDY", "YMD"].includes(setting)) return setting;
+    const locale = setting === "system" ? undefined : this._hass.locale?.language || this._hass.language || "en";
+    if (locale === "en") return "DMY";
+    const sample = new Intl.DateTimeFormat(locale, { year: "numeric", month: "2-digit", day: "2-digit" })
+      .formatToParts(new Date(2026, 10, 25))
+      .map((p) => p.type[0])
+      .filter((c) => "ymd".includes(c))
+      .join("");
+    return { ymd: "YMD", mdy: "MDY" }[sample] || "DMY";
   }
 
   _openExpense(expense) {
@@ -2464,7 +2483,7 @@ class HomesteadPanel extends HTMLElement {
     const day = (e) => {
       const w = e.weather;
       const extra = w ? ` ${w.t_mean != null ? `${Math.round(w.t_mean)}°` : ""}${w.rain_mm != null ? ` ${Math.round(w.rain_mm)}mm` : ""}` : "";
-      return `${this._date(e.done_on).replace(/\/\d{4}$|\.\d{4}$/, "")} ${MOON_ICONS[e.moon_phase] || ""}${extra}`;
+      return `${this._date(e.done_on, false)} ${MOON_ICONS[e.moon_phase] || ""}${extra}`;
     };
     const sown = of("sowing")[0] || (planting.sown_on?.startsWith(year) ? { done_on: planting.sown_on, moon_phase: planting.sown_moon_phase } : null);
     const planted = planting.planted_on?.startsWith(year) ? { done_on: planting.planted_on, moon_phase: planting.moon_phase } : null;

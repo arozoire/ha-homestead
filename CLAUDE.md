@@ -41,7 +41,7 @@ pytest
 - v0.6: annate (righe anno × coltura della stessa specie/taxon), eventi `removal` (pianta → removed) e `review` (rating, abundance, keep, avoid), meteo per evento, `repeat_planting`, `refresh_weather`, + Raccolta rapido; test recorder reale in `tests/test_recorder.py` (fixture riordinata); Open-Meteo simulato in `conftest.py`; 56 test.
 - v0.6.1: voci di inizio nel diario ricavate dai dati della pianta (semina, messa a dimora/trapianto, "presente dal ~anno"), non salvate come eventi; mappa più stretta (colonna 440 px, ⅓ su telefono) e pulsante 🗺️ per nasconderla (localStorage).
 - v0.7: `Task` (kind, due_on, pianta o zona o nessuna, yearly, title, done_on, event_id); `add/update/delete/complete_task`; `add_event` con `task_id` completa l'attività; annuale → stessa attività l'anno dopo (29/2 → 28/2); pannello "📋 Da fare" (scheda Diario + scheda pianta), ✔ apre evento precompilato; 60 test.
-- v0.7.1: promemoria integrati (vedi `reminders.py`), pulsante ⚙️ nel pannello verso le impostazioni; 63 test.
+- v0.7.1: promemoria integrati (vedi `reminders.py`), pulsante ⚙️ nel pannello verso le impostazioni; date gg/mm/aaaa secondo "Formato data" del profilo HA (inglese generico → giorno prima); 63 test.
 - Prossimo: avvisi "l'anno scorso…", tipo di pianta (icone), indice di annata, bosco/legna (backlog).
 - Rete della sessione cloud: `api.gbif.org`, `www.wikidata.org` e Open-Meteo bloccati, parsing scritto sui formati documentati → da verificare dal vivo.
 - Più avanti: caratteristiche colturali (rusticità, esposizione, fioritura/raccolta) da fonti §5.
