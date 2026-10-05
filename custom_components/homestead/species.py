@@ -31,7 +31,8 @@ def _key(candidate: Candidate | Taxon) -> str:
 
 async def search_remote(
     session: aiohttp.ClientSession, query: str, language: str, limit: int = 10
-) -> list[Candidate]:
+) -> tuple[list[Candidate], bool]:
+    """Return (candidates, complete); incomplete answers must not be cached."""
     results = await asyncio.gather(
         *(source.search(session, query, language, limit) for source in SOURCES), return_exceptions=True
     )
@@ -52,19 +53,28 @@ async def search_remote(
                     setattr(existing, name, value)
     if failures == len(SOURCES):
         raise SourcesUnavailable
-    return (await _only_plants(session, list(merged.values())))[:limit]
+    plants, unchecked = await _only_plants(session, list(merged.values()))
+    if not plants and unchecked:
+        raise SourcesUnavailable
+    return plants[:limit], not failures and not unchecked
 
 
-async def _only_plants(session: aiohttp.ClientSession, candidates: list[Candidate]) -> list[Candidate]:
+async def _only_plants(
+    session: aiohttp.ClientSession, candidates: list[Candidate]
+) -> tuple[list[Candidate], int]:
     """Wikidata results carry no kingdom: ask GBIF by key; without a GBIF key a taxon can't be checked."""
     unknown = [c for c in candidates if c.kingdom is None and c.gbif_key]
     found = await asyncio.gather(
         *(gbif.kingdom(session, c.gbif_key) for c in unknown), return_exceptions=True
     )
+    unchecked = 0
     for candidate, result in zip(unknown, found, strict=True):
-        if isinstance(result, str):
+        if isinstance(result, BaseException):
+            _LOGGER.debug("GBIF kingdom check for %s failed: %s", candidate.gbif_key, result)
+            unchecked += 1
+        elif isinstance(result, str):
             candidate.kingdom = result
-    return [c for c in candidates if c.kingdom in KINGDOMS]
+    return [c for c in candidates if c.kingdom in KINGDOMS], unchecked
 
 
 def search_local(data: HomesteadData, query: str, language: str) -> list[dict[str, Any]]:

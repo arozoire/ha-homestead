@@ -193,3 +193,19 @@ async def test_species_or_taxon_required(hass: HomeAssistant) -> None:
         await hass.services.async_call(
             DOMAIN, "update_planting", {"id": planting_id, "taxon_id": "nope"}, blocking=True
         )
+
+
+async def test_failed_kingdom_check_is_not_cached(
+    hass: HomeAssistant, hass_ws_client, aioclient_mock
+) -> None:
+    await _setup(hass)
+    aioclient_mock.get(WIKIDATA, params={"action": "wbsearchentities"}, json={"search": [{"id": "Q1"}]})
+    aioclient_mock.get(WIKIDATA, params={"action": "wbgetentities"}, json={"entities": {"Q1": WORM_ENTITY}})
+    aioclient_mock.get(f"{GBIF}/species/suggest", json=[])
+    aioclient_mock.get(f"{GBIF}/species/search", json={"results": []})
+    aioclient_mock.get(f"{GBIF}/species/2283", status=503)
+    ws = await hass_ws_client(hass)
+    for msg_id in (1, 2):
+        await ws.send_json({"id": msg_id, "type": "homestead/species/search", "query": "meloidogyne"})
+        assert (await ws.receive_json())["result"] == {"results": [], "offline": True}
+    assert aioclient_mock.call_count == 10  # both searches went to the network

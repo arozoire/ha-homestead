@@ -105,11 +105,13 @@ async def ws_search_species(
         remote = cached[1]
     else:
         try:
-            remote = await search_remote(async_get_clientsession(hass), query, language)
+            remote, complete = await search_remote(async_get_clientsession(hass), query, language)
         except SourcesUnavailable:
             remote, offline = [], True
         else:
-            if len(cache) >= SEARCH_CACHE_SIZE:
-                cache.pop(next(iter(cache)))
-            cache[key] = (time.monotonic(), remote)
+            # When a source or a kingdom check failed, don't cache: the next search retries.
+            if complete:
+                if len(cache) >= SEARCH_CACHE_SIZE:
+                    cache.pop(next(iter(cache)))
+                cache[key] = (time.monotonic(), remote)
     connection.send_result(msg["id"], {"results": combine(local, remote), "offline": offline})
