@@ -1004,3 +1004,75 @@ delete_seed_lot:
       required: true
       selector:
         text:
+
+set_crop_profile:
+  fields:
+    species:
+      required: true
+      example: "Solanum lycopersicum"
+      selector:
+        text:
+    exposure:
+      selector:
+        select:
+          multiple: true
+          translation_key: exposure
+          options:
+            - sun
+            - partial
+            - shade
+    hardiness_c:
+      selector:
+        number:
+          min: -60
+          max: 30
+          unit_of_measurement: °C
+          mode: box
+    sow_indoor:
+      selector:
+        select:
+          multiple: true
+          translation_key: month
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+    sow_outdoor:
+      selector:
+        select:
+          multiple: true
+          translation_key: month
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+    plant_out:
+      selector:
+        select:
+          multiple: true
+          translation_key: month
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+    flowering:
+      selector:
+        select:
+          multiple: true
+          translation_key: month
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+    harvest:
+      selector:
+        select:
+          multiple: true
+          translation_key: month
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+    spacing_cm:
+      selector:
+        number:
+          min: 1
+          max: 5000
+          unit_of_measurement: cm
+          mode: box
+    notes:
+      selector:
+        text:
+          multiline: true
+
+delete_crop_profile:
+  fields:
+    id:
+      required: true
+      selector:
+        text:

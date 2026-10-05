@@ -6,6 +6,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.homestead.backup import read_backup
 from custom_components.homestead.const import DOMAIN
+from custom_components.homestead.crops import load_defaults, lookup, normalize
 
 
 async def _setup(hass: HomeAssistant) -> MockConfigEntry:
@@ -99,3 +100,35 @@ async def test_seed_lots(hass: HomeAssistant) -> None:
     assert data.seeds[lot].finished and data.seeds[lot].viability_years == 5
     await _call(hass, "delete_seed_lot", {"id": lot})
     assert lot not in data.seeds and data.plantings[tomatoes].seed_lot_id is None
+
+
+def test_crop_defaults_lookup() -> None:
+    table = load_defaults()
+    assert normalize("Citrus x limon") == normalize("Citrus × limon") == "citrus limon"
+    tomato = lookup("Solanum lycopersicum var. cerasiforme", table)
+    assert tomato["species"] == "Solanum lycopersicum" and 5 in tomato["plant_out"]
+    assert lookup("Rosa canina", table)["species"] == "Rosa"
+    assert lookup("Unknown plant", table) is None
+    months = ("sow_indoor", "sow_outdoor", "plant_out", "flowering", "harvest")
+    for crop in table.values():
+        assert set(crop["exposure"]) <= {"sun", "partial", "shade"}
+        assert all(1 <= m <= 12 for key in months for m in crop.get(key, []))
+
+
+async def test_crop_profiles(hass: HomeAssistant, hass_ws_client) -> None:
+    entry = await _setup(hass)
+    data = entry.runtime_data.data
+    first = (
+        await _call(hass, "set_crop_profile", {"species": "Solanum lycopersicum", "plant_out": [5, 4, 5]})
+    )["id"]
+    again = await _call(hass, "set_crop_profile", {"species": "solanum  Lycopersicum", "hardiness_c": 3})
+    assert again["id"] == first and len(data.crops) == 1
+    assert data.crops[first].hardiness_c == 3 and data.crops[first].plant_out == []
+    with pytest.raises(vol.Invalid):
+        await _call(hass, "set_crop_profile", {"species": "X", "harvest": [13]})
+    await _call(hass, "delete_crop_profile", {"id": first})
+    assert not data.crops
+    ws = await hass_ws_client(hass)
+    await ws.send_json({"id": 1, "type": "homestead/crops/defaults"})
+    crops = (await ws.receive_json())["result"]["crops"]
+    assert crops["malus domestica"]["species"] == "Malus domestica"

@@ -127,6 +127,34 @@ const TEXT = {
     expensesTotal: "Expenses",
     incomesTotal: "Income",
     balance: "Balance",
+    cropBox: "🌿 Crop data",
+    cropDefault: "indicative values, temperate climate",
+    cropMine: "your values",
+    cropMissing: "No crop data for this species.",
+    cropEdit: "✏️ Correct",
+    cropAdd: "✏️ Add",
+    cropReset: "↩️ Built-in values",
+    cropTitle: "Crop data: {species}",
+    confirmCropReset: "Delete your values and go back to the built-in ones?",
+    exposure: "Exposure",
+    ex_sun: "☀️ sun",
+    ex_partial: "⛅ partial shade",
+    ex_shade: "☁️ shade",
+    hardiness_c: "Hardiness (lowest °C)",
+    hardiness: "❄️ down to {value} °C",
+    spacing_cm: "Spacing (cm)",
+    spacing: "↔️ {value} cm",
+    sow_indoor: "Sow indoors",
+    sow_outdoor: "Sow outdoors",
+    plant_out: "Plant out",
+    flowering: "Flowering",
+    harvest: "Harvest",
+    thisMonth: "📆 This month",
+    sowNow: "🌱 to sow now",
+    monthSowIndoor: "🌱 Sow indoors: {names}",
+    monthSowOutdoor: "🌱 Sow outdoors: {names}",
+    monthPlantOut: "🪴 Plant out: {names}",
+    monthHarvest: "🍎 Harvest: {names}",
     tabSeeds: "Seeds",
     addSeed: "New seeds",
     newSeedTitle: "New seeds",
@@ -398,6 +426,34 @@ const TEXT = {
     expensesTotal: "Spese",
     incomesTotal: "Ricavi",
     balance: "Saldo",
+    cropBox: "🌿 Scheda colturale",
+    cropDefault: "valori indicativi, clima temperato",
+    cropMine: "valori tuoi",
+    cropMissing: "Nessun dato colturale per questa specie.",
+    cropEdit: "✏️ Correggi",
+    cropAdd: "✏️ Aggiungi",
+    cropReset: "↩️ Valori di base",
+    cropTitle: "Dati colturali: {species}",
+    confirmCropReset: "Eliminare i tuoi valori e tornare a quelli di base?",
+    exposure: "Esposizione",
+    ex_sun: "☀️ sole",
+    ex_partial: "⛅ mezz'ombra",
+    ex_shade: "☁️ ombra",
+    hardiness_c: "Rusticità (minima °C)",
+    hardiness: "❄️ fino a {value} °C",
+    spacing_cm: "Distanza (cm)",
+    spacing: "↔️ {value} cm",
+    sow_indoor: "Semina in semenzaio",
+    sow_outdoor: "Semina all'aperto",
+    plant_out: "Messa a dimora",
+    flowering: "Fioritura",
+    harvest: "Raccolta",
+    thisMonth: "📆 Questo mese",
+    sowNow: "🌱 da seminare ora",
+    monthSowIndoor: "🌱 Semina in semenzaio: {names}",
+    monthSowOutdoor: "🌱 Semina all'aperto: {names}",
+    monthPlantOut: "🪴 Messa a dimora: {names}",
+    monthHarvest: "🍎 Raccolta: {names}",
     tabSeeds: "Semi",
     addSeed: "Nuovi semi",
     newSeedTitle: "Nuovi semi",
@@ -598,6 +654,8 @@ const SEED_VIABILITY = {
   Malvaceae: 3,
 };
 const ROTATION_YEARS = 3;
+const CROP_MONTHS = ["sow_indoor", "sow_outdoor", "plant_out", "flowering", "harvest"];
+const CROP_COLOR = { sow_indoor: "#8d6e63", sow_outdoor: "#7cb342", plant_out: "#26a69a", flowering: "#ec407a", harvest: "#ffa000" };
 // Plant type proposed for a new planting from the kind of its zone.
 const ZONE_PLANT_TYPE = { orchard: "tree", vegetable_garden: "vegetable", greenhouse: "vegetable", flower_bed: "flower" };
 // Start of a planting, shown in the diary from its own dates (not stored as events).
@@ -755,6 +813,12 @@ const STYLE = `
   .last-time { font-size: 13px; color: var(--secondary-text-color); }
   .balance-table { display: grid; grid-template-columns: auto 1fr 1fr; gap: 2px 12px; font-size: 13px; margin-top: 6px; }
   .balance-table .num { text-align: right; }
+  .crop-months { display: grid; grid-template-columns: minmax(90px, auto) repeat(12, 1fr); gap: 2px; font-size: 11px;
+    align-items: center; margin-top: 6px; }
+  .crop-months .m { text-align: center; color: var(--secondary-text-color); }
+  .crop-months .cell { height: 12px; border-radius: 2px; background: var(--secondary-background-color); }
+  .crop-months .cell.now { outline: 1px solid var(--primary-text-color); }
+  .crop-months button.cell { height: 22px; border: none; padding: 0; }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .chip { display: inline-flex; gap: 4px; align-items: center; padding: 2px 4px 2px 10px; border-radius: 14px; font-size: 13px;
     background: var(--secondary-background-color); color: var(--primary-text-color); }
@@ -764,7 +828,8 @@ const STYLE = `
 class HomesteadPanel extends HTMLElement {
   constructor() {
     super();
-    this._data = { plantings: [], zones: [], taxa: [], expenses: [], tools: [], photos: [], events: [], tasks: [], seeds: [] };
+    this._data = { plantings: [], zones: [], taxa: [], expenses: [], tools: [], photos: [], events: [], tasks: [], seeds: [], crops: [] };
+    this._cropDefaults = {};
     this._diaryFilter = { kind: "", zone: "", year: "" };
     this._photoUrls = new Map();
     this._taxaPending = new Map();
@@ -907,6 +972,14 @@ class HomesteadPanel extends HTMLElement {
 
   _subscribe() {
     let first = true;
+    this._hass
+      .callWS({ type: "homestead/crops/defaults" })
+      .then((result) => {
+        this._cropDefaults = result.crops || {};
+        if (!this._form && !this._eventForm && !this._taskForm && !this._zoneForm && !this._expenseForm && !this._toolForm && !this._seedForm && !this._cropForm) this._render();
+        else if (this._cropEl && this._form) this._cropEl.replaceChildren(...[this._cropBox(this._form)].filter(Boolean));
+      })
+      .catch(() => {});
     this._unsub = this._hass.connection.subscribeMessage(
       (data) => {
         this._data = {
@@ -916,6 +989,7 @@ class HomesteadPanel extends HTMLElement {
           expenses: data.expenses || [],
           tools: data.tools || [],
           seeds: data.seeds || [],
+          crops: data.crops || [],
           photos: data.photos || [],
           events: data.events || [],
           tasks: data.tasks || [],
@@ -936,7 +1010,7 @@ class HomesteadPanel extends HTMLElement {
         }
         else if (this._eventForm) this._fillEventPhotos();
         else if (this._taskForm) return;
-        else if (!this._expenseForm && !this._toolForm && !this._seedForm) this._render();
+        else if (!this._expenseForm && !this._toolForm && !this._seedForm && !this._cropForm) this._render();
       },
       { type: "homestead/subscribe" },
     );
@@ -1098,6 +1172,7 @@ class HomesteadPanel extends HTMLElement {
     this._expenseForm = null;
     this._toolForm = null;
     this._seedForm = null;
+    this._cropForm = null;
     this._eventForm = null;
     this._taskForm = null;
     this._selected = null;
@@ -1418,6 +1493,7 @@ class HomesteadPanel extends HTMLElement {
     else if (this._expenseForm) content = this._renderExpenseForm();
     else if (this._toolForm) content = this._renderToolForm();
     else if (this._seedForm) content = this._renderSeedForm();
+    else if (this._cropForm) content = this._renderCropForm();
     else if (this._eventForm) content = this._renderEventForm();
     else if (this._taskForm) content = this._renderTaskForm();
     else {
@@ -1479,6 +1555,7 @@ class HomesteadPanel extends HTMLElement {
     this._refreshDiaryBox();
     this._refreshPlantingTodo();
     if (this._seasonsEl && p) this._seasonsEl.replaceChildren(this._seasonsBox(p));
+    if (this._cropEl && p) this._cropEl.replaceChildren(this._cropBox(p));
   }
 
   _positionText() {
@@ -1678,6 +1755,7 @@ class HomesteadPanel extends HTMLElement {
       form,
       f.id ? this._plantingActions(f) : null,
       f.id ? this._plantingExpenses(f) : null,
+      f.id ? (this._cropEl = h("div", {}, this._cropBox(f))) : null,
       f.id ? (this._seasonsEl = h("div", {}, this._seasonsBox(f))) : null,
       f.id ? this._plantingTodo(f) : null,
       f.id ? this._diaryBox({ planting_id: f.id }) : null,
@@ -2471,6 +2549,7 @@ class HomesteadPanel extends HTMLElement {
         h("button", { onclick: () => this._openTask({ kind: "note", due_on: today() }) }, this.t("addTask")),
       ),
       this._todoBox(this._data.tasks),
+      this._monthBox(),
       this._lastYearsBox(this._data.events),
       h(
         "div",
@@ -3130,6 +3209,9 @@ class HomesteadPanel extends HTMLElement {
                     [lot.year, lot.supplier, lot.quantity, lot.finished ? this.t("finished") : null].filter(Boolean).join(" · "),
                   ),
                   warning ? h("div", { className: "sub warn" }, warning) : null,
+                  !lot.finished && this._inMonth(this._crop(lot.species), ["sow_indoor", "sow_outdoor"])
+                    ? h("div", { className: "sub info" }, this.t("sowNow"))
+                    : null,
                 ),
               );
             }),
@@ -3221,6 +3303,207 @@ class HomesteadPanel extends HTMLElement {
     } catch (err) {
       this._showMessage(err.message || String(err), true);
     }
+  }
+
+  // ---------- crop data ----------
+
+  /** Same rule as crops.py: genus and species, hybrid sign ignored. */
+  _cropKey(name) {
+    return (name || "").toLowerCase().replace(/\s[x×]\s|×/g, " ").split(/\s+/).filter(Boolean).slice(0, 2).join(" ");
+  }
+
+  /** The user's values win over the built-in table (exact species, then a genus entry). */
+  _crop(species) {
+    const key = this._cropKey(species);
+    if (!key) return null;
+    const mine = this._data.crops.find((c) => this._cropKey(c.species) === key);
+    if (mine) return { ...mine, source: "user" };
+    const builtIn = this._cropDefaults[key] || this._cropDefaults[key.split(" ")[0]];
+    return builtIn ? { ...builtIn, source: "default" } : null;
+  }
+
+  _inMonth(crop, keys, month = new Date().getMonth() + 1) {
+    return !!crop && keys.some((key) => (crop[key] || []).includes(month));
+  }
+
+  _monthLetters() {
+    const format = new Intl.DateTimeFormat(this._lang(), { month: "narrow" });
+    return Array.from({ length: 12 }, (_, i) => format.format(new Date(2026, i, 15)));
+  }
+
+  _cropMonths(crop) {
+    const now = new Date().getMonth() + 1;
+    const rows = CROP_MONTHS.filter((key) => crop[key]?.length);
+    if (!rows.length) return null;
+    return h(
+      "div",
+      { className: "crop-months" },
+      h("span"),
+      this._monthLetters().map((m) => h("span", { className: "m" }, m)),
+      rows.flatMap((key) => [
+        h("span", {}, this.t(key)),
+        ...Array.from({ length: 12 }, (_, i) =>
+          h("span", {
+            className: `cell${i + 1 === now ? " now" : ""}`,
+            style: crop[key].includes(i + 1) ? `background:${CROP_COLOR[key]}` : "",
+          }),
+        ),
+      ]),
+    );
+  }
+
+  _cropBox(planting) {
+    const crop = this._crop(planting.species);
+    const facts = crop
+      ? [
+          (crop.exposure || []).map((e) => this.t(`ex_${e}`)).join(" / ") || null,
+          crop.hardiness_c != null ? this.t("hardiness", { value: crop.hardiness_c }) : null,
+          crop.spacing_cm ? this.t("spacing", { value: crop.spacing_cm }) : null,
+        ].filter(Boolean)
+      : [];
+    return h(
+      "div",
+      { className: "seasons" },
+      h(
+        "div",
+        { className: "row header" },
+        h("h3", {}, this.t("cropBox")),
+        h(
+          "button",
+          { type: "button", style: "flex:none", onclick: () => this._openCrop(planting.species, crop, { planting_id: planting.id }) },
+          this.t(crop ? "cropEdit" : "cropAdd"),
+        ),
+      ),
+      crop
+        ? [
+            facts.length ? h("div", {}, facts.join(" · ")) : null,
+            this._cropMonths(crop),
+            crop.notes ? h("div", { className: "sub" }, crop.notes) : null,
+            h("div", { className: "sub" }, this.t(crop.source === "user" ? "cropMine" : "cropDefault")),
+          ]
+        : h("p", { className: "hint" }, this.t("cropMissing")),
+    );
+  }
+
+  _openCrop(species, crop, back) {
+    this._clearSelection();
+    this._showMessage("");
+    this._cropBack = back;
+    // Built-in values may come from a genus entry: corrections are saved for this very species.
+    this._cropForm = { ...(crop || {}), species: crop?.source === "user" ? crop.species : species.trim() };
+    this._syncMap();
+    this._render();
+  }
+
+  _cropDone(name = null, key = "saved") {
+    const back = this._cropBack;
+    this._cropBack = null;
+    if (back?.planting_id) this._select(back.planting_id);
+    else this._close();
+    if (name) this._showMessage(`✓ ${this.t(key, { name })}`);
+  }
+
+  _renderCropForm() {
+    const f = this._cropForm;
+    const months = Object.fromEntries(CROP_MONTHS.map((key) => [key, new Set(f[key] || [])]));
+    const letters = this._monthLetters();
+    const grid = h(
+      "div",
+      { className: "crop-months" },
+      h("span"),
+      letters.map((m) => h("span", { className: "m" }, m)),
+      CROP_MONTHS.flatMap((key) => [
+        h("span", {}, this.t(key)),
+        ...letters.map((_, i) => {
+          const paint = (b) => (b.style.background = months[key].has(i + 1) ? CROP_COLOR[key] : "");
+          const button = h("button", {
+            type: "button",
+            className: "cell",
+            title: `${this.t(key)} ${i + 1}`,
+            onclick: (ev) => {
+              months[key].has(i + 1) ? months[key].delete(i + 1) : months[key].add(i + 1);
+              paint(ev.currentTarget);
+            },
+          });
+          paint(button);
+          return button;
+        }),
+      ]),
+    );
+    this._cropMonthsState = months;
+    return [
+      h(
+        "form",
+        { onsubmit: (ev) => this._saveCrop(ev) },
+        h("h2", {}, this.t("cropTitle", { species: f.species })),
+        h(
+          "label",
+          {},
+          this.t("exposure"),
+          h(
+            "div",
+            { className: "row" },
+            ["sun", "partial", "shade"].map((e) =>
+              h("label", { className: "check" }, h("input", { type: "checkbox", name: `ex_${e}`, checked: (f.exposure || []).includes(e) }), this.t(`ex_${e}`)),
+            ),
+          ),
+        ),
+        h(
+          "div",
+          { className: "row" },
+          this._field(f, "hardiness_c", { type: "number", min: -60, max: 30, step: 1 }),
+          this._field(f, "spacing_cm", { type: "number", min: 1, max: 5000, step: 1 }),
+        ),
+        grid,
+        this._notes(f),
+        this._formButtons(null, null, () => this._cropDone()),
+        f.source === "user"
+          ? h("div", { className: "row" }, h("button", { type: "button", className: "danger", onclick: () => this._resetCrop() }, this.t("cropReset")))
+          : null,
+      ),
+    ];
+  }
+
+  async _saveCrop(ev) {
+    ev.preventDefault();
+    const v = Object.fromEntries(new FormData(ev.target));
+    const data = {
+      species: this._cropForm.species,
+      exposure: ["sun", "partial", "shade"].filter((e) => v[`ex_${e}`] === "on"),
+      hardiness_c: v.hardiness_c === "" ? null : Number(v.hardiness_c),
+      spacing_cm: v.spacing_cm ? Number(v.spacing_cm) : null,
+      notes: v.notes?.trim() || null,
+      ...Object.fromEntries(CROP_MONTHS.map((key) => [key, [...this._cropMonthsState[key]].sort((a, b) => a - b)])),
+    };
+    if (await this._call("set_crop_profile", data)) this._cropDone(data.species);
+  }
+
+  async _resetCrop() {
+    if (!confirm(this.t("confirmCropReset"))) return;
+    if (await this._call("delete_crop_profile", { id: this._cropForm.id })) this._cropDone(this._cropForm.species, "deleted");
+  }
+
+  /** What the calendar says for this month: seeds to sow, seedlings to plant out, crops to harvest. */
+  _monthBox() {
+    const names = (items) => [...new Set(items)].join(", ");
+    const seeds = this._data.seeds.filter((lot) => !lot.finished);
+    const seedsFor = (key) => seeds.filter((lot) => this._inMonth(this._crop(lot.species), [key])).map((lot) => this._seedName(lot));
+    const active = this._data.plantings.filter((p) => p.status === "active");
+    const waiting = active.filter((p) => p.origin === "sown" && !p.planted_on && this._inMonth(this._crop(p.species), ["plant_out"]));
+    const harvest = active.filter((p) => this._inMonth(this._crop(p.species), ["harvest"])).map((p) => p.name);
+    const lines = [
+      ["monthSowIndoor", seedsFor("sow_indoor")],
+      ["monthSowOutdoor", seedsFor("sow_outdoor")],
+      ["monthPlantOut", waiting.map((p) => p.name)],
+      ["monthHarvest", harvest],
+    ].filter(([, items]) => items.length);
+    if (!lines.length) return null;
+    return h(
+      "div",
+      { className: "summary" },
+      h("strong", {}, this.t("thisMonth")),
+      lines.map(([key, items]) => h("div", { className: "sub", style: "white-space:normal" }, this.t(key, { names: names(items) }))),
+    );
   }
 
   // ---------- rotation ----------

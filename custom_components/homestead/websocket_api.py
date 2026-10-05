@@ -18,11 +18,13 @@ from homeassistant.util import dt as dt_util
 
 from .backup import BackupError, make_backup, read_backup, summary
 from .const import DOMAIN, SIGNAL_DATA_UPDATED
+from .crops import load_defaults
 from .models import Photo
 from .photos import MAX_PHOTO_BYTES, image_type, photo_dir, write_photo
 from .species import SourcesUnavailable, combine, search_local, search_remote
 from .store import get_store
 
+CROP_DEFAULTS = f"{DOMAIN}_crop_defaults"
 SEARCH_CACHE = f"{DOMAIN}_species_cache"
 SEARCH_CACHE_TTL_S = 24 * 3600
 SEARCH_CACHE_SIZE = 200
@@ -35,6 +37,18 @@ def async_register_websocket(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, ws_backup_import)
     websocket_api.async_register_command(hass, ws_photo_upload)
     websocket_api.async_register_command(hass, ws_search_species)
+    websocket_api.async_register_command(hass, ws_crop_defaults)
+
+
+@websocket_api.websocket_command({vol.Required("type"): "homestead/crops/defaults"})
+@websocket_api.async_response
+async def ws_crop_defaults(
+    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]
+) -> None:
+    """The built-in crop table, keyed by normalized species name."""
+    if CROP_DEFAULTS not in hass.data:
+        hass.data[CROP_DEFAULTS] = await hass.async_add_executor_job(load_defaults)
+    connection.send_result(msg["id"], {"crops": hass.data[CROP_DEFAULTS]})
 
 
 @websocket_api.websocket_command({vol.Required("type"): "homestead/subscribe"})

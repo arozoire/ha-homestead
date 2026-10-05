@@ -21,6 +21,7 @@ REQUIRED = {
     "events": ("kind", "done_on"),
     "tasks": ("kind", "due_on"),
     "seeds": ("species",),
+    "crops": ("species",),
 }
 
 # (collection, field, referenced collection): dangling references are cleared.

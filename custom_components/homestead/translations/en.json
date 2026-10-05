@@ -193,6 +193,29 @@
         "normal": "Normal",
         "abundant": "Abundant"
       }
+    },
+    "month": {
+      "options": {
+        "1": "January",
+        "2": "February",
+        "3": "March",
+        "4": "April",
+        "5": "May",
+        "6": "June",
+        "7": "July",
+        "8": "August",
+        "9": "September",
+        "10": "October",
+        "11": "November",
+        "12": "December"
+      }
+    },
+    "exposure": {
+      "options": {
+        "sun": "Full sun",
+        "partial": "Partial shade",
+        "shade": "Shade"
+      }
     }
   },
   "services": {
@@ -1061,6 +1084,62 @@
         "id": {
           "name": "ID",
           "description": "Seed lot id."
+        }
+      }
+    },
+    "set_crop_profile": {
+      "name": "Set crop data",
+      "description": "Stores your values for a species (exposure, hardiness, sowing, planting, flowering and harvest months); they replace the built-in ones.",
+      "fields": {
+        "species": {
+          "name": "Species",
+          "description": "Scientific name."
+        },
+        "exposure": {
+          "name": "Exposure",
+          "description": "Sun, partial shade, shade."
+        },
+        "hardiness_c": {
+          "name": "Hardiness",
+          "description": "Lowest temperature tolerated."
+        },
+        "sow_indoor": {
+          "name": "Sow indoors",
+          "description": "Months for sowing in a seed tray."
+        },
+        "sow_outdoor": {
+          "name": "Sow outdoors",
+          "description": "Months for direct sowing."
+        },
+        "plant_out": {
+          "name": "Plant out",
+          "description": "Months for planting or transplanting."
+        },
+        "flowering": {
+          "name": "Flowering",
+          "description": "Flowering months."
+        },
+        "harvest": {
+          "name": "Harvest",
+          "description": "Harvest months."
+        },
+        "spacing_cm": {
+          "name": "Spacing",
+          "description": "Distance between plants."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "delete_crop_profile": {
+      "name": "Reset crop data",
+      "description": "Deletes your values for a species: the built-in ones apply again.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Crop data id."
         }
       }
     }

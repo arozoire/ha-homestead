@@ -344,6 +344,23 @@ class SeedLot(_Record):
 
 
 @dataclass(kw_only=True)
+class CropProfile(_Record):
+    """The user's correction of a species' crop data (built-in defaults in crops.json)."""
+
+    species: str
+    id: str = field(default_factory=new_id)
+    exposure: list[str] = field(default_factory=list)  # sun, partial, shade
+    hardiness_c: float | None = None  # lowest temperature tolerated
+    sow_indoor: list[int] = field(default_factory=list)  # months 1-12
+    sow_outdoor: list[int] = field(default_factory=list)
+    plant_out: list[int] = field(default_factory=list)
+    flowering: list[int] = field(default_factory=list)
+    harvest: list[int] = field(default_factory=list)
+    spacing_cm: int | None = None
+    notes: str | None = None
+
+
+@dataclass(kw_only=True)
 class Photo(_Record):
     """A picture stored under the HA media folder; ``file`` is relative to the homestead folder."""
 
@@ -365,6 +382,7 @@ _COLLECTIONS: dict[str, type[_Record]] = {
     "events": Event,
     "tasks": Task,
     "seeds": SeedLot,
+    "crops": CropProfile,
 }
 
 
@@ -379,6 +397,7 @@ class HomesteadData:
     events: dict[str, Event] = field(default_factory=dict)
     tasks: dict[str, Task] = field(default_factory=dict)
     seeds: dict[str, SeedLot] = field(default_factory=dict)
+    crops: dict[str, CropProfile] = field(default_factory=dict)
 
     @classmethod
     def from_dict(cls, raw: dict[str, Any]) -> HomesteadData:

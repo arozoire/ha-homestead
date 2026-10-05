@@ -15,10 +15,12 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN
+from .crops import normalize
 from .geo import validate_polygon
 from .models import (
     EVENT_COST_CATEGORY,
     Abundance,
+    CropProfile,
     Event,
     EventKind,
     Expense,
@@ -179,6 +181,23 @@ ADD_SEED_LOT_SCHEMA = vol.Schema(
         vol.Optional("viability_years"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=50))),
         vol.Optional("finished"): cv.boolean,
         vol.Optional("price"): vol.Any(None, _positive),
+        vol.Optional("notes"): _opt_str,
+    }
+)
+
+_months = vol.All(cv.ensure_list, [vol.All(vol.Coerce(int), vol.Range(min=1, max=12))])
+
+SET_CROP_PROFILE_SCHEMA = vol.Schema(
+    {
+        vol.Required("species"): cv.string,
+        vol.Optional("exposure"): vol.All(cv.ensure_list, [vol.In(["sun", "partial", "shade"])]),
+        vol.Optional("hardiness_c"): vol.Any(None, vol.All(vol.Coerce(float), vol.Range(min=-60, max=30))),
+        vol.Optional("sow_indoor"): _months,
+        vol.Optional("sow_outdoor"): _months,
+        vol.Optional("plant_out"): _months,
+        vol.Optional("flowering"): _months,
+        vol.Optional("harvest"): _months,
+        vol.Optional("spacing_cm"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=5000))),
         vol.Optional("notes"): _opt_str,
     }
 )
@@ -570,6 +589,27 @@ def async_register_services(hass: HomeAssistant) -> None:
         await store.async_save()
         return {"id": lot_id}
 
+    async def set_crop_profile(call: ServiceCall) -> ServiceResponse:
+        """Replace the user's crop data for a species (one record per species)."""
+        store = _store(hass)
+        args: dict[str, Any] = dict(call.data)
+        for key in ("exposure", "sow_indoor", "sow_outdoor", "plant_out", "flowering", "harvest"):
+            args[key] = sorted(set(args.get(key) or []))
+        key = normalize(args["species"])
+        old = next((c for c in store.data.crops.values() if normalize(c.species) == key), None)
+        profile = CropProfile(**args, **({"id": old.id} if old else {}))
+        store.data.crops[profile.id] = profile
+        await store.async_save()
+        return {"id": profile.id}
+
+    async def delete_crop_profile(call: ServiceCall) -> ServiceResponse:
+        """Back to the built-in values."""
+        store = _store(hass)
+        _check_ref(store.data.crops, call.data["id"], "id")
+        del store.data.crops[call.data["id"]]
+        await store.async_save()
+        return {"id": call.data["id"]}
+
     async def delete_photo(call: ServiceCall) -> ServiceResponse:
         store = _store(hass)
         _check_ref(store.data.photos, call.data["id"], "id")
@@ -748,6 +788,8 @@ def async_register_services(hass: HomeAssistant) -> None:
         ("add_seed_lot", add_seed_lot, ADD_SEED_LOT_SCHEMA, SupportsResponse.OPTIONAL),
         ("update_seed_lot", update_seed_lot, UPDATE_SEED_LOT_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_seed_lot", delete_seed_lot, ID_SCHEMA, SupportsResponse.OPTIONAL),
+        ("set_crop_profile", set_crop_profile, SET_CROP_PROFILE_SCHEMA, SupportsResponse.OPTIONAL),
+        ("delete_crop_profile", delete_crop_profile, ID_SCHEMA, SupportsResponse.OPTIONAL),
         ("add_event", add_event, ADD_EVENT_SCHEMA, SupportsResponse.OPTIONAL),
         ("update_event", update_event, UPDATE_EVENT_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_event", delete_event, ID_SCHEMA, SupportsResponse.OPTIONAL),

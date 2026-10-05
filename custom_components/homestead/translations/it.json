@@ -193,6 +193,29 @@
         "normal": "Normale",
         "abundant": "Abbondante"
       }
+    },
+    "month": {
+      "options": {
+        "1": "Gennaio",
+        "2": "Febbraio",
+        "3": "Marzo",
+        "4": "Aprile",
+        "5": "Maggio",
+        "6": "Giugno",
+        "7": "Luglio",
+        "8": "Agosto",
+        "9": "Settembre",
+        "10": "Ottobre",
+        "11": "Novembre",
+        "12": "Dicembre"
+      }
+    },
+    "exposure": {
+      "options": {
+        "sun": "Pieno sole",
+        "partial": "Mezz'ombra",
+        "shade": "Ombra"
+      }
     }
   },
   "services": {
@@ -1061,6 +1084,62 @@
         "id": {
           "name": "ID",
           "description": "Id del lotto."
+        }
+      }
+    },
+    "set_crop_profile": {
+      "name": "Imposta dati colturali",
+      "description": "Salva i tuoi valori per una specie (esposizione, rusticità, mesi di semina, impianto, fioritura e raccolta); sostituiscono quelli di base.",
+      "fields": {
+        "species": {
+          "name": "Specie",
+          "description": "Nome scientifico."
+        },
+        "exposure": {
+          "name": "Esposizione",
+          "description": "Sole, mezz'ombra, ombra."
+        },
+        "hardiness_c": {
+          "name": "Rusticità",
+          "description": "Temperatura minima sopportata."
+        },
+        "sow_indoor": {
+          "name": "Semina in semenzaio",
+          "description": "Mesi di semina al riparo."
+        },
+        "sow_outdoor": {
+          "name": "Semina all'aperto",
+          "description": "Mesi di semina diretta."
+        },
+        "plant_out": {
+          "name": "Messa a dimora",
+          "description": "Mesi di impianto o trapianto."
+        },
+        "flowering": {
+          "name": "Fioritura",
+          "description": "Mesi di fioritura."
+        },
+        "harvest": {
+          "name": "Raccolta",
+          "description": "Mesi di raccolta."
+        },
+        "spacing_cm": {
+          "name": "Distanza",
+          "description": "Distanza tra le piante."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "delete_crop_profile": {
+      "name": "Ripristina dati colturali",
+      "description": "Elimina i tuoi valori per una specie: tornano quelli di base.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id dei dati colturali."
         }
       }
     }
