@@ -461,6 +461,120 @@
         }
       }
     },
+    "update_expense": {
+      "name": "Update expense",
+      "description": "Changes the given fields of an expense.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Expense ID."
+        },
+        "amount": {
+          "name": "Amount",
+          "description": "Amount spent."
+        },
+        "category": {
+          "name": "Category",
+          "description": "Expense category."
+        },
+        "spent_on": {
+          "name": "Date",
+          "description": "Defaults to today."
+        },
+        "supplier": {
+          "name": "Supplier",
+          "description": "Where it was bought."
+        },
+        "planting_id": {
+          "name": "Planting",
+          "description": "Related planting ID."
+        },
+        "tool_id": {
+          "name": "Tool",
+          "description": "Related tool ID."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "delete_expense": {
+      "name": "Delete expense",
+      "description": "Deletes an expense.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Expense ID."
+        }
+      }
+    },
+    "update_tool": {
+      "name": "Update tool",
+      "description": "Changes the given fields of a tool.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Tool ID."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Tool name."
+        },
+        "category": {
+          "name": "Category",
+          "description": "Pruning, digging, irrigation…"
+        },
+        "brand": {
+          "name": "Brand",
+          "description": "Brand."
+        },
+        "model": {
+          "name": "Model",
+          "description": "Model."
+        },
+        "purchased_on": {
+          "name": "Purchased on",
+          "description": "Purchase date."
+        },
+        "power": {
+          "name": "Power",
+          "description": "Power source."
+        },
+        "status": {
+          "name": "Status",
+          "description": "Current condition."
+        },
+        "next_service_on": {
+          "name": "Next service",
+          "description": "Next sharpening or maintenance."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "delete_tool": {
+      "name": "Delete tool",
+      "description": "Deletes a tool; linked expenses are kept.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Tool ID."
+        }
+      }
+    },
+    "delete_photo": {
+      "name": "Delete photo",
+      "description": "Deletes a photo and its file.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Photo ID."
+        }
+      }
+    },
     "export": {
       "name": "Export data",
       "description": "Returns all HA Homestead data."

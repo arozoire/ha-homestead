@@ -180,12 +180,24 @@ class Tool(_Record):
     notes: str | None = None
 
 
+@dataclass(kw_only=True)
+class Photo(_Record):
+    """A picture stored under the HA media folder; ``file`` is relative to the homestead folder."""
+
+    file: str
+    id: str = field(default_factory=new_id)
+    planting_id: str | None = None
+    taken_on: str | None = None
+    caption: str | None = None
+
+
 _COLLECTIONS: dict[str, type[_Record]] = {
     "zones": Zone,
     "taxa": Taxon,
     "plantings": Planting,
     "expenses": Expense,
     "tools": Tool,
+    "photos": Photo,
 }
 
 
@@ -196,6 +208,7 @@ class HomesteadData:
     plantings: dict[str, Planting] = field(default_factory=dict)
     expenses: dict[str, Expense] = field(default_factory=dict)
     tools: dict[str, Tool] = field(default_factory=dict)
+    photos: dict[str, Photo] = field(default_factory=dict)
 
     @classmethod
     def from_dict(cls, raw: dict[str, Any]) -> HomesteadData:

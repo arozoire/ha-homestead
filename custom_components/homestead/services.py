@@ -29,6 +29,7 @@ from .models import (
     Zone,
     ZoneKind,
 )
+from .photos import delete_photo_file, photo_dir
 from .species import SourcesUnavailable, fetch_details, upsert_taxon
 from .store import HomesteadStore, get_store
 
@@ -116,6 +117,13 @@ ADD_EXPENSE_SCHEMA = vol.Schema(
     }
 )
 
+UPDATE_EXPENSE_SCHEMA = vol.Schema(
+    {
+        vol.Required("id"): cv.string,
+        **{vol.Optional(str(key)): value for key, value in ADD_EXPENSE_SCHEMA.schema.items()},
+    }
+)
+
 ADD_TOOL_SCHEMA = vol.Schema(
     {
         vol.Required("name"): cv.string,
@@ -130,6 +138,16 @@ ADD_TOOL_SCHEMA = vol.Schema(
         vol.Optional("notes"): _opt_str,
     }
 )
+
+
+UPDATE_TOOL_SCHEMA = vol.Schema(
+    {
+        vol.Required("id"): cv.string,
+        **{vol.Optional(str(key)): value for key, value in ADD_TOOL_SCHEMA.schema.items() if key != "price"},
+    }
+)
+
+ID_SCHEMA = vol.Schema({vol.Required("id"): cv.string})
 
 
 def _store(hass: HomeAssistant) -> HomesteadStore:
@@ -265,6 +283,9 @@ def async_register_services(hass: HomeAssistant) -> None:
         planting_id = call.data["id"]
         _check_ref(store.data.plantings, planting_id, "id")
         del store.data.plantings[planting_id]
+        for photo in [p for p in store.data.photos.values() if p.planting_id == planting_id]:
+            del store.data.photos[photo.id]
+            await hass.async_add_executor_job(delete_photo_file, photo_dir(hass), photo.file)
         for expense in store.data.expenses.values():
             if expense.planting_id == planting_id:
                 expense.planting_id = None
@@ -317,6 +338,57 @@ def async_register_services(hass: HomeAssistant) -> None:
         await store.async_save()
         return {"id": tool.id}
 
+    async def update_expense(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        args: dict[str, Any] = dict(call.data)
+        expense_id = args.pop("id")
+        _check_ref(store.data.expenses, expense_id, "id")
+        _check_ref(store.data.plantings, args.get("planting_id"), "planting_id")
+        _check_ref(store.data.tools, args.get("tool_id"), "tool_id")
+        if "spent_on" in args:
+            args["spent_on"] = _iso(args["spent_on"]) or store.data.expenses[expense_id].spent_on
+        store.data.expenses[expense_id] = replace(store.data.expenses[expense_id], **args)
+        await store.async_save()
+        return {"id": expense_id}
+
+    async def delete_expense(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        _check_ref(store.data.expenses, call.data["id"], "id")
+        del store.data.expenses[call.data["id"]]
+        await store.async_save()
+        return {"id": call.data["id"]}
+
+    async def update_tool(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        args: dict[str, Any] = dict(call.data)
+        tool_id = args.pop("id")
+        _check_ref(store.data.tools, tool_id, "id")
+        for key in ("purchased_on", "next_service_on"):
+            if key in args:
+                args[key] = _iso(args[key])
+        store.data.tools[tool_id] = replace(store.data.tools[tool_id], **args)
+        await store.async_save()
+        return {"id": tool_id}
+
+    async def delete_tool(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        tool_id = call.data["id"]
+        _check_ref(store.data.tools, tool_id, "id")
+        del store.data.tools[tool_id]
+        for expense in store.data.expenses.values():
+            if expense.tool_id == tool_id:
+                expense.tool_id = None
+        await store.async_save()
+        return {"id": tool_id}
+
+    async def delete_photo(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        _check_ref(store.data.photos, call.data["id"], "id")
+        photo = store.data.photos.pop(call.data["id"])
+        await hass.async_add_executor_job(delete_photo_file, photo_dir(hass), photo.file)
+        await store.async_save()
+        return {"id": photo.id}
+
     async def export(call: ServiceCall) -> ServiceResponse:
         return _store(hass).data.to_dict()
 
@@ -334,7 +406,12 @@ def async_register_services(hass: HomeAssistant) -> None:
         ("delete_planting", delete_planting, DELETE_PLANTING_SCHEMA, SupportsResponse.OPTIONAL),
         ("import_taxon", import_taxon, IMPORT_TAXON_SCHEMA, SupportsResponse.OPTIONAL),
         ("add_expense", add_expense, ADD_EXPENSE_SCHEMA, SupportsResponse.OPTIONAL),
+        ("update_expense", update_expense, UPDATE_EXPENSE_SCHEMA, SupportsResponse.OPTIONAL),
+        ("delete_expense", delete_expense, ID_SCHEMA, SupportsResponse.OPTIONAL),
         ("add_tool", add_tool, ADD_TOOL_SCHEMA, SupportsResponse.OPTIONAL),
+        ("update_tool", update_tool, UPDATE_TOOL_SCHEMA, SupportsResponse.OPTIONAL),
+        ("delete_tool", delete_tool, ID_SCHEMA, SupportsResponse.OPTIONAL),
+        ("delete_photo", delete_photo, ID_SCHEMA, SupportsResponse.OPTIONAL),
         ("export", export, vol.Schema({}), SupportsResponse.ONLY),
     ):
         hass.services.async_register(DOMAIN, name, handler, schema=schema, supports_response=response)

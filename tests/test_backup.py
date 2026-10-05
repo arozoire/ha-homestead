@@ -88,7 +88,7 @@ async def test_export_and_import_over_websocket(hass: HomeAssistant, hass_ws_cli
 
     await ws.send_json({"id": 2, "type": "homestead/backup/import", "backup": backup})
     result = (await ws.receive_json())["result"]
-    assert result == {"zones": 1, "taxa": 1, "plantings": 1, "expenses": 1, "tools": 1}
+    assert result == {"zones": 1, "taxa": 1, "plantings": 1, "expenses": 1, "tools": 1, "photos": 0}
     assert [t.name for t in entry.runtime_data.data.tools.values()] == ["Seghetto"]
     assert len(hass_storage[f"{DOMAIN}.data"]["data"]["tools"]) == 1
     assert hass.states.get("sensor.ha_homestead_plantings").state == "1"

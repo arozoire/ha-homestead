@@ -461,6 +461,120 @@
         }
       }
     },
+    "update_expense": {
+      "name": "Modifica spesa",
+      "description": "Modifica i campi indicati di una spesa.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID della spesa."
+        },
+        "amount": {
+          "name": "Importo",
+          "description": "Importo speso."
+        },
+        "category": {
+          "name": "Categoria",
+          "description": "Categoria di spesa."
+        },
+        "spent_on": {
+          "name": "Data",
+          "description": "Di default oggi."
+        },
+        "supplier": {
+          "name": "Fornitore",
+          "description": "Dove è stato acquistato."
+        },
+        "planting_id": {
+          "name": "Pianta",
+          "description": "ID della pianta collegata."
+        },
+        "tool_id": {
+          "name": "Attrezzo",
+          "description": "ID dell'attrezzo collegato."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "delete_expense": {
+      "name": "Elimina spesa",
+      "description": "Elimina una spesa.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID della spesa."
+        }
+      }
+    },
+    "update_tool": {
+      "name": "Modifica attrezzo",
+      "description": "Modifica i campi indicati di un attrezzo.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID dell'attrezzo."
+        },
+        "name": {
+          "name": "Nome",
+          "description": "Nome dell'attrezzo."
+        },
+        "category": {
+          "name": "Categoria",
+          "description": "Potatura, scavo, irrigazione…"
+        },
+        "brand": {
+          "name": "Marca",
+          "description": "Marca."
+        },
+        "model": {
+          "name": "Modello",
+          "description": "Modello."
+        },
+        "purchased_on": {
+          "name": "Acquistato il",
+          "description": "Data di acquisto."
+        },
+        "power": {
+          "name": "Alimentazione",
+          "description": "Tipo di alimentazione."
+        },
+        "status": {
+          "name": "Stato",
+          "description": "Condizione attuale."
+        },
+        "next_service_on": {
+          "name": "Prossima manutenzione",
+          "description": "Prossima affilatura o tagliando."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "delete_tool": {
+      "name": "Elimina attrezzo",
+      "description": "Elimina un attrezzo; le spese collegate restano.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID dell'attrezzo."
+        }
+      }
+    },
+    "delete_photo": {
+      "name": "Elimina foto",
+      "description": "Elimina una foto e il suo file.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID della foto."
+        }
+      }
+    },
     "export": {
       "name": "Esporta dati",
       "description": "Restituisce tutti i dati di HA Homestead."
