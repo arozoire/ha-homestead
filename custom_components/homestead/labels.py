@@ -24,6 +24,10 @@ ICONS = {
     "weeding": "🧤",
     "mulching": "🍂",
     "mowing": "🌾",
+    "clearing": "🧹",
+    "wood_cutting": "🪓",
+    "brushwood": "🪵",
+    "foraging": "🍄",
 }
 
 

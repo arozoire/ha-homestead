@@ -54,6 +54,10 @@ ADD_ZONE_SCHEMA = vol.Schema(
         vol.Optional("kind"): vol.Any(None, vol.In([k.value for k in ZoneKind])),
         vol.Optional("area_id"): _opt_str,
         vol.Optional("geometry"): vol.Any(None, validate_polygon),
+        vol.Optional("species"): vol.All(
+            cv.ensure_list,
+            [vol.Any(cv.string, {vol.Required("name"): cv.string, vol.Optional("taxon_id"): _opt_str})],
+        ),
         vol.Optional("notes"): _opt_str,
     }
 )
@@ -267,6 +271,12 @@ def _apply_taxon(store: HomesteadStore, args: dict[str, Any]) -> None:
         args["species"] = store.data.taxa[args["taxon_id"]].scientific_name
 
 
+def _check_species(store: HomesteadStore, args: dict[str, Any]) -> None:
+    for item in args.get("species") or []:
+        if isinstance(item, dict):
+            _check_ref(store.data.taxa, item.get("taxon_id"), "taxon_id")
+
+
 def _check_ref(collection: dict, ref: str | None, key: str) -> None:
     if ref and ref not in collection:
         raise ServiceValidationError(
@@ -282,6 +292,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         store = _store(hass)
         args = dict(call.data)
         _check_ref(store.data.zones, args.get("parent_id"), "parent_id")
+        _check_species(store, args)
         zone = Zone(**args)
         store.data.zones[zone.id] = zone
         await store.async_save()
@@ -296,6 +307,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         _check_ref(store.data.zones, parent_id, "parent_id")
         if parent_id and (parent_id == zone_id or parent_id in store.data.zone_descendants(zone_id)):
             raise ServiceValidationError(translation_domain=DOMAIN, translation_key="zone_cycle")
+        _check_species(store, args)
         store.data.zones[zone_id] = replace(store.data.zones[zone_id], **args)
         await store.async_save()
         return {"id": zone_id}

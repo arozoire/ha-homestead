@@ -2,7 +2,7 @@ import * as L from "./vendor/leaflet.js";
 
 const BASE = new URL(".", import.meta.url).href;
 
-const ZONE_KINDS = ["vegetable_garden", "orchard", "flower_bed", "greenhouse", "pots", "lawn", "other"];
+const ZONE_KINDS = ["vegetable_garden", "orchard", "flower_bed", "greenhouse", "pots", "lawn", "woodland", "other"];
 
 const TEXT = {
   en: {
@@ -54,6 +54,20 @@ const TEXT = {
     ev_problem: "Problem",
     ev_note: "Note",
     ev_removal: "End of crop",
+    ev_clearing: "Woodland clearing",
+    ev_wood_cutting: "Firewood cutting",
+    ev_brushwood: "Branches",
+    ev_foraging: "Foraging",
+    woodland: "Woodland",
+    essences: "Main species",
+    essencesHint: "Search a species and choose it, or type a name and press Enter.",
+    removeEssence: "Remove",
+    what: "What (porcini, chestnuts…)",
+    essence: "Species",
+    woodBox: "🪵 Wood and woodland harvests",
+    u_q: "q",
+    u_stere: "steres",
+    u_m3: "m³",
     ev_tillage: "Tillage",
     ev_weeding: "Weeding",
     ev_mulching: "Mulching",
@@ -291,6 +305,20 @@ const TEXT = {
     ev_problem: "Problema",
     ev_note: "Nota",
     ev_removal: "Fine coltura",
+    ev_clearing: "Pulizia bosco",
+    ev_wood_cutting: "Taglio legna",
+    ev_brushwood: "Raccolta rami",
+    ev_foraging: "Raccolta spontanea",
+    woodland: "Bosco",
+    essences: "Essenze principali",
+    essencesHint: "Cerca una specie e sceglila, oppure scrivi un nome e premi Invio.",
+    removeEssence: "Togli",
+    what: "Cosa (porcini, castagne…)",
+    essence: "Essenza",
+    woodBox: "🪵 Legna e raccolti del bosco",
+    u_q: "q",
+    u_stere: "steri",
+    u_m3: "m³",
     ev_tillage: "Lavorazione terreno",
     ev_weeding: "Diserbo",
     ev_mulching: "Pacciamatura",
@@ -498,7 +526,22 @@ const EVENT_ICONS = {
   weeding: "🧤",
   mulching: "🍂",
   mowing: "🌾",
+  clearing: "🧹",
+  wood_cutting: "🪓",
+  brushwood: "🪵",
+  foraging: "🍄",
 };
+const WOOD_KINDS = ["clearing", "wood_cutting", "brushwood", "foraging"];
+// Garden kinds that still make sense in a woodland.
+const WOODLAND_ALSO = ["pruning", "treatment", "problem", "note"];
+const QUANTITY_UNITS = {
+  harvest: ["kg", "pieces", "l"],
+  foraging: ["kg", "pieces", "l"],
+  wood_cutting: ["q", "stere", "m3"],
+  brushwood: ["q", "stere", "m3", "pieces"],
+};
+// Kinds with a "product" field, and its label.
+const PRODUCT_LABEL = { fertilizing: "product", treatment: "product", foraging: "what", wood_cutting: "essence" };
 const PLANT_ICONS = { tree: "🌳", shrub: "🍃", vine: "🍇", vegetable: "🥕", herb: "🌿", flower: "🌸", other: "🌱" };
 // Plant type proposed for a new planting from the kind of its zone.
 const ZONE_PLANT_TYPE = { orchard: "tree", vegetable_garden: "vegetable", greenhouse: "vegetable", flower_bed: "flower" };
@@ -657,6 +700,10 @@ const STYLE = `
   .last-time { font-size: 13px; color: var(--secondary-text-color); }
   .balance-table { display: grid; grid-template-columns: auto 1fr 1fr; gap: 2px 12px; font-size: 13px; margin-top: 6px; }
   .balance-table .num { text-align: right; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { display: inline-flex; gap: 4px; align-items: center; padding: 2px 4px 2px 10px; border-radius: 14px; font-size: 13px;
+    background: var(--secondary-background-color); color: var(--primary-text-color); }
+  .chip button { border: none; background: none; padding: 0 6px; font-size: 14px; }
 `;
 
 class HomesteadPanel extends HTMLElement {
@@ -826,7 +873,11 @@ class HomesteadPanel extends HTMLElement {
           if (this._eventForm) return;
         }
         if (this._form) this._refreshForm();
-        else if (this._zoneForm) this._refreshDiaryBox();
+        else if (this._zoneForm) {
+          this._refreshDiaryBox();
+          const zone = this._zone(this._zoneForm.id);
+          if (this._woodEl && zone) this._woodEl.replaceChildren(...[this._woodBox(zone)].filter(Boolean));
+        }
         else if (this._eventForm) this._fillEventPhotos();
         else if (this._taskForm) return;
         else if (!this._expenseForm && !this._toolForm) this._render();
@@ -1178,6 +1229,7 @@ class HomesteadPanel extends HTMLElement {
       name: values.name.trim(),
       kind: values.kind || null,
       parent_id: values.parent_id || null,
+      species: this._zoneForm.species || [],
       notes: values.notes?.trim() || null,
     };
     const id = this._zoneForm.id;
@@ -1466,6 +1518,7 @@ class HomesteadPanel extends HTMLElement {
                     { className: "sub" },
                     [
                       z.kind ? this.t(z.kind) : null,
+                      (z.species || []).map((e) => e.name).slice(0, 3).join(", ") || null,
                       formatArea(z.area_m2),
                       counts[z.id] ? this.t("plantsCount", { count: counts[z.id] }) : null,
                     ]
@@ -1555,7 +1608,6 @@ class HomesteadPanel extends HTMLElement {
 
   _speciesField(f) {
     const hidden = h("input", { type: "hidden", name: "taxon_id", value: f.taxon_id ?? "" });
-    const list = h("div", { className: "suggest", hidden: true });
     const linked = h("div", { className: "taxon" });
     const input = h("input", {
       name: "species",
@@ -1564,8 +1616,6 @@ class HomesteadPanel extends HTMLElement {
       autocomplete: "off",
       placeholder: this.t("speciesPlaceholder"),
     });
-    let timer = null;
-    let seq = 0;
     const showLinked = () => {
       const taxon = hidden.value && this._taxon(hidden.value);
       linked.replaceChildren();
@@ -1576,6 +1626,24 @@ class HomesteadPanel extends HTMLElement {
         h("button", { type: "button", onclick: () => ((hidden.value = ""), showLinked()) }, this.t("unlink")),
       );
     };
+    const list = this._speciesPicker(input, (item, id) => {
+      input.value = item.scientific_name;
+      hidden.value = id;
+      showLinked();
+    });
+    input.addEventListener("input", () => {
+      hidden.value = "";
+      showLinked();
+    });
+    showLinked();
+    return h("label", { className: "species" }, this.t("species"), input, list, hidden, linked);
+  }
+
+  /** Suggestions under a text input (local species, then GBIF/Wikidata); a chosen remote one is imported. */
+  _speciesPicker(input, onPicked) {
+    const list = h("div", { className: "suggest", hidden: true });
+    let timer = null;
+    let seq = 0;
     const message = (text) => list.replaceChildren(h("div", { className: "msg" }, text));
     const choose = async (item) => {
       list.hidden = true;
@@ -1595,9 +1663,7 @@ class HomesteadPanel extends HTMLElement {
           common_names: item.common_name ? { [this._lang()]: item.common_name } : {},
         });
       }
-      input.value = item.scientific_name;
-      hidden.value = id;
-      showLinked();
+      onPicked(item, id);
     };
     const search = async () => {
       const query = input.value.trim();
@@ -1639,15 +1705,59 @@ class HomesteadPanel extends HTMLElement {
       );
     };
     input.addEventListener("input", () => {
-      hidden.value = "";
-      showLinked();
       clearTimeout(timer);
       timer = setTimeout(search, 400);
     });
     input.addEventListener("blur", () => setTimeout(() => (list.hidden = true), 150));
     input.addEventListener("keydown", (ev) => ev.key === "Escape" && (list.hidden = true));
-    showLinked();
-    return h("label", { className: "species" }, this.t("species"), input, list, hidden, linked);
+    return list;
+  }
+
+  /** Main species of a zone (a woodland): chips, plus a search box; Enter adds the typed name as it is. */
+  _essencesField(z) {
+    z.species = [...(z.species || [])];
+    const chips = h("div", { className: "chips" });
+    const paint = () =>
+      chips.replaceChildren(
+        ...z.species.map((item, i) => {
+          const taxon = item.taxon_id && this._taxon(item.taxon_id);
+          const common = taxon?.common_names?.[this._lang()];
+          return h(
+            "span",
+            { className: "chip" },
+            common ? `${common} (${item.name})` : item.name,
+            h(
+              "button",
+              { type: "button", title: this.t("removeEssence"), onclick: () => (z.species.splice(i, 1), paint()) },
+              "✕",
+            ),
+          );
+        }),
+      );
+    const add = (name, taxonId = null) => {
+      if (name && !z.species.some((e) => e.name.toLowerCase() === name.toLowerCase())) z.species.push({ name, taxon_id: taxonId });
+      paint();
+    };
+    const input = h("input", { autocomplete: "off", placeholder: this.t("speciesPlaceholder") });
+    const list = this._speciesPicker(input, (item, id) => {
+      add(item.scientific_name, id);
+      input.value = "";
+    });
+    input.addEventListener("keydown", (ev) => {
+      if (ev.key !== "Enter") return;
+      ev.preventDefault();
+      add(input.value.trim());
+      input.value = "";
+      list.hidden = true;
+    });
+    paint();
+    return h(
+      "div",
+      { className: "species" },
+      h("label", {}, this.t("essences"), chips, input),
+      list,
+      h("div", { className: "hint" }, this.t("essencesHint")),
+    );
   }
 
   /** Origin decides which dates make sense: an estimated age, a planting date or sowing + transplant. */
@@ -1700,6 +1810,11 @@ class HomesteadPanel extends HTMLElement {
     } catch {
       return `${value.toFixed(2)} ${currency}`;
     }
+  }
+
+  _quantity(value, unit) {
+    const number = new Intl.NumberFormat(this._lang(), { maximumFractionDigits: 1 }).format(value);
+    return `${number} ${this.t(`u_${unit || "kg"}`)}`;
   }
 
   _date(iso, withYear = true) {
@@ -1935,7 +2050,7 @@ class HomesteadPanel extends HTMLElement {
     const zone = this._zone(event.zone_id);
     if (!zone) return "?";
     const count = this._data.plantings.filter((p) => this._inZone(p, zone.id)).length;
-    return `${zone.name} (${this.t("zonePlantings", { count })})`;
+    return count ? `${zone.name} (${this.t("zonePlantings", { count })})` : zone.name;
   }
 
   /** True when the planting is in the zone or one of its sub-zones. */
@@ -1991,7 +2106,8 @@ class HomesteadPanel extends HTMLElement {
   }
 
   _newEvent(target = {}, back = null) {
-    this._openEvent({ kind: "note", done_on: today(), ...target }, back);
+    const kind = this._isWoodland(target) ? "wood_cutting" : "note";
+    this._openEvent({ kind, done_on: today(), ...(kind === "wood_cutting" ? { unit: this._woodUnit() } : {}), ...target }, back);
   }
 
   _eventDone(name, key = "saved") {
@@ -2051,7 +2167,7 @@ class HomesteadPanel extends HTMLElement {
                   [
                     this._eventLabel(e),
                     showTarget ? this._targetName(e) : null,
-                    e.quantity ? `${e.quantity} ${this.t(`u_${e.unit || "kg"}`)}` : null,
+                    e.quantity ? this._quantity(e.quantity, e.unit) : null,
                     [e.product, e.dose].filter(Boolean).join(" "),
                   ]
                     .filter(Boolean)
@@ -2117,6 +2233,64 @@ class HomesteadPanel extends HTMLElement {
     );
   }
 
+  /** True when the event target is a woodland zone, inside one, or a planting in one. */
+  _isWoodland(target) {
+    const planting = target.planting_id && this._planting(target.planting_id);
+    for (let z = this._zone(target.zone_id || planting?.zone_id), guard = 0; z && guard < 20; z = this._zone(z.parent_id), guard++) {
+      if (z.kind === "woodland") return true;
+    }
+    return false;
+  }
+
+  /** The firewood unit used last time, else the local habit (q in Italy, stere in France). */
+  _woodUnit() {
+    const last = this._data.events
+      .filter((e) => (e.kind === "wood_cutting" || e.kind === "brushwood") && ["q", "stere", "m3"].includes(e.unit))
+      .sort((a, b) => b.done_on.localeCompare(a.done_on))[0];
+    return last?.unit || { it: "q", fr: "stere" }[this._lang()] || "m3";
+  }
+
+  /** Per year: firewood, branches and foraging of a zone and its sub-zones, by unit. */
+  _woodBox(zone) {
+    const zones = new Set([zone.id, ...this._zoneDescendants(zone.id)]);
+    const events = this._data.events.filter((e) => zones.has(e.zone_id) && ["wood_cutting", "brushwood", "foraging"].includes(e.kind));
+    if (!events.length && zone.kind !== "woodland") return null;
+    const years = new Map();
+    for (const e of events) {
+      const year = e.done_on.slice(0, 4);
+      const key = `${e.kind}:${e.unit || ""}`;
+      if (!years.has(year)) years.set(year, new Map());
+      const totals = years.get(year);
+      totals.set(key, (totals.get(key) || 0) + (e.quantity || 0));
+    }
+    const rows = [...years.entries()].sort((a, b) => b[0].localeCompare(a[0]));
+    return h(
+      "div",
+      { className: "seasons" },
+      h("h3", {}, this.t("woodBox")),
+      rows.length
+        ? rows.map(([year, totals]) =>
+            h(
+              "div",
+              { className: "season" },
+              h("div", { className: "season-head" }, h("strong", {}, year)),
+              h(
+                "div",
+                { className: "sub" },
+                [...totals.entries()]
+                  .map(([key, quantity]) => {
+                    const [kind, unit] = key.split(":");
+                    const amount = quantity ? this._quantity(quantity, unit) : this.t(`ev_${kind}`);
+                    return `${EVENT_ICONS[kind]} ${amount}`;
+                  })
+                  .join(" · "),
+              ),
+            ),
+          )
+        : h("p", { className: "hint" }, this.t("emptyDiary")),
+    );
+  }
+
   /** Events of previous years from a week before to three weeks after today's date: what usually happens now. */
   _lastYearsBox(events, back = null) {
     const now = new Date();
@@ -2152,6 +2326,7 @@ class HomesteadPanel extends HTMLElement {
     );
     return [
       this.t("lastTime", { date: this._date(event.done_on) }),
+      event.quantity ? this._quantity(event.quantity, event.unit) : null,
       event.moon_phase ? MOON_ICONS[event.moon_phase] : null,
       event.weather ? weatherText(event.weather) : null,
       review?.rating ? "★".repeat(review.rating) + "☆".repeat(5 - review.rating) : null,
@@ -2262,11 +2437,35 @@ class HomesteadPanel extends HTMLElement {
       lastEl.hidden = !last;
     };
     let form = null;
+    const currentTarget = () => {
+      const [type, id] = (form?.elements.target?.value || (f.planting_id ? `p:${f.planting_id}` : f.zone_id ? `z:${f.zone_id}` : "")).split(":");
+      return type === "p" ? { planting_id: id } : type === "z" ? { zone_id: id } : {};
+    };
+    // Woodland targets get the woodland kinds; gardens the others. The current kind always stays visible.
+    const filterKinds = () => {
+      const wood = this._isWoodland(currentTarget());
+      kinds.querySelectorAll("button").forEach((b) => {
+        const kind = b.dataset.kind;
+        b.hidden = kind !== kindInput.value && (wood ? !WOOD_KINDS.includes(kind) && !WOODLAND_ALSO.includes(kind) : WOOD_KINDS.includes(kind));
+      });
+    };
     const showExtras = () => {
+      const kind = kindInput.value;
       updateLast();
-      extras.review.hidden = kindInput.value !== "review";
-      extras.product.hidden = !["fertilizing", "treatment"].includes(kindInput.value);
-      extras.harvest.hidden = kindInput.value !== "harvest";
+      extras.review.hidden = kind !== "review";
+      extras.product.hidden = !PRODUCT_LABEL[kind];
+      productLabel.firstChild.textContent = this.t(PRODUCT_LABEL[kind] || "product");
+      doseLabel.hidden = !["fertilizing", "treatment"].includes(kind);
+      productInput.setAttribute("list", kind === "wood_cutting" ? "homestead-essences" : "");
+      extras.harvest.hidden = !QUANTITY_UNITS[kind];
+      if (QUANTITY_UNITS[kind]) {
+        const units = QUANTITY_UNITS[kind];
+        const previous = unitSelect.value || f.unit;
+        const fallback = WOOD_KINDS.includes(kind) && kind !== "foraging" ? this._woodUnit() : units[0];
+        const value = units.includes(previous) ? previous : units.includes(fallback) ? fallback : units[0];
+        unitSelect.replaceChildren(...units.map((u) => h("option", { value: u, selected: u === value }, this.t(`u_${u}`))));
+        unitSelect.value = value;
+      }
     };
     const kinds = h(
       "div",
@@ -2277,10 +2476,12 @@ class HomesteadPanel extends HTMLElement {
           {
             type: "button",
             className: kind === f.kind ? "active" : "",
+            "data-kind": kind,
             onclick: (ev) => {
               kindInput.value = kind;
               kinds.querySelectorAll("button").forEach((b) => b.classList.toggle("active", b === ev.currentTarget));
               showExtras();
+              filterKinds();
             },
           },
           h("span", {}, icon),
@@ -2297,13 +2498,27 @@ class HomesteadPanel extends HTMLElement {
         updateLast();
       },
     });
-    targetSelect.querySelector("select").addEventListener("change", updateLast);
-    extras.product = h("div", { className: "row" }, this._field(f, "product"), this._field(f, "dose", { placeholder: "30 g / 10 L" }));
+    targetSelect.querySelector("select").addEventListener("change", () => {
+      updateLast();
+      filterKinds();
+    });
+    const productInput = h("input", { name: "product", value: f.product ?? "" });
+    const productLabel = h("label", {}, this.t("product"), productInput);
+    const doseLabel = this._field(f, "dose", { placeholder: "30 g / 10 L" });
+    const essences = [...new Set(this._data.zones.flatMap((z) => (z.species || []).map((e) => e.name)))];
+    extras.product = h(
+      "div",
+      { className: "row" },
+      productLabel,
+      doseLabel,
+      h("datalist", { id: "homestead-essences" }, essences.map((name) => h("option", { value: name }))),
+    );
+    const unitSelect = h("select", { name: "unit" });
     extras.harvest = h(
       "div",
       { className: "row" },
       h("label", {}, this.t("quantity_h"), h("input", { name: "quantity", type: "number", min: 0, step: "any", value: f.quantity ?? "", inputMode: "decimal" })),
-      this._selectField(f, "unit", ["kg", "pieces", "l"].map((u) => [u, this.t(`u_${u}`)])),
+      h("label", {}, this.t("unit"), unitSelect),
     );
     const money = f.id
       ? null
@@ -2346,6 +2561,7 @@ class HomesteadPanel extends HTMLElement {
     );
     this._fillEventPhotos();
     updateLast();
+    filterKinds();
     return [form];
   }
 
@@ -2371,15 +2587,16 @@ class HomesteadPanel extends HTMLElement {
       ...(type === "p" ? { planting_id: targetId } : { zone_id: targetId }),
       product: v.product?.trim() || null,
       dose: v.dose?.trim() || null,
-      quantity: v.kind === "harvest" && v.quantity ? Number(v.quantity) : null,
+      quantity: QUANTITY_UNITS[v.kind] && v.quantity ? Number(v.quantity) : null,
       rating: v.kind === "review" && v.rating ? Number(v.rating) : null,
       abundance: v.kind === "review" ? v.abundance || null : null,
       keep: v.kind === "review" ? v.keep?.trim() || null : null,
       avoid: v.kind === "review" ? v.avoid?.trim() || null : null,
-      unit: v.kind === "harvest" ? v.unit || "kg" : null,
+      unit: QUANTITY_UNITS[v.kind] ? v.unit || QUANTITY_UNITS[v.kind][0] : null,
       notes: v.notes?.trim() || null,
     };
-    if (!["fertilizing", "treatment"].includes(v.kind)) data.product = data.dose = null;
+    if (!PRODUCT_LABEL[v.kind]) data.product = null;
+    if (!["fertilizing", "treatment"].includes(v.kind)) data.dose = null;
     const id = this._eventForm.id;
     if (!id) {
       if (v.cost) data.cost = Number(v.cost);
@@ -2674,7 +2891,7 @@ class HomesteadPanel extends HTMLElement {
     const harvests = of("harvest");
     const totals = {};
     harvests.forEach((e) => e.quantity && (totals[e.unit || "kg"] = (totals[e.unit || "kg"] || 0) + e.quantity));
-    const harvestText = Object.entries(totals).map(([u, q]) => `${Math.round(q * 10) / 10} ${this.t(`u_${u}`)}`).join(" + ");
+    const harvestText = Object.entries(totals).map(([u, q]) => this._quantity(q, u)).join(" + ");
     const parts = [
       sown ? `🌱 ${day(sown)}` : null,
       planted ? `🪴 ${day(planted)}` : null,
@@ -2961,6 +3178,11 @@ class HomesteadPanel extends HTMLElement {
     const z = this._zoneForm;
     const exclude = z.id ? new Set([z.id, ...this._zoneDescendants(z.id)]) : new Set();
     const area = formatArea(z.area_m2 ?? polygonArea(z.geometry));
+    const kindSelect = this._selectField(z, "kind", [["", this.t("noZone")], ...ZONE_KINDS.map((k) => [k, this.t(k)])]);
+    const essences = this._essencesField(z);
+    const toggleEssences = () => (essences.hidden = kindSelect.querySelector("select").value !== "woodland" && !z.species.length);
+    kindSelect.addEventListener("change", toggleEssences);
+    toggleEssences();
     return [
       h(
         "form",
@@ -2970,9 +3192,10 @@ class HomesteadPanel extends HTMLElement {
         h(
           "div",
           { className: "row" },
-          this._selectField(z, "kind", [["", this.t("noZone")], ...ZONE_KINDS.map((k) => [k, this.t(k)])]),
+          kindSelect,
           this._selectField(z, "parent_id", this._zoneOptions(exclude)),
         ),
+        essences,
         this._notes(z),
         area ? h("div", { className: "hint" }, `${this.t("surface")}: ${area}`) : null,
         h(
@@ -2990,6 +3213,7 @@ class HomesteadPanel extends HTMLElement {
             )
           : null,
       ),
+      z.id ? (this._woodEl = h("div", {}, this._woodBox(z))) : null,
       z.id ? this._diaryBox({ zone_id: z.id }) : null,
       z.id ? this._lastYearsBox(this._data.events.filter((e) => e.zone_id === z.id || this._zoneDescendants(z.id).has(e.zone_id)), { zone_id: z.id }) : null,
     ];

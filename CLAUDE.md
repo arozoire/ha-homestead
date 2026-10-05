@@ -44,7 +44,7 @@ pytest
 - v0.7.1: promemoria integrati (vedi `reminders.py`), pulsante ⚙️ nel pannello verso le impostazioni; date gg/mm/aaaa secondo "Formato data" del profilo HA (inglese generico → giorno prima); 63 test.
 - v0.8 (in corso, una sola release con 4 blocchi):
   1. diario completo — `Planting.plant_type` (icona su mappa e lista, proposto dal tipo di zona), riquadro "negli anni scorsi in questo periodo" (−7/+21 giorni, scheda pianta/zona/Diario), "↩️ l'ultima volta" nel form evento (stessa coltura o zona, anni precedenti), bilancio per anno/mese/pianta nella scheda Spese, eventi di zona `tillage`, `weeding`, `mulching`, `mowing`; 65 test
-  2. bosco e legna (zona `woodland`, essenze principali, eventi pulizia/rami/funghi/taglio legna, unità a scelta: q, stero, m³)
+  2. bosco e legna — zona `woodland` con `Zone.species` (essenze: `[{name, taxon_id}]`, `clean_species` toglie doppioni; backup azzera taxon_id orfani), eventi `clearing`, `wood_cutting` (essenza in `product`), `brushwood`, `foraging`; unità `q`, `stere`, `m3` (proposta l'ultima usata, poi q/stero secondo la lingua); nel form evento i tipi del bosco solo su zone bosco; riquadro legna per anno nella scheda zona; picker specie riusabile (`_speciesPicker`); 67 test
   3. orto: inventario semi, rotazione come consiglio per famiglia, lista spesa HA
   4. dati colturali da fonti open, correggibili a mano
 - Rete della sessione cloud: `api.gbif.org`, `www.wikidata.org` e Open-Meteo bloccati, parsing scritto sui formati documentati → da verificare dal vivo.

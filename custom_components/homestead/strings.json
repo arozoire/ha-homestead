@@ -143,6 +143,7 @@
         "greenhouse": "Greenhouse",
         "pots": "Pots",
         "lawn": "Lawn",
+        "woodland": "Woodland",
         "other": "Other"
       }
     },
@@ -169,14 +170,21 @@
         "tillage": "Tillage (hoeing, digging)",
         "weeding": "Weeding",
         "mulching": "Mulching",
-        "mowing": "Mowing"
+        "mowing": "Mowing",
+        "clearing": "Woodland clearing",
+        "wood_cutting": "Firewood cutting",
+        "brushwood": "Branches, brushwood",
+        "foraging": "Foraging (mushrooms, chestnuts…)"
       }
     },
     "harvest_unit": {
       "options": {
         "kg": "kg",
         "pieces": "Pieces",
-        "l": "Litres"
+        "l": "Litres",
+        "q": "Quintals (100 kg)",
+        "stere": "Steres",
+        "m3": "Cubic metres"
       }
     },
     "abundance": {
@@ -212,6 +220,10 @@
           "name": "Geometry",
           "description": "GeoJSON Polygon (longitude, latitude coordinates). The surface is calculated."
         },
+        "species": {
+          "name": "Main species",
+          "description": "Main species of the zone (e.g. of a woodland): names, or objects with name and taxon_id."
+        },
         "notes": {
           "name": "Notes",
           "description": "Free notes."
@@ -245,6 +257,10 @@
         "geometry": {
           "name": "Geometry",
           "description": "GeoJSON Polygon (longitude, latitude coordinates). The surface is calculated."
+        },
+        "species": {
+          "name": "Main species",
+          "description": "Main species of the zone (e.g. of a woodland): names, or objects with name and taxon_id."
         },
         "notes": {
           "name": "Notes",

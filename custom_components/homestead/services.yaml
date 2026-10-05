@@ -18,11 +18,16 @@ add_zone:
             - greenhouse
             - pots
             - lawn
+            - woodland
             - other
     area_id:
       selector:
         area:
     geometry:
+      selector:
+        object:
+    species:
+      example: '["Quercus cerris", "Castanea sativa"]'
       selector:
         object:
     notes:
@@ -53,11 +58,16 @@ update_zone:
             - greenhouse
             - pots
             - lawn
+            - woodland
             - other
     area_id:
       selector:
         area:
     geometry:
+      selector:
+        object:
+    species:
+      example: '["Quercus cerris", "Castanea sativa"]'
       selector:
         object:
     notes:
@@ -574,6 +584,10 @@ add_event:
             - weeding
             - mulching
             - mowing
+            - clearing
+            - wood_cutting
+            - brushwood
+            - foraging
     done_on:
       selector:
         date:
@@ -605,6 +619,9 @@ add_event:
             - kg
             - pieces
             - l
+            - q
+            - stere
+            - m3
     rating:
       selector:
         number:
@@ -673,6 +690,10 @@ update_event:
             - weeding
             - mulching
             - mowing
+            - clearing
+            - wood_cutting
+            - brushwood
+            - foraging
     done_on:
       selector:
         date:
@@ -704,6 +725,9 @@ update_event:
             - kg
             - pieces
             - l
+            - q
+            - stere
+            - m3
     rating:
       selector:
         number:
@@ -780,6 +804,10 @@ add_task:
             - weeding
             - mulching
             - mowing
+            - clearing
+            - wood_cutting
+            - brushwood
+            - foraging
     due_on:
       required: true
       selector:
@@ -828,6 +856,10 @@ update_task:
             - weeding
             - mulching
             - mowing
+            - clearing
+            - wood_cutting
+            - brushwood
+            - foraging
     due_on:
       selector:
         date:

@@ -93,6 +93,10 @@ def read_backup(raw: Any) -> HomesteadData:
         for record in getattr(data, collection).values():
             if getattr(record, field) and getattr(record, field) not in known:
                 setattr(record, field, None)
+    for zone in data.zones.values():
+        for item in zone.species:
+            if item["taxon_id"] not in data.taxa:
+                item["taxon_id"] = None
     return data
 
 

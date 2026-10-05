@@ -1,8 +1,10 @@
 import pytest
 import voluptuous as vol
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ServiceValidationError
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
+from custom_components.homestead.backup import read_backup
 from custom_components.homestead.const import DOMAIN
 
 
@@ -42,3 +44,40 @@ async def test_zone_work_events(hass: HomeAssistant) -> None:
     assert data.events[tilled].zone_id == garden
     categories = sorted(e.category for e in data.expenses.values())
     assert categories == ["other", "services"]
+
+
+async def test_woodland(hass: HomeAssistant) -> None:
+    entry = await _setup(hass)
+    data = entry.runtime_data.data
+    args = {
+        "name": "Bosco",
+        "kind": "woodland",
+        "species": ["Quercus cerris", "quercus cerris", " ", "Castanea sativa"],
+    }
+    wood = (await _call(hass, "add_zone", args))["id"]
+    assert [e["name"] for e in data.zones[wood].species] == ["Quercus cerris", "Castanea sativa"]
+    with pytest.raises(ServiceValidationError):
+        await _call(hass, "update_zone", {"id": wood, "species": [{"name": "Faggio", "taxon_id": "missing"}]})
+    cut = {
+        "kind": "wood_cutting",
+        "zone_id": wood,
+        "quantity": 12,
+        "unit": "stere",
+        "product": "Quercus cerris",
+    }
+    event = (await _call(hass, "add_event", {**cut, "cost": 200}))["id"]
+    await _call(hass, "add_event", {"kind": "foraging", "zone_id": wood, "quantity": 2.5, "unit": "kg"})
+    await hass.async_block_till_done()
+    assert (data.events[event].quantity, data.events[event].unit) == (12, "stere")
+    assert next(iter(data.expenses.values())).category == "services"
+
+
+def test_backup_clears_unknown_zone_species() -> None:
+    raw = {
+        "format": "ha-homestead-backup",
+        "version": 1,
+        "data": {
+            "zones": [{"id": "z", "name": "Bosco", "species": [{"name": "Faggio", "taxon_id": "gone"}]}]
+        },
+    }
+    assert read_backup(raw).zones["z"].species == [{"name": "Faggio", "taxon_id": None}]

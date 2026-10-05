@@ -143,6 +143,7 @@
         "greenhouse": "Serra",
         "pots": "Vasi",
         "lawn": "Prato",
+        "woodland": "Bosco",
         "other": "Altro"
       }
     },
@@ -169,14 +170,21 @@
         "tillage": "Lavorazione terreno (zappatura, vangatura)",
         "weeding": "Diserbo, sarchiatura",
         "mulching": "Pacciamatura",
-        "mowing": "Sfalcio"
+        "mowing": "Sfalcio",
+        "clearing": "Pulizia bosco",
+        "wood_cutting": "Taglio legna",
+        "brushwood": "Raccolta rami, fascine",
+        "foraging": "Raccolta spontanea (funghi, castagne…)"
       }
     },
     "harvest_unit": {
       "options": {
         "kg": "kg",
         "pieces": "Pezzi",
-        "l": "Litri"
+        "l": "Litri",
+        "q": "Quintali (100 kg)",
+        "stere": "Steri",
+        "m3": "Metri cubi"
       }
     },
     "abundance": {
@@ -212,6 +220,10 @@
           "name": "Geometria",
           "description": "Poligono GeoJSON (coordinate longitudine, latitudine). La superficie viene calcolata."
         },
+        "species": {
+          "name": "Essenze principali",
+          "description": "Specie principali della zona (es. di un bosco): nomi, oppure oggetti con name e taxon_id."
+        },
         "notes": {
           "name": "Note",
           "description": "Note libere."
@@ -245,6 +257,10 @@
         "geometry": {
           "name": "Geometria",
           "description": "Poligono GeoJSON (coordinate longitudine, latitudine). La superficie viene calcolata."
+        },
+        "species": {
+          "name": "Essenze principali",
+          "description": "Specie principali della zona (es. di un bosco): nomi, oppure oggetti con name e taxon_id."
         },
         "notes": {
           "name": "Note",

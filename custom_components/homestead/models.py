@@ -50,6 +50,7 @@ class ZoneKind(StrEnum):
     GREENHOUSE = "greenhouse"
     POTS = "pots"
     LAWN = "lawn"
+    WOODLAND = "woodland"
     OTHER = "other"
 
 
@@ -92,6 +93,10 @@ class EventKind(StrEnum):
     WEEDING = "weeding"
     MULCHING = "mulching"
     MOWING = "mowing"
+    CLEARING = "clearing"  # woodland: undergrowth, fallen trees
+    WOOD_CUTTING = "wood_cutting"  # firewood: quantity in q, stere or m³
+    BRUSHWOOD = "brushwood"  # branches, faggots
+    FORAGING = "foraging"  # mushrooms, chestnuts, wild berries…
 
 
 class Abundance(StrEnum):
@@ -112,6 +117,9 @@ EVENT_COST_CATEGORY = {
     EventKind.TILLAGE: ExpenseCategory.SERVICES,
     EventKind.WEEDING: ExpenseCategory.SERVICES,
     EventKind.MOWING: ExpenseCategory.SERVICES,
+    EventKind.CLEARING: ExpenseCategory.SERVICES,
+    EventKind.WOOD_CUTTING: ExpenseCategory.SERVICES,
+    EventKind.BRUSHWOOD: ExpenseCategory.SERVICES,
 }
 
 
@@ -119,6 +127,9 @@ class HarvestUnit(StrEnum):
     KG = "kg"
     PIECES = "pieces"
     LITRES = "l"
+    QUINTAL = "q"  # 100 kg (Italy)
+    STERE = "stere"  # 1 m³ of stacked logs (France)
+    CUBIC_METRE = "m3"
 
 
 class ToolStatus(StrEnum):
@@ -153,10 +164,26 @@ class Zone(_Record):
     area_id: str | None = None
     geometry: dict[str, Any] | None = None
     area_m2: float | None = None
+    # Main species of a woodland (or any zone): [{"name": "Quercus cerris", "taxon_id": "…"}]
+    species: list[dict[str, Any]] = field(default_factory=list)
     notes: str | None = None
 
     def __post_init__(self) -> None:
         self.area_m2 = polygon_area_m2(self.geometry)
+        self.species = clean_species(self.species)
+
+
+def clean_species(value: Any) -> list[dict[str, Any]]:
+    """Names (or {"name", "taxon_id"}) without blanks or duplicates."""
+    out: list[dict[str, Any]] = []
+    for item in value if isinstance(value, list) else []:
+        entry = {"name": item, "taxon_id": None} if isinstance(item, str) else item
+        if not isinstance(entry, dict) or not isinstance(entry.get("name"), str) or not entry["name"].strip():
+            continue
+        name = entry["name"].strip()
+        if all(e["name"].lower() != name.lower() for e in out):
+            out.append({"name": name, "taxon_id": entry.get("taxon_id") or None})
+    return out
 
 
 @dataclass(kw_only=True)
