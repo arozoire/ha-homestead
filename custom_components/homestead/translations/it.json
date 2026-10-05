@@ -36,6 +36,16 @@
       "tools_needing_service": {
         "name": "Attrezzi da manutenere"
       }
+    },
+    "todo": {
+      "tasks": {
+        "name": "Attività giardino"
+      }
+    },
+    "calendar": {
+      "garden": {
+        "name": "Giardino"
+      }
     }
   },
   "exceptions": {
@@ -693,6 +703,10 @@
           "name": "Note",
           "description": "Note libere."
         },
+        "task_id": {
+          "name": "Attività pianificata",
+          "description": "ID dell'attività che questo evento completa."
+        },
         "cost": {
           "name": "Costo",
           "description": "Registrato come spesa collegata all'evento."
@@ -796,6 +810,102 @@
         "year": {
           "name": "Anno",
           "description": "Di default l'anno prossimo."
+        }
+      }
+    },
+    "add_task": {
+      "name": "Aggiungi attività",
+      "description": "Pianifica un'attività: compare nella lista to-do e nel calendario.",
+      "fields": {
+        "kind": {
+          "name": "Tipo",
+          "description": "Tipo di attività (come nel diario)."
+        },
+        "due_on": {
+          "name": "Data prevista",
+          "description": "Quando farla."
+        },
+        "title": {
+          "name": "Titolo",
+          "description": "Facoltativo; di default tipo e pianta."
+        },
+        "planting_id": {
+          "name": "Pianta",
+          "description": "ID della pianta."
+        },
+        "zone_id": {
+          "name": "Zona",
+          "description": "ID della zona."
+        },
+        "yearly": {
+          "name": "Ogni anno",
+          "description": "Completata, si ripianifica un anno dopo."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "update_task": {
+      "name": "Modifica attività",
+      "description": "Modifica i campi indicati.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID dell'attività."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Tipo di attività (come nel diario)."
+        },
+        "due_on": {
+          "name": "Data prevista",
+          "description": "Quando farla."
+        },
+        "title": {
+          "name": "Titolo",
+          "description": "Facoltativo; di default tipo e pianta."
+        },
+        "planting_id": {
+          "name": "Pianta",
+          "description": "ID della pianta."
+        },
+        "zone_id": {
+          "name": "Zona",
+          "description": "ID della zona."
+        },
+        "yearly": {
+          "name": "Ogni anno",
+          "description": "Completata, si ripianifica un anno dopo."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "delete_task": {
+      "name": "Elimina attività",
+      "description": "La elimina (il diario non viene toccato).",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID dell'attività."
+        }
+      }
+    },
+    "complete_task": {
+      "name": "Completa attività",
+      "description": "La segna fatta e la registra nel diario.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID dell'attività."
+        },
+        "done_on": {
+          "name": "Fatta il",
+          "description": "Di default oggi."
         }
       }
     },

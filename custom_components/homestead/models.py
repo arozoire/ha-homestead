@@ -235,6 +235,39 @@ class Event(_Record):
 
 
 @dataclass(kw_only=True)
+class Task(_Record):
+    """A planned activity: shown in the HA to-do list and calendar; done → a diary event."""
+
+    kind: str
+    due_on: str
+    id: str = field(default_factory=new_id)
+    title: str | None = None
+    planting_id: str | None = None
+    zone_id: str | None = None
+    yearly: bool = False
+    notes: str | None = None
+    done_on: str | None = None
+    event_id: str | None = None
+
+    def next_year(self) -> Task:
+        """The same task one year later (29 February becomes 28)."""
+        due = date.fromisoformat(self.due_on)
+        try:
+            due = due.replace(year=due.year + 1)
+        except ValueError:
+            due = due.replace(year=due.year + 1, day=28)
+        return Task(
+            kind=self.kind,
+            due_on=due.isoformat(),
+            title=self.title,
+            planting_id=self.planting_id,
+            zone_id=self.zone_id,
+            yearly=True,
+            notes=self.notes,
+        )
+
+
+@dataclass(kw_only=True)
 class Tool(_Record):
     name: str
     id: str = field(default_factory=new_id)
@@ -268,6 +301,7 @@ _COLLECTIONS: dict[str, type[_Record]] = {
     "tools": Tool,
     "photos": Photo,
     "events": Event,
+    "tasks": Task,
 }
 
 
@@ -280,6 +314,7 @@ class HomesteadData:
     tools: dict[str, Tool] = field(default_factory=dict)
     photos: dict[str, Photo] = field(default_factory=dict)
     events: dict[str, Event] = field(default_factory=dict)
+    tasks: dict[str, Task] = field(default_factory=dict)
 
     @classmethod
     def from_dict(cls, raw: dict[str, Any]) -> HomesteadData:

@@ -29,6 +29,7 @@ from .models import (
     PlantingKind,
     PlantingOrigin,
     PlantingStatus,
+    Task,
     Tool,
     ToolPower,
     ToolStatus,
@@ -38,7 +39,8 @@ from .models import (
 from .photos import delete_photo_file, photo_dir
 from .species import SourcesUnavailable, fetch_details, upsert_taxon
 from .store import HomesteadStore, get_store
-from .weather import async_fill_event, async_refresh
+from .tasks import async_complete_task, mark_task_done
+from .weather import async_fill_event, async_refresh, schedule_weather
 
 _opt_str = vol.Any(None, cv.string)
 _opt_date = vol.Any(None, cv.date)
@@ -179,6 +181,33 @@ REPEAT_PLANTING_SCHEMA = vol.Schema(
 
 REFRESH_WEATHER_SCHEMA = vol.Schema({vol.Optional("id"): cv.string})
 
+_TASK_FIELDS = {
+    vol.Optional("title"): _opt_str,
+    vol.Exclusive("planting_id", "target"): vol.Any(None, cv.string),
+    vol.Exclusive("zone_id", "target"): vol.Any(None, cv.string),
+    vol.Optional("yearly"): cv.boolean,
+    vol.Optional("notes"): _opt_str,
+}
+
+ADD_TASK_SCHEMA = vol.Schema(
+    {
+        vol.Required("kind"): vol.In([k.value for k in EventKind]),
+        vol.Required("due_on"): cv.date,
+        **_TASK_FIELDS,
+    }
+)
+
+UPDATE_TASK_SCHEMA = vol.Schema(
+    {
+        vol.Required("id"): cv.string,
+        vol.Optional("kind"): vol.In([k.value for k in EventKind]),
+        vol.Optional("due_on"): cv.date,
+        **_TASK_FIELDS,
+    }
+)
+
+COMPLETE_TASK_SCHEMA = vol.Schema({vol.Required("id"): cv.string, vol.Optional("done_on"): cv.date})
+
 ADD_EVENT_SCHEMA = vol.All(
     vol.Schema(
         {
@@ -189,6 +218,7 @@ ADD_EVENT_SCHEMA = vol.All(
             **_EVENT_FIELDS,
             vol.Optional("cost"): vol.Any(None, _positive),
             vol.Optional("revenue"): vol.Any(None, _positive),
+            vol.Optional("task_id"): cv.string,
         }
     ),
     cv.has_at_least_one_key("planting_id", "zone_id"),
@@ -279,6 +309,9 @@ def async_register_services(hass: HomeAssistant) -> None:
         for planting in store.data.plantings.values():
             if planting.zone_id == zone_id:
                 planting.zone_id = zone.parent_id
+        for task in store.data.tasks.values():
+            if task.zone_id == zone_id:
+                task.zone_id = zone.parent_id
         for event in [e for e in store.data.events.values() if e.zone_id == zone_id]:
             if zone.parent_id:
                 event.zone_id = zone.parent_id
@@ -352,6 +385,8 @@ def async_register_services(hass: HomeAssistant) -> None:
                 expense.planting_id = None
         for event in [e for e in store.data.events.values() if e.planting_id == planting_id]:
             await _remove_event(store, event.id)
+        for task in [t for t in store.data.tasks.values() if t.planting_id == planting_id]:
+            del store.data.tasks[task.id]
         await store.async_save()
         return {"id": planting_id}
 
@@ -460,6 +495,8 @@ def async_register_services(hass: HomeAssistant) -> None:
         store = _store(hass)
         args: dict[str, Any] = dict(call.data)
         cost, revenue = args.pop("cost", None), args.pop("revenue", None)
+        task_id = args.pop("task_id", None)
+        _check_ref(store.data.tasks, task_id, "task_id")
         _check_ref(store.data.plantings, args.get("planting_id"), "planting_id")
         _check_ref(store.data.zones, args.get("zone_id"), "zone_id")
         args["done_on"] = _iso(args.get("done_on")) or dt_util.now().date().isoformat()
@@ -473,8 +510,51 @@ def async_register_services(hass: HomeAssistant) -> None:
             _add_expense(store, amount=revenue, category=ExpenseCategory.SALES, income=True, **link)
         if event.kind == EventKind.REMOVAL and event.planting_id:
             store.data.plantings[event.planting_id].status = PlantingStatus.REMOVED
+        if task_id:
+            mark_task_done(store, task_id, event)
         await store.async_save()
-        _fill_weather_later(store, event.id)
+        schedule_weather(hass, store, event.id)
+        return {"id": event.id}
+
+    def _task_args(store: HomesteadStore, args: dict[str, Any]) -> dict[str, Any]:
+        _check_ref(store.data.plantings, args.get("planting_id"), "planting_id")
+        _check_ref(store.data.zones, args.get("zone_id"), "zone_id")
+        if "due_on" in args:
+            args["due_on"] = _iso(args["due_on"])
+        if "planting_id" in args or "zone_id" in args:
+            # One target at most; sending only "planting_id": null clears both.
+            planting_id = args.get("planting_id")
+            args["planting_id"], args["zone_id"] = planting_id, None if planting_id else args.get("zone_id")
+        return args
+
+    async def add_task(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        task = Task(**_task_args(store, dict(call.data)))
+        store.data.tasks[task.id] = task
+        await store.async_save()
+        return {"id": task.id}
+
+    async def update_task(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        args = dict(call.data)
+        task_id = args.pop("id")
+        _check_ref(store.data.tasks, task_id, "id")
+        store.data.tasks[task_id] = replace(store.data.tasks[task_id], **_task_args(store, args))
+        await store.async_save()
+        return {"id": task_id}
+
+    async def delete_task(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        _check_ref(store.data.tasks, call.data["id"], "id")
+        del store.data.tasks[call.data["id"]]
+        await store.async_save()
+        return {"id": call.data["id"]}
+
+    async def complete_task(call: ServiceCall) -> ServiceResponse:
+        """Done: record it in the diary (today by default)."""
+        store = _store(hass)
+        _check_ref(store.data.tasks, call.data["id"], "id")
+        event = await async_complete_task(hass, store, call.data["id"], _iso(call.data.get("done_on")))
         return {"id": event.id}
 
     async def update_event(call: ServiceCall) -> ServiceResponse:
@@ -497,17 +577,8 @@ def async_register_services(hass: HomeAssistant) -> None:
         store.data.events[event_id] = replace(old, **args)
         await store.async_save()
         if store.data.events[event_id].weather is None:
-            _fill_weather_later(store, event_id)
+            schedule_weather(hass, store, event_id)
         return {"id": event_id}
-
-    def _fill_weather_later(store: HomesteadStore, event_id: str) -> None:
-        """Fetching weather may take seconds: never make the service wait for it."""
-
-        async def fill() -> None:
-            if await async_fill_event(hass, store, event_id):
-                await store.async_save()
-
-        hass.async_create_background_task(fill(), f"{DOMAIN} weather {event_id}")
 
     async def refresh_weather(call: ServiceCall) -> ServiceResponse:
         store = _store(hass)
@@ -553,6 +624,9 @@ def async_register_services(hass: HomeAssistant) -> None:
     async def _remove_event(store: HomesteadStore, event_id: str) -> None:
         """Delete an event and its photos; its expenses stay, unlinked."""
         del store.data.events[event_id]
+        for task in store.data.tasks.values():
+            if task.event_id == event_id:
+                task.event_id = None
         for photo in [p for p in store.data.photos.values() if p.event_id == event_id]:
             del store.data.photos[photo.id]
             await hass.async_add_executor_job(delete_photo_file, photo_dir(hass), photo.file)
@@ -585,6 +659,10 @@ def async_register_services(hass: HomeAssistant) -> None:
         ("delete_event", delete_event, ID_SCHEMA, SupportsResponse.OPTIONAL),
         ("refresh_weather", refresh_weather, REFRESH_WEATHER_SCHEMA, SupportsResponse.OPTIONAL),
         ("repeat_planting", repeat_planting, REPEAT_PLANTING_SCHEMA, SupportsResponse.OPTIONAL),
+        ("add_task", add_task, ADD_TASK_SCHEMA, SupportsResponse.OPTIONAL),
+        ("update_task", update_task, UPDATE_TASK_SCHEMA, SupportsResponse.OPTIONAL),
+        ("delete_task", delete_task, ID_SCHEMA, SupportsResponse.OPTIONAL),
+        ("complete_task", complete_task, COMPLETE_TASK_SCHEMA, SupportsResponse.OPTIONAL),
         ("export", export, vol.Schema({}), SupportsResponse.ONLY),
     ):
         hass.services.async_register(DOMAIN, name, handler, schema=schema, supports_response=response)

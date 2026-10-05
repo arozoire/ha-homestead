@@ -36,6 +36,16 @@
       "tools_needing_service": {
         "name": "Tools needing service"
       }
+    },
+    "todo": {
+      "tasks": {
+        "name": "Garden tasks"
+      }
+    },
+    "calendar": {
+      "garden": {
+        "name": "Garden"
+      }
     }
   },
   "exceptions": {
@@ -693,6 +703,10 @@
           "name": "Notes",
           "description": "Free notes."
         },
+        "task_id": {
+          "name": "Planned activity",
+          "description": "ID of the planned activity this event completes."
+        },
         "cost": {
           "name": "Cost",
           "description": "Recorded as an expense linked to the event."
@@ -796,6 +810,102 @@
         "year": {
           "name": "Year",
           "description": "Default: next year."
+        }
+      }
+    },
+    "add_task": {
+      "name": "Add planned activity",
+      "description": "Plans an activity: it appears in the to-do list and calendar.",
+      "fields": {
+        "kind": {
+          "name": "Kind",
+          "description": "Kind of activity (same as the diary)."
+        },
+        "due_on": {
+          "name": "Due on",
+          "description": "Planned date."
+        },
+        "title": {
+          "name": "Title",
+          "description": "Optional; default: kind and planting."
+        },
+        "planting_id": {
+          "name": "Planting",
+          "description": "ID of the planting."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "ID of the zone."
+        },
+        "yearly": {
+          "name": "Every year",
+          "description": "When done, the same task is planned one year later."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "update_task": {
+      "name": "Update planned activity",
+      "description": "Changes the given fields.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Task ID."
+        },
+        "kind": {
+          "name": "Kind",
+          "description": "Kind of activity (same as the diary)."
+        },
+        "due_on": {
+          "name": "Due on",
+          "description": "Planned date."
+        },
+        "title": {
+          "name": "Title",
+          "description": "Optional; default: kind and planting."
+        },
+        "planting_id": {
+          "name": "Planting",
+          "description": "ID of the planting."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "ID of the zone."
+        },
+        "yearly": {
+          "name": "Every year",
+          "description": "When done, the same task is planned one year later."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "delete_task": {
+      "name": "Delete planned activity",
+      "description": "Deletes it (the diary is not touched).",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Task ID."
+        }
+      }
+    },
+    "complete_task": {
+      "name": "Complete planned activity",
+      "description": "Marks it done and records it in the diary.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Task ID."
+        },
+        "done_on": {
+          "name": "Done on",
+          "description": "Default: today."
         }
       }
     },

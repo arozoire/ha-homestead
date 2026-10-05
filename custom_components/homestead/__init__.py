@@ -21,7 +21,7 @@ from .weather import async_refresh
 from .websocket_api import async_register_websocket
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
-PLATFORMS = [Platform.SENSOR]
+PLATFORMS = [Platform.CALENDAR, Platform.SENSOR, Platform.TODO]
 WEATHER_REFRESH = timedelta(hours=6)
 
 type HomesteadConfigEntry = ConfigEntry[HomesteadStore]

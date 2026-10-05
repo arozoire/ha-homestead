@@ -2,13 +2,13 @@
 
 Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, alberi da frutto, aiuole, spese, attrezzi e, nelle prossime versioni, raccolto e consigli basati sul meteo.
 
-> Stato: **v0.6 — annate, bilancio e meteo**. Specifiche complete in [SPEC.md](SPEC.md).
+> Stato: **v0.7 — attività pianificate, to-do e calendario**. Specifiche complete in [SPEC.md](SPEC.md).
 
 ## Principio guida
 
 **Non sporcare Home Assistant**: nessuna area creata, poche entità aggregate, rimozione pulita (disinstallando l'integrazione i dati vengono cancellati).
 
-## Cosa fa oggi (v0.6)
+## Cosa fa oggi (v0.7)
 
 | Funzione | Come |
 |---|---|
@@ -22,7 +22,10 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 | Annate | Nella scheda pianta, *📊 Annate*: una riga per anno (e per coltura della stessa specie) con semina, trapianto, potature con luna e meteo, trattamenti, raccolto, ⭐ voto, ✅ da rifare / ❌ da evitare |
 | Bilancio | Evento *⭐ Bilancio annata* (voto 1–5, raccolto scarso/normale/abbondante, da rifare, da evitare); chiesto subito dopo *🏁 Fine coltura* e, da settembre, nella scheda pianta |
 | Meteo | Ogni evento registra il meteo della settimana prima (+3 giorni dopo per trattamenti e semine): temperatura media/min/max, umidità, pioggia, umidità del suolo. Dai tuoi sensori (statistiche a lungo termine di HA, scelti in *Configura*), il resto da Open-Meteo (gratis, senza account) |
-| Comodità | *+ Raccolta* (ripete l'ultima quantità), *🔁 Ripeti l'anno prossimo* (nuova coltura con stessa specie, varietà e zona) |
+| Attività pianificate | *📋 Da fare* nella scheda Diario e nella scheda pianta: tipo, pianta o zona, data, *ogni anno*; ✔ apre l'evento del diario già compilato. Servizi `add_task`, `update_task`, `delete_task`, `complete_task` |
+| To-do e calendario HA | `todo.ha_homestead_garden_tasks` (spuntare = registrare nel diario oggi; si possono aggiungere voci dall'app HA) e `calendar.ha_homestead_garden` (attività pianificate + ✔ eventi fatti) |
+| Inizio pianta | Il diario mostra in fondo semina, messa a dimora/trapianto o "presente da ~N anni" (dai dati della pianta) |
+| Comodità | 🗺️ nell'intestazione nasconde/mostra la mappa; *+ Raccolta* (ripete l'ultima quantità), *🔁 Ripeti l'anno prossimo* (nuova coltura con stessa specie, varietà e zona) |
 | Spese | Scheda *Spese* (spese, ricavi, saldo) nel pannello (totale dell'anno per categoria, modifica, eliminazione) o servizi `add_expense`/`update_expense`/`delete_expense`; il prezzo di piante e attrezzi diventa una spesa; nella scheda pianta: totale speso + *+ Spesa* |
 | Attrezzi | Scheda *Attrezzi* (stato a colori, 🔧 manutenzione scaduta) o servizi `add_tool`/`update_tool`/`delete_tool` |
 | Foto | Nella scheda pianta: *📷 Aggiungi foto* (fotocamera o galleria del telefono), ridotte a 1600 px e salvate in `/media/homestead/`; visibili solo agli utenti HA |
@@ -47,7 +50,27 @@ I dati sono anche nei backup di Home Assistant (`.storage/homestead.data`); il b
 
 Mappe: satellite **Esri World Imagery** (gratuito, senza account né pubblicità) e **OpenStreetMap**. Leaflet è incluso nell'integrazione, nessuna libreria scaricata da CDN; solo le tessere della mappa arrivano da internet.
 
-Entità create: `sensor.ha_homestead_plantings`, `sensor.ha_homestead_expenses_this_year`, `sensor.ha_homestead_tools_needing_service`.
+### Notifica sul telefono il giorno di un'attività
+
+```yaml
+automation:
+  - alias: Giardino - attività di oggi
+    triggers:
+      - trigger: calendar
+        event: start
+        entity_id: calendar.ha_homestead_garden
+        offset: "8:00:00"   # alle 8 del mattino
+    conditions:
+      - condition: template
+        value_template: "{{ not trigger.calendar_event.summary.startswith('✔') }}"
+    actions:
+      - action: notify.mobile_app_il_tuo_telefono
+        data:
+          title: "🌱 Giardino"
+          message: "{{ trigger.calendar_event.summary }}"
+```
+
+Entità create: `sensor.ha_homestead_plantings`, `sensor.ha_homestead_expenses_this_year`, `sensor.ha_homestead_tools_needing_service`, `todo.ha_homestead_garden_tasks`, `calendar.ha_homestead_garden` (tutte sotto un solo dispositivo "HA Homestead").
 
 ## Installazione (HACS, repository personalizzato)
 
