@@ -2,13 +2,13 @@
 
 Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, alberi da frutto, aiuole, spese, attrezzi e, nelle prossime versioni, raccolto e consigli basati sul meteo.
 
-> Stato: **v0.5 — backup e prima prova dal vivo**. Specifiche complete in [SPEC.md](SPEC.md).
+> Stato: **v0.4.1 — backup e prima prova dal vivo**. Specifiche complete in [SPEC.md](SPEC.md).
 
 ## Principio guida
 
 **Non sporcare Home Assistant**: nessuna area creata, poche entità aggregate, rimozione pulita (disinstallando l'integrazione i dati vengono cancellati).
 
-## Cosa fa oggi (v0.5)
+## Cosa fa oggi (v0.4.1)
 
 | Funzione | Come |
 |---|---|

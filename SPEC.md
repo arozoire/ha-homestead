@@ -29,8 +29,8 @@
 | Zone sulla mappa (v0.3) | Poligono disegnato a clic (angolo per angolo); superficie calcolata; zona della pianta proposta se dentro il poligono | Metodo A di §8 esteso alle zone |
 | Import (v0.3) | KML, **KMZ** (default di Google My Maps), GeoJSON; punti → piante, poligoni → zone, linee ignorate; abbinamento per nome con scelta manuale | L'autore carica il file dal telefono quando serve |
 | Prima prova dal vivo (v0.4.1) | Pannello a tutta altezza (mappa invisibile nell'app), ricerca specie solo piante, conferma dopo Salva | Problemi visti in HA reale |
-| Date della pianta (v0.5) | Origine + date adatte (età stimata, messa a dimora + età all'impianto, semina + trapianto); salvato l'anno di nascita stimato | Per le piante già presenti la data è ignota; un albero piantato ha già qualche anno; l'orto ha semina e trapianto |
-| Import mappa **tolto** (v0.5) | Al suo posto **backup JSON** (esporta / ripristina tutto) | Disegnare nel pannello basta; serve invece poter salvare e ripristinare i dati |
+| Date della pianta (v0.4.1) | Origine + date adatte (età stimata, messa a dimora + età all'impianto, semina + trapianto); salvato l'anno di nascita stimato | Per le piante già presenti la data è ignota; un albero piantato ha già qualche anno; l'orto ha semina e trapianto |
+| Import mappa **tolto** (v0.4.1) | Al suo posto **backup JSON** (esporta / ripristina tutto) | Disegnare nel pannello basta; serve invece poter salvare e ripristinare i dati |
 | Specie (v0.4) | Ricerca combinata Wikidata (nomi comuni) + GBIF (tassonomia); la specie scelta è copiata in locale con id GBIF/Wikidata e data di import | Funziona offline dopo l'import, tracciabilità come da §4 |
 | Licenza | MIT | Richiesta da HACS; la più diffusa tra le integrazioni custom |
 
@@ -204,7 +204,7 @@ Principio: **adattatori** per fonte + cache locale + possibilità di correzione 
 | B | [Google My Maps](https://www.google.com/mymaps) → esporta KML | Gratuito, account Google, vista satellite |
 | C | [geojson.io](https://geojson.io) → esporta GeoJSON | Open source, senza account |
 
-Decisione v0.5: si usa solo il metodo A; l'import B/C (v0.3) è stato tolto perché non serviva.
+Decisione v0.4.1: si usa solo il metodo A; l'import B/C (v0.3) è stato tolto perché non serviva.
 
 ## 9. Backlog idee (non pianificate)
 
