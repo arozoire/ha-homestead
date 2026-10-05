@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-USER_AGENT = "HA-Homestead/0.4 (https://github.com/arozoire/ha-homestead)"
+USER_AGENT = "HA-Homestead/0.5 (https://github.com/arozoire/ha-homestead)"
 TIMEOUT_S = 10
 
 

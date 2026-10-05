@@ -16,8 +16,12 @@ from homeassistant.util import dt as dt_util
 from .const import DOMAIN
 from .geo import validate_polygon
 from .models import (
+    EVENT_COST_CATEGORY,
+    Event,
+    EventKind,
     Expense,
     ExpenseCategory,
+    HarvestUnit,
     InitialForm,
     Planting,
     PlantingKind,
@@ -113,6 +117,8 @@ ADD_EXPENSE_SCHEMA = vol.Schema(
         vol.Optional("supplier"): _opt_str,
         vol.Optional("planting_id"): _opt_str,
         vol.Optional("tool_id"): _opt_str,
+        vol.Optional("event_id"): _opt_str,
+        vol.Optional("income", default=False): cv.boolean,
         vol.Optional("notes"): _opt_str,
     }
 )
@@ -148,6 +154,40 @@ UPDATE_TOOL_SCHEMA = vol.Schema(
 )
 
 ID_SCHEMA = vol.Schema({vol.Required("id"): cv.string})
+
+_EVENT_FIELDS = {
+    vol.Optional("product"): _opt_str,
+    vol.Optional("dose"): _opt_str,
+    vol.Optional("quantity"): vol.Any(None, _positive),
+    vol.Optional("unit"): vol.Any(None, vol.In([u.value for u in HarvestUnit])),
+    vol.Optional("notes"): _opt_str,
+}
+
+ADD_EVENT_SCHEMA = vol.All(
+    vol.Schema(
+        {
+            vol.Required("kind"): vol.In([k.value for k in EventKind]),
+            vol.Optional("done_on"): _opt_date,
+            vol.Exclusive("planting_id", "target"): cv.string,
+            vol.Exclusive("zone_id", "target"): cv.string,
+            **_EVENT_FIELDS,
+            vol.Optional("cost"): vol.Any(None, _positive),
+            vol.Optional("revenue"): vol.Any(None, _positive),
+        }
+    ),
+    cv.has_at_least_one_key("planting_id", "zone_id"),
+)
+
+UPDATE_EVENT_SCHEMA = vol.Schema(
+    {
+        vol.Required("id"): cv.string,
+        vol.Optional("kind"): vol.In([k.value for k in EventKind]),
+        vol.Optional("done_on"): cv.date,
+        vol.Exclusive("planting_id", "target"): cv.string,
+        vol.Exclusive("zone_id", "target"): cv.string,
+        **_EVENT_FIELDS,
+    }
+)
 
 
 def _store(hass: HomeAssistant) -> HomesteadStore:
@@ -223,6 +263,11 @@ def async_register_services(hass: HomeAssistant) -> None:
         for planting in store.data.plantings.values():
             if planting.zone_id == zone_id:
                 planting.zone_id = zone.parent_id
+        for event in [e for e in store.data.events.values() if e.zone_id == zone_id]:
+            if zone.parent_id:
+                event.zone_id = zone.parent_id
+            else:
+                await _remove_event(store, event.id)
         await store.async_save()
         return {"id": zone_id}
 
@@ -289,6 +334,8 @@ def async_register_services(hass: HomeAssistant) -> None:
         for expense in store.data.expenses.values():
             if expense.planting_id == planting_id:
                 expense.planting_id = None
+        for event in [e for e in store.data.events.values() if e.planting_id == planting_id]:
+            await _remove_event(store, event.id)
         await store.async_save()
         return {"id": planting_id}
 
@@ -314,6 +361,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         args = dict(call.data)
         _check_ref(store.data.plantings, args.get("planting_id"), "planting_id")
         _check_ref(store.data.tools, args.get("tool_id"), "tool_id")
+        _check_ref(store.data.events, args.get("event_id"), "event_id")
         args["spent_on"] = _iso(args.get("spent_on"))
         expense = _add_expense(store, **args)
         await store.async_save()
@@ -392,6 +440,59 @@ def async_register_services(hass: HomeAssistant) -> None:
     async def export(call: ServiceCall) -> ServiceResponse:
         return _store(hass).data.to_dict()
 
+    async def add_event(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        args: dict[str, Any] = dict(call.data)
+        cost, revenue = args.pop("cost", None), args.pop("revenue", None)
+        _check_ref(store.data.plantings, args.get("planting_id"), "planting_id")
+        _check_ref(store.data.zones, args.get("zone_id"), "zone_id")
+        args["done_on"] = _iso(args.get("done_on")) or dt_util.now().date().isoformat()
+        event = Event(**args)
+        store.data.events[event.id] = event
+        link = {"spent_on": event.done_on, "planting_id": event.planting_id, "event_id": event.id}
+        if cost:
+            category = EVENT_COST_CATEGORY.get(EventKind(event.kind), ExpenseCategory.OTHER)
+            _add_expense(store, amount=cost, category=category, **link)
+        if revenue:
+            _add_expense(store, amount=revenue, category=ExpenseCategory.SALES, income=True, **link)
+        await store.async_save()
+        return {"id": event.id}
+
+    async def update_event(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        args: dict[str, Any] = dict(call.data)
+        event_id = args.pop("id")
+        _check_ref(store.data.events, event_id, "id")
+        _check_ref(store.data.plantings, args.get("planting_id"), "planting_id")
+        _check_ref(store.data.zones, args.get("zone_id"), "zone_id")
+        if args.get("planting_id"):
+            args["zone_id"] = None
+        if args.get("zone_id"):
+            args["planting_id"] = None
+        if "done_on" in args:
+            args["done_on"] = _iso(args["done_on"])
+            args["moon_phase"] = None
+        store.data.events[event_id] = replace(store.data.events[event_id], **args)
+        await store.async_save()
+        return {"id": event_id}
+
+    async def delete_event(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        _check_ref(store.data.events, call.data["id"], "id")
+        await _remove_event(store, call.data["id"])
+        await store.async_save()
+        return {"id": call.data["id"]}
+
+    async def _remove_event(store: HomesteadStore, event_id: str) -> None:
+        """Delete an event and its photos; its expenses stay, unlinked."""
+        del store.data.events[event_id]
+        for photo in [p for p in store.data.photos.values() if p.event_id == event_id]:
+            del store.data.photos[photo.id]
+            await hass.async_add_executor_job(delete_photo_file, photo_dir(hass), photo.file)
+        for expense in store.data.expenses.values():
+            if expense.event_id == event_id:
+                expense.event_id = None
+
     def _add_expense(store: HomesteadStore, *, spent_on: str | None, **kwargs: Any) -> Expense:
         expense = Expense(spent_on=spent_on or dt_util.now().date().isoformat(), **kwargs)
         store.data.expenses[expense.id] = expense
@@ -412,6 +513,9 @@ def async_register_services(hass: HomeAssistant) -> None:
         ("update_tool", update_tool, UPDATE_TOOL_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_tool", delete_tool, ID_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_photo", delete_photo, ID_SCHEMA, SupportsResponse.OPTIONAL),
+        ("add_event", add_event, ADD_EVENT_SCHEMA, SupportsResponse.OPTIONAL),
+        ("update_event", update_event, UPDATE_EVENT_SCHEMA, SupportsResponse.OPTIONAL),
+        ("delete_event", delete_event, ID_SCHEMA, SupportsResponse.OPTIONAL),
         ("export", export, vol.Schema({}), SupportsResponse.ONLY),
     ):
         hass.services.async_register(DOMAIN, name, handler, schema=schema, supports_response=response)

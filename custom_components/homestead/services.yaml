@@ -332,6 +332,8 @@ add_expense:
             - fertilizers
             - treatments
             - water
+            - services
+            - sales
             - other
     spent_on:
       selector:
@@ -345,6 +347,12 @@ add_expense:
     tool_id:
       selector:
         text:
+    event_id:
+      selector:
+        text:
+    income:
+      selector:
+        boolean:
     notes:
       selector:
         text:
@@ -425,6 +433,8 @@ update_expense:
             - fertilizers
             - treatments
             - water
+            - services
+            - sales
             - other
     spent_on:
       selector:
@@ -438,6 +448,12 @@ update_expense:
     tool_id:
       selector:
         text:
+    event_id:
+      selector:
+        text:
+    income:
+      selector:
+        boolean:
     notes:
       selector:
         text:
@@ -505,6 +521,134 @@ delete_tool:
         text:
 
 delete_photo:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+
+add_event:
+  fields:
+    kind:
+      required: true
+      selector:
+        select:
+          translation_key: event_kind
+          options:
+            - pruning
+            - fertilizing
+            - watering
+            - treatment
+            - sowing
+            - harvest
+            - grafting
+            - problem
+            - note
+    done_on:
+      selector:
+        date:
+    planting_id:
+      selector:
+        text:
+    zone_id:
+      selector:
+        text:
+    product:
+      example: "Rame"
+      selector:
+        text:
+    dose:
+      example: "30 g / 10 L"
+      selector:
+        text:
+    quantity:
+      selector:
+        number:
+          min: 0
+          step: any
+          mode: box
+    unit:
+      selector:
+        select:
+          translation_key: harvest_unit
+          options:
+            - kg
+            - pieces
+            - l
+    notes:
+      selector:
+        text:
+          multiline: true
+    cost:
+      selector:
+        number:
+          min: 0
+          step: 0.01
+          mode: box
+    revenue:
+      selector:
+        number:
+          min: 0
+          step: 0.01
+          mode: box
+
+update_event:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+    kind:
+      selector:
+        select:
+          translation_key: event_kind
+          options:
+            - pruning
+            - fertilizing
+            - watering
+            - treatment
+            - sowing
+            - harvest
+            - grafting
+            - problem
+            - note
+    done_on:
+      selector:
+        date:
+    planting_id:
+      selector:
+        text:
+    zone_id:
+      selector:
+        text:
+    product:
+      example: "Rame"
+      selector:
+        text:
+    dose:
+      example: "30 g / 10 L"
+      selector:
+        text:
+    quantity:
+      selector:
+        number:
+          min: 0
+          step: any
+          mode: box
+    unit:
+      selector:
+        select:
+          translation_key: harvest_unit
+          options:
+            - kg
+            - pieces
+            - l
+    notes:
+      selector:
+        text:
+          multiline: true
+
+delete_event:
   fields:
     id:
       required: true

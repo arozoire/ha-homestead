@@ -70,6 +70,8 @@
         "fertilizers": "Fertilizers",
         "treatments": "Treatments",
         "water": "Water",
+        "services": "Services and labour",
+        "sales": "Sales",
         "other": "Other"
       }
     },
@@ -111,6 +113,26 @@
         "existing": "Already there",
         "planted": "Planted by me",
         "sown": "Sown by me"
+      }
+    },
+    "event_kind": {
+      "options": {
+        "pruning": "Pruning",
+        "fertilizing": "Fertilizing",
+        "watering": "Watering",
+        "treatment": "Treatment",
+        "sowing": "Sowing",
+        "harvest": "Harvest",
+        "grafting": "Grafting",
+        "problem": "Problem",
+        "note": "Note"
+      }
+    },
+    "harvest_unit": {
+      "options": {
+        "kg": "kg",
+        "pieces": "Pieces",
+        "l": "Litres"
       }
     }
   },
@@ -409,6 +431,14 @@
           "name": "Tool",
           "description": "Related tool ID."
         },
+        "event_id": {
+          "name": "Diary event",
+          "description": "Related event ID."
+        },
+        "income": {
+          "name": "Income",
+          "description": "An income (e.g. a sale) instead of an expense."
+        },
         "notes": {
           "name": "Notes",
           "description": "Free notes."
@@ -493,6 +523,14 @@
           "name": "Tool",
           "description": "Related tool ID."
         },
+        "event_id": {
+          "name": "Diary event",
+          "description": "Related event ID."
+        },
+        "income": {
+          "name": "Income",
+          "description": "An income (e.g. a sale) instead of an expense."
+        },
         "notes": {
           "name": "Notes",
           "description": "Free notes."
@@ -572,6 +610,112 @@
         "id": {
           "name": "ID",
           "description": "Photo ID."
+        }
+      }
+    },
+    "add_event": {
+      "name": "Add diary event",
+      "description": "Records what was done on a planting or a zone (pruning, treatment, harvest…).",
+      "fields": {
+        "kind": {
+          "name": "Kind",
+          "description": "Kind of event."
+        },
+        "done_on": {
+          "name": "Date",
+          "description": "Defaults to today; the moon phase is recorded."
+        },
+        "planting_id": {
+          "name": "Planting",
+          "description": "ID of the planting (or give a zone)."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "ID of the zone: the event is valid for all its plantings."
+        },
+        "product": {
+          "name": "Product",
+          "description": "Fertilizer or treatment product."
+        },
+        "dose": {
+          "name": "Dose",
+          "description": "E.g. 30 g / 10 L."
+        },
+        "quantity": {
+          "name": "Quantity",
+          "description": "Harvested quantity."
+        },
+        "unit": {
+          "name": "Unit",
+          "description": "kg, pieces or litres."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        },
+        "cost": {
+          "name": "Cost",
+          "description": "Recorded as an expense linked to the event."
+        },
+        "revenue": {
+          "name": "Revenue",
+          "description": "Recorded as an income linked to the event."
+        }
+      }
+    },
+    "update_event": {
+      "name": "Update diary event",
+      "description": "Changes the given fields of an event.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Event ID."
+        },
+        "kind": {
+          "name": "Kind",
+          "description": "Kind of event."
+        },
+        "done_on": {
+          "name": "Date",
+          "description": "Defaults to today; the moon phase is recorded."
+        },
+        "planting_id": {
+          "name": "Planting",
+          "description": "ID of the planting (or give a zone)."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "ID of the zone: the event is valid for all its plantings."
+        },
+        "product": {
+          "name": "Product",
+          "description": "Fertilizer or treatment product."
+        },
+        "dose": {
+          "name": "Dose",
+          "description": "E.g. 30 g / 10 L."
+        },
+        "quantity": {
+          "name": "Quantity",
+          "description": "Harvested quantity."
+        },
+        "unit": {
+          "name": "Unit",
+          "description": "kg, pieces or litres."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "delete_event": {
+      "name": "Delete diary event",
+      "description": "Deletes an event and its photos; its expenses are kept.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Event ID."
         }
       }
     },

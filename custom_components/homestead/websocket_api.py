@@ -137,7 +137,8 @@ async def ws_backup_import(
 @websocket_api.websocket_command(
     {
         vol.Required("type"): "homestead/photo/upload",
-        vol.Required("planting_id"): str,
+        vol.Exclusive("planting_id", "target"): str,
+        vol.Exclusive("event_id", "target"): str,
         vol.Required("content"): str,
         vol.Optional("taken_on"): vol.Any(None, cv.date),
         vol.Optional("caption"): vol.Any(None, str),
@@ -147,10 +148,12 @@ async def ws_backup_import(
 async def ws_photo_upload(
     hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]
 ) -> None:
-    """Store a photo (base64; the panel already shrinks it) for a planting."""
+    """Store a photo (base64; the panel already shrinks it) for a planting or a diary event."""
     store = get_store(hass)
-    if store is None or msg["planting_id"] not in store.data.plantings:
-        connection.send_error(msg["id"], "not_found", "unknown planting")
+    event = store.data.events.get(msg.get("event_id") or "") if store else None
+    planting_id = event.planting_id if event else msg.get("planting_id")
+    if store is None or (event is None and planting_id not in store.data.plantings):
+        connection.send_error(msg["id"], "not_found", "unknown planting or event")
         return
     try:
         content = base64.b64decode(msg["content"], validate=True)
@@ -163,9 +166,13 @@ async def ws_photo_upload(
         return
     taken_on = msg.get("taken_on") or dt_util.now().date()
     photo = Photo(
-        planting_id=msg["planting_id"], file="", taken_on=taken_on.isoformat(), caption=msg.get("caption")
+        planting_id=planting_id,
+        event_id=event.id if event else None,
+        file="",
+        taken_on=taken_on.isoformat(),
+        caption=msg.get("caption"),
     )
-    photo.file = f"{photo.planting_id}/{photo.id}.{kind[0]}"
+    photo.file = f"{photo.planting_id or 'events'}/{photo.id}.{kind[0]}"
     await hass.async_add_executor_job(write_photo, photo_dir(hass), photo.file, content)
     store.data.photos[photo.id] = photo
     await store.async_save()
