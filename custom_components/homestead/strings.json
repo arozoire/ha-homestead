@@ -77,6 +77,17 @@
         "group": "Group (row, bed)"
       }
     },
+    "plant_type": {
+      "options": {
+        "tree": "Tree",
+        "shrub": "Shrub",
+        "vine": "Vine, climber",
+        "vegetable": "Vegetable",
+        "herb": "Aromatic herb",
+        "flower": "Flower",
+        "other": "Other"
+      }
+    },
     "initial_form": {
       "options": {
         "seed": "Seed",
@@ -154,7 +165,11 @@
         "problem": "Problem",
         "note": "Note",
         "removal": "End of crop",
-        "review": "Season review"
+        "review": "Season review",
+        "tillage": "Tillage (hoeing, digging)",
+        "weeding": "Weeding",
+        "mulching": "Mulching",
+        "mowing": "Mowing"
       }
     },
     "harvest_unit": {
@@ -267,6 +282,10 @@
           "name": "Variety",
           "description": "Cultivar or variety."
         },
+        "plant_type": {
+          "name": "Plant type",
+          "description": "Tree, shrub, vegetable… (icon on the map)."
+        },
         "kind": {
           "name": "Kind",
           "description": "Single plant or group."
@@ -352,6 +371,10 @@
         "variety": {
           "name": "Variety",
           "description": "Cultivar or variety."
+        },
+        "plant_type": {
+          "name": "Plant type",
+          "description": "Tree, shrub, vegetable… (icon on the map)."
         },
         "kind": {
           "name": "Kind",

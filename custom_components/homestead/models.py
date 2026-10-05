@@ -27,6 +27,16 @@ class PlantingOrigin(StrEnum):
     SOWN = "sown"  # sown by the user, possibly transplanted later
 
 
+class PlantType(StrEnum):
+    TREE = "tree"
+    SHRUB = "shrub"
+    VINE = "vine"
+    VEGETABLE = "vegetable"
+    HERB = "herb"
+    FLOWER = "flower"
+    OTHER = "other"
+
+
 class PlantingStatus(StrEnum):
     ACTIVE = "active"
     DEAD = "dead"
@@ -78,6 +88,10 @@ class EventKind(StrEnum):
     NOTE = "note"
     REMOVAL = "removal"  # end of the crop: the planting becomes "removed"
     REVIEW = "review"  # yearly review: rating, abundance, what to repeat / avoid
+    TILLAGE = "tillage"  # hoeing, digging, rotary tilling: usually on a whole zone
+    WEEDING = "weeding"
+    MULCHING = "mulching"
+    MOWING = "mowing"
 
 
 class Abundance(StrEnum):
@@ -95,6 +109,9 @@ EVENT_COST_CATEGORY = {
     EventKind.SOWING: ExpenseCategory.SEEDS,
     EventKind.HARVEST: ExpenseCategory.SERVICES,
     EventKind.GRAFTING: ExpenseCategory.SERVICES,
+    EventKind.TILLAGE: ExpenseCategory.SERVICES,
+    EventKind.WEEDING: ExpenseCategory.SERVICES,
+    EventKind.MOWING: ExpenseCategory.SERVICES,
 }
 
 
@@ -164,6 +181,7 @@ class Planting(_Record):
     id: str = field(default_factory=new_id)
     taxon_id: str | None = None
     variety: str | None = None
+    plant_type: str | None = None
     kind: str = PlantingKind.SINGLE
     quantity: int = 1
     origin: str | None = None

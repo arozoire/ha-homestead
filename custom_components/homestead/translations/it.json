@@ -77,6 +77,17 @@
         "group": "Gruppo (fila, aiuola)"
       }
     },
+    "plant_type": {
+      "options": {
+        "tree": "Albero",
+        "shrub": "Arbusto",
+        "vine": "Rampicante, vite",
+        "vegetable": "Ortaggio",
+        "herb": "Aromatica",
+        "flower": "Fiore",
+        "other": "Altro"
+      }
+    },
     "initial_form": {
       "options": {
         "seed": "Seme",
@@ -154,7 +165,11 @@
         "problem": "Problema",
         "note": "Nota",
         "removal": "Fine coltura",
-        "review": "Bilancio annata"
+        "review": "Bilancio annata",
+        "tillage": "Lavorazione terreno (zappatura, vangatura)",
+        "weeding": "Diserbo, sarchiatura",
+        "mulching": "Pacciamatura",
+        "mowing": "Sfalcio"
       }
     },
     "harvest_unit": {
@@ -267,6 +282,10 @@
           "name": "Varietà",
           "description": "Cultivar o varietà."
         },
+        "plant_type": {
+          "name": "Tipo di pianta",
+          "description": "Albero, arbusto, ortaggio… (icona sulla mappa)."
+        },
         "kind": {
           "name": "Tipo",
           "description": "Pianta singola o gruppo."
@@ -352,6 +371,10 @@
         "variety": {
           "name": "Varietà",
           "description": "Cultivar o varietà."
+        },
+        "plant_type": {
+          "name": "Tipo di pianta",
+          "description": "Albero, arbusto, ortaggio… (icona sulla mappa)."
         },
         "kind": {
           "name": "Tipo",

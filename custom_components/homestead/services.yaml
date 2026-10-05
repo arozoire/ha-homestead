@@ -90,6 +90,18 @@ add_planting:
       example: "Renetta"
       selector:
         text:
+    plant_type:
+      selector:
+        select:
+          translation_key: plant_type
+          options:
+            - tree
+            - shrub
+            - vine
+            - vegetable
+            - herb
+            - flower
+            - other
     kind:
       default: single
       selector:
@@ -201,6 +213,18 @@ update_planting:
       example: "Renetta"
       selector:
         text:
+    plant_type:
+      selector:
+        select:
+          translation_key: plant_type
+          options:
+            - tree
+            - shrub
+            - vine
+            - vegetable
+            - herb
+            - flower
+            - other
     kind:
       selector:
         select:
@@ -546,6 +570,10 @@ add_event:
             - note
             - removal
             - review
+            - tillage
+            - weeding
+            - mulching
+            - mowing
     done_on:
       selector:
         date:
@@ -641,6 +669,10 @@ update_event:
             - note
             - removal
             - review
+            - tillage
+            - weeding
+            - mulching
+            - mowing
     done_on:
       selector:
         date:
@@ -744,6 +776,10 @@ add_task:
             - note
             - removal
             - review
+            - tillage
+            - weeding
+            - mulching
+            - mowing
     due_on:
       required: true
       selector:
@@ -788,6 +824,10 @@ update_task:
             - note
             - removal
             - review
+            - tillage
+            - weeding
+            - mulching
+            - mowing
     due_on:
       selector:
         date:

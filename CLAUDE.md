@@ -42,7 +42,11 @@ pytest
 - v0.6.1: voci di inizio nel diario ricavate dai dati della pianta (semina, messa a dimora/trapianto, "presente dal ~anno"), non salvate come eventi; mappa più stretta (colonna 440 px, ⅓ su telefono) e pulsante 🗺️ per nasconderla (localStorage).
 - v0.7: `Task` (kind, due_on, pianta o zona o nessuna, yearly, title, done_on, event_id); `add/update/delete/complete_task`; `add_event` con `task_id` completa l'attività; annuale → stessa attività l'anno dopo (29/2 → 28/2); pannello "📋 Da fare" (scheda Diario + scheda pianta), ✔ apre evento precompilato; 60 test.
 - v0.7.1: promemoria integrati (vedi `reminders.py`), pulsante ⚙️ nel pannello verso le impostazioni; date gg/mm/aaaa secondo "Formato data" del profilo HA (inglese generico → giorno prima); 63 test.
-- Prossimo: avvisi "l'anno scorso…", tipo di pianta (icone), indice di annata, bosco/legna (backlog).
+- v0.8 (in corso, una sola release con 4 blocchi):
+  1. diario completo — `Planting.plant_type` (icona su mappa e lista, proposto dal tipo di zona), riquadro "negli anni scorsi in questo periodo" (−7/+21 giorni, scheda pianta/zona/Diario), "↩️ l'ultima volta" nel form evento (stessa coltura o zona, anni precedenti), bilancio per anno/mese/pianta nella scheda Spese, eventi di zona `tillage`, `weeding`, `mulching`, `mowing`; 65 test
+  2. bosco e legna (zona `woodland`, essenze principali, eventi pulizia/rami/funghi/taglio legna, unità a scelta: q, stero, m³)
+  3. orto: inventario semi, rotazione come consiglio per famiglia, lista spesa HA
+  4. dati colturali da fonti open, correggibili a mano
 - Rete della sessione cloud: `api.gbif.org`, `www.wikidata.org` e Open-Meteo bloccati, parsing scritto sui formati documentati → da verificare dal vivo.
 - Più avanti: caratteristiche colturali (rusticità, esposizione, fioritura/raccolta) da fonti §5.
 - Prova del pannello: harness Playwright con `hass` finto (non nel repo); in CI solo i test Python.

@@ -54,6 +54,24 @@ const TEXT = {
     ev_problem: "Problem",
     ev_note: "Note",
     ev_removal: "End of crop",
+    ev_tillage: "Tillage",
+    ev_weeding: "Weeding",
+    ev_mulching: "Mulching",
+    ev_mowing: "Mowing",
+    plant_type: "Plant type",
+    pt_tree: "Tree",
+    pt_shrub: "Shrub",
+    pt_vine: "Vine, climber",
+    pt_vegetable: "Vegetable",
+    pt_herb: "Aromatic herb",
+    pt_flower: "Flower",
+    pt_other: "Other",
+    lastYears: "📅 Other years, around now",
+    lastTime: "↩️ Last time: {date}",
+    monthly: "Month by month",
+    yearly: "Year by year",
+    byPlanting: "By planting",
+    spentEarned: "{spent} spent · {earned} earned",
     ev_planted: "Planted out",
     ev_transplanted: "Transplanted",
     ev_since: "Here for ~{years} years (since ~{year})",
@@ -108,7 +126,6 @@ const TEXT = {
     editToolTitle: "Edit tool",
     confirmDeleteExpense: "Delete this expense?",
     confirmDeleteTool: "Delete “{name}”? Its expenses are kept.",
-    yearTotal: "{year}: {total}",
     spent_on: "Date",
     amount: "Amount",
     category: "Category",
@@ -274,6 +291,24 @@ const TEXT = {
     ev_problem: "Problema",
     ev_note: "Nota",
     ev_removal: "Fine coltura",
+    ev_tillage: "Lavorazione terreno",
+    ev_weeding: "Diserbo",
+    ev_mulching: "Pacciamatura",
+    ev_mowing: "Sfalcio",
+    plant_type: "Tipo di pianta",
+    pt_tree: "Albero",
+    pt_shrub: "Arbusto",
+    pt_vine: "Rampicante, vite",
+    pt_vegetable: "Ortaggio",
+    pt_herb: "Aromatica",
+    pt_flower: "Fiore",
+    pt_other: "Altro",
+    lastYears: "📅 Negli anni scorsi, in questo periodo",
+    lastTime: "↩️ L'ultima volta: {date}",
+    monthly: "Mese per mese",
+    yearly: "Anno per anno",
+    byPlanting: "Per pianta",
+    spentEarned: "{spent} di spese · {earned} di ricavi",
     ev_planted: "Messa a dimora",
     ev_transplanted: "Trapianto",
     ev_since: "Presente da ~{years} anni (dal ~{year})",
@@ -328,7 +363,6 @@ const TEXT = {
     editToolTitle: "Modifica attrezzo",
     confirmDeleteExpense: "Eliminare questa spesa?",
     confirmDeleteTool: "Eliminare “{name}”? Le sue spese restano.",
-    yearTotal: "{year}: {total}",
     spent_on: "Data",
     amount: "Importo",
     category: "Categoria",
@@ -460,7 +494,14 @@ const EVENT_ICONS = {
   note: "📝",
   removal: "🏁",
   review: "⭐",
+  tillage: "⛏️",
+  weeding: "🧤",
+  mulching: "🍂",
+  mowing: "🌾",
 };
+const PLANT_ICONS = { tree: "🌳", shrub: "🍃", vine: "🍇", vegetable: "🥕", herb: "🌿", flower: "🌸", other: "🌱" };
+// Plant type proposed for a new planting from the kind of its zone.
+const ZONE_PLANT_TYPE = { orchard: "tree", vegetable_garden: "vegetable", greenhouse: "vegetable", flower_bed: "flower" };
 // Start of a planting, shown in the diary from its own dates (not stored as events).
 const START_ICONS = { sowing: "🌱", planted: "🪴", since: "🌳" };
 const MOON_ICONS = {
@@ -608,6 +649,14 @@ const STYLE = `
   .pin { width: 18px; height: 18px; border-radius: 50%; border: 3px solid #fff; box-sizing: border-box;
     box-shadow: 0 0 4px rgba(0,0,0,.6); }
   .pin.selected { width: 26px; height: 26px; border-color: #ffeb3b; }
+  .pin.icon { width: 28px; height: 28px; display: grid; place-items: center; font-size: 15px; line-height: 1;
+    background: var(--card-background-color, #fff) !important; border-width: 3px; }
+  .pin.icon.selected { width: 36px; height: 36px; font-size: 20px; }
+  li .badge { width: 24px; height: 24px; border-radius: 50%; border: 2px solid; box-sizing: border-box; flex: none;
+    display: grid; place-items: center; font-size: 13px; line-height: 1; }
+  .last-time { font-size: 13px; color: var(--secondary-text-color); }
+  .balance-table { display: grid; grid-template-columns: auto 1fr 1fr; gap: 2px 12px; font-size: 13px; margin-top: 6px; }
+  .balance-table .num { text-align: right; }
 `;
 
 class HomesteadPanel extends HTMLElement {
@@ -885,10 +934,14 @@ class HomesteadPanel extends HTMLElement {
       if (!hasPosition(p)) continue;
       seen.add(p.id);
       const selected = p.id === this._selected || (this._eventForm && p.id === this._eventForm.planting_id);
+      const color = STATUS_COLOR[p.status] || STATUS_COLOR.active;
+      const emoji = PLANT_ICONS[p.plant_type];
       const icon = L.divIcon({
         className: "",
-        html: `<div class="pin${selected ? " selected" : ""}" style="background:${STATUS_COLOR[p.status] || STATUS_COLOR.active}"></div>`,
-        iconSize: selected ? [26, 26] : [18, 18],
+        html: emoji
+          ? `<div class="pin icon${selected ? " selected" : ""}" style="border-color:${selected ? "#ffeb3b" : color}">${emoji}</div>`
+          : `<div class="pin${selected ? " selected" : ""}" style="background:${color}"></div>`,
+        iconSize: emoji ? (selected ? [36, 36] : [28, 28]) : selected ? [26, 26] : [18, 18],
       });
       let marker = this._markers.get(p.id);
       if (!marker) {
@@ -954,6 +1007,7 @@ class HomesteadPanel extends HTMLElement {
   }
 
   _setTab(tab) {
+    if (tab === "expenses" && this._tab !== "expenses") this._expenseYear = undefined;
     this._tab = tab;
     this._close();
   }
@@ -1043,6 +1097,7 @@ class HomesteadPanel extends HTMLElement {
     }
     this._clearSelection();
     this._showMessage("");
+    const zoneId = this._zoneAt(latlng.lat, latlng.lng);
     this._form = {
       name: "",
       species: "",
@@ -1051,7 +1106,8 @@ class HomesteadPanel extends HTMLElement {
       status: "active",
       origin: "planted",
       planted_on: today(),
-      zone_id: this._zoneAt(latlng.lat, latlng.lng),
+      zone_id: zoneId,
+      plant_type: ZONE_PLANT_TYPE[this._zone(zoneId)?.kind] || null,
       latitude: latlng.lat,
       longitude: latlng.lng,
     };
@@ -1092,6 +1148,7 @@ class HomesteadPanel extends HTMLElement {
       species: values.species.trim(),
       taxon_id: values.taxon_id || null,
       variety: values.variety?.trim() || null,
+      plant_type: values.plant_type || null,
       kind: values.kind,
       quantity: Number(values.quantity) || 1,
       ...datesFromForm(values),
@@ -1338,7 +1395,9 @@ class HomesteadPanel extends HTMLElement {
                   className: p.id === this._selected ? "selected" : "",
                   onclick: () => (hasPosition(p) ? this._select(p.id) : this._startPlacing(p.id)),
                 },
-                h("span", { className: "dot", style: `background:${STATUS_COLOR[p.status] || STATUS_COLOR.active}` }),
+                PLANT_ICONS[p.plant_type]
+                  ? h("span", { className: "badge", style: `border-color:${STATUS_COLOR[p.status] || STATUS_COLOR.active}` }, PLANT_ICONS[p.plant_type])
+                  : h("span", { className: "dot", style: `background:${STATUS_COLOR[p.status] || STATUS_COLOR.active}` }),
                 h(
                   "div",
                   { className: "main" },
@@ -1457,7 +1516,12 @@ class HomesteadPanel extends HTMLElement {
         h("h2", {}, f.id ? this.t("editTitle") : this.t("newTitle")),
         this._field(f, "name", { required: true, maxLength: 100 }),
         this._speciesField(f),
-        this._field(f, "variety"),
+        h(
+          "div",
+          { className: "row" },
+          this._field(f, "variety"),
+          this._selectField(f, "plant_type", [["", "—"], ...Object.entries(PLANT_ICONS).map(([k, icon]) => [k, `${icon} ${this.t(`pt_${k}`)}`])]),
+        ),
         h("div", { className: "row" }, kind, quantity),
         this._datesFields(f),
         this._selectField(f, "zone_id", this._zoneOptions()),
@@ -1484,6 +1548,7 @@ class HomesteadPanel extends HTMLElement {
       f.id ? (this._seasonsEl = h("div", {}, this._seasonsBox(f))) : null,
       f.id ? this._plantingTodo(f) : null,
       f.id ? this._diaryBox({ planting_id: f.id }) : null,
+      f.id ? this._lastYearsBox(this._relatedPlantings(f).flatMap((p) => this._eventsFor({ planting_id: p.id })), { planting_id: f.id }) : null,
       this._photosSection(f),
     ];
   }
@@ -1670,16 +1735,27 @@ class HomesteadPanel extends HTMLElement {
   }
 
   _renderExpenseList() {
-    const year = String(new Date().getFullYear());
-    const expenses = [...this._data.expenses].sort((a, b) => b.spent_on.localeCompare(a.spent_on));
-    const thisYear = expenses.filter((e) => e.spent_on.startsWith(year));
+    const all = [...this._data.expenses].sort((a, b) => b.spent_on.localeCompare(a.spent_on));
+    const years = [...new Set([String(new Date().getFullYear()), ...all.map((e) => e.spent_on.slice(0, 4))])].sort().reverse();
+    if (this._expenseYear === undefined) this._expenseYear = years[0];
+    const year = this._expenseYear;
+    const expenses = year ? all.filter((e) => e.spent_on.startsWith(year)) : all;
+    const sum = (list) => list.reduce((total, e) => total + e.amount, 0);
+    const spent = expenses.filter((e) => !e.income);
+    const earned = expenses.filter((e) => e.income);
     const byCategory = {};
-    thisYear
-      .filter((e) => !e.income)
-      .forEach((e) => (byCategory[e.category] = (byCategory[e.category] || 0) + e.amount));
-    const total = thisYear.filter((e) => !e.income).reduce((sum, e) => sum + e.amount, 0);
-    const incomes = thisYear.filter((e) => e.income).reduce((sum, e) => sum + e.amount, 0);
+    spent.forEach((e) => (byCategory[e.category] = (byCategory[e.category] || 0) + e.amount));
     const linked = (e) => this._planting(e.planting_id)?.name || this._data.tools.find((t) => t.id === e.tool_id)?.name;
+    const yearSelect = h(
+      "select",
+      {
+        onchange: (ev) => {
+          this._expenseYear = ev.target.value;
+          this._render();
+        },
+      },
+      [["", this.t("allYears")], ...years.map((y) => [y, y])].map(([v, text]) => h("option", { value: v, selected: v === year }, text)),
+    );
     return [
       h(
         "div",
@@ -1689,21 +1765,28 @@ class HomesteadPanel extends HTMLElement {
           { className: "primary", onclick: () => this._openExpense({ spent_on: today(), category: "plants" }) },
           `+ ${this.t("addExpense")}`,
         ),
+        yearSelect,
       ),
       h(
         "div",
         { className: "summary" },
-        h("strong", {}, this.t("yearTotal", { year, total: this._money(total) })),
-        incomes
-          ? h(
-              "div",
-              {},
-              `${this.t("incomesTotal")}: ${this._money(incomes)} · ${this.t("balance")}: ${this._money(incomes - total)}`,
-            )
+        h("strong", {}, `${this.t("expensesTotal")}: ${this._money(sum(spent))}`),
+        earned.length
+          ? h("div", {}, `${this.t("incomesTotal")}: ${this._money(sum(earned))} · ${this.t("balance")}: ${this._money(sum(earned) - sum(spent))}`)
           : null,
         Object.entries(byCategory)
           .sort((a, b) => b[1] - a[1])
           .map(([cat, value]) => h("div", { className: "sub" }, `${this.t(`cat_${cat}`)}: ${this._money(value)}`)),
+        this._balanceTable(this.t(year ? "monthly" : "yearly"), expenses, (e) => (year ? e.spent_on.slice(0, 7) : e.spent_on.slice(0, 4)), (key) =>
+          year ? new Intl.DateTimeFormat(this._lang(), { month: "long" }).format(new Date(`${key}-15T12:00:00`)) : key,
+        ),
+        this._balanceTable(
+          this.t("byPlanting"),
+          expenses.filter((e) => e.planting_id && this._planting(e.planting_id)),
+          (e) => e.planting_id,
+          (id) => this._planting(id).name,
+          true,
+        ),
       ),
       expenses.length
         ? h(
@@ -1732,6 +1815,34 @@ class HomesteadPanel extends HTMLElement {
           )
         : h("p", { className: "hint" }, this.t("emptyExpenses")),
     ];
+  }
+
+  /** Spent / earned per group (month, planting…); by amount when `byAmount`, else by key. */
+  _balanceTable(title, expenses, keyOf, labelOf, byAmount = false) {
+    const groups = new Map();
+    for (const e of expenses) {
+      const key = keyOf(e);
+      const g = groups.get(key) || { spent: 0, earned: 0 };
+      g[e.income ? "earned" : "spent"] += e.amount;
+      groups.set(key, g);
+    }
+    if (groups.size < 2 && !byAmount) return null;
+    if (!groups.size) return null;
+    const rows = [...groups.entries()].sort(byAmount ? (a, b) => b[1].spent + b[1].earned - a[1].spent - a[1].earned : (a, b) => a[0].localeCompare(b[0]));
+    return h(
+      "div",
+      {},
+      h("h3", {}, title),
+      h(
+        "div",
+        { className: "balance-table" },
+        rows.slice(0, 12).flatMap(([key, g]) => [
+          h("span", {}, labelOf(key)),
+          h("span", { className: "num" }, g.spent ? `−${this._money(g.spent)}` : ""),
+          h("span", { className: "num income" }, g.earned ? `+${this._money(g.earned)}` : ""),
+        ]),
+      ),
+    );
   }
 
   _renderExpenseForm() {
@@ -1794,11 +1905,18 @@ class HomesteadPanel extends HTMLElement {
 
   _plantingExpenses(f) {
     const mine = this._data.expenses.filter((e) => e.planting_id === f.id);
-    const total = mine.reduce((sum, e) => sum + e.amount, 0);
+    const spent = mine.filter((e) => !e.income).reduce((sum, e) => sum + e.amount, 0);
+    const earned = mine.filter((e) => e.income).reduce((sum, e) => sum + e.amount, 0);
     return h(
       "div",
       { className: "taxon" },
-      h("span", {}, this.t("expensesOfPlanting", { total: this._money(total) })),
+      h(
+        "span",
+        {},
+        earned
+          ? `💶 ${this.t("spentEarned", { spent: this._money(spent), earned: this._money(earned) })}`
+          : this.t("expensesOfPlanting", { total: this._money(spent) }),
+      ),
       h(
         "button",
         {
@@ -1999,6 +2117,50 @@ class HomesteadPanel extends HTMLElement {
     );
   }
 
+  /** Events of previous years from a week before to three weeks after today's date: what usually happens now. */
+  _lastYearsBox(events, back = null) {
+    const now = new Date();
+    const year = now.getFullYear();
+    const start = new Date(year, now.getMonth(), now.getDate());
+    const near = events.filter((e) => {
+      const [y, m, d] = e.done_on.split("-").map(Number);
+      if (y >= year || e.kind === "review") return false;
+      const days = (new Date(year, m - 1, d) - start) / 86400000;
+      return days >= -7 && days <= 21;
+    });
+    if (!near.length) return null;
+    const latest = [...near].sort((a, b) => b.done_on.localeCompare(a.done_on)).slice(0, 8);
+    return h("div", { className: "diary-box" }, h("h3", {}, this.t("lastYears")), this._renderTimeline(latest, true, back));
+  }
+
+  /** The latest event of this kind on this target (same crop, its zones) before this year. */
+  _lastTime(kind, target, beforeYear) {
+    let events;
+    if (target.planting_id && this._planting(target.planting_id)) {
+      events = this._relatedPlantings(this._planting(target.planting_id)).flatMap((p) => this._eventsFor({ planting_id: p.id }));
+    } else if (target.zone_id) {
+      events = this._eventsFor({ zone_id: target.zone_id });
+    } else return null;
+    return events
+      .filter((e) => e.kind === kind && Number(e.done_on.slice(0, 4)) < beforeYear)
+      .sort((a, b) => b.done_on.localeCompare(a.done_on))[0];
+  }
+
+  _lastTimeText(event) {
+    const review = this._data.events.find(
+      (e) => e.kind === "review" && e.planting_id && e.planting_id === event.planting_id && e.done_on.startsWith(event.done_on.slice(0, 4)),
+    );
+    return [
+      this.t("lastTime", { date: this._date(event.done_on) }),
+      event.moon_phase ? MOON_ICONS[event.moon_phase] : null,
+      event.weather ? weatherText(event.weather) : null,
+      review?.rating ? "★".repeat(review.rating) + "☆".repeat(5 - review.rating) : null,
+      event.notes,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+  }
+
   _renderDiary() {
     const f = this._diaryFilter;
     const all = [...this._data.events, ...this._data.plantings.flatMap((p) => this._startEvents(p))];
@@ -2032,6 +2194,7 @@ class HomesteadPanel extends HTMLElement {
         h("button", { onclick: () => this._openTask({ kind: "note", due_on: today() }) }, this.t("addTask")),
       ),
       this._todoBox(this._data.tasks),
+      this._lastYearsBox(this._data.events),
       h(
         "div",
         { className: "row filters" },
@@ -2089,7 +2252,18 @@ class HomesteadPanel extends HTMLElement {
       h("label", {}, this.t("keep"), h("textarea", { name: "keep", rows: 2, value: f.keep ?? "" })),
       h("label", {}, this.t("avoid"), h("textarea", { name: "avoid", rows: 2, value: f.avoid ?? "" })),
     );
+    const lastEl = h("p", { className: "last-time" });
+    const updateLast = () => {
+      const [type, id] = (form?.elements.target?.value || "").split(":");
+      const target = type === "p" ? { planting_id: id } : type === "z" ? { zone_id: id } : {};
+      const year = Number((form?.elements.done_on?.value || today()).slice(0, 4));
+      const last = this._lastTime(kindInput.value, target, year);
+      lastEl.textContent = last ? this._lastTimeText(last) : "";
+      lastEl.hidden = !last;
+    };
+    let form = null;
     const showExtras = () => {
+      updateLast();
       extras.review.hidden = kindInput.value !== "review";
       extras.product.hidden = !["fertilizing", "treatment"].includes(kindInput.value);
       extras.harvest.hidden = kindInput.value !== "harvest";
@@ -2115,7 +2289,15 @@ class HomesteadPanel extends HTMLElement {
       ),
     );
     const targetSelect = this._targetSelect(f, true);
-    const date = this._field(f, "done_on", { type: "date", required: true, oninput: (ev) => updateMoon(ev.target.value) });
+    const date = this._field(f, "done_on", {
+      type: "date",
+      required: true,
+      oninput: (ev) => {
+        updateMoon(ev.target.value);
+        updateLast();
+      },
+    });
+    targetSelect.querySelector("select").addEventListener("change", updateLast);
     extras.product = h("div", { className: "row" }, this._field(f, "product"), this._field(f, "dose", { placeholder: "30 g / 10 L" }));
     extras.harvest = h(
       "div",
@@ -2135,7 +2317,7 @@ class HomesteadPanel extends HTMLElement {
     this._eventPhotosEl = h("div", { className: "photos" });
     showExtras();
     updateMoon(f.done_on);
-    const form = h(
+    form = h(
       "form",
       { onsubmit: (ev) => this._saveEvent(ev) },
       h("h2", {}, f.id ? this.t("editEventTitle") : this.t("newEventTitle")),
@@ -2143,6 +2325,7 @@ class HomesteadPanel extends HTMLElement {
       kinds,
       targetSelect,
       h("div", { className: "row date-moon" }, date, moonEl),
+      lastEl,
       extras.product,
       extras.harvest,
       extras.review,
@@ -2162,6 +2345,7 @@ class HomesteadPanel extends HTMLElement {
       ),
     );
     this._fillEventPhotos();
+    updateLast();
     return [form];
   }
 
@@ -2807,6 +2991,7 @@ class HomesteadPanel extends HTMLElement {
           : null,
       ),
       z.id ? this._diaryBox({ zone_id: z.id }) : null,
+      z.id ? this._lastYearsBox(this._data.events.filter((e) => e.zone_id === z.id || this._zoneDescendants(z.id).has(e.zone_id)), { zone_id: z.id }) : null,
     ];
   }
 }

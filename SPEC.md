@@ -36,6 +36,13 @@
 | Meteo sugli eventi (v0.6) | Media della settimana prima (+3 giorni per trattamenti/semine): T media/min/max, umidità, pioggia, umidità suolo; sensori HA via statistiche a lungo termine, ripiego Open-Meteo; salvato nell'evento | Spiega le annate; base per regole meteo (v4) |
 | To-do e calendario (v0.7) | Attività pianificate (`Task`) separate dal diario: in `todo` e `calendar` di HA; spuntare = evento nel diario con data di oggi; ripetizione annuale; notifiche via automazione sul calendario | Riusare ciò che HA sa già fare (§6), nessuna app in più |
 | Promemoria (v0.7.1) | Integrati: telefoni e ora nelle opzioni; tocco → form del diario precompilato; ✔ Fatto dalla notifica | L'autore vuole completare l'evento direttamente dalla notifica, senza scrivere automazioni |
+| Programma v0.8 | Una sola release con 4 blocchi: diario completo, bosco e legna, orto (semi, rotazione, lista spesa), dati colturali | L'autore preferisce raggruppare e provare tutto insieme |
+| Tipo di pianta (v0.8) | Albero, arbusto, rampicante, ortaggio, aromatica, fiore, altro; icona su mappa e lista; proposto dal tipo di zona | Riconoscere le piante a colpo d'occhio |
+| Anni scorsi (v0.8) | Riquadro con gli eventi degli anni precedenti da 7 giorni prima a 3 settimane dopo la data di oggi; nel form evento "l'ultima volta" con meteo, luna e voto dell'annata | "Non rifare gli errori" senza cercare nello storico |
+| Eventi di zona (v0.8) | Già possibili dalla 0.5; aggiunti lavorazione terreno, diserbo, pacciamatura, sfalcio | Es. zappare o concimare tutto l'orto |
+| Legna (v0.8) | Unità scelta a ogni registrazione (quintale, stero, m³): ogni paese usa la sua | Francia stero, Italia quintale |
+| Bosco (v0.8) | Per ora solo quantità tagliata e anno; stagionatura più avanti | Decisione dell'autore |
+| Rotazione (v0.8) | Consiglio per famiglia botanica, non un divieto | Decisione dell'autore |
 | Import mappa **tolto** (v0.4.1) | Al suo posto **backup JSON** (esporta / ripristina tutto) | Disegnare nel pannello basta; serve invece poter salvare e ripristinare i dati |
 | Specie (v0.4) | Ricerca combinata Wikidata (nomi comuni) + GBIF (tassonomia); la specie scelta è copiata in locale con id GBIF/Wikidata e data di import | Funziona offline dopo l'import, tracciabilità come da §4 |
 | Licenza | MIT | Richiesta da HACS; la più diffusa tra le integrazioni custom |

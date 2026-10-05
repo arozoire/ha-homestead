@@ -20,6 +20,10 @@ ICONS = {
     "note": "📝",
     "removal": "🏁",
     "review": "⭐",
+    "tillage": "⛏️",
+    "weeding": "🧤",
+    "mulching": "🍂",
+    "mowing": "🌾",
 }
 
 
