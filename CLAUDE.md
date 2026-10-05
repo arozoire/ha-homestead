@@ -9,7 +9,7 @@ Integrazione custom Home Assistant (HACS) per orto, frutteto e homesteading. Spe
 - `custom_components/homestead/models.py` — dataclass pure, **nessun import HA** (testabili da sole). Valori enum in inglese, testi in `translations/`.
 - `store.py` — persistenza JSON in `.storage/homestead.data`, segnale dispatcher a ogni salvataggio.
 - `services.py` — servizi registrati in `async_setup`, rispondono con l'id creato.
-- `sensor.py` — 3 sensori aggregati.
+- `sensor.py` — 3 sensori aggregati. `todo.py` (lista attività: spunta → evento nel diario via `tasks.async_complete_task`), `calendar.py` (attività aperte + eventi fatti, giornata intera); `entity.py` device comune; `labels.py` titoli dalle traduzioni `selector.event_kind`.
 - `weather.py` — snapshot meteo per evento: finestra 7 giorni prima (+3 dopo per treatment/sowing); statistiche a lungo termine del recorder (`mean/min/max`, pioggia con `change`, copertura ≥50%) dai sensori in `entry.options`, campi mancanti da Open-Meteo (archive o forecast se recente); `complete=false` finché la finestra non è chiusa; `async_refresh` ogni 6 h; mai bloccante per i servizi.
 - `config_flow.py` — options flow: sensori temperatura, umidità, pioggia, umidità suolo + Open-Meteo sì/no.
 - `photos.py` — file in `<media local>/homestead/<planting_id>/<id>.jpg`; `PhotoView` `/api/homestead/photo/{id}` (auth; il pannello usa `auth/sign_path` per `<img>`); tipo controllato dalla firma (JPEG/PNG/WebP, max 3 MB); cartella cancellata in `async_remove_entry`.
@@ -39,7 +39,8 @@ pytest
 - v0.5 (diario, inizio v2): `Event` (kind, done_on, planting_id **o** zone_id, product/dose, quantity/unit, moon_phase); `add/update/delete_event` con `cost`/`revenue` → `Expense` collegata (`event_id`, `income`; categorie `services`, `sales`); sensore spese esclude i ricavi; foto su evento (`Photo.event_id`, cartella `events/` per eventi di zona); eliminando pianta/zona gli eventi seguono (zona → zona padre); pannello: scheda Diario + sezione nelle schede pianta/zona, fase lunare calcolata anche in JS (stesso algoritmo di `moon.py`); 48 test.
 - v0.6: annate (righe anno × coltura della stessa specie/taxon), eventi `removal` (pianta → removed) e `review` (rating, abundance, keep, avoid), meteo per evento, `repeat_planting`, `refresh_weather`, + Raccolta rapido; test recorder reale in `tests/test_recorder.py` (fixture riordinata); Open-Meteo simulato in `conftest.py`; 56 test.
 - v0.6.1: voci di inizio nel diario ricavate dai dati della pianta (semina, messa a dimora/trapianto, "presente dal ~anno"), non salvate come eventi; mappa più stretta (colonna 440 px, ⅓ su telefono) e pulsante 🗺️ per nasconderla (localStorage).
-- Prossimo: to-do e calendario HA (attività pianificate, promemoria bilancio), poi tipo di pianta (icone), avvisi "l'anno scorso…".
+- v0.7: `Task` (kind, due_on, pianta o zona o nessuna, yearly, title, done_on, event_id); `add/update/delete/complete_task`; `add_event` con `task_id` completa l'attività; annuale → stessa attività l'anno dopo (29/2 → 28/2); pannello "📋 Da fare" (scheda Diario + scheda pianta), ✔ apre evento precompilato; 60 test.
+- Prossimo: avvisi "l'anno scorso…", tipo di pianta (icone), indice di annata, bosco/legna (backlog).
 - Rete della sessione cloud: `api.gbif.org`, `www.wikidata.org` e Open-Meteo bloccati, parsing scritto sui formati documentati → da verificare dal vivo.
 - Più avanti: caratteristiche colturali (rusticità, esposizione, fioritura/raccolta) da fonti §5.
 - Prova del pannello: harness Playwright con `hass` finto (non nel repo); in CI solo i test Python.

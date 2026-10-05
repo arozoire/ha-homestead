@@ -12,13 +12,13 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
 )
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util import dt as dt_util
 
 from . import HomesteadConfigEntry
-from .const import DOMAIN, SIGNAL_DATA_UPDATED
+from .const import SIGNAL_DATA_UPDATED
+from .entity import device_info
 from .models import HomesteadData
 
 
@@ -68,11 +68,7 @@ class HomesteadSensor(SensorEntity):
         self.entity_description = description
         self._store = entry.runtime_data
         self._attr_unique_id = f"{entry.entry_id}_{description.key}"
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.entry_id)},
-            name="HA Homestead",
-            entry_type=DeviceEntryType.SERVICE,
-        )
+        self._attr_device_info = device_info(entry)
         if description.device_class is SensorDeviceClass.MONETARY:
             self._attr_native_unit_of_measurement = entry.runtime_data.hass.config.currency
 

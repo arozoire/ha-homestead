@@ -221,3 +221,13 @@ async def async_refresh(hass: HomeAssistant, store: Any, force: bool = False, li
     if changed:
         await store.async_save()
     return changed
+
+
+def schedule_weather(hass: HomeAssistant, store: Any, event_id: str) -> None:
+    """Fetching weather may take seconds: never make a service wait for it."""
+
+    async def fill() -> None:
+        if await async_fill_event(hass, store, event_id):
+            await store.async_save()
+
+    hass.async_create_background_task(fill(), f"homestead weather {event_id}")

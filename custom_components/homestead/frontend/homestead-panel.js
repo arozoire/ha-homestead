@@ -12,6 +12,17 @@ const TEXT = {
     tabPlantings: "Plantings",
     tabZones: "Zones",
     tabDiary: "Diary",
+    tabTodo: "📋 To do",
+    addTask: "+ Planned activity",
+    newTaskTitle: "Plan an activity",
+    editTaskTitle: "Planned activity",
+    due_on: "When",
+    title: "Title (optional)",
+    yearly: "Every year",
+    nothingToDo: "Nothing planned.",
+    done: "Done",
+    confirmDeleteTask: "Delete this planned activity?",
+    overdue: "overdue",
     addEvent: "+ Event",
     newEventTitle: "New diary event",
     editEventTitle: "Diary event",
@@ -220,6 +231,17 @@ const TEXT = {
     tabPlantings: "Piante",
     tabZones: "Zone",
     tabDiary: "Diario",
+    tabTodo: "📋 Da fare",
+    addTask: "+ Attività",
+    newTaskTitle: "Pianifica un'attività",
+    editTaskTitle: "Attività pianificata",
+    due_on: "Quando",
+    title: "Titolo (facoltativo)",
+    yearly: "Ogni anno",
+    nothingToDo: "Niente in programma.",
+    done: "Fatto",
+    confirmDeleteTask: "Eliminare questa attività?",
+    overdue: "in ritardo",
     addEvent: "+ Evento",
     newEventTitle: "Nuovo evento",
     editEventTitle: "Evento del diario",
@@ -546,6 +568,12 @@ const STYLE = `
   .season.current { border-color: var(--primary-color); }
   .season-head { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
   .review-ask { border-color: #ffb300; text-align: left; }
+  .todo { display: grid; gap: 4px; margin: 12px 0; }
+  .task { display: flex; gap: 6px; align-items: stretch; }
+  .task .tick { flex: none; width: 36px; padding: 0; color: var(--success-color, #43a047); font-size: 18px; }
+  .task-main { flex: 1; display: grid; gap: 2px; text-align: left; }
+  .task.late .sub { color: var(--error-color, #db4437); }
+  .check { display: flex; gap: 8px; align-items: center; color: var(--primary-text-color); }
   .income { color: var(--success-color, #43a047); }
   .kinds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
   .kinds button { display: grid; justify-items: center; gap: 2px; padding: 6px 2px; font-size: 12px; }
@@ -583,7 +611,7 @@ const STYLE = `
 class HomesteadPanel extends HTMLElement {
   constructor() {
     super();
-    this._data = { plantings: [], zones: [], taxa: [], expenses: [], tools: [], photos: [], events: [] };
+    this._data = { plantings: [], zones: [], taxa: [], expenses: [], tools: [], photos: [], events: [], tasks: [] };
     this._diaryFilter = { kind: "", zone: "", year: "" };
     this._photoUrls = new Map();
     this._taxaPending = new Map();
@@ -724,6 +752,7 @@ class HomesteadPanel extends HTMLElement {
           tools: data.tools || [],
           photos: data.photos || [],
           events: data.events || [],
+          tasks: data.tasks || [],
         };
         this._loaded = !!data.plantings;
         this._syncMap();
@@ -732,6 +761,7 @@ class HomesteadPanel extends HTMLElement {
         if (this._form) this._refreshForm();
         else if (this._zoneForm) this._refreshDiaryBox();
         else if (this._eventForm) this._fillEventPhotos();
+        else if (this._taskForm) return;
         else if (!this._expenseForm && !this._toolForm) this._render();
       },
       { type: "homestead/subscribe" },
@@ -890,6 +920,7 @@ class HomesteadPanel extends HTMLElement {
     this._expenseForm = null;
     this._toolForm = null;
     this._eventForm = null;
+    this._taskForm = null;
     this._selected = null;
     this._placing = null;
     this._drawing = null;
@@ -1202,6 +1233,7 @@ class HomesteadPanel extends HTMLElement {
     else if (this._expenseForm) content = this._renderExpenseForm();
     else if (this._toolForm) content = this._renderToolForm();
     else if (this._eventForm) content = this._renderEventForm();
+    else if (this._taskForm) content = this._renderTaskForm();
     else {
       const lists = {
         plantings: () => this._renderList(),
@@ -1257,6 +1289,7 @@ class HomesteadPanel extends HTMLElement {
     if (this._positionEl) this._positionEl.textContent = this._positionText();
     this._fillPhotos();
     this._refreshDiaryBox();
+    this._refreshPlantingTodo();
     if (this._seasonsEl && p) this._seasonsEl.replaceChildren(this._seasonsBox(p));
   }
 
@@ -1431,6 +1464,7 @@ class HomesteadPanel extends HTMLElement {
       f.id ? this._plantingActions(f) : null,
       f.id ? this._plantingExpenses(f) : null,
       f.id ? (this._seasonsEl = h("div", {}, this._seasonsBox(f))) : null,
+      f.id ? this._plantingTodo(f) : null,
       f.id ? this._diaryBox({ planting_id: f.id }) : null,
       this._photosSection(f),
     ];
@@ -1954,7 +1988,13 @@ class HomesteadPanel extends HTMLElement {
         options.map(([v, text]) => h("option", { value: v, selected: v === f[name] }, text)),
       );
     return [
-      h("div", { className: "actions" }, h("button", { className: "primary", onclick: () => this._newEvent() }, this.t("addEvent"))),
+      h(
+        "div",
+        { className: "actions" },
+        h("button", { className: "primary", onclick: () => this._newEvent() }, this.t("addEvent")),
+        h("button", { onclick: () => this._openTask({ kind: "note", due_on: today() }) }, this.t("addTask")),
+      ),
+      this._todoBox(this._data.tasks),
       h(
         "div",
         { className: "row filters" },
@@ -1964,6 +2004,35 @@ class HomesteadPanel extends HTMLElement {
       ),
       events.length ? this._renderTimeline(events) : h("p", { className: "hint" }, this.t("emptyDiary")),
     ];
+  }
+
+  /** Planting or zone picker; value "p:<id>" / "z:<id>" ("" = none, allowed only for tasks). */
+  _targetSelect(f, required) {
+    const target = f.planting_id ? `p:${f.planting_id}` : f.zone_id ? `z:${f.zone_id}` : "";
+    return h(
+      "label",
+      {},
+      this.t("target"),
+      h(
+        "select",
+        { name: "target", required },
+        h("option", { value: "", selected: !target }, "—"),
+        h(
+          "optgroup",
+          { label: this.t("plantingsGroup") },
+          [...this._data.plantings]
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((p) => h("option", { value: `p:${p.id}`, selected: target === `p:${p.id}` }, p.name)),
+        ),
+        h(
+          "optgroup",
+          { label: this.t("zonesGroup") },
+          this._zoneOptions()
+            .slice(1)
+            .map(([id, name]) => h("option", { value: `z:${id}`, selected: target === `z:${id}` }, name)),
+        ),
+      ),
+    );
   }
 
   _renderEventForm() {
@@ -2008,31 +2077,7 @@ class HomesteadPanel extends HTMLElement {
         ),
       ),
     );
-    const target = f.planting_id ? `p:${f.planting_id}` : f.zone_id ? `z:${f.zone_id}` : "";
-    const targetSelect = h(
-      "label",
-      {},
-      this.t("target"),
-      h(
-        "select",
-        { name: "target", required: true },
-        h("option", { value: "", selected: !target }, "—"),
-        h(
-          "optgroup",
-          { label: this.t("plantingsGroup") },
-          [...this._data.plantings]
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .map((p) => h("option", { value: `p:${p.id}`, selected: target === `p:${p.id}` }, p.name)),
-        ),
-        h(
-          "optgroup",
-          { label: this.t("zonesGroup") },
-          this._zoneOptions()
-            .slice(1)
-            .map(([id, name]) => h("option", { value: `z:${id}`, selected: target === `z:${id}` }, name)),
-        ),
-      ),
-    );
+    const targetSelect = this._targetSelect(f, true);
     const date = this._field(f, "done_on", { type: "date", required: true, oninput: (ev) => updateMoon(ev.target.value) });
     extras.product = h("div", { className: "row" }, this._field(f, "product"), this._field(f, "dose", { placeholder: "30 g / 10 L" }));
     extras.harvest = h(
@@ -2118,6 +2163,7 @@ class HomesteadPanel extends HTMLElement {
     if (!id) {
       if (v.cost) data.cost = Number(v.cost);
       if (v.revenue) data.revenue = Number(v.revenue);
+      if (this._eventForm.task_id) data.task_id = this._eventForm.task_id;
     }
     const file = this._eventPhotoInput.files?.[0];
     const result = await this._call(id ? "update_event" : "add_event", id ? { id, ...data } : data);
@@ -2176,6 +2222,152 @@ class HomesteadPanel extends HTMLElement {
         .filter(Boolean)
         .join(" · "),
     );
+  }
+
+  // ---------- planned activities ----------
+
+  _openTask(task, back = null) {
+    this._clearSelection();
+    this._showMessage("");
+    this._tab = "diary";
+    this._taskBack = back;
+    this._taskForm = { ...task };
+    this._syncMap();
+    this._render();
+  }
+
+  _taskLabel(task) {
+    const icon = EVENT_ICONS[task.kind] || "📝";
+    const target = task.planting_id || task.zone_id ? this._targetName(task) : null;
+    return `${icon} ${[task.title || this.t(`ev_${task.kind}`), target].filter(Boolean).join(" — ")}`;
+  }
+
+  /** Open tasks, oldest due first; ✔ opens the diary form already filled in. */
+  _todoBox(tasks, back = null) {
+    const open = tasks.filter((t) => !t.done_on).sort((a, b) => a.due_on.localeCompare(b.due_on));
+    const now = today();
+    return h(
+      "div",
+      { className: "todo" },
+      h("h3", {}, this.t("tabTodo")),
+      open.length
+        ? open.map((t) =>
+            h(
+              "div",
+              { className: `task${t.due_on < now ? " late" : ""}` },
+              h(
+                "button",
+                {
+                  type: "button",
+                  className: "tick",
+                  title: this.t("done"),
+                  onclick: () =>
+                    this._newEvent(
+                      {
+                        kind: t.kind,
+                        planting_id: t.planting_id,
+                        zone_id: t.zone_id,
+                        notes: [t.title, t.notes].filter(Boolean).join(" — ") || null,
+                        task_id: t.id,
+                      },
+                      back,
+                    ),
+                },
+                "✔",
+              ),
+              h(
+                "button",
+                { type: "button", className: "task-main", onclick: () => this._openTask(t, back) },
+                h("span", {}, this._taskLabel(t)),
+                h(
+                  "span",
+                  { className: "sub" },
+                  `${this._date(t.due_on)}${t.due_on < now ? ` · ${this.t("overdue")}` : ""}${t.yearly ? " · 🔁" : ""}`,
+                ),
+              ),
+            ),
+          )
+        : h("p", { className: "hint" }, this.t("nothingToDo")),
+    );
+  }
+
+  _plantingTodo(f) {
+    const back = { planting_id: f.id };
+    this._todoEl = h("div");
+    this._todoPlanting = f;
+    this._refreshPlantingTodo();
+    return h(
+      "div",
+      {},
+      this._todoEl,
+      h(
+        "button",
+        { type: "button", onclick: () => this._openTask({ kind: "pruning", due_on: today(), planting_id: f.id }, back) },
+        this.t("addTask"),
+      ),
+    );
+  }
+
+  _refreshPlantingTodo() {
+    const f = this._todoPlanting;
+    if (!this._todoEl || !f) return;
+    const mine = this._data.tasks.filter((t) => t.planting_id === f.id || (t.zone_id && this._inZone(f, t.zone_id)));
+    this._todoEl.replaceChildren(this._todoBox(mine, { planting_id: f.id }));
+  }
+
+  _renderTaskForm() {
+    const f = this._taskForm;
+    const kinds = Object.entries(EVENT_ICONS).map(([k, icon]) => [k, `${icon} ${this.t(`ev_${k}`)}`]);
+    return [
+      h(
+        "form",
+        { onsubmit: (ev) => this._saveTask(ev) },
+        h("h2", {}, f.id ? this.t("editTaskTitle") : this.t("newTaskTitle")),
+        this._selectField(f, "kind", kinds),
+        this._targetSelect(f, false),
+        h("div", { className: "row" }, this._field(f, "due_on", { type: "date", required: true })),
+        this._field(f, "title", { maxLength: 100 }),
+        h("label", { className: "check" }, h("input", { type: "checkbox", name: "yearly", checked: !!f.yearly }), this.t("yearly")),
+        this._notes(f),
+        this._formButtons(f.id, () => this._deleteTask(), () => this._taskDone()),
+      ),
+    ];
+  }
+
+  _taskDone(name = null, key = "saved") {
+    const back = this._taskBack;
+    this._taskBack = null;
+    if (back?.planting_id) this._select(back.planting_id);
+    else this._close();
+    if (name) this._showMessage(`✓ ${this.t(key, { name })}`);
+  }
+
+  async _saveTask(ev) {
+    ev.preventDefault();
+    const v = Object.fromEntries(new FormData(ev.target));
+    const [type, targetId] = (v.target || ":").split(":");
+    const data = {
+      kind: v.kind,
+      due_on: v.due_on,
+      planting_id: type === "p" ? targetId : null,
+      zone_id: type === "z" ? targetId : null,
+      title: v.title?.trim() || null,
+      yearly: v.yearly === "on",
+      notes: v.notes?.trim() || null,
+    };
+    if (data.planting_id) delete data.zone_id;
+    else if (data.zone_id) delete data.planting_id;
+    else delete data.zone_id;
+    const id = this._taskForm.id;
+    if (await this._call(id ? "update_task" : "add_task", id ? { id, ...data } : data)) {
+      this._taskDone(data.title || this.t(`ev_${data.kind}`));
+    }
+  }
+
+  async _deleteTask() {
+    if (!confirm(this.t("confirmDeleteTask"))) return;
+    const name = this._taskForm.title || this.t(`ev_${this._taskForm.kind}`);
+    if (await this._call("delete_task", { id: this._taskForm.id })) this._taskDone(name, "deleted");
   }
 
   // ---------- seasons ----------

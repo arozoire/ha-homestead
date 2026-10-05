@@ -603,6 +603,9 @@ add_event:
       selector:
         text:
           multiline: true
+    task_id:
+      selector:
+        text:
     cost:
       selector:
         number:
@@ -721,5 +724,106 @@ repeat_planting:
           min: 1900
           max: 2200
           mode: box
+
+add_task:
+  fields:
+    kind:
+      required: true
+      selector:
+        select:
+          translation_key: event_kind
+          options:
+            - pruning
+            - fertilizing
+            - watering
+            - treatment
+            - sowing
+            - harvest
+            - grafting
+            - problem
+            - note
+            - removal
+            - review
+    due_on:
+      required: true
+      selector:
+        date:
+    title:
+      example: "Potare il melo"
+      selector:
+        text:
+    planting_id:
+      selector:
+        text:
+    zone_id:
+      selector:
+        text:
+    yearly:
+      selector:
+        boolean:
+    notes:
+      selector:
+        text:
+          multiline: true
+
+update_task:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+    kind:
+      selector:
+        select:
+          translation_key: event_kind
+          options:
+            - pruning
+            - fertilizing
+            - watering
+            - treatment
+            - sowing
+            - harvest
+            - grafting
+            - problem
+            - note
+            - removal
+            - review
+    due_on:
+      selector:
+        date:
+    title:
+      example: "Potare il melo"
+      selector:
+        text:
+    planting_id:
+      selector:
+        text:
+    zone_id:
+      selector:
+        text:
+    yearly:
+      selector:
+        boolean:
+    notes:
+      selector:
+        text:
+          multiline: true
+
+delete_task:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+
+complete_task:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+    done_on:
+      selector:
+        date:
 
 export:
