@@ -18,11 +18,16 @@ add_zone:
             - greenhouse
             - pots
             - lawn
+            - woodland
             - other
     area_id:
       selector:
         area:
     geometry:
+      selector:
+        object:
+    species:
+      example: '["Quercus cerris", "Castanea sativa"]'
       selector:
         object:
     notes:
@@ -53,11 +58,16 @@ update_zone:
             - greenhouse
             - pots
             - lawn
+            - woodland
             - other
     area_id:
       selector:
         area:
     geometry:
+      selector:
+        object:
+    species:
+      example: '["Quercus cerris", "Castanea sativa"]'
       selector:
         object:
     notes:
@@ -90,6 +100,18 @@ add_planting:
       example: "Renetta"
       selector:
         text:
+    plant_type:
+      selector:
+        select:
+          translation_key: plant_type
+          options:
+            - tree
+            - shrub
+            - vine
+            - vegetable
+            - herb
+            - flower
+            - other
     kind:
       default: single
       selector:
@@ -175,6 +197,9 @@ add_planting:
           min: 0
           step: 0.01
           mode: box
+    seed_lot_id:
+      selector:
+        text:
     notes:
       selector:
         text:
@@ -201,6 +226,18 @@ update_planting:
       example: "Renetta"
       selector:
         text:
+    plant_type:
+      selector:
+        select:
+          translation_key: plant_type
+          options:
+            - tree
+            - shrub
+            - vine
+            - vegetable
+            - herb
+            - flower
+            - other
     kind:
       selector:
         select:
@@ -286,6 +323,9 @@ update_planting:
             - active
             - dead
             - removed
+    seed_lot_id:
+      selector:
+        text:
     notes:
       selector:
         text:
@@ -546,6 +586,14 @@ add_event:
             - note
             - removal
             - review
+            - tillage
+            - weeding
+            - mulching
+            - mowing
+            - clearing
+            - wood_cutting
+            - brushwood
+            - foraging
     done_on:
       selector:
         date:
@@ -577,6 +625,9 @@ add_event:
             - kg
             - pieces
             - l
+            - q
+            - stere
+            - m3
     rating:
       selector:
         number:
@@ -641,6 +692,14 @@ update_event:
             - note
             - removal
             - review
+            - tillage
+            - weeding
+            - mulching
+            - mowing
+            - clearing
+            - wood_cutting
+            - brushwood
+            - foraging
     done_on:
       selector:
         date:
@@ -672,6 +731,9 @@ update_event:
             - kg
             - pieces
             - l
+            - q
+            - stere
+            - m3
     rating:
       selector:
         number:
@@ -744,6 +806,14 @@ add_task:
             - note
             - removal
             - review
+            - tillage
+            - weeding
+            - mulching
+            - mowing
+            - clearing
+            - wood_cutting
+            - brushwood
+            - foraging
     due_on:
       required: true
       selector:
@@ -788,6 +858,14 @@ update_task:
             - note
             - removal
             - review
+            - tillage
+            - weeding
+            - mulching
+            - mowing
+            - clearing
+            - wood_cutting
+            - brushwood
+            - foraging
     due_on:
       selector:
         date:
@@ -827,3 +905,174 @@ complete_task:
         date:
 
 export:
+
+add_seed_lot:
+  fields:
+    species:
+      example: "Solanum lycopersicum"
+      selector:
+        text:
+    taxon_id:
+      selector:
+        text:
+    variety:
+      example: "Cuore di bue"
+      selector:
+        text:
+    year:
+      example: 2025
+      selector:
+        number:
+          min: 1900
+          max: 2200
+          mode: box
+    supplier:
+      selector:
+        text:
+    quantity:
+      example: "1 bustina"
+      selector:
+        text:
+    viability_years:
+      selector:
+        number:
+          min: 1
+          max: 50
+          mode: box
+    finished:
+      selector:
+        boolean:
+    price:
+      selector:
+        number:
+          min: 0
+          step: 0.01
+          mode: box
+    notes:
+      selector:
+        text:
+          multiline: true
+
+update_seed_lot:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+    species:
+      example: "Solanum lycopersicum"
+      selector:
+        text:
+    taxon_id:
+      selector:
+        text:
+    variety:
+      example: "Cuore di bue"
+      selector:
+        text:
+    year:
+      example: 2025
+      selector:
+        number:
+          min: 1900
+          max: 2200
+          mode: box
+    supplier:
+      selector:
+        text:
+    quantity:
+      example: "1 bustina"
+      selector:
+        text:
+    viability_years:
+      selector:
+        number:
+          min: 1
+          max: 50
+          mode: box
+    finished:
+      selector:
+        boolean:
+    notes:
+      selector:
+        text:
+          multiline: true
+
+delete_seed_lot:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+
+set_crop_profile:
+  fields:
+    species:
+      required: true
+      example: "Solanum lycopersicum"
+      selector:
+        text:
+    exposure:
+      selector:
+        select:
+          multiple: true
+          translation_key: exposure
+          options:
+            - sun
+            - partial
+            - shade
+    hardiness_c:
+      selector:
+        number:
+          min: -60
+          max: 30
+          unit_of_measurement: °C
+          mode: box
+    sow_indoor:
+      selector:
+        select:
+          multiple: true
+          translation_key: month
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+    sow_outdoor:
+      selector:
+        select:
+          multiple: true
+          translation_key: month
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+    plant_out:
+      selector:
+        select:
+          multiple: true
+          translation_key: month
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+    flowering:
+      selector:
+        select:
+          multiple: true
+          translation_key: month
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+    harvest:
+      selector:
+        select:
+          multiple: true
+          translation_key: month
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+    spacing_cm:
+      selector:
+        number:
+          min: 1
+          max: 5000
+          unit_of_measurement: cm
+          mode: box
+    notes:
+      selector:
+        text:
+          multiline: true
+
+delete_crop_profile:
+  fields:
+    id:
+      required: true
+      selector:
+        text:

@@ -20,6 +20,8 @@ REQUIRED = {
     "photos": ("file",),
     "events": ("kind", "done_on"),
     "tasks": ("kind", "due_on"),
+    "seeds": ("species",),
+    "crops": ("species",),
 }
 
 # (collection, field, referenced collection): dangling references are cleared.
@@ -37,6 +39,8 @@ REFERENCES = (
     ("tasks", "planting_id", "plantings"),
     ("tasks", "zone_id", "zones"),
     ("tasks", "event_id", "events"),
+    ("seeds", "taxon_id", "taxa"),
+    ("plantings", "seed_lot_id", "seeds"),
 )
 
 
@@ -93,6 +97,10 @@ def read_backup(raw: Any) -> HomesteadData:
         for record in getattr(data, collection).values():
             if getattr(record, field) and getattr(record, field) not in known:
                 setattr(record, field, None)
+    for zone in data.zones.values():
+        for item in zone.species:
+            if item["taxon_id"] not in data.taxa:
+                item["taxon_id"] = None
     return data
 
 

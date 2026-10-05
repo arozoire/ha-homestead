@@ -20,6 +20,14 @@ ICONS = {
     "note": "📝",
     "removal": "🏁",
     "review": "⭐",
+    "tillage": "⛏️",
+    "weeding": "🧤",
+    "mulching": "🍂",
+    "mowing": "🌾",
+    "clearing": "🧹",
+    "wood_cutting": "🪓",
+    "brushwood": "🪵",
+    "foraging": "🍄",
 }
 
 

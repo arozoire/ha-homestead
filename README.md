@@ -8,7 +8,7 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 
 **Non sporcare Home Assistant**: nessuna area creata, poche entità aggregate, rimozione pulita (disinstallando l'integrazione i dati vengono cancellati).
 
-## Cosa fa oggi (v0.7)
+## Cosa fa oggi (v0.8)
 
 | Funzione | Come |
 |---|---|
@@ -31,6 +31,15 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 | Attrezzi | Scheda *Attrezzi* (stato a colori, 🔧 manutenzione scaduta) o servizi `add_tool`/`update_tool`/`delete_tool` |
 | Foto | Nella scheda pianta: *📷 Aggiungi foto* (fotocamera o galleria del telefono), ridotte a 1600 px e salvate in `/media/homestead/`; visibili solo agli utenti HA |
 | Sfondo "Nessuna mappa" | Dal selettore dei livelli: zoom fino al livello 23 per lavorare dentro un'aiuola |
+| Tipo di pianta | Albero, arbusto, rampicante, ortaggio, aromatica, fiore: icona sulla mappa e nella lista (proposto dal tipo di zona) |
+| Negli anni scorsi | Riquadro *📅 Negli anni scorsi, in questo periodo* (scheda pianta, zona e Diario); nel form evento *↩️ L'ultima volta* con data, quantità, luna, meteo e voto dell'annata |
+| Lavori di zona | Lavorazione terreno, diserbo, pacciamatura, sfalcio: un evento sulla zona (es. tutto l'orto) |
+| Bilancio | Scheda *Spese*: anno a scelta (o tutti), spese, ricavi, saldo, mese per mese, per pianta |
+| Bosco e legna | Zona di tipo *Bosco* con le essenze principali; eventi pulizia, taglio legna (essenza, quantità in quintali, steri o m³ a scelta), raccolta rami, raccolta spontanea (funghi, castagne…); legna per anno nella scheda zona |
+| Semi | Scheda *Semi*: specie, varietà, anno, fornitore, quantità; avviso quando invecchiano (durata tipica per famiglia, modificabile); il lotto si sceglie nella pianta seminata. Servizi `add_seed_lot`, `update_seed_lot`, `delete_seed_lot` |
+| Rotazione | Consiglio nel form pianta se nella stessa zona c'era la stessa famiglia negli ultimi 3 anni; colture per anno nella scheda zona |
+| Lista della spesa | 🛒 da semi e da prodotti di concimazione/trattamento → lista della spesa di HA (`todo.shopping_list`) |
+| Dati colturali | Scheda pianta *🌿 Scheda colturale*: esposizione, rusticità, distanza, mesi di semina, impianto, fioritura e raccolta (tabella di base di ~85 specie, valori indicativi per clima temperato; *✏️ Correggi* salva i tuoi valori). Nel Diario *📆 Questo mese*: semi da seminare, piantine da mettere a dimora, raccolte. Servizi `set_crop_profile`, `delete_crop_profile` |
 | Esportazione | Servizio `homestead.export` (risposta con tutti i dati) |
 
 ### Pannello "Giardino"

@@ -15,10 +15,12 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN
+from .crops import normalize
 from .geo import validate_polygon
 from .models import (
     EVENT_COST_CATEGORY,
     Abundance,
+    CropProfile,
     Event,
     EventKind,
     Expense,
@@ -29,6 +31,8 @@ from .models import (
     PlantingKind,
     PlantingOrigin,
     PlantingStatus,
+    PlantType,
+    SeedLot,
     Task,
     Tool,
     ToolPower,
@@ -53,6 +57,10 @@ ADD_ZONE_SCHEMA = vol.Schema(
         vol.Optional("kind"): vol.Any(None, vol.In([k.value for k in ZoneKind])),
         vol.Optional("area_id"): _opt_str,
         vol.Optional("geometry"): vol.Any(None, validate_polygon),
+        vol.Optional("species"): vol.All(
+            cv.ensure_list,
+            [vol.Any(cv.string, {vol.Required("name"): cv.string, vol.Optional("taxon_id"): _opt_str})],
+        ),
         vol.Optional("notes"): _opt_str,
     }
 )
@@ -72,6 +80,7 @@ ADD_PLANTING_SCHEMA = vol.Schema(
         vol.Optional("species"): cv.string,
         vol.Optional("taxon_id"): _opt_str,
         vol.Optional("variety"): _opt_str,
+        vol.Optional("plant_type"): vol.Any(None, vol.In([t.value for t in PlantType])),
         vol.Optional("kind", default=PlantingKind.SINGLE): vol.In([k.value for k in PlantingKind]),
         vol.Optional("quantity", default=1): vol.All(vol.Coerce(int), vol.Range(min=1)),
         vol.Optional("origin"): vol.Any(None, vol.In([o.value for o in PlantingOrigin])),
@@ -85,6 +94,7 @@ ADD_PLANTING_SCHEMA = vol.Schema(
         vol.Optional("zone_id"): _opt_str,
         vol.Optional("latitude"): vol.Any(None, cv.latitude),
         vol.Optional("longitude"): vol.Any(None, cv.longitude),
+        vol.Optional("seed_lot_id"): _opt_str,
         vol.Optional("price"): vol.Any(None, _positive),
         vol.Optional("notes"): _opt_str,
     }
@@ -159,6 +169,49 @@ UPDATE_TOOL_SCHEMA = vol.Schema(
 )
 
 ID_SCHEMA = vol.Schema({vol.Required("id"): cv.string})
+
+ADD_SEED_LOT_SCHEMA = vol.Schema(
+    {
+        vol.Optional("species"): cv.string,
+        vol.Optional("taxon_id"): _opt_str,
+        vol.Optional("variety"): _opt_str,
+        vol.Optional("year"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1900, max=2200))),
+        vol.Optional("supplier"): _opt_str,
+        vol.Optional("quantity"): _opt_str,
+        vol.Optional("viability_years"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=50))),
+        vol.Optional("finished"): cv.boolean,
+        vol.Optional("price"): vol.Any(None, _positive),
+        vol.Optional("notes"): _opt_str,
+    }
+)
+
+_months = vol.All(cv.ensure_list, [vol.All(vol.Coerce(int), vol.Range(min=1, max=12))])
+
+SET_CROP_PROFILE_SCHEMA = vol.Schema(
+    {
+        vol.Required("species"): cv.string,
+        vol.Optional("exposure"): vol.All(cv.ensure_list, [vol.In(["sun", "partial", "shade"])]),
+        vol.Optional("hardiness_c"): vol.Any(None, vol.All(vol.Coerce(float), vol.Range(min=-60, max=30))),
+        vol.Optional("sow_indoor"): _months,
+        vol.Optional("sow_outdoor"): _months,
+        vol.Optional("plant_out"): _months,
+        vol.Optional("flowering"): _months,
+        vol.Optional("harvest"): _months,
+        vol.Optional("spacing_cm"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=5000))),
+        vol.Optional("notes"): _opt_str,
+    }
+)
+
+UPDATE_SEED_LOT_SCHEMA = vol.Schema(
+    {
+        vol.Required("id"): cv.string,
+        **{
+            vol.Optional(str(key)): value
+            for key, value in ADD_SEED_LOT_SCHEMA.schema.items()
+            if key != "price"
+        },
+    }
+)
 
 _EVENT_FIELDS = {
     vol.Optional("product"): _opt_str,
@@ -265,6 +318,12 @@ def _apply_taxon(store: HomesteadStore, args: dict[str, Any]) -> None:
         args["species"] = store.data.taxa[args["taxon_id"]].scientific_name
 
 
+def _check_species(store: HomesteadStore, args: dict[str, Any]) -> None:
+    for item in args.get("species") or []:
+        if isinstance(item, dict):
+            _check_ref(store.data.taxa, item.get("taxon_id"), "taxon_id")
+
+
 def _check_ref(collection: dict, ref: str | None, key: str) -> None:
     if ref and ref not in collection:
         raise ServiceValidationError(
@@ -280,6 +339,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         store = _store(hass)
         args = dict(call.data)
         _check_ref(store.data.zones, args.get("parent_id"), "parent_id")
+        _check_species(store, args)
         zone = Zone(**args)
         store.data.zones[zone.id] = zone
         await store.async_save()
@@ -294,6 +354,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         _check_ref(store.data.zones, parent_id, "parent_id")
         if parent_id and (parent_id == zone_id or parent_id in store.data.zone_descendants(zone_id)):
             raise ServiceValidationError(translation_domain=DOMAIN, translation_key="zone_cycle")
+        _check_species(store, args)
         store.data.zones[zone_id] = replace(store.data.zones[zone_id], **args)
         await store.async_save()
         return {"id": zone_id}
@@ -327,6 +388,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         args["planted_on"] = _iso(args.get("planted_on"))
         args["sown_on"] = _iso(args.get("sown_on"))
         _check_ref(store.data.zones, args.get("zone_id"), "zone_id")
+        _check_ref(store.data.seeds, args.get("seed_lot_id"), "seed_lot_id")
         _apply_taxon(store, args)
         if args["kind"] == PlantingKind.SINGLE:
             args["quantity"] = 1
@@ -351,6 +413,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         planting_id = args.pop("id")
         _check_ref(store.data.plantings, planting_id, "id")
         _check_ref(store.data.zones, args.get("zone_id"), "zone_id")
+        _check_ref(store.data.seeds, args.get("seed_lot_id"), "seed_lot_id")
         if "taxon_id" in args or "species" in args:
             current = store.data.plantings[planting_id]
             merged = {"species": current.species, "taxon_id": current.taxon_id, **args}
@@ -480,6 +543,73 @@ def async_register_services(hass: HomeAssistant) -> None:
         await store.async_save()
         return {"id": tool_id}
 
+    async def add_seed_lot(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        args: dict[str, Any] = dict(call.data)
+        price = args.pop("price", None)
+        _apply_taxon(store, args)
+        lot = SeedLot(**args)
+        store.data.seeds[lot.id] = lot
+        if price:
+            _add_expense(
+                store,
+                amount=price,
+                category=ExpenseCategory.SEEDS,
+                spent_on=None,
+                supplier=lot.supplier,
+                notes=" ".join(filter(None, [lot.species, lot.variety])),
+            )
+        await store.async_save()
+        return {"id": lot.id}
+
+    async def update_seed_lot(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        args: dict[str, Any] = dict(call.data)
+        lot_id = args.pop("id")
+        _check_ref(store.data.seeds, lot_id, "id")
+        if "taxon_id" in args or "species" in args:
+            current = store.data.seeds[lot_id]
+            merged = {"species": current.species, "taxon_id": current.taxon_id, **args}
+            if args.get("taxon_id") and "species" not in args:
+                merged["species"] = None
+            _apply_taxon(store, merged)
+            args["species"] = merged["species"]
+        store.data.seeds[lot_id] = replace(store.data.seeds[lot_id], **args)
+        await store.async_save()
+        return {"id": lot_id}
+
+    async def delete_seed_lot(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        lot_id = call.data["id"]
+        _check_ref(store.data.seeds, lot_id, "id")
+        del store.data.seeds[lot_id]
+        for planting in store.data.plantings.values():
+            if planting.seed_lot_id == lot_id:
+                planting.seed_lot_id = None
+        await store.async_save()
+        return {"id": lot_id}
+
+    async def set_crop_profile(call: ServiceCall) -> ServiceResponse:
+        """Replace the user's crop data for a species (one record per species)."""
+        store = _store(hass)
+        args: dict[str, Any] = dict(call.data)
+        for key in ("exposure", "sow_indoor", "sow_outdoor", "plant_out", "flowering", "harvest"):
+            args[key] = sorted(set(args.get(key) or []))
+        key = normalize(args["species"])
+        old = next((c for c in store.data.crops.values() if normalize(c.species) == key), None)
+        profile = CropProfile(**args, **({"id": old.id} if old else {}))
+        store.data.crops[profile.id] = profile
+        await store.async_save()
+        return {"id": profile.id}
+
+    async def delete_crop_profile(call: ServiceCall) -> ServiceResponse:
+        """Back to the built-in values."""
+        store = _store(hass)
+        _check_ref(store.data.crops, call.data["id"], "id")
+        del store.data.crops[call.data["id"]]
+        await store.async_save()
+        return {"id": call.data["id"]}
+
     async def delete_photo(call: ServiceCall) -> ServiceResponse:
         store = _store(hass)
         _check_ref(store.data.photos, call.data["id"], "id")
@@ -603,6 +733,7 @@ def async_register_services(hass: HomeAssistant) -> None:
             species=source.species,
             taxon_id=source.taxon_id,
             variety=source.variety,
+            plant_type=source.plant_type,
             kind=source.kind,
             quantity=source.quantity,
             origin=source.origin,
@@ -654,6 +785,11 @@ def async_register_services(hass: HomeAssistant) -> None:
         ("update_tool", update_tool, UPDATE_TOOL_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_tool", delete_tool, ID_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_photo", delete_photo, ID_SCHEMA, SupportsResponse.OPTIONAL),
+        ("add_seed_lot", add_seed_lot, ADD_SEED_LOT_SCHEMA, SupportsResponse.OPTIONAL),
+        ("update_seed_lot", update_seed_lot, UPDATE_SEED_LOT_SCHEMA, SupportsResponse.OPTIONAL),
+        ("delete_seed_lot", delete_seed_lot, ID_SCHEMA, SupportsResponse.OPTIONAL),
+        ("set_crop_profile", set_crop_profile, SET_CROP_PROFILE_SCHEMA, SupportsResponse.OPTIONAL),
+        ("delete_crop_profile", delete_crop_profile, ID_SCHEMA, SupportsResponse.OPTIONAL),
         ("add_event", add_event, ADD_EVENT_SCHEMA, SupportsResponse.OPTIONAL),
         ("update_event", update_event, UPDATE_EVENT_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_event", delete_event, ID_SCHEMA, SupportsResponse.OPTIONAL),

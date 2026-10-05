@@ -77,6 +77,17 @@
         "group": "Gruppo (fila, aiuola)"
       }
     },
+    "plant_type": {
+      "options": {
+        "tree": "Albero",
+        "shrub": "Arbusto",
+        "vine": "Rampicante, vite",
+        "vegetable": "Ortaggio",
+        "herb": "Aromatica",
+        "flower": "Fiore",
+        "other": "Altro"
+      }
+    },
     "initial_form": {
       "options": {
         "seed": "Seme",
@@ -132,6 +143,7 @@
         "greenhouse": "Serra",
         "pots": "Vasi",
         "lawn": "Prato",
+        "woodland": "Bosco",
         "other": "Altro"
       }
     },
@@ -154,14 +166,25 @@
         "problem": "Problema",
         "note": "Nota",
         "removal": "Fine coltura",
-        "review": "Bilancio annata"
+        "review": "Bilancio annata",
+        "tillage": "Lavorazione terreno (zappatura, vangatura)",
+        "weeding": "Diserbo, sarchiatura",
+        "mulching": "Pacciamatura",
+        "mowing": "Sfalcio",
+        "clearing": "Pulizia bosco",
+        "wood_cutting": "Taglio legna",
+        "brushwood": "Raccolta rami, fascine",
+        "foraging": "Raccolta spontanea (funghi, castagne…)"
       }
     },
     "harvest_unit": {
       "options": {
         "kg": "kg",
         "pieces": "Pezzi",
-        "l": "Litri"
+        "l": "Litri",
+        "q": "Quintali (100 kg)",
+        "stere": "Steri",
+        "m3": "Metri cubi"
       }
     },
     "abundance": {
@@ -169,6 +192,29 @@
         "poor": "Scarso",
         "normal": "Normale",
         "abundant": "Abbondante"
+      }
+    },
+    "month": {
+      "options": {
+        "1": "Gennaio",
+        "2": "Febbraio",
+        "3": "Marzo",
+        "4": "Aprile",
+        "5": "Maggio",
+        "6": "Giugno",
+        "7": "Luglio",
+        "8": "Agosto",
+        "9": "Settembre",
+        "10": "Ottobre",
+        "11": "Novembre",
+        "12": "Dicembre"
+      }
+    },
+    "exposure": {
+      "options": {
+        "sun": "Pieno sole",
+        "partial": "Mezz'ombra",
+        "shade": "Ombra"
       }
     }
   },
@@ -196,6 +242,10 @@
         "geometry": {
           "name": "Geometria",
           "description": "Poligono GeoJSON (coordinate longitudine, latitudine). La superficie viene calcolata."
+        },
+        "species": {
+          "name": "Essenze principali",
+          "description": "Specie principali della zona (es. di un bosco): nomi, oppure oggetti con name e taxon_id."
         },
         "notes": {
           "name": "Note",
@@ -230,6 +280,10 @@
         "geometry": {
           "name": "Geometria",
           "description": "Poligono GeoJSON (coordinate longitudine, latitudine). La superficie viene calcolata."
+        },
+        "species": {
+          "name": "Essenze principali",
+          "description": "Specie principali della zona (es. di un bosco): nomi, oppure oggetti con name e taxon_id."
         },
         "notes": {
           "name": "Note",
@@ -266,6 +320,10 @@
         "variety": {
           "name": "Varietà",
           "description": "Cultivar o varietà."
+        },
+        "plant_type": {
+          "name": "Tipo di pianta",
+          "description": "Albero, arbusto, ortaggio… (icona sulla mappa)."
         },
         "kind": {
           "name": "Tipo",
@@ -323,6 +381,10 @@
           "name": "Prezzo",
           "description": "Prezzo d'acquisto; registrato come spesa."
         },
+        "seed_lot_id": {
+          "name": "Lotto di semi",
+          "description": "Semi usati (id del lotto)."
+        },
         "notes": {
           "name": "Note",
           "description": "Note libere."
@@ -352,6 +414,10 @@
         "variety": {
           "name": "Varietà",
           "description": "Cultivar o varietà."
+        },
+        "plant_type": {
+          "name": "Tipo di pianta",
+          "description": "Albero, arbusto, ortaggio… (icona sulla mappa)."
         },
         "kind": {
           "name": "Tipo",
@@ -408,6 +474,10 @@
         "status": {
           "name": "Stato",
           "description": "Attiva, morta o rimossa."
+        },
+        "seed_lot_id": {
+          "name": "Lotto di semi",
+          "description": "Semi usati (id del lotto)."
         },
         "notes": {
           "name": "Note",
@@ -914,6 +984,164 @@
     "export": {
       "name": "Esporta dati",
       "description": "Restituisce tutti i dati di HA Homestead."
+    },
+    "add_seed_lot": {
+      "name": "Aggiungi lotto di semi",
+      "description": "Aggiunge semi all'inventario (bustina, barattolo, semi propri).",
+      "fields": {
+        "species": {
+          "name": "Specie",
+          "description": "Nome scientifico o comune; facoltativo con una specie collegata."
+        },
+        "taxon_id": {
+          "name": "Specie importata",
+          "description": "Specie importata (id)."
+        },
+        "variety": {
+          "name": "Varietà",
+          "description": "Varietà."
+        },
+        "year": {
+          "name": "Anno",
+          "description": "Anno di confezionamento o raccolta: la germinabilità cala con l'età."
+        },
+        "supplier": {
+          "name": "Fornitore",
+          "description": "Negozio, scambio semi, semi propri…"
+        },
+        "quantity": {
+          "name": "Quantità",
+          "description": "Testo libero: 1 bustina, 20 g…"
+        },
+        "viability_years": {
+          "name": "Durata (anni)",
+          "description": "Per quanti anni germinano bene; vuoto = valore tipico della famiglia."
+        },
+        "finished": {
+          "name": "Finiti",
+          "description": "Semi esauriti."
+        },
+        "price": {
+          "name": "Prezzo",
+          "description": "Prezzo d'acquisto; diventa una spesa per semi."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "update_seed_lot": {
+      "name": "Modifica lotto di semi",
+      "description": "Cambia i campi indicati di un lotto di semi.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id del lotto."
+        },
+        "species": {
+          "name": "Specie",
+          "description": "Nome scientifico o comune; facoltativo con una specie collegata."
+        },
+        "taxon_id": {
+          "name": "Specie importata",
+          "description": "Specie importata (id)."
+        },
+        "variety": {
+          "name": "Varietà",
+          "description": "Varietà."
+        },
+        "year": {
+          "name": "Anno",
+          "description": "Anno di confezionamento o raccolta: la germinabilità cala con l'età."
+        },
+        "supplier": {
+          "name": "Fornitore",
+          "description": "Negozio, scambio semi, semi propri…"
+        },
+        "quantity": {
+          "name": "Quantità",
+          "description": "Testo libero: 1 bustina, 20 g…"
+        },
+        "viability_years": {
+          "name": "Durata (anni)",
+          "description": "Per quanti anni germinano bene; vuoto = valore tipico della famiglia."
+        },
+        "finished": {
+          "name": "Finiti",
+          "description": "Semi esauriti."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "delete_seed_lot": {
+      "name": "Elimina lotto di semi",
+      "description": "Elimina un lotto di semi; le piante restano.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id del lotto."
+        }
+      }
+    },
+    "set_crop_profile": {
+      "name": "Imposta dati colturali",
+      "description": "Salva i tuoi valori per una specie (esposizione, rusticità, mesi di semina, impianto, fioritura e raccolta); sostituiscono quelli di base.",
+      "fields": {
+        "species": {
+          "name": "Specie",
+          "description": "Nome scientifico."
+        },
+        "exposure": {
+          "name": "Esposizione",
+          "description": "Sole, mezz'ombra, ombra."
+        },
+        "hardiness_c": {
+          "name": "Rusticità",
+          "description": "Temperatura minima sopportata."
+        },
+        "sow_indoor": {
+          "name": "Semina in semenzaio",
+          "description": "Mesi di semina al riparo."
+        },
+        "sow_outdoor": {
+          "name": "Semina all'aperto",
+          "description": "Mesi di semina diretta."
+        },
+        "plant_out": {
+          "name": "Messa a dimora",
+          "description": "Mesi di impianto o trapianto."
+        },
+        "flowering": {
+          "name": "Fioritura",
+          "description": "Mesi di fioritura."
+        },
+        "harvest": {
+          "name": "Raccolta",
+          "description": "Mesi di raccolta."
+        },
+        "spacing_cm": {
+          "name": "Distanza",
+          "description": "Distanza tra le piante."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "delete_crop_profile": {
+      "name": "Ripristina dati colturali",
+      "description": "Elimina i tuoi valori per una specie: tornano quelli di base.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id dei dati colturali."
+        }
+      }
     }
   },
   "common": {

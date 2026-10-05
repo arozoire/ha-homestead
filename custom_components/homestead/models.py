@@ -27,6 +27,16 @@ class PlantingOrigin(StrEnum):
     SOWN = "sown"  # sown by the user, possibly transplanted later
 
 
+class PlantType(StrEnum):
+    TREE = "tree"
+    SHRUB = "shrub"
+    VINE = "vine"
+    VEGETABLE = "vegetable"
+    HERB = "herb"
+    FLOWER = "flower"
+    OTHER = "other"
+
+
 class PlantingStatus(StrEnum):
     ACTIVE = "active"
     DEAD = "dead"
@@ -40,6 +50,7 @@ class ZoneKind(StrEnum):
     GREENHOUSE = "greenhouse"
     POTS = "pots"
     LAWN = "lawn"
+    WOODLAND = "woodland"
     OTHER = "other"
 
 
@@ -78,6 +89,14 @@ class EventKind(StrEnum):
     NOTE = "note"
     REMOVAL = "removal"  # end of the crop: the planting becomes "removed"
     REVIEW = "review"  # yearly review: rating, abundance, what to repeat / avoid
+    TILLAGE = "tillage"  # hoeing, digging, rotary tilling: usually on a whole zone
+    WEEDING = "weeding"
+    MULCHING = "mulching"
+    MOWING = "mowing"
+    CLEARING = "clearing"  # woodland: undergrowth, fallen trees
+    WOOD_CUTTING = "wood_cutting"  # firewood: quantity in q, stere or m³
+    BRUSHWOOD = "brushwood"  # branches, faggots
+    FORAGING = "foraging"  # mushrooms, chestnuts, wild berries…
 
 
 class Abundance(StrEnum):
@@ -95,6 +114,12 @@ EVENT_COST_CATEGORY = {
     EventKind.SOWING: ExpenseCategory.SEEDS,
     EventKind.HARVEST: ExpenseCategory.SERVICES,
     EventKind.GRAFTING: ExpenseCategory.SERVICES,
+    EventKind.TILLAGE: ExpenseCategory.SERVICES,
+    EventKind.WEEDING: ExpenseCategory.SERVICES,
+    EventKind.MOWING: ExpenseCategory.SERVICES,
+    EventKind.CLEARING: ExpenseCategory.SERVICES,
+    EventKind.WOOD_CUTTING: ExpenseCategory.SERVICES,
+    EventKind.BRUSHWOOD: ExpenseCategory.SERVICES,
 }
 
 
@@ -102,6 +127,9 @@ class HarvestUnit(StrEnum):
     KG = "kg"
     PIECES = "pieces"
     LITRES = "l"
+    QUINTAL = "q"  # 100 kg (Italy)
+    STERE = "stere"  # 1 m³ of stacked logs (France)
+    CUBIC_METRE = "m3"
 
 
 class ToolStatus(StrEnum):
@@ -136,10 +164,26 @@ class Zone(_Record):
     area_id: str | None = None
     geometry: dict[str, Any] | None = None
     area_m2: float | None = None
+    # Main species of a woodland (or any zone): [{"name": "Quercus cerris", "taxon_id": "…"}]
+    species: list[dict[str, Any]] = field(default_factory=list)
     notes: str | None = None
 
     def __post_init__(self) -> None:
         self.area_m2 = polygon_area_m2(self.geometry)
+        self.species = clean_species(self.species)
+
+
+def clean_species(value: Any) -> list[dict[str, Any]]:
+    """Names (or {"name", "taxon_id"}) without blanks or duplicates."""
+    out: list[dict[str, Any]] = []
+    for item in value if isinstance(value, list) else []:
+        entry = {"name": item, "taxon_id": None} if isinstance(item, str) else item
+        if not isinstance(entry, dict) or not isinstance(entry.get("name"), str) or not entry["name"].strip():
+            continue
+        name = entry["name"].strip()
+        if all(e["name"].lower() != name.lower() for e in out):
+            out.append({"name": name, "taxon_id": entry.get("taxon_id") or None})
+    return out
 
 
 @dataclass(kw_only=True)
@@ -164,6 +208,7 @@ class Planting(_Record):
     id: str = field(default_factory=new_id)
     taxon_id: str | None = None
     variety: str | None = None
+    plant_type: str | None = None
     kind: str = PlantingKind.SINGLE
     quantity: int = 1
     origin: str | None = None
@@ -180,6 +225,7 @@ class Planting(_Record):
     status: str = PlantingStatus.ACTIVE
     moon_phase: str | None = None
     sown_moon_phase: str | None = None
+    seed_lot_id: str | None = None
     notes: str | None = None
 
     def __post_init__(self) -> None:
@@ -282,6 +328,39 @@ class Tool(_Record):
 
 
 @dataclass(kw_only=True)
+class SeedLot(_Record):
+    """A packet or jar of seeds: germination drops with age (the panel warns per botanical family)."""
+
+    species: str
+    id: str = field(default_factory=new_id)
+    taxon_id: str | None = None
+    variety: str | None = None
+    year: int | None = None  # packed or harvested
+    supplier: str | None = None
+    quantity: str | None = None  # free text: "1 packet", "20 g"
+    viability_years: int | None = None  # overrides the family default
+    finished: bool = False
+    notes: str | None = None
+
+
+@dataclass(kw_only=True)
+class CropProfile(_Record):
+    """The user's correction of a species' crop data (built-in defaults in crops.json)."""
+
+    species: str
+    id: str = field(default_factory=new_id)
+    exposure: list[str] = field(default_factory=list)  # sun, partial, shade
+    hardiness_c: float | None = None  # lowest temperature tolerated
+    sow_indoor: list[int] = field(default_factory=list)  # months 1-12
+    sow_outdoor: list[int] = field(default_factory=list)
+    plant_out: list[int] = field(default_factory=list)
+    flowering: list[int] = field(default_factory=list)
+    harvest: list[int] = field(default_factory=list)
+    spacing_cm: int | None = None
+    notes: str | None = None
+
+
+@dataclass(kw_only=True)
 class Photo(_Record):
     """A picture stored under the HA media folder; ``file`` is relative to the homestead folder."""
 
@@ -302,6 +381,8 @@ _COLLECTIONS: dict[str, type[_Record]] = {
     "photos": Photo,
     "events": Event,
     "tasks": Task,
+    "seeds": SeedLot,
+    "crops": CropProfile,
 }
 
 
@@ -315,6 +396,8 @@ class HomesteadData:
     photos: dict[str, Photo] = field(default_factory=dict)
     events: dict[str, Event] = field(default_factory=dict)
     tasks: dict[str, Task] = field(default_factory=dict)
+    seeds: dict[str, SeedLot] = field(default_factory=dict)
+    crops: dict[str, CropProfile] = field(default_factory=dict)
 
     @classmethod
     def from_dict(cls, raw: dict[str, Any]) -> HomesteadData:

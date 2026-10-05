@@ -1,0 +1,1888 @@
+{
+ "_note": "Indicative values for a temperate climate (northern/central Italy). Months 1-12; hardiness = lowest temperature tolerated (°C). Corrections are stored per species.",
+ "crops": {
+  "Solanum lycopersicum": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": 2,
+   "sow_indoor": [
+    2,
+    3,
+    4
+   ],
+   "sow_outdoor": [
+    4,
+    5
+   ],
+   "plant_out": [
+    4,
+    5,
+    6
+   ],
+   "flowering": [
+    6,
+    7,
+    8
+   ],
+   "harvest": [
+    7,
+    8,
+    9,
+    10
+   ],
+   "spacing_cm": 50
+  },
+  "Capsicum annuum": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": 5,
+   "sow_indoor": [
+    2,
+    3
+   ],
+   "plant_out": [
+    5,
+    6
+   ],
+   "flowering": [
+    6,
+    7,
+    8
+   ],
+   "harvest": [
+    7,
+    8,
+    9,
+    10
+   ],
+   "spacing_cm": 40
+  },
+  "Solanum melongena": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": 5,
+   "sow_indoor": [
+    2,
+    3
+   ],
+   "plant_out": [
+    5,
+    6
+   ],
+   "flowering": [
+    6,
+    7,
+    8
+   ],
+   "harvest": [
+    7,
+    8,
+    9
+   ],
+   "spacing_cm": 50
+  },
+  "Solanum tuberosum": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": 0,
+   "sow_outdoor": [
+    3,
+    4
+   ],
+   "flowering": [
+    6,
+    7
+   ],
+   "harvest": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "spacing_cm": 35
+  },
+  "Cucurbita pepo": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": 2,
+   "sow_indoor": [
+    3,
+    4
+   ],
+   "sow_outdoor": [
+    4,
+    5,
+    6
+   ],
+   "plant_out": [
+    5
+   ],
+   "flowering": [
+    6,
+    7,
+    8
+   ],
+   "harvest": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "spacing_cm": 100
+  },
+  "Cucurbita maxima": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": 2,
+   "sow_indoor": [
+    3,
+    4
+   ],
+   "sow_outdoor": [
+    5
+   ],
+   "plant_out": [
+    5
+   ],
+   "flowering": [
+    6,
+    7,
+    8
+   ],
+   "harvest": [
+    9,
+    10
+   ],
+   "spacing_cm": 150
+  },
+  "Cucurbita moschata": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": 2,
+   "sow_indoor": [
+    3,
+    4
+   ],
+   "sow_outdoor": [
+    5
+   ],
+   "plant_out": [
+    5
+   ],
+   "flowering": [
+    6,
+    7,
+    8
+   ],
+   "harvest": [
+    9,
+    10
+   ],
+   "spacing_cm": 150
+  },
+  "Cucumis sativus": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": 4,
+   "sow_indoor": [
+    3,
+    4
+   ],
+   "sow_outdoor": [
+    5,
+    6
+   ],
+   "plant_out": [
+    5
+   ],
+   "flowering": [
+    6,
+    7,
+    8
+   ],
+   "harvest": [
+    7,
+    8,
+    9
+   ],
+   "spacing_cm": 50
+  },
+  "Cucumis melo": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": 5,
+   "sow_indoor": [
+    3,
+    4
+   ],
+   "sow_outdoor": [
+    5
+   ],
+   "plant_out": [
+    5
+   ],
+   "flowering": [
+    6,
+    7
+   ],
+   "harvest": [
+    7,
+    8
+   ],
+   "spacing_cm": 100
+  },
+  "Citrullus lanatus": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": 5,
+   "sow_indoor": [
+    4
+   ],
+   "sow_outdoor": [
+    5
+   ],
+   "plant_out": [
+    5
+   ],
+   "flowering": [
+    6,
+    7
+   ],
+   "harvest": [
+    7,
+    8
+   ],
+   "spacing_cm": 150
+  },
+  "Phaseolus vulgaris": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": 2,
+   "sow_outdoor": [
+    4,
+    5,
+    6,
+    7
+   ],
+   "flowering": [
+    6,
+    7,
+    8
+   ],
+   "harvest": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "spacing_cm": 15
+  },
+  "Phaseolus coccineus": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": 2,
+   "sow_outdoor": [
+    5,
+    6
+   ],
+   "flowering": [
+    7,
+    8,
+    9
+   ],
+   "harvest": [
+    8,
+    9,
+    10
+   ],
+   "spacing_cm": 20
+  },
+  "Pisum sativum": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -5,
+   "sow_outdoor": [
+    2,
+    3,
+    10,
+    11
+   ],
+   "flowering": [
+    4,
+    5
+   ],
+   "harvest": [
+    5,
+    6
+   ],
+   "spacing_cm": 5
+  },
+  "Vicia faba": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -8,
+   "sow_outdoor": [
+    2,
+    10,
+    11
+   ],
+   "flowering": [
+    3,
+    4
+   ],
+   "harvest": [
+    4,
+    5,
+    6
+   ],
+   "spacing_cm": 20
+  },
+  "Cicer arietinum": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -5,
+   "sow_outdoor": [
+    3,
+    4
+   ],
+   "flowering": [
+    5,
+    6
+   ],
+   "harvest": [
+    7,
+    8
+   ],
+   "spacing_cm": 15
+  },
+  "Lactuca sativa": {
+   "exposure": [
+    "sun",
+    "partial"
+   ],
+   "hardiness_c": -3,
+   "sow_indoor": [
+    2,
+    3
+   ],
+   "sow_outdoor": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "plant_out": [
+    3,
+    4,
+    5,
+    8,
+    9
+   ],
+   "harvest": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ],
+   "spacing_cm": 30
+  },
+  "Cichorium intybus": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -8,
+   "sow_outdoor": [
+    6,
+    7
+   ],
+   "plant_out": [
+    7,
+    8
+   ],
+   "harvest": [
+    1,
+    2,
+    10,
+    11,
+    12
+   ],
+   "spacing_cm": 30
+  },
+  "Cichorium endivia": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -5,
+   "sow_outdoor": [
+    6,
+    7
+   ],
+   "plant_out": [
+    7,
+    8
+   ],
+   "harvest": [
+    9,
+    10,
+    11,
+    12
+   ],
+   "spacing_cm": 30
+  },
+  "Eruca vesicaria": {
+   "exposure": [
+    "sun",
+    "partial"
+   ],
+   "hardiness_c": -5,
+   "sow_outdoor": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "harvest": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ],
+   "spacing_cm": 5
+  },
+  "Spinacia oleracea": {
+   "exposure": [
+    "sun",
+    "partial"
+   ],
+   "hardiness_c": -8,
+   "sow_outdoor": [
+    2,
+    3,
+    8,
+    9,
+    10
+   ],
+   "harvest": [
+    3,
+    4,
+    5,
+    10,
+    11,
+    12
+   ],
+   "spacing_cm": 10
+  },
+  "Beta vulgaris": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -5,
+   "sow_outdoor": [
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "harvest": [
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ],
+   "spacing_cm": 25
+  },
+  "Daucus carota": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -5,
+   "sow_outdoor": [
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "harvest": [
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ],
+   "spacing_cm": 5
+  },
+  "Raphanus sativus": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -5,
+   "sow_outdoor": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "harvest": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "spacing_cm": 5
+  },
+  "Allium cepa": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -10,
+   "sow_indoor": [
+    1,
+    2
+   ],
+   "sow_outdoor": [
+    2,
+    3,
+    9
+   ],
+   "plant_out": [
+    3,
+    4,
+    10
+   ],
+   "harvest": [
+    6,
+    7,
+    8
+   ],
+   "spacing_cm": 10
+  },
+  "Allium sativum": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -15,
+   "sow_outdoor": [
+    2,
+    3,
+    10,
+    11
+   ],
+   "harvest": [
+    6,
+    7
+   ],
+   "spacing_cm": 15
+  },
+  "Allium porrum": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -12,
+   "sow_indoor": [
+    2,
+    3
+   ],
+   "sow_outdoor": [
+    3,
+    4
+   ],
+   "plant_out": [
+    5,
+    6,
+    7
+   ],
+   "harvest": [
+    1,
+    2,
+    3,
+    9,
+    10,
+    11,
+    12
+   ],
+   "spacing_cm": 15
+  },
+  "Allium schoenoprasum": {
+   "exposure": [
+    "sun",
+    "partial"
+   ],
+   "hardiness_c": -20,
+   "sow_outdoor": [
+    3,
+    4,
+    5
+   ],
+   "flowering": [
+    5,
+    6,
+    7
+   ],
+   "harvest": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "spacing_cm": 20
+  },
+  "Brassica oleracea": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -10,
+   "sow_indoor": [
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "plant_out": [
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "harvest": [
+    1,
+    2,
+    3,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+   ],
+   "spacing_cm": 50
+  },
+  "Brassica rapa": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -5,
+   "sow_outdoor": [
+    8,
+    9
+   ],
+   "harvest": [
+    10,
+    11,
+    12
+   ],
+   "spacing_cm": 15
+  },
+  "Foeniculum vulgare": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -3,
+   "sow_outdoor": [
+    6,
+    7
+   ],
+   "plant_out": [
+    7,
+    8
+   ],
+   "harvest": [
+    9,
+    10,
+    11,
+    12
+   ],
+   "spacing_cm": 30
+  },
+  "Apium graveolens": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -3,
+   "sow_indoor": [
+    2,
+    3
+   ],
+   "plant_out": [
+    5,
+    6
+   ],
+   "harvest": [
+    8,
+    9,
+    10,
+    11
+   ],
+   "spacing_cm": 30
+  },
+  "Zea mays": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": 2,
+   "sow_outdoor": [
+    4,
+    5
+   ],
+   "flowering": [
+    7,
+    8
+   ],
+   "harvest": [
+    8,
+    9
+   ],
+   "spacing_cm": 30
+  },
+  "Asparagus officinalis": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -20,
+   "plant_out": [
+    3,
+    4
+   ],
+   "harvest": [
+    4,
+    5
+   ],
+   "spacing_cm": 40
+  },
+  "Cynara cardunculus": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -8,
+   "plant_out": [
+    3,
+    4,
+    9,
+    10
+   ],
+   "harvest": [
+    4,
+    5,
+    6
+   ],
+   "spacing_cm": 100
+  },
+  "Fragaria × ananassa": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -15,
+   "plant_out": [
+    3,
+    4,
+    8,
+    9
+   ],
+   "flowering": [
+    4,
+    5
+   ],
+   "harvest": [
+    5,
+    6
+   ],
+   "spacing_cm": 30
+  },
+  "Ocimum basilicum": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": 5,
+   "sow_indoor": [
+    3,
+    4
+   ],
+   "sow_outdoor": [
+    5,
+    6
+   ],
+   "plant_out": [
+    5
+   ],
+   "flowering": [
+    7,
+    8,
+    9
+   ],
+   "harvest": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "spacing_cm": 25
+  },
+  "Petroselinum crispum": {
+   "exposure": [
+    "partial"
+   ],
+   "hardiness_c": -10,
+   "sow_outdoor": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "harvest": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ],
+   "spacing_cm": 15
+  },
+  "Salvia rosmarinus": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -10,
+   "plant_out": [
+    3,
+    4,
+    9,
+    10
+   ],
+   "flowering": [
+    3,
+    4,
+    5,
+    9,
+    10
+   ],
+   "spacing_cm": 80
+  },
+  "Salvia officinalis": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -15,
+   "plant_out": [
+    3,
+    4,
+    9,
+    10
+   ],
+   "flowering": [
+    5,
+    6
+   ],
+   "spacing_cm": 50
+  },
+  "Thymus vulgaris": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -15,
+   "plant_out": [
+    3,
+    4
+   ],
+   "flowering": [
+    5,
+    6,
+    7
+   ],
+   "spacing_cm": 30
+  },
+  "Origanum vulgare": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -20,
+   "plant_out": [
+    3,
+    4
+   ],
+   "flowering": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "spacing_cm": 30
+  },
+  "Lavandula angustifolia": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -15,
+   "plant_out": [
+    3,
+    4,
+    9,
+    10
+   ],
+   "flowering": [
+    6,
+    7,
+    8
+   ],
+   "spacing_cm": 60
+  },
+  "Mentha spicata": {
+   "exposure": [
+    "partial"
+   ],
+   "hardiness_c": -20,
+   "plant_out": [
+    3,
+    4,
+    5
+   ],
+   "flowering": [
+    7,
+    8,
+    9
+   ],
+   "harvest": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "spacing_cm": 40
+  },
+  "Laurus nobilis": {
+   "exposure": [
+    "sun",
+    "partial"
+   ],
+   "hardiness_c": -10,
+   "plant_out": [
+    3,
+    4,
+    10
+   ],
+   "flowering": [
+    3,
+    4
+   ],
+   "spacing_cm": 150
+  },
+  "Malus domestica": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -30,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    4,
+    5
+   ],
+   "harvest": [
+    8,
+    9,
+    10
+   ],
+   "spacing_cm": 400
+  },
+  "Pyrus communis": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -25,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    3,
+    4
+   ],
+   "harvest": [
+    7,
+    8,
+    9,
+    10
+   ],
+   "spacing_cm": 400
+  },
+  "Prunus persica": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -20,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    3
+   ],
+   "harvest": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "spacing_cm": 400
+  },
+  "Prunus avium": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -25,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    3,
+    4
+   ],
+   "harvest": [
+    5,
+    6
+   ],
+   "spacing_cm": 500
+  },
+  "Prunus cerasus": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -25,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    4,
+    5
+   ],
+   "harvest": [
+    6,
+    7
+   ],
+   "spacing_cm": 400
+  },
+  "Prunus domestica": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -25,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    3,
+    4
+   ],
+   "harvest": [
+    7,
+    8,
+    9
+   ],
+   "spacing_cm": 400
+  },
+  "Prunus armeniaca": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -20,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    2,
+    3
+   ],
+   "harvest": [
+    6,
+    7
+   ],
+   "spacing_cm": 400
+  },
+  "Prunus dulcis": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -15,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    2,
+    3
+   ],
+   "harvest": [
+    8,
+    9
+   ],
+   "spacing_cm": 500
+  },
+  "Cydonia oblonga": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -20,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    4,
+    5
+   ],
+   "harvest": [
+    9,
+    10
+   ],
+   "spacing_cm": 400
+  },
+  "Ficus carica": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -12,
+   "plant_out": [
+    3,
+    4,
+    10,
+    11
+   ],
+   "harvest": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "spacing_cm": 400
+  },
+  "Olea europaea": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -10,
+   "plant_out": [
+    3,
+    4,
+    10
+   ],
+   "flowering": [
+    5,
+    6
+   ],
+   "harvest": [
+    10,
+    11,
+    12
+   ],
+   "spacing_cm": 500
+  },
+  "Vitis vinifera": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -18,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    5,
+    6
+   ],
+   "harvest": [
+    8,
+    9,
+    10
+   ],
+   "spacing_cm": 150
+  },
+  "Citrus × limon": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -3,
+   "plant_out": [
+    4,
+    5
+   ],
+   "flowering": [
+    3,
+    4,
+    5,
+    6
+   ],
+   "harvest": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+   ],
+   "spacing_cm": 300
+  },
+  "Juglans regia": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -25,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    4,
+    5
+   ],
+   "harvest": [
+    9,
+    10
+   ],
+   "spacing_cm": 1000
+  },
+  "Corylus avellana": {
+   "exposure": [
+    "sun",
+    "partial"
+   ],
+   "hardiness_c": -25,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    1,
+    2,
+    3
+   ],
+   "harvest": [
+    8,
+    9
+   ],
+   "spacing_cm": 400
+  },
+  "Castanea sativa": {
+   "exposure": [
+    "sun",
+    "partial"
+   ],
+   "hardiness_c": -20,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    6,
+    7
+   ],
+   "harvest": [
+    9,
+    10,
+    11
+   ],
+   "spacing_cm": 1000
+  },
+  "Actinidia deliciosa": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -12,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    5,
+    6
+   ],
+   "harvest": [
+    10,
+    11
+   ],
+   "spacing_cm": 400
+  },
+  "Diospyros kaki": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -15,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    5,
+    6
+   ],
+   "harvest": [
+    10,
+    11,
+    12
+   ],
+   "spacing_cm": 500
+  },
+  "Punica granatum": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -12,
+   "plant_out": [
+    3,
+    4,
+    10
+   ],
+   "flowering": [
+    5,
+    6,
+    7
+   ],
+   "harvest": [
+    9,
+    10
+   ],
+   "spacing_cm": 300
+  },
+  "Rubus idaeus": {
+   "exposure": [
+    "sun",
+    "partial"
+   ],
+   "hardiness_c": -25,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    5,
+    6
+   ],
+   "harvest": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "spacing_cm": 50
+  },
+  "Rubus fruticosus": {
+   "exposure": [
+    "sun",
+    "partial"
+   ],
+   "hardiness_c": -20,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    5,
+    6,
+    7
+   ],
+   "harvest": [
+    7,
+    8,
+    9
+   ],
+   "spacing_cm": 150
+  },
+  "Ribes rubrum": {
+   "exposure": [
+    "partial"
+   ],
+   "hardiness_c": -25,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    4
+   ],
+   "harvest": [
+    6,
+    7
+   ],
+   "spacing_cm": 120
+  },
+  "Vaccinium corymbosum": {
+   "exposure": [
+    "sun",
+    "partial"
+   ],
+   "hardiness_c": -25,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    4,
+    5
+   ],
+   "harvest": [
+    7,
+    8
+   ],
+   "spacing_cm": 150
+  },
+  "Quercus robur": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -30,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    4,
+    5
+   ],
+   "spacing_cm": 1000
+  },
+  "Quercus cerris": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -25,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    4,
+    5
+   ],
+   "spacing_cm": 1000
+  },
+  "Quercus pubescens": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -25,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    4,
+    5
+   ],
+   "spacing_cm": 1000
+  },
+  "Fagus sylvatica": {
+   "exposure": [
+    "partial",
+    "shade"
+   ],
+   "hardiness_c": -30,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    4,
+    5
+   ],
+   "spacing_cm": 1000
+  },
+  "Carpinus betulus": {
+   "exposure": [
+    "sun",
+    "partial"
+   ],
+   "hardiness_c": -30,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    4,
+    5
+   ],
+   "spacing_cm": 600
+  },
+  "Fraxinus excelsior": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -30,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    3,
+    4
+   ],
+   "spacing_cm": 1000
+  },
+  "Robinia pseudoacacia": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -30,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    5,
+    6
+   ],
+   "spacing_cm": 600
+  },
+  "Acer campestre": {
+   "exposure": [
+    "sun",
+    "partial"
+   ],
+   "hardiness_c": -30,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    4,
+    5
+   ],
+   "spacing_cm": 600
+  },
+  "Ostrya carpinifolia": {
+   "exposure": [
+    "sun",
+    "partial"
+   ],
+   "hardiness_c": -25,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    4,
+    5
+   ],
+   "spacing_cm": 600
+  },
+  "Rosa": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -20,
+   "plant_out": [
+    1,
+    2,
+    3,
+    11,
+    12
+   ],
+   "flowering": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "spacing_cm": 80
+  },
+  "Hydrangea": {
+   "exposure": [
+    "partial"
+   ],
+   "hardiness_c": -15,
+   "plant_out": [
+    3,
+    4,
+    10,
+    11
+   ],
+   "flowering": [
+    6,
+    7,
+    8,
+    9
+   ],
+   "spacing_cm": 120
+  },
+  "Tulipa": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -25,
+   "plant_out": [
+    10,
+    11
+   ],
+   "flowering": [
+    3,
+    4,
+    5
+   ],
+   "spacing_cm": 10
+  },
+  "Narcissus": {
+   "exposure": [
+    "sun",
+    "partial"
+   ],
+   "hardiness_c": -25,
+   "plant_out": [
+    9,
+    10,
+    11
+   ],
+   "flowering": [
+    2,
+    3,
+    4
+   ],
+   "spacing_cm": 10
+  },
+  "Dahlia": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": 0,
+   "plant_out": [
+    4,
+    5
+   ],
+   "flowering": [
+    7,
+    8,
+    9,
+    10
+   ],
+   "spacing_cm": 60
+  },
+  "Tagetes": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": 2,
+   "sow_indoor": [
+    3,
+    4
+   ],
+   "sow_outdoor": [
+    5
+   ],
+   "plant_out": [
+    5
+   ],
+   "flowering": [
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "spacing_cm": 25
+  },
+  "Helianthus annuus": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": 2,
+   "sow_outdoor": [
+    4,
+    5,
+    6
+   ],
+   "flowering": [
+    7,
+    8,
+    9
+   ],
+   "spacing_cm": 40
+  },
+  "Zinnia": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": 2,
+   "sow_indoor": [
+    4
+   ],
+   "sow_outdoor": [
+    5,
+    6
+   ],
+   "flowering": [
+    7,
+    8,
+    9,
+    10
+   ],
+   "spacing_cm": 30
+  },
+  "Calendula officinalis": {
+   "exposure": [
+    "sun"
+   ],
+   "hardiness_c": -5,
+   "sow_outdoor": [
+    3,
+    4,
+    9
+   ],
+   "flowering": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "spacing_cm": 30
+  }
+ }
+}

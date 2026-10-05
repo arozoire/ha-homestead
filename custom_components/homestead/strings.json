@@ -77,6 +77,17 @@
         "group": "Group (row, bed)"
       }
     },
+    "plant_type": {
+      "options": {
+        "tree": "Tree",
+        "shrub": "Shrub",
+        "vine": "Vine, climber",
+        "vegetable": "Vegetable",
+        "herb": "Aromatic herb",
+        "flower": "Flower",
+        "other": "Other"
+      }
+    },
     "initial_form": {
       "options": {
         "seed": "Seed",
@@ -132,6 +143,7 @@
         "greenhouse": "Greenhouse",
         "pots": "Pots",
         "lawn": "Lawn",
+        "woodland": "Woodland",
         "other": "Other"
       }
     },
@@ -154,14 +166,25 @@
         "problem": "Problem",
         "note": "Note",
         "removal": "End of crop",
-        "review": "Season review"
+        "review": "Season review",
+        "tillage": "Tillage (hoeing, digging)",
+        "weeding": "Weeding",
+        "mulching": "Mulching",
+        "mowing": "Mowing",
+        "clearing": "Woodland clearing",
+        "wood_cutting": "Firewood cutting",
+        "brushwood": "Branches, brushwood",
+        "foraging": "Foraging (mushrooms, chestnuts…)"
       }
     },
     "harvest_unit": {
       "options": {
         "kg": "kg",
         "pieces": "Pieces",
-        "l": "Litres"
+        "l": "Litres",
+        "q": "Quintals (100 kg)",
+        "stere": "Steres",
+        "m3": "Cubic metres"
       }
     },
     "abundance": {
@@ -169,6 +192,29 @@
         "poor": "Poor",
         "normal": "Normal",
         "abundant": "Abundant"
+      }
+    },
+    "month": {
+      "options": {
+        "1": "January",
+        "2": "February",
+        "3": "March",
+        "4": "April",
+        "5": "May",
+        "6": "June",
+        "7": "July",
+        "8": "August",
+        "9": "September",
+        "10": "October",
+        "11": "November",
+        "12": "December"
+      }
+    },
+    "exposure": {
+      "options": {
+        "sun": "Full sun",
+        "partial": "Partial shade",
+        "shade": "Shade"
       }
     }
   },
@@ -196,6 +242,10 @@
         "geometry": {
           "name": "Geometry",
           "description": "GeoJSON Polygon (longitude, latitude coordinates). The surface is calculated."
+        },
+        "species": {
+          "name": "Main species",
+          "description": "Main species of the zone (e.g. of a woodland): names, or objects with name and taxon_id."
         },
         "notes": {
           "name": "Notes",
@@ -230,6 +280,10 @@
         "geometry": {
           "name": "Geometry",
           "description": "GeoJSON Polygon (longitude, latitude coordinates). The surface is calculated."
+        },
+        "species": {
+          "name": "Main species",
+          "description": "Main species of the zone (e.g. of a woodland): names, or objects with name and taxon_id."
         },
         "notes": {
           "name": "Notes",
@@ -266,6 +320,10 @@
         "variety": {
           "name": "Variety",
           "description": "Cultivar or variety."
+        },
+        "plant_type": {
+          "name": "Plant type",
+          "description": "Tree, shrub, vegetable… (icon on the map)."
         },
         "kind": {
           "name": "Kind",
@@ -323,6 +381,10 @@
           "name": "Price",
           "description": "Purchase price; recorded as an expense."
         },
+        "seed_lot_id": {
+          "name": "Seed lot",
+          "description": "Seeds used (id of a seed lot)."
+        },
         "notes": {
           "name": "Notes",
           "description": "Free notes."
@@ -352,6 +414,10 @@
         "variety": {
           "name": "Variety",
           "description": "Cultivar or variety."
+        },
+        "plant_type": {
+          "name": "Plant type",
+          "description": "Tree, shrub, vegetable… (icon on the map)."
         },
         "kind": {
           "name": "Kind",
@@ -408,6 +474,10 @@
         "status": {
           "name": "Status",
           "description": "Active, dead or removed."
+        },
+        "seed_lot_id": {
+          "name": "Seed lot",
+          "description": "Seeds used (id of a seed lot)."
         },
         "notes": {
           "name": "Notes",
@@ -914,6 +984,164 @@
     "export": {
       "name": "Export data",
       "description": "Returns all HA Homestead data."
+    },
+    "add_seed_lot": {
+      "name": "Add seed lot",
+      "description": "Adds seeds to the inventory (packet, jar, own seeds).",
+      "fields": {
+        "species": {
+          "name": "Species",
+          "description": "Scientific or common name; optional with a linked taxon."
+        },
+        "taxon_id": {
+          "name": "Taxon",
+          "description": "Imported species (id)."
+        },
+        "variety": {
+          "name": "Variety",
+          "description": "Variety."
+        },
+        "year": {
+          "name": "Year",
+          "description": "Year packed or harvested: germination drops with age."
+        },
+        "supplier": {
+          "name": "Supplier",
+          "description": "Shop, seed swap, own seeds…"
+        },
+        "quantity": {
+          "name": "Quantity",
+          "description": "Free text: 1 packet, 20 g…"
+        },
+        "viability_years": {
+          "name": "Viability (years)",
+          "description": "How long these seeds keep germinating well; empty = typical value of the family."
+        },
+        "finished": {
+          "name": "Finished",
+          "description": "No seeds left."
+        },
+        "price": {
+          "name": "Price",
+          "description": "Purchase price; recorded as a seed expense."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "update_seed_lot": {
+      "name": "Update seed lot",
+      "description": "Changes the given fields of a seed lot.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Seed lot id."
+        },
+        "species": {
+          "name": "Species",
+          "description": "Scientific or common name; optional with a linked taxon."
+        },
+        "taxon_id": {
+          "name": "Taxon",
+          "description": "Imported species (id)."
+        },
+        "variety": {
+          "name": "Variety",
+          "description": "Variety."
+        },
+        "year": {
+          "name": "Year",
+          "description": "Year packed or harvested: germination drops with age."
+        },
+        "supplier": {
+          "name": "Supplier",
+          "description": "Shop, seed swap, own seeds…"
+        },
+        "quantity": {
+          "name": "Quantity",
+          "description": "Free text: 1 packet, 20 g…"
+        },
+        "viability_years": {
+          "name": "Viability (years)",
+          "description": "How long these seeds keep germinating well; empty = typical value of the family."
+        },
+        "finished": {
+          "name": "Finished",
+          "description": "No seeds left."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "delete_seed_lot": {
+      "name": "Delete seed lot",
+      "description": "Deletes a seed lot; plantings keep their data.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Seed lot id."
+        }
+      }
+    },
+    "set_crop_profile": {
+      "name": "Set crop data",
+      "description": "Stores your values for a species (exposure, hardiness, sowing, planting, flowering and harvest months); they replace the built-in ones.",
+      "fields": {
+        "species": {
+          "name": "Species",
+          "description": "Scientific name."
+        },
+        "exposure": {
+          "name": "Exposure",
+          "description": "Sun, partial shade, shade."
+        },
+        "hardiness_c": {
+          "name": "Hardiness",
+          "description": "Lowest temperature tolerated."
+        },
+        "sow_indoor": {
+          "name": "Sow indoors",
+          "description": "Months for sowing in a seed tray."
+        },
+        "sow_outdoor": {
+          "name": "Sow outdoors",
+          "description": "Months for direct sowing."
+        },
+        "plant_out": {
+          "name": "Plant out",
+          "description": "Months for planting or transplanting."
+        },
+        "flowering": {
+          "name": "Flowering",
+          "description": "Flowering months."
+        },
+        "harvest": {
+          "name": "Harvest",
+          "description": "Harvest months."
+        },
+        "spacing_cm": {
+          "name": "Spacing",
+          "description": "Distance between plants."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "delete_crop_profile": {
+      "name": "Reset crop data",
+      "description": "Deletes your values for a species: the built-in ones apply again.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Crop data id."
+        }
+      }
     }
   },
   "common": {
