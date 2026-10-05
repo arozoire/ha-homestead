@@ -7,9 +7,27 @@ from typing import Any
 import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult, OptionsFlow
 from homeassistant.core import callback
-from homeassistant.helpers.selector import BooleanSelector, EntitySelector, EntitySelectorConfig
+from homeassistant.helpers.selector import (
+    BooleanSelector,
+    EntitySelector,
+    EntitySelectorConfig,
+    SelectSelector,
+    SelectSelectorConfig,
+    SelectSelectorMode,
+    TimeSelector,
+)
 
-from .const import CONF_HUMIDITY, CONF_OPEN_METEO, CONF_RAIN, CONF_SOIL, CONF_TEMPERATURE, DOMAIN
+from .const import (
+    CONF_HUMIDITY,
+    CONF_NOTIFY,
+    CONF_NOTIFY_TIME,
+    CONF_OPEN_METEO,
+    CONF_RAIN,
+    CONF_SOIL,
+    CONF_TEMPERATURE,
+    DEFAULT_NOTIFY_TIME,
+    DOMAIN,
+)
 
 SENSORS = {
     CONF_TEMPERATURE: "temperature",
@@ -34,7 +52,14 @@ class HomesteadConfigFlow(ConfigFlow, domain=DOMAIN):
 
 
 class HomesteadOptionsFlow(OptionsFlow):
-    """All sensors are optional: what is missing comes from Open-Meteo."""
+    """Weather sensors (optional: what is missing comes from Open-Meteo) and phone reminders."""
+
+    def _notify_services(self) -> list[str]:
+        """Phones first (mobile_app_*), then the other notify services."""
+        names = [n for n in self.hass.services.async_services_for_domain("notify") if n != "send_message"]
+        return sorted(
+            (f"notify.{n}" for n in names), key=lambda n: (not n.startswith("notify.mobile_app_"), n)
+        )
 
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         if user_input is not None:
@@ -48,6 +73,15 @@ class HomesteadOptionsFlow(OptionsFlow):
                     for key, device_class in SENSORS.items()
                 },
                 vol.Optional(CONF_OPEN_METEO, default=True): BooleanSelector(),
+                vol.Optional(CONF_NOTIFY): SelectSelector(
+                    SelectSelectorConfig(
+                        options=self._notify_services(),
+                        multiple=True,
+                        custom_value=True,
+                        mode=SelectSelectorMode.DROPDOWN,
+                    )
+                ),
+                vol.Optional(CONF_NOTIFY_TIME, default=DEFAULT_NOTIFY_TIME): TimeSelector(),
             }
         )
         return self.async_show_form(

@@ -13,3 +13,8 @@ CONF_HUMIDITY = "humidity_sensor"
 CONF_RAIN = "rain_sensor"
 CONF_SOIL = "soil_moisture_sensor"
 CONF_OPEN_METEO = "open_meteo"
+
+# Options: phone reminders for planned activities.
+CONF_NOTIFY = "notify_services"
+CONF_NOTIFY_TIME = "notify_time"
+DEFAULT_NOTIFY_TIME = "08:00:00"

@@ -15,6 +15,7 @@ from homeassistant.helpers.typing import ConfigType
 from .const import DOMAIN
 from .panel import async_register_panel, async_unregister_panel
 from .photos import PhotoView, delete_all, photo_dir
+from .reminders import async_setup_reminders
 from .services import async_register_services
 from .store import HomesteadStore
 from .weather import async_refresh
@@ -47,7 +48,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: HomesteadConfigEntry) ->
     # Snapshots of events whose window was still open, or saved while offline, get completed later.
     entry.async_on_unload(async_track_time_interval(hass, refresh_weather, WEATHER_REFRESH))
     entry.async_create_background_task(hass, refresh_weather(), f"{DOMAIN} weather refresh")
+    entry.async_on_unload(async_setup_reminders(hass, store, dict(entry.options)))
+    # New options (sensors, phones, time) apply at once.
+    entry.async_on_unload(entry.add_update_listener(_async_options_updated))
     return True
+
+
+async def _async_options_updated(hass: HomeAssistant, entry: HomesteadConfigEntry) -> None:
+    await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: HomesteadConfigEntry) -> bool:

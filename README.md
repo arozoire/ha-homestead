@@ -23,6 +23,7 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 | Bilancio | Evento *⭐ Bilancio annata* (voto 1–5, raccolto scarso/normale/abbondante, da rifare, da evitare); chiesto subito dopo *🏁 Fine coltura* e, da settembre, nella scheda pianta |
 | Meteo | Ogni evento registra il meteo della settimana prima (+3 giorni dopo per trattamenti e semine): temperatura media/min/max, umidità, pioggia, umidità del suolo. Dai tuoi sensori (statistiche a lungo termine di HA, scelti in *Configura*), il resto da Open-Meteo (gratis, senza account) |
 | Attività pianificate | *📋 Da fare* nella scheda Diario e nella scheda pianta: tipo, pianta o zona, data, *ogni anno*; ✔ apre l'evento del diario già compilato. Servizi `add_task`, `update_task`, `delete_task`, `complete_task` |
+| Promemoria sul telefono | Ora e telefoni in *Configura*; tocco → form del diario precompilato; ✔ Fatto dalla notifica |
 | To-do e calendario HA | `todo.ha_homestead_garden_tasks` (spuntare = registrare nel diario oggi; si possono aggiungere voci dall'app HA) e `calendar.ha_homestead_garden` (attività pianificate + ✔ eventi fatti) |
 | Inizio pianta | Il diario mostra in fondo semina, messa a dimora/trapianto o "presente da ~N anni" (dai dati della pianta) |
 | Comodità | 🗺️ nell'intestazione nasconde/mostra la mappa; *+ Raccolta* (ripete l'ultima quantità), *🔁 Ripeti l'anno prossimo* (nuova coltura con stessa specie, varietà e zona) |
@@ -50,25 +51,17 @@ I dati sono anche nei backup di Home Assistant (`.storage/homestead.data`); il b
 
 Mappe: satellite **Esri World Imagery** (gratuito, senza account né pubblicità) e **OpenStreetMap**. Leaflet è incluso nell'integrazione, nessuna libreria scaricata da CDN; solo le tessere della mappa arrivano da internet.
 
-### Notifica sul telefono il giorno di un'attività
+### Impostazioni
 
-```yaml
-automation:
-  - alias: Giardino - attività di oggi
-    triggers:
-      - trigger: calendar
-        event: start
-        entity_id: calendar.ha_homestead_garden
-        offset: "8:00:00"   # alle 8 del mattino
-    conditions:
-      - condition: template
-        value_template: "{{ not trigger.calendar_event.summary.startswith('✔') }}"
-    actions:
-      - action: notify.mobile_app_il_tuo_telefono
-        data:
-          title: "🌱 Giardino"
-          message: "{{ trigger.calendar_event.summary }}"
-```
+*Impostazioni → Dispositivi e servizi → HA Homestead → **Configura*** (oppure ⚙️ in alto nel pannello):
+
+| Impostazione | Default |
+|---|---|
+| Sensori meteo (temperatura, umidità, pioggia, umidità suolo) | nessuno: si usa Open-Meteo |
+| **Invia i promemoria a** (uno o più `notify.mobile_app_…`) | nessuno: niente notifiche |
+| **Ora dei promemoria** | 08:00 |
+
+Ogni giorno, all'ora scelta, arriva una notifica per ogni attività prevista oggi (più un riepilogo delle attività in ritardo). **Toccandola** si apre il pannello sul form del diario già compilato; il pulsante **✔ Fatto** la registra subito nel diario.
 
 Entità create: `sensor.ha_homestead_plantings`, `sensor.ha_homestead_expenses_this_year`, `sensor.ha_homestead_tools_needing_service`, `todo.ha_homestead_garden_tasks`, `calendar.ha_homestead_garden` (tutte sotto un solo dispositivo "HA Homestead").
 

@@ -14,13 +14,15 @@
     "step": {
       "init": {
         "title": "Weather for the diary",
-        "description": "Each diary event records the weather of the week before it (and of the 3 days after for treatments and sowings). Choose your sensors; anything missing comes from Open-Meteo (free, no account).",
+        "description": "Each diary event records the weather of the week before it (and of the 3 days after for treatments and sowings). Choose your sensors; anything missing comes from Open-Meteo (free, no account). Reminders: planned activities due today are sent to the chosen phones at the chosen time; tapping one opens the diary form already filled in.",
         "data": {
           "temperature_sensor": "Outdoor temperature",
           "humidity_sensor": "Outdoor humidity",
           "rain_sensor": "Rain (total, mm)",
           "soil_moisture_sensor": "Soil moisture",
-          "open_meteo": "Use Open-Meteo for missing data"
+          "open_meteo": "Use Open-Meteo for missing data",
+          "notify_services": "Send reminders to",
+          "notify_time": "Reminder time"
         }
       }
     }
@@ -913,5 +915,10 @@
       "name": "Export data",
       "description": "Returns all HA Homestead data."
     }
+  },
+  "common": {
+    "notification_title": "🌱 Garden",
+    "notification_done": "✔ Done",
+    "notification_late": "{count} overdue activities"
   }
 }

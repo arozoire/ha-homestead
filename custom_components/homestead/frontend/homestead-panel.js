@@ -6,7 +6,7 @@ const ZONE_KINDS = ["vegetable_garden", "orchard", "flower_bed", "greenhouse", "
 
 const TEXT = {
   en: {
-    title: "Garden",
+    panelTitle: "Garden",
     satellite: "Satellite",
     map: "Map",
     tabPlantings: "Plantings",
@@ -58,6 +58,7 @@ const TEXT = {
     ev_transplanted: "Transplanted",
     ev_since: "Here for ~{years} years (since ~{year})",
     toggleMap: "Show / hide the map",
+    settings: "Settings: weather sensors, reminders",
     ev_review: "Season review",
     rating: "Rating",
     abundance: "Harvest",
@@ -225,7 +226,7 @@ const TEXT = {
     local: "imported",
   },
   it: {
-    title: "Giardino",
+    panelTitle: "Giardino",
     satellite: "Satellite",
     map: "Mappa",
     tabPlantings: "Piante",
@@ -277,6 +278,7 @@ const TEXT = {
     ev_transplanted: "Trapianto",
     ev_since: "Presente da ~{years} anni (dal ~{year})",
     toggleMap: "Mostra / nascondi la mappa",
+    settings: "Impostazioni: sensori meteo, promemoria",
     ev_review: "Bilancio annata",
     rating: "Voto",
     abundance: "Raccolto",
@@ -671,8 +673,20 @@ class HomesteadPanel extends HTMLElement {
         "header",
         {},
         this._menu,
-        h("h1", {}, this.t("title")),
+        h("h1", {}, this.t("panelTitle")),
         h("button", { className: "map-toggle", title: this.t("toggleMap"), onclick: () => this._toggleMap() }, "🗺️"),
+        h(
+          "button",
+          {
+            className: "map-toggle",
+            title: this.t("settings"),
+            onclick: () => {
+              history.pushState(null, "", "/config/integrations/integration/homestead");
+              window.dispatchEvent(new CustomEvent("location-changed"));
+            },
+          },
+          "⚙️",
+        ),
       ),
       h("div", { className: "body" }, this._mapWrap, this._aside),
     );
@@ -758,6 +772,10 @@ class HomesteadPanel extends HTMLElement {
         this._syncMap();
         if (first) this._fitAll();
         first = false;
+        if (window.location.search.includes("task=")) {
+          this._openTaskFromUrl();
+          if (this._eventForm) return;
+        }
         if (this._form) this._refreshForm();
         else if (this._zoneForm) this._refreshDiaryBox();
         else if (this._eventForm) this._fillEventPhotos();
@@ -1619,8 +1637,27 @@ class HomesteadPanel extends HTMLElement {
     }
   }
 
-  _date(iso) {
-    return iso ? new Date(`${iso}T12:00:00`).toLocaleDateString(this._lang()) : "";
+  _date(iso, withYear = true) {
+    if (!iso) return "";
+    const [y, m, d] = iso.slice(0, 10).split("-");
+    const order = this._dateOrder();
+    if (order === "YMD") return withYear ? `${y}-${m}-${d}` : `${m}-${d}`;
+    const parts = order === "MDY" ? [m, d] : [d, m];
+    return [...parts, ...(withYear ? [y] : [])].join("/");
+  }
+
+  // Follows the HA profile "Date format"; with "language" an English UI stays day-first unless it is en-US.
+  _dateOrder() {
+    const setting = this._hass.locale?.date_format;
+    if (["DMY", "MDY", "YMD"].includes(setting)) return setting;
+    const locale = setting === "system" ? undefined : this._hass.locale?.language || this._hass.language || "en";
+    if (locale === "en") return "DMY";
+    const sample = new Intl.DateTimeFormat(locale, { year: "numeric", month: "2-digit", day: "2-digit" })
+      .formatToParts(new Date(2026, 10, 25))
+      .map((p) => p.type[0])
+      .filter((c) => "ymd".includes(c))
+      .join("");
+    return { ymd: "YMD", mdy: "MDY" }[sample] || "DMY";
   }
 
   _openExpense(expense) {
@@ -2261,17 +2298,7 @@ class HomesteadPanel extends HTMLElement {
                   type: "button",
                   className: "tick",
                   title: this.t("done"),
-                  onclick: () =>
-                    this._newEvent(
-                      {
-                        kind: t.kind,
-                        planting_id: t.planting_id,
-                        zone_id: t.zone_id,
-                        notes: [t.title, t.notes].filter(Boolean).join(" — ") || null,
-                        task_id: t.id,
-                      },
-                      back,
-                    ),
+                  onclick: () => this._completeFromTask(t, back),
                 },
                 "✔",
               ),
@@ -2289,6 +2316,35 @@ class HomesteadPanel extends HTMLElement {
           )
         : h("p", { className: "hint" }, this.t("nothingToDo")),
     );
+  }
+
+  /** The diary form filled in from a planned activity (✔, or a tapped phone notification). */
+  _completeFromTask(t, back = null) {
+    this._newEvent(
+      {
+        kind: t.kind,
+        planting_id: t.planting_id,
+        zone_id: t.zone_id,
+        notes: [t.title, t.notes].filter(Boolean).join(" — ") || null,
+        task_id: t.id,
+      },
+      back,
+    );
+  }
+
+  /** `/homestead?task=<id>` (from a notification) opens that task once the data has arrived. */
+  _openTaskFromUrl() {
+    const id = new URLSearchParams(window.location.search).get("task");
+    if (!id || !this._loaded) return;
+    history.replaceState(history.state, "", window.location.pathname);
+    const task = this._data.tasks.find((t) => t.id === id);
+    if (task && !task.done_on) this._completeFromTask(task);
+    else if (task) this._setTab("diary");
+  }
+
+  set route(route) {
+    this._route = route;
+    if (this._hass) this._openTaskFromUrl();
   }
 
   _plantingTodo(f) {
@@ -2427,7 +2483,7 @@ class HomesteadPanel extends HTMLElement {
     const day = (e) => {
       const w = e.weather;
       const extra = w ? ` ${w.t_mean != null ? `${Math.round(w.t_mean)}°` : ""}${w.rain_mm != null ? ` ${Math.round(w.rain_mm)}mm` : ""}` : "";
-      return `${this._date(e.done_on).replace(/\/\d{4}$|\.\d{4}$/, "")} ${MOON_ICONS[e.moon_phase] || ""}${extra}`;
+      return `${this._date(e.done_on, false)} ${MOON_ICONS[e.moon_phase] || ""}${extra}`;
     };
     const sown = of("sowing")[0] || (planting.sown_on?.startsWith(year) ? { done_on: planting.sown_on, moon_phase: planting.sown_moon_phase } : null);
     const planted = planting.planted_on?.startsWith(year) ? { done_on: planting.planted_on, moon_phase: planting.moon_phase } : null;
