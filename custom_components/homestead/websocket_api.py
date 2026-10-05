@@ -123,6 +123,12 @@ async def ws_backup_import(
     except BackupError as err:
         connection.send_error(msg["id"], "invalid_format", str(err))
         return
+    # The JSON has no image bytes: keep only photo records whose file is still on this instance.
+    folder = photo_dir(hass)
+    exists = await hass.async_add_executor_job(
+        lambda: {i for i, p in data.photos.items() if (folder / p.file).is_file()}
+    )
+    data.photos = {i: p for i, p in data.photos.items() if i in exists}
     store.data = data
     await store.async_save()
     connection.send_result(msg["id"], summary(data))

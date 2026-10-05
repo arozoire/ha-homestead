@@ -105,3 +105,23 @@ async def test_photos_follow_planting_and_entry_removal(
     await hass.config_entries.async_remove(entry.entry_id)
     await hass.async_block_till_done()
     assert not photo_dir(hass).exists()
+
+
+async def test_restore_keeps_only_photos_with_files(hass: HomeAssistant, tmp_path, hass_ws_client) -> None:
+    entry = await _setup(hass, tmp_path)
+    planting = await _call(hass, "add_planting", {"name": "Melo", "species": "Malus domestica"})
+    ws = await hass_ws_client(hass)
+    content = base64.b64encode(JPEG).decode()
+    for msg_id in (1, 2):
+        await ws.send_json(
+            {"id": msg_id, "type": "homestead/photo/upload", "planting_id": planting, "content": content}
+        )
+        await ws.receive_json()
+    await ws.send_json({"id": 3, "type": "homestead/backup/export"})
+    backup = (await ws.receive_json())["result"]
+    lost = backup["data"]["photos"][0]
+    (photo_dir(hass) / lost["file"]).unlink()
+
+    await ws.send_json({"id": 4, "type": "homestead/backup/import", "backup": backup})
+    assert (await ws.receive_json())["result"]["photos"] == 1
+    assert lost["id"] not in entry.runtime_data.data.photos
