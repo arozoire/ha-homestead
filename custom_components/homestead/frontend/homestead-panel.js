@@ -58,6 +58,7 @@ const TEXT = {
     ev_transplanted: "Transplanted",
     ev_since: "Here for ~{years} years (since ~{year})",
     toggleMap: "Show / hide the map",
+    settings: "Settings: weather sensors, reminders",
     ev_review: "Season review",
     rating: "Rating",
     abundance: "Harvest",
@@ -277,6 +278,7 @@ const TEXT = {
     ev_transplanted: "Trapianto",
     ev_since: "Presente da ~{years} anni (dal ~{year})",
     toggleMap: "Mostra / nascondi la mappa",
+    settings: "Impostazioni: sensori meteo, promemoria",
     ev_review: "Bilancio annata",
     rating: "Voto",
     abundance: "Raccolto",
@@ -673,6 +675,18 @@ class HomesteadPanel extends HTMLElement {
         this._menu,
         h("h1", {}, this.t("title")),
         h("button", { className: "map-toggle", title: this.t("toggleMap"), onclick: () => this._toggleMap() }, "🗺️"),
+        h(
+          "button",
+          {
+            className: "map-toggle",
+            title: this.t("settings"),
+            onclick: () => {
+              history.pushState(null, "", "/config/integrations/integration/homestead");
+              window.dispatchEvent(new CustomEvent("location-changed"));
+            },
+          },
+          "⚙️",
+        ),
       ),
       h("div", { className: "body" }, this._mapWrap, this._aside),
     );
@@ -758,6 +772,10 @@ class HomesteadPanel extends HTMLElement {
         this._syncMap();
         if (first) this._fitAll();
         first = false;
+        if (window.location.search.includes("task=")) {
+          this._openTaskFromUrl();
+          if (this._eventForm) return;
+        }
         if (this._form) this._refreshForm();
         else if (this._zoneForm) this._refreshDiaryBox();
         else if (this._eventForm) this._fillEventPhotos();
@@ -2261,17 +2279,7 @@ class HomesteadPanel extends HTMLElement {
                   type: "button",
                   className: "tick",
                   title: this.t("done"),
-                  onclick: () =>
-                    this._newEvent(
-                      {
-                        kind: t.kind,
-                        planting_id: t.planting_id,
-                        zone_id: t.zone_id,
-                        notes: [t.title, t.notes].filter(Boolean).join(" — ") || null,
-                        task_id: t.id,
-                      },
-                      back,
-                    ),
+                  onclick: () => this._completeFromTask(t, back),
                 },
                 "✔",
               ),
@@ -2289,6 +2297,35 @@ class HomesteadPanel extends HTMLElement {
           )
         : h("p", { className: "hint" }, this.t("nothingToDo")),
     );
+  }
+
+  /** The diary form filled in from a planned activity (✔, or a tapped phone notification). */
+  _completeFromTask(t, back = null) {
+    this._newEvent(
+      {
+        kind: t.kind,
+        planting_id: t.planting_id,
+        zone_id: t.zone_id,
+        notes: [t.title, t.notes].filter(Boolean).join(" — ") || null,
+        task_id: t.id,
+      },
+      back,
+    );
+  }
+
+  /** `/homestead?task=<id>` (from a notification) opens that task once the data has arrived. */
+  _openTaskFromUrl() {
+    const id = new URLSearchParams(window.location.search).get("task");
+    if (!id || !this._loaded) return;
+    history.replaceState(history.state, "", window.location.pathname);
+    const task = this._data.tasks.find((t) => t.id === id);
+    if (task && !task.done_on) this._completeFromTask(task);
+    else if (task) this._setTab("diary");
+  }
+
+  set route(route) {
+    this._route = route;
+    if (this._hass) this._openTaskFromUrl();
   }
 
   _plantingTodo(f) {

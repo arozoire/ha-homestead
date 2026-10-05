@@ -14,13 +14,15 @@
     "step": {
       "init": {
         "title": "Meteo per il diario",
-        "description": "Ogni evento del diario registra il meteo della settimana prima (e dei 3 giorni dopo per trattamenti e semine). Scegli i tuoi sensori; quello che manca arriva da Open-Meteo (gratuito, senza account).",
+        "description": "Ogni evento del diario registra il meteo della settimana prima (e dei 3 giorni dopo per trattamenti e semine). Scegli i tuoi sensori; quello che manca arriva da Open-Meteo (gratuito, senza account). Promemoria: le attività previste per oggi vengono inviate ai telefoni scelti all'ora scelta; toccandone una si apre il form del diario già compilato.",
         "data": {
           "temperature_sensor": "Temperatura esterna",
           "humidity_sensor": "Umidità esterna",
           "rain_sensor": "Pioggia (totale, mm)",
           "soil_moisture_sensor": "Umidità del suolo",
-          "open_meteo": "Usa Open-Meteo per i dati mancanti"
+          "open_meteo": "Usa Open-Meteo per i dati mancanti",
+          "notify_services": "Invia i promemoria a",
+          "notify_time": "Ora dei promemoria"
         }
       }
     }
@@ -913,5 +915,10 @@
       "name": "Esporta dati",
       "description": "Restituisce tutti i dati di HA Homestead."
     }
+  },
+  "common": {
+    "notification_title": "🌱 Giardino",
+    "notification_done": "✔ Fatto",
+    "notification_late": "{count} attività in ritardo"
   }
 }
