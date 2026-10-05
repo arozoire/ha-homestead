@@ -8,6 +8,7 @@ from enum import StrEnum
 from typing import Any, Self
 from uuid import uuid4
 
+from .geo import polygon_area_m2
 from .moon import moon_phase
 
 
@@ -24,6 +25,16 @@ class PlantingStatus(StrEnum):
     ACTIVE = "active"
     DEAD = "dead"
     REMOVED = "removed"
+
+
+class ZoneKind(StrEnum):
+    VEGETABLE_GARDEN = "vegetable_garden"
+    ORCHARD = "orchard"
+    FLOWER_BED = "flower_bed"
+    GREENHOUSE = "greenhouse"
+    POTS = "pots"
+    LAWN = "lawn"
+    OTHER = "other"
 
 
 class InitialForm(StrEnum):
@@ -77,7 +88,27 @@ class Zone(_Record):
     parent_id: str | None = None
     kind: str | None = None
     area_id: str | None = None
+    geometry: dict[str, Any] | None = None
+    area_m2: float | None = None
     notes: str | None = None
+
+    def __post_init__(self) -> None:
+        self.area_m2 = polygon_area_m2(self.geometry)
+
+
+@dataclass(kw_only=True)
+class Taxon(_Record):
+    """A species (or genus, variety…) imported from open data sources."""
+
+    scientific_name: str
+    id: str = field(default_factory=new_id)
+    common_names: dict[str, str] = field(default_factory=dict)
+    family: str | None = None
+    genus: str | None = None
+    rank: str | None = None
+    gbif_key: int | None = None
+    wikidata_id: str | None = None
+    imported_on: str | None = None
 
 
 @dataclass(kw_only=True)
@@ -85,6 +116,7 @@ class Planting(_Record):
     name: str
     species: str
     id: str = field(default_factory=new_id)
+    taxon_id: str | None = None
     variety: str | None = None
     kind: str = PlantingKind.SINGLE
     quantity: int = 1
@@ -133,6 +165,7 @@ class Tool(_Record):
 
 _COLLECTIONS: dict[str, type[_Record]] = {
     "zones": Zone,
+    "taxa": Taxon,
     "plantings": Planting,
     "expenses": Expense,
     "tools": Tool,
@@ -142,6 +175,7 @@ _COLLECTIONS: dict[str, type[_Record]] = {
 @dataclass
 class HomesteadData:
     zones: dict[str, Zone] = field(default_factory=dict)
+    taxa: dict[str, Taxon] = field(default_factory=dict)
     plantings: dict[str, Planting] = field(default_factory=dict)
     expenses: dict[str, Expense] = field(default_factory=dict)
     tools: dict[str, Tool] = field(default_factory=dict)
@@ -158,6 +192,23 @@ class HomesteadData:
 
     def to_dict(self) -> dict[str, list[dict[str, Any]]]:
         return {name: [r.to_dict() for r in getattr(self, name).values()] for name in _COLLECTIONS}
+
+    def zone_descendants(self, zone_id: str) -> set[str]:
+        children = {z.id for z in self.zones.values() if z.parent_id == zone_id}
+        for child in list(children):
+            children |= self.zone_descendants(child)
+        return children
+
+    def find_taxon(
+        self, gbif_key: int | None, wikidata_id: str | None, scientific_name: str | None
+    ) -> Taxon | None:
+        for taxon in self.taxa.values():
+            if (gbif_key and taxon.gbif_key == gbif_key) or (
+                wikidata_id and taxon.wikidata_id == wikidata_id
+            ):
+                return taxon
+        name = (scientific_name or "").lower()
+        return next((t for t in self.taxa.values() if name and t.scientific_name.lower() == name), None)
 
     def active_plantings(self) -> list[Planting]:
         return [p for p in self.plantings.values() if p.status == PlantingStatus.ACTIVE]

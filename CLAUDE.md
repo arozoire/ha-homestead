@@ -10,6 +10,11 @@ Integrazione custom Home Assistant (HACS) per orto, frutteto e homesteading. Spe
 - `store.py` — persistenza JSON in `.storage/homestead.data`, segnale dispatcher a ogni salvataggio.
 - `services.py` — servizi registrati in `async_setup`, rispondono con l'id creato.
 - `sensor.py` — 3 sensori aggregati.
+- `panel.py` — registra il pannello sidebar (`/homestead`) e serve `frontend/` su `/homestead_static`.
+- `geo.py` — puro (no HA): area poligoni (sferica), validazione Polygon, parsing KML/KMZ/GeoJSON. Geometrie GeoJSON `[lon, lat]`.
+- `sources/` — adattatori fonti specie (puri, solo aiohttp): `gbif.py`, `wikidata.py`; stessa interfaccia `search`/`details`. `species.py` li combina (Wikidata prima per i nomi comuni, GBIF per famiglia/genere), cerca anche nelle specie locali, `upsert_taxon` evita doppioni.
+- `websocket_api.py` — `homestead/species/search` (locali + remote, cache 24 h in memoria, `offline` se le fonti non rispondono), `homestead/subscribe` (dati a ogni salvataggio), `homestead/parse_map` (file base64 → punti e poligoni; l'abbinamento lo fa il pannello).
+- `frontend/homestead-panel.js` — web component **vanilla** (niente Lit, niente build); Leaflet ESM minificato in `frontend/vendor/`. Testi del pannello nel dizionario `TEXT` del JS (it/en). Scritture tramite servizi (`call_service` con `return_response`).
 - Lingua UI: italiano (v1), inglese di base; `strings.json` = inglese, `translations/it.json` = italiano. Aggiornarli insieme.
 
 ## Comandi
@@ -21,7 +26,12 @@ pytest
 
 ## Stato e prossimi passi
 - v0.1 fatta: zone, piante (con fase lunare all'impianto), spese, attrezzi, export, 3 sensori, 8 test.
-- Prossimo: **pannello in sidebar** (JS/Lit servito dall'integrazione) con mappa satellitare (Leaflet, tile non Google) per posizionare le piante a clic; import KML/GeoJSON.
+- v0.2 fatta: pannello "Giardino" con mappa satellitare Esri + OSM, crea/posiziona/trascina/modifica/elimina piante; servizi `update_planting`, `delete_planting`; 12 test.
+- v0.3 fatta: zone con poligono (disegno a clic, superficie, gerarchia, `update_zone`/`delete_zone`), import KML/KMZ/GeoJSON con abbinamento per nome, zona proposta in automatico; licenza MIT; 23 test.
+- v0.4 fatta: `Taxon` (specie importate in `.storage`, nessuna entità), `Planting.taxon_id`, servizio `import_taxon`, ricerca specie nel pannello; 30 test (HTTP simulato con `aioclient_mock`).
+- Rete della sessione cloud: `api.gbif.org` e `www.wikidata.org` bloccati, parsing scritto sui formati documentati → da verificare dal vivo.
+- Prossimo: caratteristiche colturali (rusticità, esposizione, fioritura/raccolta) da fonti §5; tipo di pianta (albero da frutto, ortaggio…) sul taxon.
+- Prova del pannello: harness Playwright con `hass` finto (non nel repo); in CI solo i test Python.
 - Poi: import specie da Wikidata/GBIF (adattatori sostituibili, cache locale).
 
 ## Preferenze dell'autore

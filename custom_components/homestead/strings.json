@@ -29,6 +29,18 @@
     },
     "unknown_reference": {
       "message": "Unknown {field}: {value}."
+    },
+    "zone_cycle": {
+      "message": "A zone cannot be inside itself or one of its sub-zones."
+    },
+    "incomplete_position": {
+      "message": "Latitude and longitude must be given together."
+    },
+    "species_required": {
+      "message": "Give a species or link an imported species."
+    },
+    "sources_unavailable": {
+      "message": "GBIF and Wikidata are not answering: try again later."
     }
   },
   "selector": {
@@ -75,6 +87,24 @@
         "needs_service": "Needs service",
         "broken": "Broken"
       }
+    },
+    "planting_status": {
+      "options": {
+        "active": "Active",
+        "dead": "Dead",
+        "removed": "Removed"
+      }
+    },
+    "zone_kind": {
+      "options": {
+        "vegetable_garden": "Vegetable garden",
+        "orchard": "Orchard",
+        "flower_bed": "Flower bed",
+        "greenhouse": "Greenhouse",
+        "pots": "Pots",
+        "lawn": "Lawn",
+        "other": "Other"
+      }
     }
   },
   "services": {
@@ -92,15 +122,63 @@
         },
         "kind": {
           "name": "Kind",
-          "description": "Vegetable garden, orchard, flower bed, greenhouse…"
+          "description": "Kind of zone."
         },
         "area_id": {
           "name": "Home Assistant area",
           "description": "Optional link to an existing area."
         },
+        "geometry": {
+          "name": "Geometry",
+          "description": "GeoJSON Polygon (longitude, latitude coordinates). The surface is calculated."
+        },
         "notes": {
           "name": "Notes",
           "description": "Free notes."
+        }
+      }
+    },
+    "update_zone": {
+      "name": "Update zone",
+      "description": "Changes the given fields of a zone (including its polygon).",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Zone ID."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Zone name."
+        },
+        "parent_id": {
+          "name": "Parent zone",
+          "description": "ID of the parent zone."
+        },
+        "kind": {
+          "name": "Kind",
+          "description": "Kind of zone."
+        },
+        "area_id": {
+          "name": "Home Assistant area",
+          "description": "Optional link to an existing area."
+        },
+        "geometry": {
+          "name": "Geometry",
+          "description": "GeoJSON Polygon (longitude, latitude coordinates). The surface is calculated."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "delete_zone": {
+      "name": "Delete zone",
+      "description": "Deletes a zone; sub-zones and plantings move to its parent.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Zone ID."
         }
       }
     },
@@ -114,7 +192,11 @@
         },
         "species": {
           "name": "Species",
-          "description": "Scientific or common name."
+          "description": "Scientific or common name; optional when an imported species is linked."
+        },
+        "taxon_id": {
+          "name": "Imported species",
+          "description": "ID of an imported species (import_taxon service); without a species name, its scientific name is used."
         },
         "variety": {
           "name": "Variety",
@@ -167,6 +249,104 @@
         "notes": {
           "name": "Notes",
           "description": "Free notes."
+        }
+      }
+    },
+    "update_planting": {
+      "name": "Update planting",
+      "description": "Changes the given fields of a planting (including its position).",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Planting ID."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Your own name for this planting."
+        },
+        "species": {
+          "name": "Species",
+          "description": "Scientific or common name; optional when an imported species is linked."
+        },
+        "taxon_id": {
+          "name": "Imported species",
+          "description": "ID of an imported species (import_taxon service); without a species name, its scientific name is used."
+        },
+        "variety": {
+          "name": "Variety",
+          "description": "Cultivar or variety."
+        },
+        "kind": {
+          "name": "Kind",
+          "description": "Single plant or group."
+        },
+        "quantity": {
+          "name": "Quantity",
+          "description": "Number of plants (groups only)."
+        },
+        "planted_on": {
+          "name": "Planted on",
+          "description": "Planting date."
+        },
+        "initial_form": {
+          "name": "Initial form",
+          "description": "What was planted."
+        },
+        "initial_height_cm": {
+          "name": "Initial height",
+          "description": "Estimated height when planted."
+        },
+        "rootstock": {
+          "name": "Rootstock",
+          "description": "For grafted fruit trees."
+        },
+        "supplier": {
+          "name": "Supplier",
+          "description": "Where it was bought."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "ID of the zone."
+        },
+        "latitude": {
+          "name": "Latitude",
+          "description": "Position on the map."
+        },
+        "longitude": {
+          "name": "Longitude",
+          "description": "Position on the map."
+        },
+        "status": {
+          "name": "Status",
+          "description": "Active, dead or removed."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "delete_planting": {
+      "name": "Delete planting",
+      "description": "Deletes a planting entered by mistake. Linked expenses are kept. For a dead plant use the status instead.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Planting ID."
+        }
+      }
+    },
+    "import_taxon": {
+      "name": "Import species",
+      "description": "Imports a species from GBIF/Wikidata (common names, family, genus) and stores it locally. Returns its id; an existing one is updated.",
+      "fields": {
+        "gbif_key": {
+          "name": "GBIF key",
+          "description": "Species number on gbif.org."
+        },
+        "wikidata_id": {
+          "name": "Wikidata ID",
+          "description": "E.g. Q18674606."
         }
       }
     },

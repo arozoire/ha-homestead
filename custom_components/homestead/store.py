@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.storage import Store
 
-from .const import SIGNAL_DATA_UPDATED, STORAGE_KEY, STORAGE_VERSION
+from .const import DOMAIN, SIGNAL_DATA_UPDATED, STORAGE_KEY, STORAGE_VERSION
 from .models import HomesteadData
 
 
@@ -28,3 +29,10 @@ class HomesteadStore:
 
     async def async_remove(self) -> None:
         await self._store.async_remove()
+
+
+def get_store(hass: HomeAssistant) -> HomesteadStore | None:
+    for entry in hass.config_entries.async_entries(DOMAIN):
+        if entry.state is ConfigEntryState.LOADED:
+            return entry.runtime_data
+    return None

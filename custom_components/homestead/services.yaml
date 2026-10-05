@@ -9,14 +9,68 @@ add_zone:
         text:
     kind:
       selector:
-        text:
+        select:
+          translation_key: zone_kind
+          options:
+            - vegetable_garden
+            - orchard
+            - flower_bed
+            - greenhouse
+            - pots
+            - lawn
+            - other
     area_id:
       selector:
         area:
+    geometry:
+      selector:
+        object:
     notes:
       selector:
         text:
           multiline: true
+
+update_zone:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+    name:
+      selector:
+        text:
+    parent_id:
+      selector:
+        text:
+    kind:
+      selector:
+        select:
+          translation_key: zone_kind
+          options:
+            - vegetable_garden
+            - orchard
+            - flower_bed
+            - greenhouse
+            - pots
+            - lawn
+            - other
+    area_id:
+      selector:
+        area:
+    geometry:
+      selector:
+        object:
+    notes:
+      selector:
+        text:
+          multiline: true
+
+delete_zone:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
 
 add_planting:
   fields:
@@ -26,8 +80,10 @@ add_planting:
       selector:
         text:
     species:
-      required: true
       example: "Malus domestica"
+      selector:
+        text:
+    taxon_id:
       selector:
         text:
     variety:
@@ -105,6 +161,119 @@ add_planting:
       selector:
         text:
           multiline: true
+
+update_planting:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+    name:
+      example: "Melo vicino al pozzo"
+      selector:
+        text:
+    species:
+      example: "Malus domestica"
+      selector:
+        text:
+    taxon_id:
+      selector:
+        text:
+    variety:
+      example: "Renetta"
+      selector:
+        text:
+    kind:
+      selector:
+        select:
+          translation_key: planting_kind
+          options:
+            - single
+            - group
+    quantity:
+      selector:
+        number:
+          min: 1
+          max: 10000
+          mode: box
+    planted_on:
+      selector:
+        date:
+    initial_form:
+      selector:
+        select:
+          translation_key: initial_form
+          options:
+            - seed
+            - cutting
+            - bulb
+            - bare_root
+            - potted
+            - one_year
+            - two_years
+            - other
+    initial_height_cm:
+      selector:
+        number:
+          min: 0
+          max: 2000
+          unit_of_measurement: cm
+          mode: box
+    rootstock:
+      selector:
+        text:
+    supplier:
+      selector:
+        text:
+    zone_id:
+      selector:
+        text:
+    latitude:
+      selector:
+        number:
+          min: -90
+          max: 90
+          step: any
+          mode: box
+    longitude:
+      selector:
+        number:
+          min: -180
+          max: 180
+          step: any
+          mode: box
+    status:
+      selector:
+        select:
+          translation_key: planting_status
+          options:
+            - active
+            - dead
+            - removed
+    notes:
+      selector:
+        text:
+          multiline: true
+
+delete_planting:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+
+import_taxon:
+  fields:
+    gbif_key:
+      example: 3001509
+      selector:
+        number:
+          min: 1
+          mode: box
+    wikidata_id:
+      example: "Q18674606"
+      selector:
+        text:
 
 add_expense:
   fields:
