@@ -43,6 +43,10 @@ const TEXT = {
     ev_problem: "Problem",
     ev_note: "Note",
     ev_removal: "End of crop",
+    ev_planted: "Planted out",
+    ev_transplanted: "Transplanted",
+    ev_since: "Here for ~{years} years (since ~{year})",
+    toggleMap: "Show / hide the map",
     ev_review: "Season review",
     rating: "Rating",
     abundance: "Harvest",
@@ -247,6 +251,10 @@ const TEXT = {
     ev_problem: "Problema",
     ev_note: "Nota",
     ev_removal: "Fine coltura",
+    ev_planted: "Messa a dimora",
+    ev_transplanted: "Trapianto",
+    ev_since: "Presente da ~{years} anni (dal ~{year})",
+    toggleMap: "Mostra / nascondi la mappa",
     ev_review: "Bilancio annata",
     rating: "Voto",
     abundance: "Raccolto",
@@ -429,6 +437,8 @@ const EVENT_ICONS = {
   removal: "🏁",
   review: "⭐",
 };
+// Start of a planting, shown in the diary from its own dates (not stored as events).
+const START_ICONS = { sowing: "🌱", planted: "🪴", since: "🌳" };
 const MOON_ICONS = {
   new_moon: "🌑",
   waxing_crescent: "🌒",
@@ -468,11 +478,15 @@ const STYLE = `
   .body { flex: 1; display: flex; min-height: 0; }
   .map { flex: 1; min-width: 0; position: relative; }
   .map.placing .leaflet-container { cursor: crosshair; }
-  aside { width: 360px; flex: none; overflow-y: auto; border-left: 1px solid var(--divider-color);
+  aside { width: 440px; max-width: 45%; flex: none; overflow-y: auto; border-left: 1px solid var(--divider-color);
     background: var(--card-background-color); box-sizing: border-box; padding: 12px; }
   .narrow .body { flex-direction: column; }
-  .narrow .map { min-height: 45%; }
-  .narrow aside { width: auto; height: 45%; border-left: none; border-top: 1px solid var(--divider-color); }
+  .narrow .map { flex: 0 0 33%; min-height: 0; }
+  .narrow aside { width: auto; max-width: none; height: auto; flex: 1; border-left: none; border-top: 1px solid var(--divider-color); }
+  .no-map .map { display: none; }
+  .no-map aside { width: auto; max-width: none; flex: 1; border: none; }
+  .map-toggle { background: none; border: none; color: inherit; font-size: 20px; padding: 4px 8px; }
+  .event.start { opacity: .85; }
   .banner { position: absolute; z-index: 1000; top: 10px; left: 50%; transform: translateX(-50%);
     background: var(--primary-color); color: var(--text-primary-color, #fff); padding: 8px 12px; border-radius: 8px;
     display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center;
@@ -625,7 +639,13 @@ class HomesteadPanel extends HTMLElement {
     this._layout = h(
       "div",
       { className: `layout${this._narrow ? " narrow" : ""}` },
-      h("header", {}, this._menu, h("h1", {}, this.t("title"))),
+      h(
+        "header",
+        {},
+        this._menu,
+        h("h1", {}, this.t("title")),
+        h("button", { className: "map-toggle", title: this.t("toggleMap"), onclick: () => this._toggleMap() }, "🗺️"),
+      ),
       h("div", { className: "body" }, this._mapWrap, this._aside),
     );
     root.append(
@@ -634,8 +654,23 @@ class HomesteadPanel extends HTMLElement {
       this._layout,
     );
     this._createMap();
+    try {
+      if (localStorage.getItem("homestead-map-hidden")) this._toggleMap(true);
+    } catch {
+      // storage unavailable: the map stays visible
+    }
     this._render();
     if (this.isConnected) this._subscribe();
+  }
+
+  _toggleMap(hidden = !this._layout.classList.contains("no-map")) {
+    this._layout.classList.toggle("no-map", hidden);
+    try {
+      localStorage.setItem("homestead-map-hidden", hidden ? "1" : "");
+    } catch {
+      // private mode: the choice is just not remembered
+    }
+    if (!hidden) setTimeout(() => this._map.invalidateSize(), 0);
   }
 
   _createMap() {
@@ -1731,6 +1766,26 @@ class HomesteadPanel extends HTMLElement {
     );
   }
 
+  /** Diary lines derived from the planting's dates: sowing, planting out, or "here since ~year". */
+  _startEvents(planting) {
+    const virtual = (kind, done_on, moon_phase) => ({
+      id: `start:${kind}:${planting.id}`,
+      virtual: true,
+      kind,
+      done_on,
+      moon_phase,
+      planting_id: planting.id,
+    });
+    const real = new Set(this._data.events.filter((e) => e.planting_id === planting.id).map((e) => `${e.kind}:${e.done_on}`));
+    const out = [];
+    if (planting.sown_on && !real.has(`sowing:${planting.sown_on}`)) {
+      out.push(virtual("sowing", planting.sown_on, planting.sown_moon_phase));
+    }
+    if (planting.planted_on) out.push(virtual("planted", planting.planted_on, planting.moon_phase));
+    if (!out.length && planting.birth_year) out.push(virtual("since", `${planting.birth_year}-01-01`, null));
+    return out;
+  }
+
   /** `back` is the planting or zone card to return to after saving. */
   _openEvent(event, back = null) {
     this._clearSelection();
@@ -1759,6 +1814,15 @@ class HomesteadPanel extends HTMLElement {
     this._showMessage(`✓ ${this.t(key, { name })}`);
   }
 
+  _eventLabel(e) {
+    if (e.kind === "since") {
+      const year = Number(e.done_on.slice(0, 4));
+      return this.t("ev_since", { years: new Date().getFullYear() - year, year });
+    }
+    if (e.kind === "planted" && this._planting(e.planting_id)?.sown_on) return this.t("ev_transplanted");
+    return this.t(`ev_${e.kind}`);
+  }
+
   _renderTimeline(events, showTarget = true, back = null) {
     const sorted = [...events].sort((a, b) => b.done_on.localeCompare(a.done_on));
     const days = [];
@@ -1773,12 +1837,22 @@ class HomesteadPanel extends HTMLElement {
         h(
           "div",
           { className: "day" },
-          h("div", { className: "sub" }, `${this._date(day.date)} · ${MOON_ICONS[day.moon] || ""} ${this.t(`moon_${day.moon}`)}`),
+          h(
+            "div",
+            { className: "sub" },
+            day.events[0].kind === "since"
+              ? `~${day.date.slice(0, 4)}`
+              : `${this._date(day.date)}${day.moon ? ` · ${MOON_ICONS[day.moon]} ${this.t(`moon_${day.moon}`)}` : ""}`,
+          ),
           day.events.map((e) =>
             h(
               "button",
-              { type: "button", className: "event", onclick: () => this._openEvent(e, back) },
-              h("span", { className: "icon" }, EVENT_ICONS[e.kind] || "📝"),
+              {
+                type: "button",
+                className: `event${e.virtual ? " start" : ""}`,
+                onclick: () => (e.virtual ? this._select(e.planting_id) : this._openEvent(e, back)),
+              },
+              h("span", { className: "icon" }, e.virtual ? START_ICONS[e.kind] : EVENT_ICONS[e.kind] || "📝"),
               h(
                 "span",
                 { className: "main" },
@@ -1786,7 +1860,7 @@ class HomesteadPanel extends HTMLElement {
                   "span",
                   {},
                   [
-                    this.t(`ev_${e.kind}`),
+                    this._eventLabel(e),
                     showTarget ? this._targetName(e) : null,
                     e.quantity ? `${e.quantity} ${this.t(`u_${e.unit || "kg"}`)}` : null,
                     [e.product, e.dose].filter(Boolean).join(" "),
@@ -1826,7 +1900,11 @@ class HomesteadPanel extends HTMLElement {
   _refreshDiaryBox() {
     if (!this._diaryEl || !this._diaryTarget) return;
     const events = this._eventsFor(this._diaryTarget);
-    const recent = [...events].sort((a, b) => b.done_on.localeCompare(a.done_on)).slice(0, 5);
+    const planting = this._diaryTarget.planting_id && this._planting(this._diaryTarget.planting_id);
+    const recent = [
+      ...[...events].sort((a, b) => b.done_on.localeCompare(a.done_on)).slice(0, 5),
+      ...(planting ? this._startEvents(planting) : []),
+    ];
     this._diaryEl.replaceChildren(
       ...[
         recent.length
@@ -1853,7 +1931,8 @@ class HomesteadPanel extends HTMLElement {
   _renderDiary() {
     const f = this._diaryFilter;
     const years = [...new Set(this._data.events.map((e) => e.done_on.slice(0, 4)))].sort().reverse();
-    const events = this._data.events.filter((e) => {
+    const all = [...this._data.events, ...this._data.plantings.flatMap((p) => this._startEvents(p))];
+    const events = all.filter((e) => {
       if (f.kind && e.kind !== f.kind) return false;
       if (f.year && !e.done_on.startsWith(f.year)) return false;
       if (f.zone) {
