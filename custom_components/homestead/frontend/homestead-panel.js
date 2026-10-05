@@ -42,6 +42,24 @@ const TEXT = {
     ev_grafting: "Grafting",
     ev_problem: "Problem",
     ev_note: "Note",
+    ev_removal: "End of crop",
+    ev_review: "Season review",
+    rating: "Rating",
+    abundance: "Harvest",
+    ab_poor: "poor",
+    ab_normal: "normal",
+    ab_abundant: "abundant",
+    keep: "✅ To repeat",
+    avoid: "❌ To avoid",
+    seasons: "📊 Seasons",
+    noSeasons: "No history yet: record sowing, pruning, harvests and a season review.",
+    reviewMissing: "⭐ How did {year} go?",
+    writeReview: "Season review",
+    quickHarvest: "+ Harvest",
+    repeat: "🔁 Repeat next year",
+    repeated: "Created: {name}",
+    weatherSource: "weather: {source}",
+    treatments: "{count} treatments",
     u_kg: "kg",
     u_pieces: "pieces",
     u_l: "L",
@@ -228,6 +246,24 @@ const TEXT = {
     ev_grafting: "Innesto",
     ev_problem: "Problema",
     ev_note: "Nota",
+    ev_removal: "Fine coltura",
+    ev_review: "Bilancio annata",
+    rating: "Voto",
+    abundance: "Raccolto",
+    ab_poor: "scarso",
+    ab_normal: "normale",
+    ab_abundant: "abbondante",
+    keep: "✅ Da rifare",
+    avoid: "❌ Da evitare",
+    seasons: "📊 Annate",
+    noSeasons: "Ancora nessuno storico: registra semina, potature, raccolti e un bilancio d'annata.",
+    reviewMissing: "⭐ Com'è andato il {year}?",
+    writeReview: "Bilancio annata",
+    quickHarvest: "+ Raccolta",
+    repeat: "🔁 Ripeti l'anno prossimo",
+    repeated: "Creata: {name}",
+    weatherSource: "meteo: {source}",
+    treatments: "{count} trattamenti",
     u_kg: "kg",
     u_pieces: "pezzi",
     u_l: "L",
@@ -390,6 +426,8 @@ const EVENT_ICONS = {
   grafting: "🔀",
   problem: "🐛",
   note: "📝",
+  removal: "🏁",
+  review: "⭐",
 };
 const MOON_ICONS = {
   new_moon: "🌑",
@@ -484,6 +522,16 @@ const STYLE = `
   .dates { display: grid; gap: 10px; }
   .dates [hidden] { display: none; }
   form + .taxon { margin-top: 16px; }
+  .stars { display: flex; gap: 4px; }
+  .star { font-size: 26px; line-height: 1; padding: 0 4px; border: none; background: none; color: var(--disabled-text-color, #bbb); }
+  .star.on, .stars-read { color: #ffb300; }
+  .review { display: grid; gap: 10px; }
+  .weather { color: var(--secondary-text-color); }
+  .seasons { margin-top: 16px; display: grid; gap: 8px; }
+  .season { padding: 8px 10px; border-radius: 6px; border: 1px solid var(--divider-color); display: grid; gap: 3px; }
+  .season.current { border-color: var(--primary-color); }
+  .season-head { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .review-ask { border-color: #ffb300; text-align: left; }
   .income { color: var(--success-color, #43a047); }
   .kinds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
   .kinds button { display: grid; justify-items: center; gap: 2px; padding: 6px 2px; font-size: 12px; }
@@ -1174,6 +1222,7 @@ class HomesteadPanel extends HTMLElement {
     if (this._positionEl) this._positionEl.textContent = this._positionText();
     this._fillPhotos();
     this._refreshDiaryBox();
+    if (this._seasonsEl && p) this._seasonsEl.replaceChildren(this._seasonsBox(p));
   }
 
   _positionText() {
@@ -1344,7 +1393,9 @@ class HomesteadPanel extends HTMLElement {
             )
           : null,
       ),
+      f.id ? this._plantingActions(f) : null,
       f.id ? this._plantingExpenses(f) : null,
+      f.id ? (this._seasonsEl = h("div", {}, this._seasonsBox(f))) : null,
       f.id ? this._diaryBox({ planting_id: f.id }) : null,
       this._photosSection(f),
     ];
@@ -1743,7 +1794,9 @@ class HomesteadPanel extends HTMLElement {
                     .filter(Boolean)
                     .join(" — "),
                 ),
+                e.kind === "review" ? this._reviewLine(e) : null,
                 e.notes ? h("span", { className: "sub" }, e.notes) : null,
+                e.weather ? h("span", { className: "sub weather" }, weatherText(e.weather)) : null,
               ),
             ),
           ),
@@ -1843,7 +1896,16 @@ class HomesteadPanel extends HTMLElement {
       const phase = iso ? moonPhase(iso) : null;
       moonEl.textContent = phase ? `${MOON_ICONS[phase]} ${this.t(`moon_${phase}`)}` : "";
     };
+    extras.review = h(
+      "div",
+      { className: "review" },
+      this._starsField(f.rating),
+      this._selectField(f, "abundance", [["", "—"], ...["poor", "normal", "abundant"].map((a) => [a, this.t(`ab_${a}`)])]),
+      h("label", {}, this.t("keep"), h("textarea", { name: "keep", rows: 2, value: f.keep ?? "" })),
+      h("label", {}, this.t("avoid"), h("textarea", { name: "avoid", rows: 2, value: f.avoid ?? "" })),
+    );
     const showExtras = () => {
+      extras.review.hidden = kindInput.value !== "review";
       extras.product.hidden = !["fertilizing", "treatment"].includes(kindInput.value);
       extras.harvest.hidden = kindInput.value !== "harvest";
     };
@@ -1922,6 +1984,7 @@ class HomesteadPanel extends HTMLElement {
       h("div", { className: "row date-moon" }, date, moonEl),
       extras.product,
       extras.harvest,
+      extras.review,
       money,
       this._notes(f),
       f.id ? this._eventPhotosEl : null,
@@ -1964,6 +2027,10 @@ class HomesteadPanel extends HTMLElement {
       product: v.product?.trim() || null,
       dose: v.dose?.trim() || null,
       quantity: v.kind === "harvest" && v.quantity ? Number(v.quantity) : null,
+      rating: v.kind === "review" && v.rating ? Number(v.rating) : null,
+      abundance: v.kind === "review" ? v.abundance || null : null,
+      keep: v.kind === "review" ? v.keep?.trim() || null : null,
+      avoid: v.kind === "review" ? v.avoid?.trim() || null : null,
       unit: v.kind === "harvest" ? v.unit || "kg" : null,
       notes: v.notes?.trim() || null,
     };
@@ -1985,7 +2052,178 @@ class HomesteadPanel extends HTMLElement {
         return;
       }
     }
+    if (data.kind === "removal" && !id) {
+      // End of a crop: ask for the season review right away.
+      const back = this._eventBack;
+      const target = data.planting_id ? { planting_id: data.planting_id } : { zone_id: data.zone_id };
+      this._openEvent({ kind: "review", done_on: data.done_on, ...target }, back);
+      this._showMessage(`✓ ${this.t("saved", { name: this.t("ev_removal") })}`);
+      return;
+    }
     this._eventDone(this.t(`ev_${data.kind}`));
+  }
+
+  _starsField(value) {
+    const input = h("input", { type: "hidden", name: "rating", value: value ?? "" });
+    const stars = [1, 2, 3, 4, 5].map((n) =>
+      h(
+        "button",
+        {
+          type: "button",
+          className: "star",
+          onclick: () => {
+            input.value = input.value === String(n) ? "" : String(n);
+            paint();
+          },
+        },
+        "★",
+      ),
+    );
+    const paint = () => stars.forEach((b, i) => b.classList.toggle("on", i < Number(input.value || 0)));
+    paint();
+    return h("label", {}, this.t("rating"), h("div", { className: "stars" }, stars), input);
+  }
+
+  _reviewLine(e) {
+    return h(
+      "span",
+      { className: "sub" },
+      [
+        e.rating ? "★".repeat(e.rating) + "☆".repeat(5 - e.rating) : null,
+        e.abundance ? `${this.t("abundance")}: ${this.t(`ab_${e.abundance}`)}` : null,
+        e.keep ? `${this.t("keep")}: ${e.keep}` : null,
+        e.avoid ? `${this.t("avoid")}: ${e.avoid}` : null,
+      ]
+        .filter(Boolean)
+        .join(" · "),
+    );
+  }
+
+  // ---------- seasons ----------
+
+  /** Plantings of the same crop over the years: same imported species, else same species text. */
+  _relatedPlantings(planting) {
+    const key = (p) => (p.taxon_id ? `t:${p.taxon_id}` : `s:${p.species.trim().toLowerCase()}`);
+    return this._data.plantings.filter((p) => key(p) === key(planting));
+  }
+
+  /** One row per planting and year: what was done, how it went, with the weather of key moments. */
+  _seasonRows(planting) {
+    const rows = new Map();
+    const row = (p, year) => {
+      const id = `${year}:${p.id}`;
+      if (!rows.has(id)) rows.set(id, { year, planting: p, events: [] });
+      return rows.get(id);
+    };
+    for (const p of this._relatedPlantings(planting)) {
+      for (const e of this._eventsFor({ planting_id: p.id })) row(p, e.done_on.slice(0, 4)).events.push(e);
+      for (const date of [p.sown_on, p.planted_on].filter(Boolean)) row(p, date.slice(0, 4));
+    }
+    return [...rows.values()].sort((a, b) => b.year.localeCompare(a.year) || a.planting.name.localeCompare(b.planting.name));
+  }
+
+  _seasonsBox(planting) {
+    const rows = this._seasonRows(planting);
+    const several = new Set(rows.map((r) => r.planting.id)).size > 1;
+    const year = String(new Date().getFullYear());
+    const thisYear = rows.find((r) => r.year === year && r.planting.id === planting.id);
+    const reviewed = thisYear?.events.some((e) => e.kind === "review" && e.planting_id === planting.id);
+    const askReview = thisYear && !reviewed && (planting.status !== "active" || new Date().getMonth() >= 8);
+    return h(
+      "div",
+      { className: "seasons" },
+      h("h3", {}, this.t("seasons")),
+      askReview
+        ? h(
+            "button",
+            {
+              type: "button",
+              className: "review-ask",
+              onclick: () => this._newEvent({ kind: "review", planting_id: planting.id }, { planting_id: planting.id }),
+            },
+            `${this.t("reviewMissing", { year })} → ${this.t("writeReview")}`,
+          )
+        : null,
+      rows.length
+        ? rows.map((r) => this._seasonCard(r, several, r.planting.id === planting.id))
+        : h("p", { className: "hint" }, this.t("noSeasons")),
+    );
+  }
+
+  _seasonCard({ year, planting, events }, several, current) {
+    const of = (kind) => events.filter((e) => e.kind === kind).sort((a, b) => a.done_on.localeCompare(b.done_on));
+    const review = of("review").at(-1);
+    const day = (e) => {
+      const w = e.weather;
+      const extra = w ? ` ${w.t_mean != null ? `${Math.round(w.t_mean)}°` : ""}${w.rain_mm != null ? ` ${Math.round(w.rain_mm)}mm` : ""}` : "";
+      return `${this._date(e.done_on).replace(/\/\d{4}$|\.\d{4}$/, "")} ${MOON_ICONS[e.moon_phase] || ""}${extra}`;
+    };
+    const sown = of("sowing")[0] || (planting.sown_on?.startsWith(year) ? { done_on: planting.sown_on, moon_phase: planting.sown_moon_phase } : null);
+    const planted = planting.planted_on?.startsWith(year) ? { done_on: planting.planted_on, moon_phase: planting.moon_phase } : null;
+    const harvests = of("harvest");
+    const totals = {};
+    harvests.forEach((e) => e.quantity && (totals[e.unit || "kg"] = (totals[e.unit || "kg"] || 0) + e.quantity));
+    const harvestText = Object.entries(totals).map(([u, q]) => `${Math.round(q * 10) / 10} ${this.t(`u_${u}`)}`).join(" + ");
+    const parts = [
+      sown ? `🌱 ${day(sown)}` : null,
+      planted ? `🪴 ${day(planted)}` : null,
+      ...of("pruning").map((e) => `✂️ ${day(e)}`),
+      ...of("fertilizing").map((e) => `🌿 ${day(e)}`),
+      of("treatment").length ? `🧪 ${this.t("treatments", { count: of("treatment").length })}` : null,
+      harvestText || harvests.length ? `🍎 ${harvestText || harvests.length}` : review?.abundance ? `🍎 ${this.t(`ab_${review.abundance}`)}` : null,
+      ...of("removal").map((e) => `🏁 ${day(e)}`),
+    ].filter(Boolean);
+    return h(
+      "div",
+      { className: `season${current ? " current" : ""}` },
+      h(
+        "div",
+        { className: "season-head" },
+        h("strong", {}, year),
+        several ? h("span", {}, [planting.name, planting.variety].filter(Boolean).join(" · ")) : planting.variety ? h("span", {}, planting.variety) : null,
+        this._zone(planting.zone_id) ? h("span", { className: "sub" }, this._zone(planting.zone_id).name) : null,
+        review?.rating ? h("span", { className: "stars-read" }, "★".repeat(review.rating) + "☆".repeat(5 - review.rating)) : null,
+      ),
+      parts.length ? h("div", { className: "sub" }, parts.join(" · ")) : null,
+      review?.keep ? h("div", { className: "sub" }, `${this.t("keep")}: ${review.keep}`) : null,
+      review?.avoid ? h("div", { className: "sub" }, `${this.t("avoid")}: ${review.avoid}`) : null,
+    );
+  }
+
+  _plantingActions(f) {
+    const last = this._data.events
+      .filter((e) => e.kind === "harvest" && e.planting_id === f.id)
+      .sort((a, b) => b.done_on.localeCompare(a.done_on))[0];
+    return h(
+      "div",
+      { className: "actions" },
+      h(
+        "button",
+        {
+          type: "button",
+          onclick: () =>
+            this._newEvent(
+              { kind: "harvest", planting_id: f.id, quantity: last?.quantity, unit: last?.unit || "kg" },
+              { planting_id: f.id },
+            ),
+        },
+        this.t("quickHarvest"),
+      ),
+      h(
+        "button",
+        {
+          type: "button",
+          onclick: async () => {
+            const result = await this._call("repeat_planting", { id: f.id });
+            if (!result) return;
+            const copy = { ...f, id: result.id, name: result.name, sown_on: null, planted_on: null, status: "active" };
+            this._select(result.id, copy);
+            this._showMessage(`✓ ${this.t("repeated", { name: result.name })}`);
+          },
+        },
+        this.t("repeat"),
+      ),
+    );
   }
 
   async _deleteEvent() {
@@ -2252,6 +2490,15 @@ function moonPhase(iso) {
   const days = Math.round((Date.UTC(...iso.split("-").map((v, i) => Number(v) - (i === 1 ? 1 : 0))) - Date.UTC(2000, 0, 6)) / 86400000);
   const age = ((days % synodic) + synodic) % synodic;
   return Object.keys(MOON_ICONS)[Math.floor((age / synodic) * 8 + 0.5) % 8];
+}
+
+function weatherText(w) {
+  const parts = [];
+  if (w.t_mean != null) parts.push(`🌡️ ${Math.round(w.t_mean)}°${w.t_min != null ? ` (${Math.round(w.t_min)}–${Math.round(w.t_max)})` : ""}`);
+  if (w.rh_mean != null) parts.push(`💧 ${Math.round(w.rh_mean)}%`);
+  if (w.rain_mm != null) parts.push(`🌧️ ${w.rain_mm} mm`);
+  if (w.soil_mean != null) parts.push(`🌱 ${Math.round(w.soil_mean)}%`);
+  return parts.join(" · ");
 }
 
 function today() {

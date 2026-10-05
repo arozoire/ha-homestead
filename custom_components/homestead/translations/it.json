@@ -10,6 +10,21 @@
       "single_instance_allowed": "HA Homestead è già configurato."
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Meteo per il diario",
+        "description": "Ogni evento del diario registra il meteo della settimana prima (e dei 3 giorni dopo per trattamenti e semine). Scegli i tuoi sensori; quello che manca arriva da Open-Meteo (gratuito, senza account).",
+        "data": {
+          "temperature_sensor": "Temperatura esterna",
+          "humidity_sensor": "Umidità esterna",
+          "rain_sensor": "Pioggia (totale, mm)",
+          "soil_moisture_sensor": "Umidità del suolo",
+          "open_meteo": "Usa Open-Meteo per i dati mancanti"
+        }
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "plantings": {
@@ -125,7 +140,9 @@
         "harvest": "Raccolta",
         "grafting": "Innesto",
         "problem": "Problema",
-        "note": "Nota"
+        "note": "Nota",
+        "removal": "Fine coltura",
+        "review": "Bilancio annata"
       }
     },
     "harvest_unit": {
@@ -133,6 +150,13 @@
         "kg": "kg",
         "pieces": "Pezzi",
         "l": "Litri"
+      }
+    },
+    "abundance": {
+      "options": {
+        "poor": "Scarso",
+        "normal": "Normale",
+        "abundant": "Abbondante"
       }
     }
   },
@@ -649,6 +673,22 @@
           "name": "Unità",
           "description": "kg, pezzi o litri."
         },
+        "rating": {
+          "name": "Voto",
+          "description": "Da 1 a 5 stelle."
+        },
+        "abundance": {
+          "name": "Raccolto",
+          "description": "Scarso, normale o abbondante (se non pesato)."
+        },
+        "keep": {
+          "name": "Da rifare",
+          "description": "Cosa ha funzionato."
+        },
+        "avoid": {
+          "name": "Da evitare",
+          "description": "Cosa è andato storto."
+        },
         "notes": {
           "name": "Note",
           "description": "Note libere."
@@ -703,6 +743,22 @@
           "name": "Unità",
           "description": "kg, pezzi o litri."
         },
+        "rating": {
+          "name": "Voto",
+          "description": "Da 1 a 5 stelle."
+        },
+        "abundance": {
+          "name": "Raccolto",
+          "description": "Scarso, normale o abbondante (se non pesato)."
+        },
+        "keep": {
+          "name": "Da rifare",
+          "description": "Cosa ha funzionato."
+        },
+        "avoid": {
+          "name": "Da evitare",
+          "description": "Cosa è andato storto."
+        },
         "notes": {
           "name": "Note",
           "description": "Note libere."
@@ -716,6 +772,30 @@
         "id": {
           "name": "ID",
           "description": "ID dell'evento."
+        }
+      }
+    },
+    "refresh_weather": {
+      "name": "Aggiorna meteo",
+      "description": "Ricalcola il meteo di un evento o di tutti gli eventi (es. dopo aver scelto nuovi sensori).",
+      "fields": {
+        "id": {
+          "name": "Evento",
+          "description": "ID dell'evento; vuoto = tutti."
+        }
+      }
+    },
+    "repeat_planting": {
+      "name": "Ripeti l'anno prossimo",
+      "description": "Crea la stessa coltura per una nuova stagione (specie, varietà, zona, posizione; senza date).",
+      "fields": {
+        "id": {
+          "name": "Pianta",
+          "description": "Pianta da ripetere."
+        },
+        "year": {
+          "name": "Anno",
+          "description": "Di default l'anno prossimo."
         }
       }
     },

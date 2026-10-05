@@ -10,6 +10,21 @@
       "single_instance_allowed": "HA Homestead is already configured."
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Weather for the diary",
+        "description": "Each diary event records the weather of the week before it (and of the 3 days after for treatments and sowings). Choose your sensors; anything missing comes from Open-Meteo (free, no account).",
+        "data": {
+          "temperature_sensor": "Outdoor temperature",
+          "humidity_sensor": "Outdoor humidity",
+          "rain_sensor": "Rain (total, mm)",
+          "soil_moisture_sensor": "Soil moisture",
+          "open_meteo": "Use Open-Meteo for missing data"
+        }
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "plantings": {
@@ -125,7 +140,9 @@
         "harvest": "Harvest",
         "grafting": "Grafting",
         "problem": "Problem",
-        "note": "Note"
+        "note": "Note",
+        "removal": "End of crop",
+        "review": "Season review"
       }
     },
     "harvest_unit": {
@@ -133,6 +150,13 @@
         "kg": "kg",
         "pieces": "Pieces",
         "l": "Litres"
+      }
+    },
+    "abundance": {
+      "options": {
+        "poor": "Poor",
+        "normal": "Normal",
+        "abundant": "Abundant"
       }
     }
   },
@@ -649,6 +673,22 @@
           "name": "Unit",
           "description": "kg, pieces or litres."
         },
+        "rating": {
+          "name": "Rating",
+          "description": "1 to 5 stars."
+        },
+        "abundance": {
+          "name": "Harvest",
+          "description": "Poor, normal or abundant (when not weighed)."
+        },
+        "keep": {
+          "name": "To repeat",
+          "description": "What worked."
+        },
+        "avoid": {
+          "name": "To avoid",
+          "description": "What went wrong."
+        },
         "notes": {
           "name": "Notes",
           "description": "Free notes."
@@ -703,6 +743,22 @@
           "name": "Unit",
           "description": "kg, pieces or litres."
         },
+        "rating": {
+          "name": "Rating",
+          "description": "1 to 5 stars."
+        },
+        "abundance": {
+          "name": "Harvest",
+          "description": "Poor, normal or abundant (when not weighed)."
+        },
+        "keep": {
+          "name": "To repeat",
+          "description": "What worked."
+        },
+        "avoid": {
+          "name": "To avoid",
+          "description": "What went wrong."
+        },
         "notes": {
           "name": "Notes",
           "description": "Free notes."
@@ -716,6 +772,30 @@
         "id": {
           "name": "ID",
           "description": "Event ID."
+        }
+      }
+    },
+    "refresh_weather": {
+      "name": "Refresh weather",
+      "description": "Recomputes the weather snapshot of one event, or of all events (e.g. after choosing new sensors).",
+      "fields": {
+        "id": {
+          "name": "Event",
+          "description": "Event ID; empty = all events."
+        }
+      }
+    },
+    "repeat_planting": {
+      "name": "Repeat next year",
+      "description": "Creates the same crop for a new season (species, variety, zone, position; no dates).",
+      "fields": {
+        "id": {
+          "name": "Planting",
+          "description": "Planting to repeat."
+        },
+        "year": {
+          "name": "Year",
+          "description": "Default: next year."
         }
       }
     },

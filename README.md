@@ -2,13 +2,13 @@
 
 Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, alberi da frutto, aiuole, spese, attrezzi e, nelle prossime versioni, raccolto e consigli basati sul meteo.
 
-> Stato: **v0.5 — diario**. Specifiche complete in [SPEC.md](SPEC.md).
+> Stato: **v0.6 — annate, bilancio e meteo**. Specifiche complete in [SPEC.md](SPEC.md).
 
 ## Principio guida
 
 **Non sporcare Home Assistant**: nessuna area creata, poche entità aggregate, rimozione pulita (disinstallando l'integrazione i dati vengono cancellati).
 
-## Cosa fa oggi (v0.5)
+## Cosa fa oggi (v0.6)
 
 | Funzione | Come |
 |---|---|
@@ -19,6 +19,10 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 | Date della pianta | Origine: *già presente* (età stimata), *piantata da me* (messa a dimora + età all'impianto), *seminata da me* (semina + trapianto); l'età si aggiorna da sola |
 | Fase lunare | Registrata automaticamente alla semina e alla messa a dimora |
 | Diario | Scheda *Diario* (filtri per tipo, zona, anno) e sezione *Diario* nelle schede pianta e zona: potatura, concimazione, irrigazione, trattamento, semina, raccolta (quantità), innesto, problema, nota; fase lunare automatica; foto; un evento sulla zona vale per tutte le sue piante; costo e ricavo facoltativi diventano movimenti collegati. Servizi `add_event`, `update_event`, `delete_event` |
+| Annate | Nella scheda pianta, *📊 Annate*: una riga per anno (e per coltura della stessa specie) con semina, trapianto, potature con luna e meteo, trattamenti, raccolto, ⭐ voto, ✅ da rifare / ❌ da evitare |
+| Bilancio | Evento *⭐ Bilancio annata* (voto 1–5, raccolto scarso/normale/abbondante, da rifare, da evitare); chiesto subito dopo *🏁 Fine coltura* e, da settembre, nella scheda pianta |
+| Meteo | Ogni evento registra il meteo della settimana prima (+3 giorni dopo per trattamenti e semine): temperatura media/min/max, umidità, pioggia, umidità del suolo. Dai tuoi sensori (statistiche a lungo termine di HA, scelti in *Configura*), il resto da Open-Meteo (gratis, senza account) |
+| Comodità | *+ Raccolta* (ripete l'ultima quantità), *🔁 Ripeti l'anno prossimo* (nuova coltura con stessa specie, varietà e zona) |
 | Spese | Scheda *Spese* (spese, ricavi, saldo) nel pannello (totale dell'anno per categoria, modifica, eliminazione) o servizi `add_expense`/`update_expense`/`delete_expense`; il prezzo di piante e attrezzi diventa una spesa; nella scheda pianta: totale speso + *+ Spesa* |
 | Attrezzi | Scheda *Attrezzi* (stato a colori, 🔧 manutenzione scaduta) o servizi `add_tool`/`update_tool`/`delete_tool` |
 | Foto | Nella scheda pianta: *📷 Aggiungi foto* (fotocamera o galleria del telefono), ridotte a 1600 px e salvate in `/media/homestead/`; visibili solo agli utenti HA |

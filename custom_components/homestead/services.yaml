@@ -544,6 +544,8 @@ add_event:
             - grafting
             - problem
             - note
+            - removal
+            - review
     done_on:
       selector:
         date:
@@ -575,6 +577,28 @@ add_event:
             - kg
             - pieces
             - l
+    rating:
+      selector:
+        number:
+          min: 1
+          max: 5
+          mode: slider
+    abundance:
+      selector:
+        select:
+          translation_key: abundance
+          options:
+            - poor
+            - normal
+            - abundant
+    keep:
+      selector:
+        text:
+          multiline: true
+    avoid:
+      selector:
+        text:
+          multiline: true
     notes:
       selector:
         text:
@@ -612,6 +636,8 @@ update_event:
             - grafting
             - problem
             - note
+            - removal
+            - review
     done_on:
       selector:
         date:
@@ -643,6 +669,28 @@ update_event:
             - kg
             - pieces
             - l
+    rating:
+      selector:
+        number:
+          min: 1
+          max: 5
+          mode: slider
+    abundance:
+      selector:
+        select:
+          translation_key: abundance
+          options:
+            - poor
+            - normal
+            - abundant
+    keep:
+      selector:
+        text:
+          multiline: true
+    avoid:
+      selector:
+        text:
+          multiline: true
     notes:
       selector:
         text:
@@ -654,5 +702,24 @@ delete_event:
       required: true
       selector:
         text:
+
+refresh_weather:
+  fields:
+    id:
+      selector:
+        text:
+
+repeat_planting:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+    year:
+      selector:
+        number:
+          min: 1900
+          max: 2200
+          mode: box
 
 export:
