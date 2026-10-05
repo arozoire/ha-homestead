@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import replace
 from datetime import date
 from typing import Any
@@ -17,6 +18,7 @@ from .const import DOMAIN
 from .geo import validate_polygon
 from .models import (
     EVENT_COST_CATEGORY,
+    Abundance,
     Event,
     EventKind,
     Expense,
@@ -36,6 +38,7 @@ from .models import (
 from .photos import delete_photo_file, photo_dir
 from .species import SourcesUnavailable, fetch_details, upsert_taxon
 from .store import HomesteadStore, get_store
+from .weather import async_fill_event, async_refresh
 
 _opt_str = vol.Any(None, cv.string)
 _opt_date = vol.Any(None, cv.date)
@@ -160,8 +163,21 @@ _EVENT_FIELDS = {
     vol.Optional("dose"): _opt_str,
     vol.Optional("quantity"): vol.Any(None, _positive),
     vol.Optional("unit"): vol.Any(None, vol.In([u.value for u in HarvestUnit])),
+    vol.Optional("rating"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=5))),
+    vol.Optional("abundance"): vol.Any(None, vol.In([a.value for a in Abundance])),
+    vol.Optional("keep"): _opt_str,
+    vol.Optional("avoid"): _opt_str,
     vol.Optional("notes"): _opt_str,
 }
+
+REPEAT_PLANTING_SCHEMA = vol.Schema(
+    {
+        vol.Required("id"): cv.string,
+        vol.Optional("year"): vol.All(vol.Coerce(int), vol.Range(min=1900, max=2200)),
+    }
+)
+
+REFRESH_WEATHER_SCHEMA = vol.Schema({vol.Optional("id"): cv.string})
 
 ADD_EVENT_SCHEMA = vol.All(
     vol.Schema(
@@ -455,7 +471,10 @@ def async_register_services(hass: HomeAssistant) -> None:
             _add_expense(store, amount=cost, category=category, **link)
         if revenue:
             _add_expense(store, amount=revenue, category=ExpenseCategory.SALES, income=True, **link)
+        if event.kind == EventKind.REMOVAL and event.planting_id:
+            store.data.plantings[event.planting_id].status = PlantingStatus.REMOVED
         await store.async_save()
+        _fill_weather_later(store, event.id)
         return {"id": event.id}
 
     async def update_event(call: ServiceCall) -> ServiceResponse:
@@ -472,9 +491,57 @@ def async_register_services(hass: HomeAssistant) -> None:
         if "done_on" in args:
             args["done_on"] = _iso(args["done_on"])
             args["moon_phase"] = None
-        store.data.events[event_id] = replace(store.data.events[event_id], **args)
+        old = store.data.events[event_id]
+        if args.get("done_on", old.done_on) != old.done_on or args.get("kind", old.kind) != old.kind:
+            args["weather"] = None
+        store.data.events[event_id] = replace(old, **args)
         await store.async_save()
+        if store.data.events[event_id].weather is None:
+            _fill_weather_later(store, event_id)
         return {"id": event_id}
+
+    def _fill_weather_later(store: HomesteadStore, event_id: str) -> None:
+        """Fetching weather may take seconds: never make the service wait for it."""
+
+        async def fill() -> None:
+            if await async_fill_event(hass, store, event_id):
+                await store.async_save()
+
+        hass.async_create_background_task(fill(), f"{DOMAIN} weather {event_id}")
+
+    async def refresh_weather(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        if event_id := call.data.get("id"):
+            _check_ref(store.data.events, event_id, "id")
+            store.data.events[event_id].weather = None
+            changed = int(await async_fill_event(hass, store, event_id))
+            await store.async_save()
+        else:
+            changed = await async_refresh(hass, store, force=True)
+        return {"updated": changed}
+
+    async def repeat_planting(call: ServiceCall) -> ServiceResponse:
+        """Same crop for a new season: species, variety, zone and position; no dates."""
+        store = _store(hass)
+        _check_ref(store.data.plantings, call.data["id"], "id")
+        source = store.data.plantings[call.data["id"]]
+        year = call.data.get("year") or dt_util.now().year + 1
+        name = re.sub(r"\b(19|20)\d\d\b", str(year), source.name)
+        planting = Planting(
+            name=name if name != source.name else f"{source.name} {year}",
+            species=source.species,
+            taxon_id=source.taxon_id,
+            variety=source.variety,
+            kind=source.kind,
+            quantity=source.quantity,
+            origin=source.origin,
+            zone_id=source.zone_id,
+            latitude=source.latitude,
+            longitude=source.longitude,
+        )
+        store.data.plantings[planting.id] = planting
+        await store.async_save()
+        return {"id": planting.id, "name": planting.name}
 
     async def delete_event(call: ServiceCall) -> ServiceResponse:
         store = _store(hass)
@@ -516,6 +583,8 @@ def async_register_services(hass: HomeAssistant) -> None:
         ("add_event", add_event, ADD_EVENT_SCHEMA, SupportsResponse.OPTIONAL),
         ("update_event", update_event, UPDATE_EVENT_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_event", delete_event, ID_SCHEMA, SupportsResponse.OPTIONAL),
+        ("refresh_weather", refresh_weather, REFRESH_WEATHER_SCHEMA, SupportsResponse.OPTIONAL),
+        ("repeat_planting", repeat_planting, REPEAT_PLANTING_SCHEMA, SupportsResponse.OPTIONAL),
         ("export", export, vol.Schema({}), SupportsResponse.ONLY),
     ):
         hass.services.async_register(DOMAIN, name, handler, schema=schema, supports_response=response)

@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+from datetime import timedelta
+from typing import Any
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.helpers.typing import ConfigType
 
 from .const import DOMAIN
@@ -13,10 +17,12 @@ from .panel import async_register_panel, async_unregister_panel
 from .photos import PhotoView, delete_all, photo_dir
 from .services import async_register_services
 from .store import HomesteadStore
+from .weather import async_refresh
 from .websocket_api import async_register_websocket
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 PLATFORMS = [Platform.SENSOR]
+WEATHER_REFRESH = timedelta(hours=6)
 
 type HomesteadConfigEntry = ConfigEntry[HomesteadStore]
 
@@ -34,6 +40,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: HomesteadConfigEntry) ->
     entry.runtime_data = store
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     await async_register_panel(hass)
+
+    async def refresh_weather(_now: Any = None) -> None:
+        await async_refresh(hass, store)
+
+    # Snapshots of events whose window was still open, or saved while offline, get completed later.
+    entry.async_on_unload(async_track_time_interval(hass, refresh_weather, WEATHER_REFRESH))
+    entry.async_create_background_task(hass, refresh_weather(), f"{DOMAIN} weather refresh")
     return True
 
 

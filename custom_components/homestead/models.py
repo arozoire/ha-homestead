@@ -76,6 +76,14 @@ class EventKind(StrEnum):
     GRAFTING = "grafting"
     PROBLEM = "problem"
     NOTE = "note"
+    REMOVAL = "removal"  # end of the crop: the planting becomes "removed"
+    REVIEW = "review"  # yearly review: rating, abundance, what to repeat / avoid
+
+
+class Abundance(StrEnum):
+    POOR = "poor"
+    NORMAL = "normal"
+    ABUNDANT = "abundant"
 
 
 # Expense category used when an event records a cost.
@@ -213,7 +221,12 @@ class Event(_Record):
     dose: str | None = None
     quantity: float | None = None
     unit: str | None = None
+    rating: int | None = None
+    abundance: str | None = None
+    keep: str | None = None
+    avoid: str | None = None
     moon_phase: str | None = None
+    weather: dict[str, Any] | None = None
     notes: str | None = None
 
     def __post_init__(self) -> None:

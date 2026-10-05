@@ -10,6 +10,8 @@ Integrazione custom Home Assistant (HACS) per orto, frutteto e homesteading. Spe
 - `store.py` — persistenza JSON in `.storage/homestead.data`, segnale dispatcher a ogni salvataggio.
 - `services.py` — servizi registrati in `async_setup`, rispondono con l'id creato.
 - `sensor.py` — 3 sensori aggregati.
+- `weather.py` — snapshot meteo per evento: finestra 7 giorni prima (+3 dopo per treatment/sowing); statistiche a lungo termine del recorder (`mean/min/max`, pioggia con `change`, copertura ≥50%) dai sensori in `entry.options`, campi mancanti da Open-Meteo (archive o forecast se recente); `complete=false` finché la finestra non è chiusa; `async_refresh` ogni 6 h; mai bloccante per i servizi.
+- `config_flow.py` — options flow: sensori temperatura, umidità, pioggia, umidità suolo + Open-Meteo sì/no.
 - `photos.py` — file in `<media local>/homestead/<planting_id>/<id>.jpg`; `PhotoView` `/api/homestead/photo/{id}` (auth; il pannello usa `auth/sign_path` per `<img>`); tipo controllato dalla firma (JPEG/PNG/WebP, max 3 MB); cartella cancellata in `async_remove_entry`.
 - `panel.py` — registra il pannello sidebar (`/homestead`) e serve `frontend/` su `/homestead_static`.
 - `geo.py` — puro (no HA): area poligoni (sferica), validazione Polygon. Geometrie GeoJSON `[lon, lat]`.
@@ -35,8 +37,9 @@ pytest
 - v0.4.1 (include anche le correzioni sopra): import KML/KMZ/GeoJSON **tolto** (decisione dell'autore: si disegna nel pannello); backup JSON esporta/ripristina; ricerca specie non mette in cache risposte incomplete; `Planting.origin` (existing/planted/sown) + `sown_on` (+ `sown_moon_phase`) + `birth_year` (età calcolata); 39 test.
 - v0.4.2 (fine V1): schede Spese e Attrezzi nel pannello (`update/delete_expense`, `update/delete_tool`), foto delle piante (`Photo`, `delete_photo`, foto cancellate con la pianta), sfondo "Nessuna mappa" (zoom 23); 43 test.
 - v0.5 (diario, inizio v2): `Event` (kind, done_on, planting_id **o** zone_id, product/dose, quantity/unit, moon_phase); `add/update/delete_event` con `cost`/`revenue` → `Expense` collegata (`event_id`, `income`; categorie `services`, `sales`); sensore spese esclude i ricavi; foto su evento (`Photo.event_id`, cartella `events/` per eventi di zona); eliminando pianta/zona gli eventi seguono (zona → zona padre); pannello: scheda Diario + sezione nelle schede pianta/zona, fase lunare calcolata anche in JS (stesso algoritmo di `moon.py`); 48 test.
-- Prossimo: to-do e calendario HA (attività pianificate), poi tipo di pianta (icone), bilancio per pianta/anno.
-- Rete della sessione cloud: `api.gbif.org` e `www.wikidata.org` bloccati, parsing scritto sui formati documentati → da verificare dal vivo.
+- v0.6: annate (righe anno × coltura della stessa specie/taxon), eventi `removal` (pianta → removed) e `review` (rating, abundance, keep, avoid), meteo per evento, `repeat_planting`, `refresh_weather`, + Raccolta rapido; test recorder reale in `tests/test_recorder.py` (fixture riordinata); Open-Meteo simulato in `conftest.py`; 56 test.
+- Prossimo: to-do e calendario HA (attività pianificate, promemoria bilancio), poi tipo di pianta (icone), avvisi "l'anno scorso…".
+- Rete della sessione cloud: `api.gbif.org`, `www.wikidata.org` e Open-Meteo bloccati, parsing scritto sui formati documentati → da verificare dal vivo.
 - Più avanti: caratteristiche colturali (rusticità, esposizione, fioritura/raccolta) da fonti §5.
 - Prova del pannello: harness Playwright con `hass` finto (non nel repo); in CI solo i test Python.
 
