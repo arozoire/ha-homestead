@@ -80,6 +80,7 @@
     "plant_type": {
       "options": {
         "tree": "Albero",
+        "fruit_tree": "Albero da frutto",
         "shrub": "Arbusto",
         "vine": "Rampicante, vite",
         "vegetable": "Ortaggio",

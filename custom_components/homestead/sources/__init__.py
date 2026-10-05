@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-USER_AGENT = "HA-Homestead/0.7 (https://github.com/arozoire/ha-homestead)"
+USER_AGENT = "HA-Homestead/0.8 (https://github.com/arozoire/ha-homestead)"
 TIMEOUT_S = 10
 
 
@@ -27,6 +27,7 @@ class Candidate:
     description: str | None = None
     gbif_key: int | None = None
     wikidata_id: str | None = None
+    image: str | None = None  # Wikimedia Commons file name
 
 
 @dataclass
@@ -38,12 +39,13 @@ class TaxonDetails:
     rank: str | None = None
     gbif_key: int | None = None
     wikidata_id: str | None = None
+    image: str | None = None
 
     def merge(self, other: TaxonDetails | None) -> None:
         """Fill missing values from ``other``; names already present win."""
         if other is None:
             return
-        for name in ("scientific_name", "family", "genus", "rank", "gbif_key", "wikidata_id"):
+        for name in ("scientific_name", "family", "genus", "rank", "gbif_key", "wikidata_id", "image"):
             if getattr(self, name) is None:
                 setattr(self, name, getattr(other, name))
         for lang, value in other.common_names.items():

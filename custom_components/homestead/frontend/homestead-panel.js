@@ -74,6 +74,21 @@ const TEXT = {
     ev_mowing: "Mowing",
     plant_type: "Plant type",
     pt_tree: "Tree",
+    pt_fruit_tree: "Fruit tree",
+    csvImport: "📥 Import CSV",
+    csvTemplate: "📄 CSV template",
+    csvTitlePlantings: "Import plantings",
+    csvTitleSeeds: "Import seeds",
+    csvSummary: "{count} rows, {issues} to check. Fix the highlighted values or untick a row to skip it.",
+    csvDo: "Import {count}",
+    csvDone: "Imported: {ok}. Errors: {failed}.",
+    csvEmpty: "No rows found: is the first line the header?",
+    csvUnknownZone: "zone “{value}” not found",
+    csvBadDate: "date “{value}” not understood (use dd/mm/yyyy)",
+    csvBadNumber: "number “{value}” not understood",
+    csvBadChoice: "“{value}” not understood",
+    csvMissing: "required",
+    csvDuplicate: "already in your list: stays out unless you tick it",
     pt_shrub: "Shrub",
     pt_vine: "Vine, climber",
     pt_vegetable: "Vegetable",
@@ -373,6 +388,21 @@ const TEXT = {
     ev_mowing: "Sfalcio",
     plant_type: "Tipo di pianta",
     pt_tree: "Albero",
+    pt_fruit_tree: "Albero da frutto",
+    csvImport: "📥 Importa CSV",
+    csvTemplate: "📄 Modello CSV",
+    csvTitlePlantings: "Importa piante",
+    csvTitleSeeds: "Importa semi",
+    csvSummary: "{count} righe, {issues} da controllare. Correggi i valori evidenziati o togli la spunta per saltare una riga.",
+    csvDo: "Importa {count}",
+    csvDone: "Importate: {ok}. Errori: {failed}.",
+    csvEmpty: "Nessuna riga trovata: la prima riga è l'intestazione?",
+    csvUnknownZone: "zona “{value}” non trovata",
+    csvBadDate: "data “{value}” non capita (usa gg/mm/aaaa)",
+    csvBadNumber: "numero “{value}” non capito",
+    csvBadChoice: "“{value}” non capito",
+    csvMissing: "obbligatorio",
+    csvDuplicate: "è già nell'elenco: non verrà importata due volte se resta senza spunta",
     pt_shrub: "Arbusto",
     pt_vine: "Rampicante, vite",
     pt_vegetable: "Ortaggio",
@@ -638,7 +668,7 @@ const QUANTITY_UNITS = {
 };
 // Kinds with a "product" field, and its label.
 const PRODUCT_LABEL = { fertilizing: "product", treatment: "product", foraging: "what", wood_cutting: "essence" };
-const PLANT_ICONS = { tree: "🌳", shrub: "🍃", vine: "🍇", vegetable: "🥕", herb: "🌿", flower: "🌸", other: "🌱" };
+const PLANT_ICONS = { tree: "🌳", fruit_tree: "🍎", shrub: "🍃", vine: "🍇", vegetable: "🥕", herb: "🌿", flower: "🌸", other: "🌱" };
 // Years seeds usually keep germinating well, by botanical family (default 3).
 const SEED_VIABILITY = {
   Solanaceae: 4,
@@ -657,7 +687,7 @@ const ROTATION_YEARS = 3;
 const CROP_MONTHS = ["sow_indoor", "sow_outdoor", "plant_out", "flowering", "harvest"];
 const CROP_COLOR = { sow_indoor: "#8d6e63", sow_outdoor: "#7cb342", plant_out: "#26a69a", flowering: "#ec407a", harvest: "#ffa000" };
 // Plant type proposed for a new planting from the kind of its zone.
-const ZONE_PLANT_TYPE = { orchard: "tree", vegetable_garden: "vegetable", greenhouse: "vegetable", flower_bed: "flower" };
+const ZONE_PLANT_TYPE = { orchard: "fruit_tree", vegetable_garden: "vegetable", greenhouse: "vegetable", flower_bed: "flower" };
 // Start of a planting, shown in the diary from its own dates (not stored as events).
 const START_ICONS = { sowing: "🌱", planted: "🪴", since: "🌳" };
 const MOON_ICONS = {
@@ -819,6 +849,14 @@ const STYLE = `
   .crop-months .cell { height: 12px; border-radius: 2px; background: var(--secondary-background-color); }
   .crop-months .cell.now { outline: 1px solid var(--primary-text-color); }
   .crop-months button.cell { height: 22px; border: none; padding: 0; }
+  .suggest button { display: flex; gap: 8px; align-items: center; }
+  .suggest img, .taxon img { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; flex: none;
+    background: var(--secondary-background-color); }
+  .csv-row { border: 1px solid var(--divider-color); border-radius: 6px; padding: 8px; display: grid; gap: 6px; }
+  .csv-row.issue { border-color: var(--warning-color, #ffa600); }
+  .csv-row.off { opacity: .5; }
+  .csv-row .err { font-size: 12px; color: var(--warning-color, #ffa600); }
+  .csv-list { display: grid; gap: 8px; margin: 12px 0; }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .chip { display: inline-flex; gap: 4px; align-items: center; padding: 2px 4px 2px 10px; border-radius: 14px; font-size: 13px;
     background: var(--secondary-background-color); color: var(--primary-text-color); }
@@ -976,7 +1014,7 @@ class HomesteadPanel extends HTMLElement {
       .callWS({ type: "homestead/crops/defaults" })
       .then((result) => {
         this._cropDefaults = result.crops || {};
-        if (!this._form && !this._eventForm && !this._taskForm && !this._zoneForm && !this._expenseForm && !this._toolForm && !this._seedForm && !this._cropForm) this._render();
+        if (!this._form && !this._eventForm && !this._taskForm && !this._zoneForm && !this._expenseForm && !this._toolForm && !this._seedForm && !this._cropForm && !this._import) this._render();
         else if (this._cropEl && this._form) this._cropEl.replaceChildren(...[this._cropBox(this._form)].filter(Boolean));
       })
       .catch(() => {});
@@ -1010,7 +1048,7 @@ class HomesteadPanel extends HTMLElement {
         }
         else if (this._eventForm) this._fillEventPhotos();
         else if (this._taskForm) return;
-        else if (!this._expenseForm && !this._toolForm && !this._seedForm && !this._cropForm) this._render();
+        else if (!this._expenseForm && !this._toolForm && !this._seedForm && !this._cropForm && !this._import) this._render();
       },
       { type: "homestead/subscribe" },
     );
@@ -1173,6 +1211,7 @@ class HomesteadPanel extends HTMLElement {
     this._toolForm = null;
     this._seedForm = null;
     this._cropForm = null;
+    this._import = null;
     this._eventForm = null;
     this._taskForm = null;
     this._selected = null;
@@ -1346,6 +1385,8 @@ class HomesteadPanel extends HTMLElement {
     } else {
       data.latitude = round(this._form.latitude);
       data.longitude = round(this._form.longitude);
+      if (values.price) data.price = Number(values.price);
+      if (values.supplier?.trim()) data.supplier = values.supplier.trim();
       const result = await this._call("add_planting", data);
       if (result) this._saved(data.name);
     }
@@ -1494,6 +1535,7 @@ class HomesteadPanel extends HTMLElement {
     else if (this._toolForm) content = this._renderToolForm();
     else if (this._seedForm) content = this._renderSeedForm();
     else if (this._cropForm) content = this._renderCropForm();
+    else if (this._import) content = this._renderImport();
     else if (this._eventForm) content = this._renderEventForm();
     else if (this._taskForm) content = this._renderTaskForm();
     else {
@@ -1572,6 +1614,8 @@ class HomesteadPanel extends HTMLElement {
         "div",
         { className: "actions" },
         h("button", { className: "primary", onclick: () => this._startPlacing(null) }, `+ ${this.t("add")}`),
+        h("button", { onclick: () => this._csvPick("plantings") }, this.t("csvImport")),
+        h("button", { onclick: () => this._csvTemplate("plantings") }, this.t("csvTemplate")),
       ),
       this._loaded === false ? h("p", { className: "error" }, this.t("notLoaded")) : null,
       plantings.length
@@ -1733,6 +1777,14 @@ class HomesteadPanel extends HTMLElement {
         this._selectField(f, "zone_id", this._zoneOptions()),
         rotationEl,
         f.id ? this._selectField(f, "status", ["active", "dead", "removed"].map((s) => [s, this.t(s)])) : null,
+        f.id
+          ? null
+          : h(
+              "div",
+              { className: "row" },
+              this._field(f, "price", { type: "number", min: 0, step: "0.01", inputMode: "decimal" }),
+              this._field(f, "supplier"),
+            ),
         this._notes(f),
         (this._positionEl = h("div", { className: "hint" }, this._positionText())),
         h(
@@ -1780,6 +1832,7 @@ class HomesteadPanel extends HTMLElement {
       if (!taxon) return;
       const common = taxon.common_names?.[this._lang()];
       linked.append(
+        taxon.image ? h("img", { src: commonsThumb(taxon.image, 80), alt: "", referrerPolicy: "no-referrer", onerror: (ev) => ev.target.remove() }) : "",
         h("span", {}, `✓ ${this.t("linked")}: ${[common, taxon.scientific_name, taxon.family].filter(Boolean).join(" · ")}`),
         h("button", { type: "button", onclick: () => ((hidden.value = ""), showLinked()) }, this.t("unlink")),
       );
@@ -1820,6 +1873,7 @@ class HomesteadPanel extends HTMLElement {
           scientific_name: item.scientific_name,
           family: item.family,
           common_names: item.common_name ? { [this._lang()]: item.common_name } : {},
+          image: item.image,
         });
       }
       onPicked(item, id);
@@ -1845,13 +1899,18 @@ class HomesteadPanel extends HTMLElement {
         h(
           "button",
           { type: "button", onmousedown: (ev) => ev.preventDefault(), onclick: () => choose(item) },
-          h("div", {}, item.common_name ? `${item.common_name} — ${item.scientific_name}` : item.scientific_name),
+          item.image ? h("img", { src: commonsThumb(item.image, 80), alt: "", loading: "lazy", referrerPolicy: "no-referrer", onerror: (ev) => ev.target.remove() }) : null,
           h(
             "div",
-            { className: "sub" },
-            [item.family, item.rank, item.source === "local" ? `✓ ${this.t("local")}` : item.description || item.source]
-              .filter(Boolean)
-              .join(" · "),
+            {},
+            h("div", {}, item.common_name ? `${item.common_name} — ${item.scientific_name}` : item.scientific_name),
+            h(
+              "div",
+              { className: "sub" },
+              [item.family, item.rank, item.source === "local" ? `✓ ${this.t("local")}` : item.description || item.source]
+                .filter(Boolean)
+                .join(" · "),
+            ),
           ),
         ),
       );
@@ -3188,6 +3247,8 @@ class HomesteadPanel extends HTMLElement {
         "div",
         { className: "actions" },
         h("button", { className: "primary", onclick: () => this._openSeed({ year: new Date().getFullYear() }) }, `+ ${this.t("addSeed")}`),
+        h("button", { onclick: () => this._csvPick("seeds") }, this.t("csvImport")),
+        h("button", { onclick: () => this._csvTemplate("seeds") }, this.t("csvTemplate")),
       ),
       lots.length
         ? h(
@@ -3505,6 +3566,338 @@ class HomesteadPanel extends HTMLElement {
       lines.map(([key, items]) => h("div", { className: "sub", style: "white-space:normal" }, this.t(key, { names: names(items) }))),
     );
   }
+
+  // ---------- CSV import ----------
+
+  /** Columns of the CSV files: key, Italian header, English header. */
+  _csvColumns(kind) {
+    return kind === "seeds"
+      ? [
+          ["species", "specie", "species"],
+          ["variety", "varieta", "variety"],
+          ["year", "anno", "year"],
+          ["supplier", "fornitore", "supplier"],
+          ["quantity", "quantita", "quantity"],
+          ["viability_years", "durata_anni", "viability_years"],
+          ["finished", "finiti", "finished"],
+          ["price", "prezzo", "price"],
+          ["notes", "note", "notes"],
+        ]
+      : [
+          ["name", "nome", "name"],
+          ["species", "specie", "species"],
+          ["variety", "varieta", "variety"],
+          ["plant_type", "tipo_pianta", "plant_type"],
+          ["quantity", "quantita", "quantity"],
+          ["origin", "origine", "origin"],
+          ["sown_on", "data_semina", "sown_on"],
+          ["planted_on", "data_impianto", "planted_on"],
+          ["age", "eta_anni", "age_years"],
+          ["zone", "zona", "zone"],
+          ["latitude", "latitudine", "latitude"],
+          ["longitude", "longitudine", "longitude"],
+          ["price", "prezzo", "price"],
+          ["supplier", "fornitore", "supplier"],
+          ["notes", "note", "notes"],
+        ];
+  }
+
+  /** A file with the headers and one example row; ";" and BOM so Excel opens it as columns. */
+  _csvTemplate(kind) {
+    const it = this._lang() === "it";
+    const columns = this._csvColumns(kind);
+    const example =
+      kind === "seeds"
+        ? {
+            species: "Solanum lycopersicum",
+            variety: "Cuore di bue",
+            year: "2025",
+            supplier: it ? "Negozio" : "Shop",
+            quantity: it ? "1 bustina" : "1 packet",
+            finished: "no",
+            price: it ? "2,90" : "2.90",
+          }
+        : {
+            name: it ? "Melo vicino al pozzo" : "Apple tree by the well",
+            species: "Malus domestica",
+            variety: "Renetta",
+            plant_type: this.t("pt_fruit_tree"),
+            quantity: "1",
+            origin: this.t("planted"),
+            planted_on: "15/11/2024",
+            age: "2",
+            zone: this._data.zones[0]?.name || (it ? "Frutteto" : "Orchard"),
+            price: it ? "25,00" : "25.00",
+            supplier: it ? "Vivaio" : "Nursery",
+          };
+    const header = columns.map(([, itName, enName]) => (it ? itName : enName));
+    const text = [header, columns.map(([key]) => example[key] ?? "")].map((row) => row.map(csvCell).join(";")).join("\r\n");
+    const url = URL.createObjectURL(new Blob(["﻿" + text + "\r\n"], { type: "text/csv" }));
+    const name = kind === "seeds" ? (it ? "semi" : "seeds") : it ? "piante" : "plantings";
+    const link = h("a", { href: url, download: `homestead-${name}.csv` });
+    this.shadowRoot.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  }
+
+  _csvPick(kind) {
+    const input = h("input", { type: "file", accept: ".csv,text/csv,text/plain", hidden: true });
+    input.addEventListener("change", async () => {
+      const file = input.files?.[0];
+      input.remove();
+      if (file) this._csvLoad(kind, await file.text());
+    });
+    this.shadowRoot.append(input);
+    input.click();
+  }
+
+  _csvLoad(kind, text) {
+    const table = parseCsv(text);
+    const plain = (v) => v.normalize("NFD").replace(/[̀-ͯ]/g, "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+    const headers = (table.shift() || []).map(plain);
+    const columns = this._csvColumns(kind);
+    const index = Object.fromEntries(
+      columns.map(([key, itName, enName]) => [key, headers.findIndex((name) => [key, itName, enName].includes(name))]),
+    );
+    const rows = table
+      .filter((cells) => cells.some((c) => c.trim()))
+      .map((cells) => {
+        const raw = Object.fromEntries(columns.map(([key]) => [key, index[key] >= 0 ? (cells[index[key]] || "").trim() : ""]));
+        const row = { include: true, raw, values: {}, issues: {} };
+        this._csvCheck(kind, row);
+        return row;
+      });
+    this._clearSelection();
+    this._tab = kind === "seeds" ? "seeds" : "plantings";
+    if (!rows.length) {
+      this._render();
+      return this._showMessage(this.t("csvEmpty"), true);
+    }
+    this._showMessage("");
+    this._import = { kind, rows };
+    this._syncMap();
+    this._render();
+  }
+
+  /** Text cells → service values; what is not clear becomes an issue to fix in the review. */
+  _csvCheck(kind, row) {
+    const raw = row.raw;
+    const v = {};
+    const issues = {};
+    const text = (key) => raw[key] || null;
+    const number = (key) => {
+      if (!raw[key]) return null;
+      const value = Number(raw[key].replace(/\s/g, "").replace(",", "."));
+      if (Number.isNaN(value)) issues[key] = this.t("csvBadNumber", { value: raw[key] });
+      return Number.isNaN(value) ? null : value;
+    };
+    const date = (key) => {
+      if (!raw[key]) return null;
+      const value = parseDate(raw[key]);
+      if (!value) issues[key] = this.t("csvBadDate", { value: raw[key] });
+      return value;
+    };
+    const bare = (value) => value.toLowerCase().replace(/^[^\p{L}\p{N}]+/u, "").trim();
+    const choice = (key, options) => {
+      if (!raw[key]) return null;
+      const wanted = bare(raw[key]);
+      const found = options.find(([value, label]) => value === wanted || bare(label) === wanted);
+      if (!found) issues[key] = this.t("csvBadChoice", { value: raw[key] });
+      return found?.[0] ?? null;
+    };
+    v.species = text("species");
+    if (!v.species) issues.species = this.t("csvMissing");
+    const named = (t) => [t.scientific_name, ...Object.values(t.common_names || {})].some((n) => n.toLowerCase() === v.species.toLowerCase());
+    const taxon = v.species && this._data.taxa.find(named);
+    if (taxon) {
+      v.taxon_id = taxon.id;
+      v.species = taxon.scientific_name;
+    }
+    v.variety = text("variety");
+    v.supplier = text("supplier");
+    v.notes = text("notes");
+    v.price = number("price");
+    if (kind === "seeds") {
+      v.year = number("year");
+      v.quantity = text("quantity");
+      v.viability_years = number("viability_years");
+      v.finished = ["si", "sì", "yes", "y", "x", "1", "true", "vero"].includes((raw.finished || "").toLowerCase());
+      const same = (s) => s.species.toLowerCase() === (v.species || "").toLowerCase() && (s.variety || "") === (v.variety || "") && s.year === v.year;
+      if (this._data.seeds.some(same)) issues.duplicate = this.t("csvDuplicate");
+    } else {
+      v.name = text("name") || raw.species || null;
+      if (!v.name) issues.name = this.t("csvMissing");
+      v.plant_type = choice("plant_type", Object.keys(PLANT_ICONS).map((k) => [k, this.t(`pt_${k}`)]));
+      const quantity = number("quantity");
+      v.kind = quantity > 1 ? "group" : "single";
+      v.quantity = quantity > 1 ? Math.round(quantity) : 1;
+      v.sown_on = date("sown_on");
+      v.planted_on = date("planted_on");
+      const age = number("age");
+      const origins = ["existing", "planted", "sown"].map((o) => [o, this.t(o)]);
+      v.origin = choice("origin", origins) || (v.sown_on ? "sown" : v.planted_on ? "planted" : "existing");
+      v.birth_year = age != null ? new Date().getFullYear() - Math.round(age) : v.sown_on ? Number(v.sown_on.slice(0, 4)) : null;
+      v.zone_id = null;
+      if (raw.zone) {
+        const wanted = raw.zone.toLowerCase();
+        const zone = this._data.zones.find((z) => z.name.toLowerCase() === wanted || this._zonePath(z.id).toLowerCase() === wanted);
+        v.zone_id = zone?.id || null;
+        if (!zone) issues.zone = this.t("csvUnknownZone", { value: raw.zone });
+      }
+      v.latitude = number("latitude");
+      v.longitude = number("longitude");
+      if ((v.latitude == null) !== (v.longitude == null)) issues[v.latitude == null ? "latitude" : "longitude"] = this.t("csvMissing");
+      if (!v.plant_type && !issues.plant_type && v.zone_id) v.plant_type = ZONE_PLANT_TYPE[this._zone(v.zone_id)?.kind] || null;
+      if (this._data.plantings.some((p) => p.name.toLowerCase() === (v.name || "").toLowerCase())) issues.duplicate = this.t("csvDuplicate");
+    }
+    row.values = v;
+    row.issues = issues;
+    // Rows already in the list start unticked: importing twice is the usual mistake.
+    if (issues.duplicate && !row.touched) row.include = false;
+  }
+
+  _csvBlocking(row) {
+    return Object.keys(row.issues).some((key) => key !== "duplicate");
+  }
+
+  _renderImport() {
+    const { kind, rows } = this._import;
+    this._csvButton = h("button", { className: "primary", onclick: (ev) => ((ev.target.disabled = true), this._csvRun()) });
+    this._csvRefreshButton();
+    return [
+      h("h2", {}, this.t(kind === "seeds" ? "csvTitleSeeds" : "csvTitlePlantings")),
+      h("p", { className: "hint" }, this.t("csvSummary", { count: rows.length, issues: rows.filter((r) => Object.keys(r.issues).length).length })),
+      h("div", { className: "row" }, this._csvButton, h("button", { onclick: () => this._close() }, this.t("cancel"))),
+      h("div", { className: "csv-list" }, rows.map((row) => this._csvCard(row))),
+    ];
+  }
+
+  _csvRefreshButton() {
+    const ready = this._import.rows.filter((r) => r.include && !this._csvBlocking(r)).length;
+    this._csvButton.textContent = this.t("csvDo", { count: ready });
+    this._csvButton.disabled = !ready;
+  }
+
+  /** After a fix only the row and the button change: a full redraw would swallow a click in progress. */
+  _csvUpdate(row) {
+    this._csvCheck(this._import.kind, row);
+    setTimeout(() => {
+      if (!this._import || !row.el?.isConnected) return;
+      row.el.replaceWith(this._csvCard(row));
+      this._csvRefreshButton();
+    }, 0);
+  }
+
+  _csvCard(row) {
+    const { kind } = this._import;
+    const fixers = {
+      zone: () => this._csvSelect(row, "zone", this._zoneOptions(), (id) => this._zonePath(id)),
+      plant_type: () =>
+        this._csvSelect(row, "plant_type", Object.keys(PLANT_ICONS).map((k) => [k, `${PLANT_ICONS[k]} ${this.t(`pt_${k}`)}`]), (k) => k),
+      origin: () => this._csvSelect(row, "origin", ["existing", "planted", "sown"].map((o) => [o, this.t(o)]), (o) => o),
+      sown_on: () => this._csvInput(row, "sown_on", "date"),
+      planted_on: () => this._csvInput(row, "planted_on", "date"),
+      species: () => this._csvInput(row, "species", "text"),
+      name: () => this._csvInput(row, "name", "text"),
+      price: () => this._csvInput(row, "price", "number"),
+      quantity: () => this._csvInput(row, "quantity", "number"),
+      year: () => this._csvInput(row, "year", "number"),
+      age: () => this._csvInput(row, "age", "number"),
+      viability_years: () => this._csvInput(row, "viability_years", "number"),
+      latitude: () => this._csvInput(row, "latitude", "number"),
+      longitude: () => this._csvInput(row, "longitude", "number"),
+    };
+    const label = (key) => this.t({ zone: "zone_id", age: "age_now" }[key] || key);
+    const v = row.values;
+    const year = new Date().getFullYear();
+    const title =
+      kind === "seeds" ? [v.species, v.variety, v.year].filter(Boolean).join(" · ") : [v.name, v.species !== v.name ? v.species : null].filter(Boolean).join(" — ");
+    const details =
+      kind === "seeds"
+        ? [v.supplier, v.quantity, v.finished ? this.t("finished") : null, v.price != null ? this._money(v.price) : null]
+        : [
+            PLANT_ICONS[v.plant_type] ? `${PLANT_ICONS[v.plant_type]} ${this.t(`pt_${v.plant_type}`)}` : null,
+            this.t(v.origin),
+            v.zone_id ? this._zonePath(v.zone_id) : null,
+            v.sown_on ? `🌱 ${this._date(v.sown_on)}` : null,
+            v.planted_on ? `🪴 ${this._date(v.planted_on)}` : null,
+            v.birth_year && v.birth_year < year ? this.t("ageYears", { years: year - v.birth_year }) : null,
+            v.quantity > 1 ? `×${v.quantity}` : null,
+            v.price != null ? this._money(v.price) : null,
+            v.latitude != null ? "📍" : null,
+          ];
+    row.el = h(
+      "div",
+      { className: `csv-row${Object.keys(row.issues).length ? " issue" : ""}${row.include ? "" : " off"}` },
+      h(
+        "label",
+        { className: "check" },
+        h("input", {
+          type: "checkbox",
+          checked: row.include,
+          onchange: (ev) => {
+            row.include = ev.target.checked;
+            row.touched = true;
+            this._csvUpdate(row);
+          },
+        }),
+        h("strong", {}, title || "?"),
+      ),
+      h("div", { className: "sub", style: "white-space:normal" }, details.filter(Boolean).join(" · ")),
+      Object.entries(row.issues).map(([key, message]) =>
+        h(
+          "div",
+          { className: "row" },
+          h("span", { className: "err" }, key === "duplicate" ? `⚠️ ${message}` : `⚠️ ${label(key)}: ${message}`),
+          fixers[key]?.() || null,
+        ),
+      ),
+    );
+    return row.el;
+  }
+
+  /** A select that rewrites the raw cell and checks the row again. */
+  _csvSelect(row, key, options, toRaw) {
+    return h(
+      "select",
+      {
+        onchange: (ev) => {
+          row.raw[key] = ev.target.value ? toRaw(ev.target.value) : "";
+          this._csvUpdate(row);
+        },
+      },
+      h("option", { value: "" }, "—"),
+      options.filter(([value]) => value).map(([value, text]) => h("option", { value }, text)),
+    );
+  }
+
+  _csvInput(row, key, type) {
+    return h("input", {
+      type,
+      value: type === "date" ? "" : row.raw[key],
+      onchange: (ev) => {
+        row.raw[key] = ev.target.value;
+        this._csvUpdate(row);
+      },
+    });
+  }
+
+  async _csvRun() {
+    const { kind, rows } = this._import;
+    const todo = rows.filter((r) => r.include && !this._csvBlocking(r));
+    let ok = 0;
+    let failed = 0;
+    for (const row of todo) {
+      const data = Object.fromEntries(Object.entries(row.values).filter(([, value]) => value !== null && value !== undefined && value !== ""));
+      const result = await this._call(kind === "seeds" ? "add_seed_lot" : "add_planting", data);
+      if (result) ok++;
+      else failed++;
+    }
+    this._close();
+    this._showMessage(`${failed ? "" : "✓ "}${this.t("csvDone", { ok, failed })}`, !!failed);
+  }
+
 
   // ---------- rotation ----------
 
@@ -3825,6 +4218,66 @@ function moonPhase(iso) {
   const days = Math.round((Date.UTC(...iso.split("-").map((v, i) => Number(v) - (i === 1 ? 1 : 0))) - Date.UTC(2000, 0, 6)) / 86400000);
   const age = ((days % synodic) + synodic) % synodic;
   return Object.keys(MOON_ICONS)[Math.floor((age / synodic) * 8 + 0.5) % 8];
+}
+
+/** Rows of a CSV text: ";", "," or tab separated (guessed from the header), quotes, BOM. */
+function parseCsv(text) {
+  const clean = text.replace(/^﻿/, "");
+  const first = clean.split(/\r?\n/, 1)[0];
+  const separator = [";", "\t", ","].map((s) => [s, first.split(s).length]).sort((a, b) => b[1] - a[1])[0][0];
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let quoted = false;
+  for (let i = 0; i < clean.length; i++) {
+    const c = clean[i];
+    if (quoted) {
+      if (c === '"' && clean[i + 1] === '"') {
+        cell += '"';
+        i++;
+      } else if (c === '"') quoted = false;
+      else cell += c;
+    } else if (c === '"') quoted = true;
+    else if (c === separator) {
+      row.push(cell);
+      cell = "";
+    } else if (c === "\n" || c === "\r") {
+      if (c === "\r" && clean[i + 1] === "\n") i++;
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = "";
+    } else cell += c;
+  }
+  if (cell || row.length) rows.push([...row, cell]);
+  return rows;
+}
+
+function csvCell(value) {
+  const text = String(value ?? "");
+  return /[;"\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+/** dd/mm/yyyy, dd-mm-yyyy, dd.mm.yyyy (day first, as in Europe) or yyyy-mm-dd → ISO date, else null. */
+function parseDate(text) {
+  const value = text.trim();
+  let m = value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  let y, mo, d;
+  if (m) [, y, mo, d] = m;
+  else {
+    m = value.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2}|\d{4})$/);
+    if (!m) return null;
+    [, d, mo, y] = m;
+    if (y.length === 2) y = `20${y}`;
+  }
+  const date = new Date(Number(y), Number(mo) - 1, Number(d));
+  if (date.getMonth() !== Number(mo) - 1 || date.getDate() !== Number(d)) return null;
+  return `${y}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+}
+
+/** Thumbnail of a Wikimedia Commons file (the species picture from Wikidata). */
+function commonsThumb(file, width) {
+  return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(file.replace(/ /g, "_"))}?width=${width}`;
 }
 
 function weatherText(w) {

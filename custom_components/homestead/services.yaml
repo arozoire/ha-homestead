@@ -106,6 +106,7 @@ add_planting:
           translation_key: plant_type
           options:
             - tree
+            - fruit_tree
             - shrub
             - vine
             - vegetable
@@ -232,6 +233,7 @@ update_planting:
           translation_key: plant_type
           options:
             - tree
+            - fruit_tree
             - shrub
             - vine
             - vegetable

@@ -93,6 +93,7 @@ def search_local(data: HomesteadData, query: str, language: str) -> list[dict[st
                     "rank": taxon.rank,
                     "gbif_key": taxon.gbif_key,
                     "wikidata_id": taxon.wikidata_id,
+                    "image": taxon.image,
                 }
             )
     return sorted(found, key=lambda item: item["scientific_name"])

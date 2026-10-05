@@ -23,6 +23,7 @@ APPLE_ENTITY = {
         "P225": [{"mainsnak": {"datavalue": {"value": "Malus domestica", "type": "string"}}}],
         "P846": [{"mainsnak": {"datavalue": {"value": "3001509", "type": "string"}}}],
         "P105": [{"mainsnak": {"datavalue": {"value": {"entity-type": "item", "id": "Q7432"}}}}],
+        "P18": [{"mainsnak": {"datavalue": {"value": "Malus domestica a1.jpg", "type": "string"}}}],
     },
 }
 CITY_ENTITY = {"id": "Q999", "labels": {"it": {"value": "Melo"}}, "claims": {}}
@@ -59,6 +60,7 @@ def test_parse_wikidata_entity():
     assert taxon.scientific_name == "Malus domestica"
     assert taxon.common_names == {"it": "melo", "en": "apple"}
     assert (taxon.rank, taxon.gbif_key, taxon.wikidata_id) == ("species", 3001509, "Q18674606")
+    assert taxon.image == "Malus domestica a1.jpg"
     assert wikidata.parse_entity(CITY_ENTITY, ["it"]) is None
 
 
@@ -137,6 +139,7 @@ async def test_search_import_and_link(hass: HomeAssistant, hass_ws_client, aiocl
         "Rosaceae",
     )
     assert (apple["gbif_key"], apple["wikidata_id"]) == (3001509, "Q18674606")
+    assert apple["image"] == "Malus domestica a1.jpg"
 
     response = await hass.services.async_call(
         DOMAIN, "import_taxon", {"wikidata_id": "Q18674606"}, blocking=True, return_response=True
@@ -144,6 +147,7 @@ async def test_search_import_and_link(hass: HomeAssistant, hass_ws_client, aiocl
     taxon = entry.runtime_data.data.taxa[response["id"]]
     assert (taxon.family, taxon.genus, taxon.gbif_key) == ("Rosaceae", "Malus", 3001509)
     assert taxon.common_names["it"] == "melo" and taxon.common_names["fr"] == "pommier domestique"
+    assert taxon.image == "Malus domestica a1.jpg"
 
     again = await hass.services.async_call(
         DOMAIN, "import_taxon", {"gbif_key": 3001509}, blocking=True, return_response=True
