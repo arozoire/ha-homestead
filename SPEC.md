@@ -28,6 +28,8 @@
 | Pannello (v0.2) | Web component senza Lit né build, Leaflet incluso, satellite Esri + OSM | Zero dipendenze esterne, niente Google |
 | Zone sulla mappa (v0.3) | Poligono disegnato a clic (angolo per angolo); superficie calcolata; zona della pianta proposta se dentro il poligono | Metodo A di §8 esteso alle zone |
 | Import (v0.3) | KML, **KMZ** (default di Google My Maps), GeoJSON; punti → piante, poligoni → zone, linee ignorate; abbinamento per nome con scelta manuale | L'autore carica il file dal telefono quando serve |
+| Prima prova dal vivo (v0.4.1) | Pannello a tutta altezza (mappa invisibile nell'app), ricerca specie solo piante, conferma dopo Salva | Problemi visti in HA reale |
+| Import mappa **tolto** (v0.5) | Al suo posto **backup JSON** (esporta / ripristina tutto) | Disegnare nel pannello basta; serve invece poter salvare e ripristinare i dati |
 | Specie (v0.4) | Ricerca combinata Wikidata (nomi comuni) + GBIF (tassonomia); la specie scelta è copiata in locale con id GBIF/Wikidata e data di import | Funziona offline dopo l'import, tracciabilità come da §4 |
 | Licenza | MIT | Richiesta da HACS; la più diffusa tra le integrazioni custom |
 
@@ -66,7 +68,7 @@ Registrare tutto ciò che vive nel giardino (alberi, gruppi di ortaggi, bulbi, s
 ## 3. Scope v1 (MVP)
 
 1. **Censimento piante** con caratteristiche importate da DB open.
-2. **Posizionamento su mappa** (import GeoJSON/KML).
+2. **Posizionamento su mappa** (clic e disegno nel pannello).
 3. **Costi** di acquisto per pianta.
 4. **Inventario attrezzi**.
 
@@ -95,7 +97,7 @@ Fuori v1: calendario semine, regole meteo, produzione, lista spesa, inventario s
 | altezza/diametro all'impianto | stimati |
 | portainnesto | per fruttiferi |
 | fornitore | |
-| posizione | punto (lat/lon) o poligono, da import mappa |
+| posizione | punto (lat/lon), cliccato sulla mappa del pannello |
 | stato | attivo, morto, rimosso (con data) |
 | foto, note | |
 | fase lunare | calcolata automaticamente alla data (solo registrazione) |
@@ -199,7 +201,7 @@ Principio: **adattatori** per fonte + cache locale + possibilità di correzione 
 | B | [Google My Maps](https://www.google.com/mymaps) → esporta KML | Gratuito, account Google, vista satellite |
 | C | [geojson.io](https://geojson.io) → esporta GeoJSON | Open source, senza account |
 
-Ogni punto/poligono importato viene abbinato a una pianta (per nome o manualmente).
+Decisione v0.5: si usa solo il metodo A; l'import B/C (v0.3) è stato tolto perché non serviva.
 
 ## 9. Backlog idee (non pianificate)
 
