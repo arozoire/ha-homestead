@@ -127,6 +127,26 @@ const TEXT = {
     expensesTotal: "Expenses",
     incomesTotal: "Income",
     balance: "Balance",
+    tabSeeds: "Seeds",
+    addSeed: "New seeds",
+    newSeedTitle: "New seeds",
+    editSeedTitle: "Seeds",
+    emptySeeds: "No seeds yet.",
+    year: "Year (packed or harvested)",
+    quantity_s: "Quantity (1 packet, 20 g…)",
+    viability_years: "Germinate well for (years)",
+    viabilityHint: "Empty: typical value for the family ({years} years).",
+    finished: "Finished",
+    seedsOld: "⚠️ old: germination is dropping (over {years} years)",
+    seedsLastYear: "⏳ last good year",
+    seed_lot_id: "Seeds used",
+    confirmDeleteSeed: "Delete these seeds? Plantings keep their data.",
+    shop: "🛒 Shopping list",
+    shopAdded: "Added to the shopping list: {item}",
+    noShoppingList: "No to-do list for shopping in Home Assistant (add the Shopping list integration).",
+    seedsItem: "Seeds: {name}",
+    rotationHint: "💡 Rotation: {what} already here in {years} ({names}). Better to wait about 3 years before the same family.",
+    rotation: "🔄 Crops in this zone",
     tabExpenses: "Expenses",
     tabTools: "Tools",
     noMap: "No map",
@@ -378,6 +398,26 @@ const TEXT = {
     expensesTotal: "Spese",
     incomesTotal: "Ricavi",
     balance: "Saldo",
+    tabSeeds: "Semi",
+    addSeed: "Nuovi semi",
+    newSeedTitle: "Nuovi semi",
+    editSeedTitle: "Semi",
+    emptySeeds: "Nessun seme in inventario.",
+    year: "Anno (confezione o raccolta)",
+    quantity_s: "Quantità (1 bustina, 20 g…)",
+    viability_years: "Germinano bene per (anni)",
+    viabilityHint: "Vuoto: valore tipico della famiglia ({years} anni).",
+    finished: "Finiti",
+    seedsOld: "⚠️ vecchi: germinabilità in calo (oltre {years} anni)",
+    seedsLastYear: "⏳ ultimo anno buono",
+    seed_lot_id: "Semi usati",
+    confirmDeleteSeed: "Eliminare questi semi? Le piante restano.",
+    shop: "🛒 Lista spesa",
+    shopAdded: "Aggiunto alla lista della spesa: {item}",
+    noShoppingList: "Nessuna lista della spesa in Home Assistant (aggiungi l'integrazione Lista della spesa).",
+    seedsItem: "Semi: {name}",
+    rotationHint: "💡 Rotazione: {what} già qui nel {years} ({names}). Meglio aspettare circa 3 anni prima della stessa famiglia.",
+    rotation: "🔄 Colture in questa zona",
     tabExpenses: "Spese",
     tabTools: "Attrezzi",
     noMap: "Nessuna mappa",
@@ -543,6 +583,21 @@ const QUANTITY_UNITS = {
 // Kinds with a "product" field, and its label.
 const PRODUCT_LABEL = { fertilizing: "product", treatment: "product", foraging: "what", wood_cutting: "essence" };
 const PLANT_ICONS = { tree: "🌳", shrub: "🍃", vine: "🍇", vegetable: "🥕", herb: "🌿", flower: "🌸", other: "🌱" };
+// Years seeds usually keep germinating well, by botanical family (default 3).
+const SEED_VIABILITY = {
+  Solanaceae: 4,
+  Brassicaceae: 4,
+  Cucurbitaceae: 5,
+  Fabaceae: 3,
+  Apiaceae: 2,
+  Amaryllidaceae: 2,
+  Asteraceae: 4,
+  Amaranthaceae: 4,
+  Lamiaceae: 4,
+  Poaceae: 2,
+  Malvaceae: 3,
+};
+const ROTATION_YEARS = 3;
 // Plant type proposed for a new planting from the kind of its zone.
 const ZONE_PLANT_TYPE = { orchard: "tree", vegetable_garden: "vegetable", greenhouse: "vegetable", flower_bed: "flower" };
 // Start of a planting, shown in the diary from its own dates (not stored as events).
@@ -709,7 +764,7 @@ const STYLE = `
 class HomesteadPanel extends HTMLElement {
   constructor() {
     super();
-    this._data = { plantings: [], zones: [], taxa: [], expenses: [], tools: [], photos: [], events: [], tasks: [] };
+    this._data = { plantings: [], zones: [], taxa: [], expenses: [], tools: [], photos: [], events: [], tasks: [], seeds: [] };
     this._diaryFilter = { kind: "", zone: "", year: "" };
     this._photoUrls = new Map();
     this._taxaPending = new Map();
@@ -860,6 +915,7 @@ class HomesteadPanel extends HTMLElement {
           taxa: data.taxa || [],
           expenses: data.expenses || [],
           tools: data.tools || [],
+          seeds: data.seeds || [],
           photos: data.photos || [],
           events: data.events || [],
           tasks: data.tasks || [],
@@ -880,7 +936,7 @@ class HomesteadPanel extends HTMLElement {
         }
         else if (this._eventForm) this._fillEventPhotos();
         else if (this._taskForm) return;
-        else if (!this._expenseForm && !this._toolForm) this._render();
+        else if (!this._expenseForm && !this._toolForm && !this._seedForm) this._render();
       },
       { type: "homestead/subscribe" },
     );
@@ -1041,6 +1097,7 @@ class HomesteadPanel extends HTMLElement {
     this._zoneForm = null;
     this._expenseForm = null;
     this._toolForm = null;
+    this._seedForm = null;
     this._eventForm = null;
     this._taskForm = null;
     this._selected = null;
@@ -1200,6 +1257,7 @@ class HomesteadPanel extends HTMLElement {
       taxon_id: values.taxon_id || null,
       variety: values.variety?.trim() || null,
       plant_type: values.plant_type || null,
+      seed_lot_id: values.origin === "sown" ? values.seed_lot_id || null : null,
       kind: values.kind,
       quantity: Number(values.quantity) || 1,
       ...datesFromForm(values),
@@ -1359,6 +1417,7 @@ class HomesteadPanel extends HTMLElement {
     else if (this._zoneForm && !this._drawing) content = this._renderZoneForm();
     else if (this._expenseForm) content = this._renderExpenseForm();
     else if (this._toolForm) content = this._renderToolForm();
+    else if (this._seedForm) content = this._renderSeedForm();
     else if (this._eventForm) content = this._renderEventForm();
     else if (this._taskForm) content = this._renderTaskForm();
     else {
@@ -1366,6 +1425,7 @@ class HomesteadPanel extends HTMLElement {
         plantings: () => this._renderList(),
         zones: () => this._renderZoneList(),
         diary: () => this._renderDiary(),
+        seeds: () => this._renderSeedList(),
         expenses: () => this._renderExpenseList(),
         tools: () => this._renderToolList(),
       };
@@ -1383,6 +1443,7 @@ class HomesteadPanel extends HTMLElement {
       tab("plantings", this.t("tabPlantings")),
       tab("zones", this.t("tabZones")),
       tab("diary", this.t("tabDiary")),
+      tab("seeds", this.t("tabSeeds")),
       tab("expenses", this.t("tabExpenses")),
       tab("tools", this.t("tabTools")),
     );
@@ -1562,10 +1623,25 @@ class HomesteadPanel extends HTMLElement {
     const toggleQuantity = () => (quantity.style.display = kind.querySelector("select").value === "group" ? "" : "none");
     kind.addEventListener("change", toggleQuantity);
     toggleQuantity();
-    return [
-      h(
-        "form",
-        { onsubmit: (ev) => this._save(ev) },
+    const rotationEl = h("p", { className: "last-time" });
+    const updateRotation = (form) => {
+      const el = form.elements;
+      const hint = this._rotationHint({
+        id: f.id,
+        zone_id: el.zone_id.value,
+        species: el.species.value,
+        taxon_id: el.taxon_id.value,
+        plant_type: el.plant_type.value,
+      });
+      rotationEl.textContent = hint || "";
+      rotationEl.hidden = !hint;
+    };
+    const form = h(
+      "form",
+      {
+        onsubmit: (ev) => this._save(ev),
+        onchange: (ev) => updateRotation(ev.currentTarget),
+      },
         h("h2", {}, f.id ? this.t("editTitle") : this.t("newTitle")),
         this._field(f, "name", { required: true, maxLength: 100 }),
         this._speciesField(f),
@@ -1578,6 +1654,7 @@ class HomesteadPanel extends HTMLElement {
         h("div", { className: "row" }, kind, quantity),
         this._datesFields(f),
         this._selectField(f, "zone_id", this._zoneOptions()),
+        rotationEl,
         f.id ? this._selectField(f, "status", ["active", "dead", "removed"].map((s) => [s, this.t(s)])) : null,
         this._notes(f),
         (this._positionEl = h("div", { className: "hint" }, this._positionText())),
@@ -1595,7 +1672,10 @@ class HomesteadPanel extends HTMLElement {
               h("button", { type: "button", className: "danger", onclick: () => this._delete() }, this.t("delete")),
             )
           : null,
-      ),
+    );
+    updateRotation(form);
+    return [
+      form,
       f.id ? this._plantingActions(f) : null,
       f.id ? this._plantingExpenses(f) : null,
       f.id ? (this._seasonsEl = h("div", {}, this._seasonsBox(f))) : null,
@@ -1630,6 +1710,7 @@ class HomesteadPanel extends HTMLElement {
       input.value = item.scientific_name;
       hidden.value = id;
       showLinked();
+      input.dispatchEvent(new Event("change", { bubbles: true }));
     });
     input.addEventListener("input", () => {
       hidden.value = "";
@@ -1769,8 +1850,9 @@ class HomesteadPanel extends HTMLElement {
       age_now: f.birth_year ? year - f.birth_year : "",
       age_at_planting: f.birth_year && plantedYear ? plantedYear - f.birth_year : "",
       planted_on: f.planted_on,
-      sown_on: f.sown_on,
-      transplanted_on: f.planted_on,
+      // A new planting starts with today as planting date: for "sown" it is the sowing date instead.
+      sown_on: f.sown_on || (f.id ? "" : f.planted_on),
+      transplanted_on: f.sown_on || f.origin === "sown" ? f.planted_on : "",
     };
     const age = { type: "number", min: 0, max: 500, step: 1, inputMode: "numeric" };
     const groups = {
@@ -1786,6 +1868,7 @@ class HomesteadPanel extends HTMLElement {
         { className: "row" },
         this._field(values, "sown_on", { type: "date" }),
         this._field(values, "transplanted_on", { type: "date" }),
+        this._seedLotSelect(f),
       ),
     };
     const origin = this._selectField(values, "origin", ["existing", "planted", "sown"].map((o) => [o, this.t(o)]));
@@ -1799,6 +1882,25 @@ class HomesteadPanel extends HTMLElement {
     origin.addEventListener("change", show);
     show();
     return h("div", { className: "dates" }, origin, ...Object.values(groups));
+  }
+
+  /** Seeds still available (plus the one already linked); choosing one fills an empty species. */
+  _seedLotSelect(f) {
+    const lots = this._data.seeds.filter((lot) => !lot.finished || lot.id === f.seed_lot_id);
+    if (!lots.length) return null;
+    const field = this._selectField(f, "seed_lot_id", [
+      ["", "—"],
+      ...lots.map((lot) => [lot.id, `${this._seedName(lot)}${lot.year ? ` (${lot.year})` : ""}`]),
+    ]);
+    field.querySelector("select").addEventListener("change", (ev) => {
+      const lot = this._data.seeds.find((l) => l.id === ev.target.value);
+      const el = ev.target.form?.elements;
+      if (!lot || !el || el.species.value.trim()) return;
+      el.species.value = lot.species;
+      el.taxon_id.value = lot.taxon_id || "";
+      if (!el.variety.value.trim()) el.variety.value = lot.variety || "";
+    });
+    return field;
   }
 
   // ---------- expenses ----------
@@ -2456,6 +2558,7 @@ class HomesteadPanel extends HTMLElement {
       extras.product.hidden = !PRODUCT_LABEL[kind];
       productLabel.firstChild.textContent = this.t(PRODUCT_LABEL[kind] || "product");
       doseLabel.hidden = !["fertilizing", "treatment"].includes(kind);
+      shopButton.hidden = doseLabel.hidden;
       productInput.setAttribute("list", kind === "wood_cutting" ? "homestead-essences" : "");
       extras.harvest.hidden = !QUANTITY_UNITS[kind];
       if (QUANTITY_UNITS[kind]) {
@@ -2506,11 +2609,22 @@ class HomesteadPanel extends HTMLElement {
     const productLabel = h("label", {}, this.t("product"), productInput);
     const doseLabel = this._field(f, "dose", { placeholder: "30 g / 10 L" });
     const essences = [...new Set(this._data.zones.flatMap((z) => (z.species || []).map((e) => e.name)))];
+    const shopButton = h(
+      "button",
+      {
+        type: "button",
+        style: "flex:none;align-self:end",
+        title: this.t("shop"),
+        onclick: () => productInput.value.trim() && this._addToShopping(productInput.value.trim()),
+      },
+      "🛒",
+    );
     extras.product = h(
       "div",
       { className: "row" },
       productLabel,
       doseLabel,
+      shopButton,
       h("datalist", { id: "homestead-essences" }, essences.map((name) => h("option", { value: name }))),
     );
     const unitSelect = h("select", { name: "unit" });
@@ -2959,6 +3073,207 @@ class HomesteadPanel extends HTMLElement {
     if (await this._call("delete_event", { id: this._eventForm.id })) this._eventDone(this.t(`ev_${this._eventForm.kind}`), "deleted");
   }
 
+  // ---------- seeds ----------
+
+  _seedName(lot) {
+    const common = this._taxon(lot.taxon_id)?.common_names?.[this._lang()];
+    return [common || lot.species, lot.variety].filter(Boolean).join(" · ");
+  }
+
+  _seedViability(lot) {
+    return lot.viability_years || SEED_VIABILITY[this._taxon(lot.taxon_id)?.family] || 3;
+  }
+
+  /** null when fine, else a warning about the age of the seeds. */
+  _seedWarning(lot) {
+    if (!lot.year || lot.finished) return null;
+    const age = new Date().getFullYear() - lot.year;
+    const years = this._seedViability(lot);
+    if (age > years) return this.t("seedsOld", { years });
+    return age === years ? this.t("seedsLastYear") : null;
+  }
+
+  _openSeed(lot) {
+    this._clearSelection();
+    this._showMessage("");
+    this._tab = "seeds";
+    this._seedForm = { ...lot };
+    this._syncMap();
+    this._render();
+  }
+
+  _renderSeedList() {
+    const lots = [...this._data.seeds].sort((a, b) => a.finished - b.finished || this._seedName(a).localeCompare(this._seedName(b)));
+    return [
+      h(
+        "div",
+        { className: "actions" },
+        h("button", { className: "primary", onclick: () => this._openSeed({ year: new Date().getFullYear() }) }, `+ ${this.t("addSeed")}`),
+      ),
+      lots.length
+        ? h(
+            "ul",
+            {},
+            lots.map((lot) => {
+              const warning = this._seedWarning(lot);
+              return h(
+                "li",
+                { onclick: () => this._openSeed(lot), style: lot.finished ? "opacity:.55" : "" },
+                h("span", { className: "dot", style: `background:${lot.finished ? STATUS_COLOR.removed : warning ? "#ffa600" : STATUS_COLOR.active}` }),
+                h(
+                  "div",
+                  { className: "main" },
+                  h("div", {}, this._seedName(lot)),
+                  h(
+                    "div",
+                    { className: "sub" },
+                    [lot.year, lot.supplier, lot.quantity, lot.finished ? this.t("finished") : null].filter(Boolean).join(" · "),
+                  ),
+                  warning ? h("div", { className: "sub warn" }, warning) : null,
+                ),
+              );
+            }),
+          )
+        : h("p", { className: "hint" }, this.t("emptySeeds")),
+    ];
+  }
+
+  _renderSeedForm() {
+    const f = this._seedForm;
+    const family = this._taxon(f.taxon_id)?.family;
+    return [
+      h(
+        "form",
+        { onsubmit: (ev) => this._saveSeed(ev) },
+        h("h2", {}, f.id ? this.t("editSeedTitle") : this.t("newSeedTitle")),
+        this._speciesField(f),
+        this._field(f, "variety"),
+        h(
+          "div",
+          { className: "row" },
+          this._field(f, "year", { type: "number", min: 1900, max: 2200, step: 1, inputMode: "numeric" }),
+          this._field(f, "quantity", { placeholder: "1 bustina" }),
+        ),
+        this._field(f, "supplier"),
+        h(
+          "label",
+          {},
+          this.t("viability_years"),
+          h("input", { name: "viability_years", type: "number", min: 1, max: 50, step: 1, value: f.viability_years ?? "", inputMode: "numeric" }),
+          h("span", { className: "hint" }, this.t("viabilityHint", { years: SEED_VIABILITY[family] || 3 })),
+        ),
+        h("label", { className: "check" }, h("input", { type: "checkbox", name: "finished", checked: !!f.finished }), this.t("finished")),
+        f.id ? null : this._field(f, "price", { type: "number", min: 0, step: "0.01", inputMode: "decimal" }),
+        this._notes(f),
+        this._formButtons(f.id, () => this._deleteSeed()),
+      ),
+      f.id
+        ? h(
+            "div",
+            { className: "actions" },
+            h("button", { type: "button", onclick: () => this._addToShopping(this.t("seedsItem", { name: this._seedName(f) })) }, this.t("shop")),
+          )
+        : null,
+    ];
+  }
+
+  async _saveSeed(ev) {
+    ev.preventDefault();
+    const v = Object.fromEntries(new FormData(ev.target));
+    if (!v.species?.trim()) {
+      this._showMessage(this.t("required"), true);
+      return;
+    }
+    const data = {
+      species: v.species.trim(),
+      taxon_id: v.taxon_id || null,
+      variety: v.variety?.trim() || null,
+      year: v.year ? Number(v.year) : null,
+      quantity: v.quantity?.trim() || null,
+      supplier: v.supplier?.trim() || null,
+      viability_years: v.viability_years ? Number(v.viability_years) : null,
+      finished: v.finished === "on",
+      notes: v.notes?.trim() || null,
+    };
+    const id = this._seedForm.id;
+    if (!id && v.price) data.price = Number(v.price);
+    if (await this._call(id ? "update_seed_lot" : "add_seed_lot", id ? { id, ...data } : data)) this._saved(this._seedName(data));
+  }
+
+  async _deleteSeed() {
+    if (!confirm(this.t("confirmDeleteSeed"))) return;
+    if (await this._call("delete_seed_lot", { id: this._seedForm.id })) this._saved(this._seedName(this._seedForm), "deleted");
+  }
+
+  /** HA's shopping list (todo.shopping_list), else the first to-do list that is not ours. */
+  _shoppingList() {
+    const ids = Object.keys(this._hass.states || {}).filter((id) => id.startsWith("todo."));
+    const ours = (id) => this._hass.entities?.[id]?.platform === "homestead" || id.startsWith("todo.ha_homestead");
+    return ids.includes("todo.shopping_list") ? "todo.shopping_list" : ids.find((id) => !ours(id));
+  }
+
+  async _addToShopping(item) {
+    const entity_id = this._shoppingList();
+    if (!entity_id) return this._showMessage(this.t("noShoppingList"), true);
+    try {
+      await this._hass.callService("todo", "add_item", { item }, { entity_id });
+      this._showMessage(`✓ ${this.t("shopAdded", { item })}`);
+    } catch (err) {
+      this._showMessage(err.message || String(err), true);
+    }
+  }
+
+  // ---------- rotation ----------
+
+  _plantingYear(p) {
+    const date = p.sown_on || p.planted_on || this._data.events.filter((e) => e.planting_id === p.id).map((e) => e.done_on).sort()[0];
+    return date ? Number(date.slice(0, 4)) : null;
+  }
+
+  _family(p) {
+    return this._taxon(p.taxon_id)?.family || null;
+  }
+
+  /** Earlier crops of the same family (or species) in the zone during the last years, as a tip. */
+  _rotationHint({ id, zone_id, species, taxon_id, plant_type }) {
+    const zone = this._zone(zone_id);
+    if (!zone || !species?.trim()) return null;
+    if (!["vegetable_garden", "greenhouse"].includes(zone.kind) && plant_type !== "vegetable") return null;
+    const family = this._taxon(taxon_id)?.family;
+    const name = species.trim().toLowerCase();
+    const year = new Date().getFullYear();
+    const same = this._data.plantings.filter((p) => {
+      if (p.id === id || p.zone_id !== zone_id) return false;
+      const y = this._plantingYear(p);
+      if (!y || y < year - ROTATION_YEARS || y > year) return false;
+      return family ? this._family(p) === family : p.species.trim().toLowerCase() === name;
+    });
+    if (!same.length) return null;
+    const years = [...new Set(same.map((p) => this._plantingYear(p)))].sort().join(", ");
+    return this.t("rotationHint", { what: family || species.trim(), years, names: same.map((p) => p.name).join(", ") });
+  }
+
+  /** Crops of a zone per year with their family: the base for rotations. */
+  _rotationBox(zone) {
+    const rows = new Map();
+    for (const p of this._data.plantings.filter((p) => p.zone_id === zone.id)) {
+      const year = this._plantingYear(p);
+      if (!year) continue;
+      if (!rows.has(year)) rows.set(year, []);
+      rows.get(year).push(`${p.name}${this._family(p) ? ` (${this._family(p)})` : ""}`);
+    }
+    if (!rows.size) return null;
+    return h(
+      "div",
+      { className: "seasons" },
+      h("h3", {}, this.t("rotation")),
+      [...rows.entries()]
+        .sort((a, b) => b[0] - a[0])
+        .slice(0, 6)
+        .map(([year, crops]) => h("div", { className: "sub" }, `${year}: ${crops.join(" · ")}`)),
+    );
+  }
+
   // ---------- tools ----------
 
   _openTool(tool) {
@@ -3214,6 +3529,7 @@ class HomesteadPanel extends HTMLElement {
           : null,
       ),
       z.id ? (this._woodEl = h("div", {}, this._woodBox(z))) : null,
+      z.id && z.kind !== "woodland" ? this._rotationBox(z) : null,
       z.id ? this._diaryBox({ zone_id: z.id }) : null,
       z.id ? this._lastYearsBox(this._data.events.filter((e) => e.zone_id === z.id || this._zoneDescendants(z.id).has(e.zone_id)), { zone_id: z.id }) : null,
     ];

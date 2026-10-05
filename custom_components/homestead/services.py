@@ -30,6 +30,7 @@ from .models import (
     PlantingOrigin,
     PlantingStatus,
     PlantType,
+    SeedLot,
     Task,
     Tool,
     ToolPower,
@@ -91,6 +92,7 @@ ADD_PLANTING_SCHEMA = vol.Schema(
         vol.Optional("zone_id"): _opt_str,
         vol.Optional("latitude"): vol.Any(None, cv.latitude),
         vol.Optional("longitude"): vol.Any(None, cv.longitude),
+        vol.Optional("seed_lot_id"): _opt_str,
         vol.Optional("price"): vol.Any(None, _positive),
         vol.Optional("notes"): _opt_str,
     }
@@ -165,6 +167,32 @@ UPDATE_TOOL_SCHEMA = vol.Schema(
 )
 
 ID_SCHEMA = vol.Schema({vol.Required("id"): cv.string})
+
+ADD_SEED_LOT_SCHEMA = vol.Schema(
+    {
+        vol.Optional("species"): cv.string,
+        vol.Optional("taxon_id"): _opt_str,
+        vol.Optional("variety"): _opt_str,
+        vol.Optional("year"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1900, max=2200))),
+        vol.Optional("supplier"): _opt_str,
+        vol.Optional("quantity"): _opt_str,
+        vol.Optional("viability_years"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=50))),
+        vol.Optional("finished"): cv.boolean,
+        vol.Optional("price"): vol.Any(None, _positive),
+        vol.Optional("notes"): _opt_str,
+    }
+)
+
+UPDATE_SEED_LOT_SCHEMA = vol.Schema(
+    {
+        vol.Required("id"): cv.string,
+        **{
+            vol.Optional(str(key)): value
+            for key, value in ADD_SEED_LOT_SCHEMA.schema.items()
+            if key != "price"
+        },
+    }
+)
 
 _EVENT_FIELDS = {
     vol.Optional("product"): _opt_str,
@@ -341,6 +369,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         args["planted_on"] = _iso(args.get("planted_on"))
         args["sown_on"] = _iso(args.get("sown_on"))
         _check_ref(store.data.zones, args.get("zone_id"), "zone_id")
+        _check_ref(store.data.seeds, args.get("seed_lot_id"), "seed_lot_id")
         _apply_taxon(store, args)
         if args["kind"] == PlantingKind.SINGLE:
             args["quantity"] = 1
@@ -365,6 +394,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         planting_id = args.pop("id")
         _check_ref(store.data.plantings, planting_id, "id")
         _check_ref(store.data.zones, args.get("zone_id"), "zone_id")
+        _check_ref(store.data.seeds, args.get("seed_lot_id"), "seed_lot_id")
         if "taxon_id" in args or "species" in args:
             current = store.data.plantings[planting_id]
             merged = {"species": current.species, "taxon_id": current.taxon_id, **args}
@@ -493,6 +523,52 @@ def async_register_services(hass: HomeAssistant) -> None:
                 expense.tool_id = None
         await store.async_save()
         return {"id": tool_id}
+
+    async def add_seed_lot(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        args: dict[str, Any] = dict(call.data)
+        price = args.pop("price", None)
+        _apply_taxon(store, args)
+        lot = SeedLot(**args)
+        store.data.seeds[lot.id] = lot
+        if price:
+            _add_expense(
+                store,
+                amount=price,
+                category=ExpenseCategory.SEEDS,
+                spent_on=None,
+                supplier=lot.supplier,
+                notes=" ".join(filter(None, [lot.species, lot.variety])),
+            )
+        await store.async_save()
+        return {"id": lot.id}
+
+    async def update_seed_lot(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        args: dict[str, Any] = dict(call.data)
+        lot_id = args.pop("id")
+        _check_ref(store.data.seeds, lot_id, "id")
+        if "taxon_id" in args or "species" in args:
+            current = store.data.seeds[lot_id]
+            merged = {"species": current.species, "taxon_id": current.taxon_id, **args}
+            if args.get("taxon_id") and "species" not in args:
+                merged["species"] = None
+            _apply_taxon(store, merged)
+            args["species"] = merged["species"]
+        store.data.seeds[lot_id] = replace(store.data.seeds[lot_id], **args)
+        await store.async_save()
+        return {"id": lot_id}
+
+    async def delete_seed_lot(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        lot_id = call.data["id"]
+        _check_ref(store.data.seeds, lot_id, "id")
+        del store.data.seeds[lot_id]
+        for planting in store.data.plantings.values():
+            if planting.seed_lot_id == lot_id:
+                planting.seed_lot_id = None
+        await store.async_save()
+        return {"id": lot_id}
 
     async def delete_photo(call: ServiceCall) -> ServiceResponse:
         store = _store(hass)
@@ -669,6 +745,9 @@ def async_register_services(hass: HomeAssistant) -> None:
         ("update_tool", update_tool, UPDATE_TOOL_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_tool", delete_tool, ID_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_photo", delete_photo, ID_SCHEMA, SupportsResponse.OPTIONAL),
+        ("add_seed_lot", add_seed_lot, ADD_SEED_LOT_SCHEMA, SupportsResponse.OPTIONAL),
+        ("update_seed_lot", update_seed_lot, UPDATE_SEED_LOT_SCHEMA, SupportsResponse.OPTIONAL),
+        ("delete_seed_lot", delete_seed_lot, ID_SCHEMA, SupportsResponse.OPTIONAL),
         ("add_event", add_event, ADD_EVENT_SCHEMA, SupportsResponse.OPTIONAL),
         ("update_event", update_event, UPDATE_EVENT_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_event", delete_event, ID_SCHEMA, SupportsResponse.OPTIONAL),

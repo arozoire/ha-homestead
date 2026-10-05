@@ -81,3 +81,21 @@ def test_backup_clears_unknown_zone_species() -> None:
         },
     }
     assert read_backup(raw).zones["z"].species == [{"name": "Faggio", "taxon_id": None}]
+
+
+async def test_seed_lots(hass: HomeAssistant) -> None:
+    entry = await _setup(hass)
+    data = entry.runtime_data.data
+    args = {"species": "Solanum lycopersicum", "variety": "Cuore di bue", "year": 2023, "price": 3.5}
+    lot = (await _call(hass, "add_seed_lot", args))["id"]
+    expense = next(iter(data.expenses.values()))
+    assert (expense.category, expense.amount) == ("seeds", 3.5)
+    assert expense.notes == "Solanum lycopersicum Cuore di bue"
+    sown = {"name": "Pomodori", "species": "Solanum lycopersicum", "origin": "sown", "seed_lot_id": lot}
+    tomatoes = (await _call(hass, "add_planting", sown))["id"]
+    with pytest.raises(ServiceValidationError):
+        await _call(hass, "add_planting", {**sown, "seed_lot_id": "missing"})
+    await _call(hass, "update_seed_lot", {"id": lot, "finished": True, "viability_years": 5})
+    assert data.seeds[lot].finished and data.seeds[lot].viability_years == 5
+    await _call(hass, "delete_seed_lot", {"id": lot})
+    assert lot not in data.seeds and data.plantings[tomatoes].seed_lot_id is None

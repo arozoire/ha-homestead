@@ -197,6 +197,9 @@ add_planting:
           min: 0
           step: 0.01
           mode: box
+    seed_lot_id:
+      selector:
+        text:
     notes:
       selector:
         text:
@@ -320,6 +323,9 @@ update_planting:
             - active
             - dead
             - removed
+    seed_lot_id:
+      selector:
+        text:
     notes:
       selector:
         text:
@@ -899,3 +905,102 @@ complete_task:
         date:
 
 export:
+
+add_seed_lot:
+  fields:
+    species:
+      example: "Solanum lycopersicum"
+      selector:
+        text:
+    taxon_id:
+      selector:
+        text:
+    variety:
+      example: "Cuore di bue"
+      selector:
+        text:
+    year:
+      example: 2025
+      selector:
+        number:
+          min: 1900
+          max: 2200
+          mode: box
+    supplier:
+      selector:
+        text:
+    quantity:
+      example: "1 bustina"
+      selector:
+        text:
+    viability_years:
+      selector:
+        number:
+          min: 1
+          max: 50
+          mode: box
+    finished:
+      selector:
+        boolean:
+    price:
+      selector:
+        number:
+          min: 0
+          step: 0.01
+          mode: box
+    notes:
+      selector:
+        text:
+          multiline: true
+
+update_seed_lot:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+    species:
+      example: "Solanum lycopersicum"
+      selector:
+        text:
+    taxon_id:
+      selector:
+        text:
+    variety:
+      example: "Cuore di bue"
+      selector:
+        text:
+    year:
+      example: 2025
+      selector:
+        number:
+          min: 1900
+          max: 2200
+          mode: box
+    supplier:
+      selector:
+        text:
+    quantity:
+      example: "1 bustina"
+      selector:
+        text:
+    viability_years:
+      selector:
+        number:
+          min: 1
+          max: 50
+          mode: box
+    finished:
+      selector:
+        boolean:
+    notes:
+      selector:
+        text:
+          multiline: true
+
+delete_seed_lot:
+  fields:
+    id:
+      required: true
+      selector:
+        text:

@@ -225,6 +225,7 @@ class Planting(_Record):
     status: str = PlantingStatus.ACTIVE
     moon_phase: str | None = None
     sown_moon_phase: str | None = None
+    seed_lot_id: str | None = None
     notes: str | None = None
 
     def __post_init__(self) -> None:
@@ -327,6 +328,22 @@ class Tool(_Record):
 
 
 @dataclass(kw_only=True)
+class SeedLot(_Record):
+    """A packet or jar of seeds: germination drops with age (the panel warns per botanical family)."""
+
+    species: str
+    id: str = field(default_factory=new_id)
+    taxon_id: str | None = None
+    variety: str | None = None
+    year: int | None = None  # packed or harvested
+    supplier: str | None = None
+    quantity: str | None = None  # free text: "1 packet", "20 g"
+    viability_years: int | None = None  # overrides the family default
+    finished: bool = False
+    notes: str | None = None
+
+
+@dataclass(kw_only=True)
 class Photo(_Record):
     """A picture stored under the HA media folder; ``file`` is relative to the homestead folder."""
 
@@ -347,6 +364,7 @@ _COLLECTIONS: dict[str, type[_Record]] = {
     "photos": Photo,
     "events": Event,
     "tasks": Task,
+    "seeds": SeedLot,
 }
 
 
@@ -360,6 +378,7 @@ class HomesteadData:
     photos: dict[str, Photo] = field(default_factory=dict)
     events: dict[str, Event] = field(default_factory=dict)
     tasks: dict[str, Task] = field(default_factory=dict)
+    seeds: dict[str, SeedLot] = field(default_factory=dict)
 
     @classmethod
     def from_dict(cls, raw: dict[str, Any]) -> HomesteadData:

@@ -358,6 +358,10 @@
           "name": "Price",
           "description": "Purchase price; recorded as an expense."
         },
+        "seed_lot_id": {
+          "name": "Seed lot",
+          "description": "Seeds used (id of a seed lot)."
+        },
         "notes": {
           "name": "Notes",
           "description": "Free notes."
@@ -447,6 +451,10 @@
         "status": {
           "name": "Status",
           "description": "Active, dead or removed."
+        },
+        "seed_lot_id": {
+          "name": "Seed lot",
+          "description": "Seeds used (id of a seed lot)."
         },
         "notes": {
           "name": "Notes",
@@ -953,6 +961,108 @@
     "export": {
       "name": "Export data",
       "description": "Returns all HA Homestead data."
+    },
+    "add_seed_lot": {
+      "name": "Add seed lot",
+      "description": "Adds seeds to the inventory (packet, jar, own seeds).",
+      "fields": {
+        "species": {
+          "name": "Species",
+          "description": "Scientific or common name; optional with a linked taxon."
+        },
+        "taxon_id": {
+          "name": "Taxon",
+          "description": "Imported species (id)."
+        },
+        "variety": {
+          "name": "Variety",
+          "description": "Variety."
+        },
+        "year": {
+          "name": "Year",
+          "description": "Year packed or harvested: germination drops with age."
+        },
+        "supplier": {
+          "name": "Supplier",
+          "description": "Shop, seed swap, own seeds…"
+        },
+        "quantity": {
+          "name": "Quantity",
+          "description": "Free text: 1 packet, 20 g…"
+        },
+        "viability_years": {
+          "name": "Viability (years)",
+          "description": "How long these seeds keep germinating well; empty = typical value of the family."
+        },
+        "finished": {
+          "name": "Finished",
+          "description": "No seeds left."
+        },
+        "price": {
+          "name": "Price",
+          "description": "Purchase price; recorded as a seed expense."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "update_seed_lot": {
+      "name": "Update seed lot",
+      "description": "Changes the given fields of a seed lot.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Seed lot id."
+        },
+        "species": {
+          "name": "Species",
+          "description": "Scientific or common name; optional with a linked taxon."
+        },
+        "taxon_id": {
+          "name": "Taxon",
+          "description": "Imported species (id)."
+        },
+        "variety": {
+          "name": "Variety",
+          "description": "Variety."
+        },
+        "year": {
+          "name": "Year",
+          "description": "Year packed or harvested: germination drops with age."
+        },
+        "supplier": {
+          "name": "Supplier",
+          "description": "Shop, seed swap, own seeds…"
+        },
+        "quantity": {
+          "name": "Quantity",
+          "description": "Free text: 1 packet, 20 g…"
+        },
+        "viability_years": {
+          "name": "Viability (years)",
+          "description": "How long these seeds keep germinating well; empty = typical value of the family."
+        },
+        "finished": {
+          "name": "Finished",
+          "description": "No seeds left."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "delete_seed_lot": {
+      "name": "Delete seed lot",
+      "description": "Deletes a seed lot; plantings keep their data.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Seed lot id."
+        }
+      }
     }
   },
   "common": {

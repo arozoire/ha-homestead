@@ -358,6 +358,10 @@
           "name": "Prezzo",
           "description": "Prezzo d'acquisto; registrato come spesa."
         },
+        "seed_lot_id": {
+          "name": "Lotto di semi",
+          "description": "Semi usati (id del lotto)."
+        },
         "notes": {
           "name": "Note",
           "description": "Note libere."
@@ -447,6 +451,10 @@
         "status": {
           "name": "Stato",
           "description": "Attiva, morta o rimossa."
+        },
+        "seed_lot_id": {
+          "name": "Lotto di semi",
+          "description": "Semi usati (id del lotto)."
         },
         "notes": {
           "name": "Note",
@@ -953,6 +961,108 @@
     "export": {
       "name": "Esporta dati",
       "description": "Restituisce tutti i dati di HA Homestead."
+    },
+    "add_seed_lot": {
+      "name": "Aggiungi lotto di semi",
+      "description": "Aggiunge semi all'inventario (bustina, barattolo, semi propri).",
+      "fields": {
+        "species": {
+          "name": "Specie",
+          "description": "Nome scientifico o comune; facoltativo con una specie collegata."
+        },
+        "taxon_id": {
+          "name": "Specie importata",
+          "description": "Specie importata (id)."
+        },
+        "variety": {
+          "name": "Varietà",
+          "description": "Varietà."
+        },
+        "year": {
+          "name": "Anno",
+          "description": "Anno di confezionamento o raccolta: la germinabilità cala con l'età."
+        },
+        "supplier": {
+          "name": "Fornitore",
+          "description": "Negozio, scambio semi, semi propri…"
+        },
+        "quantity": {
+          "name": "Quantità",
+          "description": "Testo libero: 1 bustina, 20 g…"
+        },
+        "viability_years": {
+          "name": "Durata (anni)",
+          "description": "Per quanti anni germinano bene; vuoto = valore tipico della famiglia."
+        },
+        "finished": {
+          "name": "Finiti",
+          "description": "Semi esauriti."
+        },
+        "price": {
+          "name": "Prezzo",
+          "description": "Prezzo d'acquisto; diventa una spesa per semi."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "update_seed_lot": {
+      "name": "Modifica lotto di semi",
+      "description": "Cambia i campi indicati di un lotto di semi.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id del lotto."
+        },
+        "species": {
+          "name": "Specie",
+          "description": "Nome scientifico o comune; facoltativo con una specie collegata."
+        },
+        "taxon_id": {
+          "name": "Specie importata",
+          "description": "Specie importata (id)."
+        },
+        "variety": {
+          "name": "Varietà",
+          "description": "Varietà."
+        },
+        "year": {
+          "name": "Anno",
+          "description": "Anno di confezionamento o raccolta: la germinabilità cala con l'età."
+        },
+        "supplier": {
+          "name": "Fornitore",
+          "description": "Negozio, scambio semi, semi propri…"
+        },
+        "quantity": {
+          "name": "Quantità",
+          "description": "Testo libero: 1 bustina, 20 g…"
+        },
+        "viability_years": {
+          "name": "Durata (anni)",
+          "description": "Per quanti anni germinano bene; vuoto = valore tipico della famiglia."
+        },
+        "finished": {
+          "name": "Finiti",
+          "description": "Semi esauriti."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "delete_seed_lot": {
+      "name": "Elimina lotto di semi",
+      "description": "Elimina un lotto di semi; le piante restano.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id del lotto."
+        }
+      }
     }
   },
   "common": {
