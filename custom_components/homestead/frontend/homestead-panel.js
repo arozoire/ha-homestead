@@ -461,6 +461,8 @@ class HomesteadPanel extends HTMLElement {
     const streets = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 23,
       maxNativeZoom: 19,
+      // OSM tile servers answer 403 without a Referer, and HA strips it from cross-site requests.
+      referrerPolicy: "origin",
       attribution: "© OpenStreetMap contributors",
     });
     // Without tiles the map can zoom further: a plan of a single bed.
