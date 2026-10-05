@@ -105,6 +105,13 @@
         "lawn": "Lawn",
         "other": "Other"
       }
+    },
+    "planting_origin": {
+      "options": {
+        "existing": "Already there",
+        "planted": "Planted by me",
+        "sown": "Sown by me"
+      }
     }
   },
   "services": {
@@ -210,9 +217,21 @@
           "name": "Quantity",
           "description": "Number of plants (groups only)."
         },
+        "origin": {
+          "name": "Origin",
+          "description": "Already there, planted or sown by you."
+        },
+        "sown_on": {
+          "name": "Sown on",
+          "description": "Sowing date; the moon phase is recorded."
+        },
         "planted_on": {
           "name": "Planted on",
-          "description": "Planting date."
+          "description": "Date planted out or transplanted."
+        },
+        "birth_year": {
+          "name": "Estimated birth year",
+          "description": "Estimated year of sowing or grafting, used for the age."
         },
         "initial_form": {
           "name": "Initial form",
@@ -284,9 +303,21 @@
           "name": "Quantity",
           "description": "Number of plants (groups only)."
         },
+        "origin": {
+          "name": "Origin",
+          "description": "Already there, planted or sown by you."
+        },
+        "sown_on": {
+          "name": "Sown on",
+          "description": "Sowing date; the moon phase is recorded."
+        },
         "planted_on": {
           "name": "Planted on",
-          "description": "Planting date."
+          "description": "Date planted out or transplanted."
+        },
+        "birth_year": {
+          "name": "Estimated birth year",
+          "description": "Estimated year of sowing or grafting, used for the age."
         },
         "initial_form": {
           "name": "Initial form",

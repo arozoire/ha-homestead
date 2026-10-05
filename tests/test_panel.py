@@ -1,5 +1,3 @@
-import base64
-
 import pytest
 import voluptuous as vol
 from homeassistant.components.frontend import DATA_PANELS
@@ -137,29 +135,6 @@ async def test_zone_services(hass: HomeAssistant) -> None:
     assert data.plantings[planting].zone_id == garden
 
 
-async def test_websocket_parse_map(hass: HomeAssistant, hass_ws_client) -> None:
-    await _setup(hass)
-    ws = await hass_ws_client(hass)
-    geojson = b'{"type": "Point", "coordinates": [7, 45]}'
-    await ws.send_json(
-        {
-            "id": 1,
-            "type": "homestead/parse_map",
-            "filename": "a.geojson",
-            "content": base64.b64encode(geojson).decode(),
-        }
-    )
-    result = await ws.receive_json()
-    assert result["result"] == {
-        "features": [{"name": "", "geometry": {"type": "Point", "coordinates": [7.0, 45.0]}}],
-        "skipped": 0,
-    }
-
-    await ws.send_json({"id": 2, "type": "homestead/parse_map", "filename": "a.kml", "content": "bm9wZQ=="})
-    result = await ws.receive_json()
-    assert result["error"]["code"] == "invalid_format"
-
-
 async def test_position_needs_both_coordinates(hass: HomeAssistant) -> None:
     await _setup(hass)
     with pytest.raises(ServiceValidationError):
@@ -172,3 +147,24 @@ async def test_position_needs_both_coordinates(hass: HomeAssistant) -> None:
     await hass.services.async_call(
         DOMAIN, "update_planting", {"id": planting_id, "latitude": None, "longitude": None}, blocking=True
     )
+
+
+async def test_sown_then_transplanted(hass: HomeAssistant) -> None:
+    entry = await _setup(hass)
+    planting_id = await _add(hass, origin="sown", sown_on="2024-04-08", kind="group", quantity=12)
+    await hass.services.async_call(
+        DOMAIN,
+        "update_planting",
+        {"id": planting_id, "planted_on": "2024-04-23", "birth_year": 2024},
+        blocking=True,
+    )
+    planting = entry.runtime_data.data.plantings[planting_id]
+    assert (planting.sown_moon_phase, planting.moon_phase, planting.birth_year) == (
+        "new_moon",
+        "full_moon",
+        2024,
+    )
+    await hass.services.async_call(
+        DOMAIN, "update_planting", {"id": planting_id, "sown_on": None}, blocking=True
+    )
+    assert entry.runtime_data.data.plantings[planting_id].sown_moon_phase is None

@@ -35,6 +35,15 @@ GBIF_USAGE = {
     "taxonomicStatus": "ACCEPTED",
     "family": "Rosaceae",
     "genus": "Malus",
+    "kingdom": "Plantae",
+}
+WORM_ENTITY = {
+    "id": "Q1",
+    "labels": {"it": {"value": "Meloidogyne incognita"}},
+    "claims": {
+        "P225": [{"mainsnak": {"datavalue": {"value": "Meloidogyne incognita"}}}],
+        "P846": [{"mainsnak": {"datavalue": {"value": "2283"}}}],
+    },
 }
 GBIF_NAMES = {
     "results": [
@@ -96,12 +105,12 @@ def _mock_sources(aioclient_mock) -> None:
     aioclient_mock.get(
         WIKIDATA,
         params={"action": "wbsearchentities"},
-        json={"search": [{"id": "Q18674606"}, {"id": "Q999"}]},
+        json={"search": [{"id": "Q18674606"}, {"id": "Q999"}, {"id": "Q1"}]},
     )
     aioclient_mock.get(
         WIKIDATA,
         params={"action": "wbgetentities"},
-        json={"entities": {"Q18674606": APPLE_ENTITY, "Q999": CITY_ENTITY}},
+        json={"entities": {"Q18674606": APPLE_ENTITY, "Q999": CITY_ENTITY, "Q1": WORM_ENTITY}},
     )
     aioclient_mock.get(f"{GBIF}/species/suggest", json=[{**GBIF_USAGE, "status": "ACCEPTED"}])
     aioclient_mock.get(f"{GBIF}/species/search", json={"results": []})
@@ -110,6 +119,7 @@ def _mock_sources(aioclient_mock) -> None:
     )
     aioclient_mock.get(f"{GBIF}/species/3001509/vernacularNames", json=GBIF_NAMES)
     aioclient_mock.get(f"{GBIF}/species/3001509", json=GBIF_USAGE)
+    aioclient_mock.get(f"{GBIF}/species/2283", json={"key": 2283, "kingdom": "Animalia"})
 
 
 async def test_search_import_and_link(hass: HomeAssistant, hass_ws_client, aioclient_mock) -> None:
@@ -152,7 +162,7 @@ async def test_search_import_and_link(hass: HomeAssistant, hass_ws_client, aiocl
     assert all(item["source"] == "local" for item in local)
     await ws.send_json({"id": 3, "type": "homestead/species/search", "query": "melo"})
     await ws.receive_json()
-    assert aioclient_mock.call_count == calls + 4  # "mel" hit the network, "melo" came from the cache
+    assert aioclient_mock.call_count == calls + 5  # "mel": 4 searches + 1 kingdom check; "melo" was cached
 
 
 async def test_offline(hass: HomeAssistant, hass_ws_client, aioclient_mock) -> None:
@@ -183,3 +193,19 @@ async def test_species_or_taxon_required(hass: HomeAssistant) -> None:
         await hass.services.async_call(
             DOMAIN, "update_planting", {"id": planting_id, "taxon_id": "nope"}, blocking=True
         )
+
+
+async def test_failed_kingdom_check_is_not_cached(
+    hass: HomeAssistant, hass_ws_client, aioclient_mock
+) -> None:
+    await _setup(hass)
+    aioclient_mock.get(WIKIDATA, params={"action": "wbsearchentities"}, json={"search": [{"id": "Q1"}]})
+    aioclient_mock.get(WIKIDATA, params={"action": "wbgetentities"}, json={"entities": {"Q1": WORM_ENTITY}})
+    aioclient_mock.get(f"{GBIF}/species/suggest", json=[])
+    aioclient_mock.get(f"{GBIF}/species/search", json={"results": []})
+    aioclient_mock.get(f"{GBIF}/species/2283", status=503)
+    ws = await hass_ws_client(hass)
+    for msg_id in (1, 2):
+        await ws.send_json({"id": msg_id, "type": "homestead/species/search", "query": "meloidogyne"})
+        assert (await ws.receive_json())["result"] == {"results": [], "offline": True}
+    assert aioclient_mock.call_count == 10  # both searches went to the network

@@ -61,6 +61,7 @@ def parse_usage(item: dict[str, Any], language: str | None = None) -> Candidate 
         common_name=names.get(language or ""),
         family=item.get("family"),
         rank=(item.get("rank") or "").lower() or None,
+        kingdom=item.get("kingdom"),
         gbif_key=int(key),
     )
 
@@ -83,6 +84,10 @@ async def search(
         if candidate and candidate.gbif_key not in found:
             found[candidate.gbif_key] = candidate  # type: ignore[index]
     return list(found.values())[:limit]
+
+
+async def kingdom(session: aiohttp.ClientSession, key: int) -> str | None:
+    return (await _get(session, f"/species/{key}", {})).get("kingdom")
 
 
 async def details(

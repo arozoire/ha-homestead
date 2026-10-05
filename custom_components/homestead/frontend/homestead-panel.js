@@ -13,7 +13,6 @@ const TEXT = {
     tabZones: "Zones",
     add: "New planting",
     addZone: "New zone",
-    import: "Import KML / KMZ / GeoJSON",
     empty: "No plantings yet. Press “New planting” and click on the map.",
     emptyZones: "No zones yet. Press “New zone” and click the corners on the map.",
     noPosition: "not on the map",
@@ -44,6 +43,15 @@ const TEXT = {
     group: "Group (row, bed)",
     quantity: "Quantity",
     planted_on: "Planted on",
+    origin: "Origin",
+    existing: "Already there",
+    planted: "Planted by me",
+    sown: "Sown by me",
+    age_now: "Estimated age (years)",
+    age_at_planting: "Age when planted (years)",
+    sown_on: "Sown on",
+    transplanted_on: "Transplanted on",
+    ageYears: "~{years} y",
     zone_id: "Zone",
     parent_id: "Inside zone",
     noZone: "—",
@@ -65,20 +73,16 @@ const TEXT = {
     pots: "Pots",
     lawn: "Lawn",
     other: "Other",
-    importTitle: "Import map",
-    importHint: "Same names are matched to your plantings and zones. Empty species = the name is used.",
-    importSkipped: "{count} lines or empty elements ignored.",
-    importNothing: "No points or polygons found in the file.",
-    importApply: "Import {count}",
-    importProgress: "Importing… {done}/{count}",
-    importDone: "{count} elements imported.",
-    point: "Point",
-    polygon: "Polygon",
-    newPlanting: "New planting",
-    newZone: "New zone",
-    skip: "Ignore",
-    update: "Update “{name}”",
-    tooLarge: "File too large (max 2 MB).",
+    saved: "Saved: {name}",
+    backup: "Backup",
+    backupHint: "All plantings, zones, species, expenses and tools in a JSON file. Home Assistant backups include them too.",
+    exportBackup: "Export",
+    importBackup: "Restore",
+    confirmRestore: "Replace ALL current data with this backup ({date})?\n{summary}\nTip: export the current data first.",
+    restored: "Backup restored: {summary}",
+    notBackup: "This file is not an HA Homestead backup.",
+    summary: "{plantings} plantings, {zones} zones, {taxa} species, {expenses} expenses, {tools} tools",
+    deleted: "Deleted: {name}",
     speciesPlaceholder: "Search: apple, Malus domestica…",
     searching: "Searching…",
     noResults: "No species found: the text is kept as it is.",
@@ -96,7 +100,6 @@ const TEXT = {
     tabZones: "Zone",
     add: "Nuova pianta",
     addZone: "Nuova zona",
-    import: "Importa KML / KMZ / GeoJSON",
     empty: "Nessuna pianta. Premi “Nuova pianta” e clicca sulla mappa.",
     emptyZones: "Nessuna zona. Premi “Nuova zona” e clicca gli angoli sulla mappa.",
     noPosition: "non sulla mappa",
@@ -127,6 +130,15 @@ const TEXT = {
     group: "Gruppo (fila, aiuola)",
     quantity: "Quantità",
     planted_on: "Messa a dimora",
+    origin: "Origine",
+    existing: "Già presente",
+    planted: "Piantata da me",
+    sown: "Seminata da me",
+    age_now: "Età stimata (anni)",
+    age_at_planting: "Età all'impianto (anni)",
+    sown_on: "Semina",
+    transplanted_on: "Trapianto",
+    ageYears: "~{years} anni",
     zone_id: "Zona",
     parent_id: "Dentro la zona",
     noZone: "—",
@@ -148,20 +160,16 @@ const TEXT = {
     pots: "Vasi",
     lawn: "Prato",
     other: "Altro",
-    importTitle: "Importa mappa",
-    importHint: "Gli stessi nomi vengono abbinati alle tue piante e zone. Specie vuota = uso il nome.",
-    importSkipped: "{count} linee o elementi vuoti ignorati.",
-    importNothing: "Nessun punto o poligono trovato nel file.",
-    importApply: "Importa {count}",
-    importProgress: "Importo… {done}/{count}",
-    importDone: "{count} elementi importati.",
-    point: "Punto",
-    polygon: "Poligono",
-    newPlanting: "Nuova pianta",
-    newZone: "Nuova zona",
-    skip: "Ignora",
-    update: "Aggiorna “{name}”",
-    tooLarge: "File troppo grande (max 2 MB).",
+    saved: "Salvato: {name}",
+    backup: "Backup",
+    backupHint: "Tutte le piante, zone, specie, spese e attrezzi in un file JSON. Sono inclusi anche nei backup di Home Assistant.",
+    exportBackup: "Esporta",
+    importBackup: "Ripristina",
+    confirmRestore: "Sostituire TUTTI i dati attuali con questo backup ({date})?\n{summary}\nConsiglio: esporta prima i dati attuali.",
+    restored: "Backup ripristinato: {summary}",
+    notBackup: "Questo file non è un backup di HA Homestead.",
+    summary: "{plantings} piante, {zones} zone, {taxa} specie, {expenses} spese, {tools} attrezzi",
+    deleted: "Eliminato: {name}",
     speciesPlaceholder: "Cerca: melo, Malus domestica…",
     searching: "Cerco…",
     noResults: "Nessuna specie trovata: il testo resta così com'è.",
@@ -175,7 +183,6 @@ const TEXT = {
 
 const STATUS_COLOR = { active: "#43a047", dead: "#e53935", removed: "#9e9e9e" };
 const ZONE_COLOR = "#ffca28";
-const MAX_FILE_BYTES = 2 * 1024 * 1024;
 
 const h = (tag, attrs = {}, ...children) => {
   const el = document.createElement(tag);
@@ -191,7 +198,8 @@ const h = (tag, attrs = {}, ...children) => {
 
 const STYLE = `
   :host { display: block; height: 100%; background: var(--primary-background-color); color: var(--primary-text-color); }
-  .layout { display: flex; flex-direction: column; height: 100%; }
+  /* HA gives custom panels no definite height: size on the viewport instead of 100%. */
+  .layout { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
   header { display: flex; align-items: center; gap: 8px; height: var(--header-height, 56px); padding: 0 12px;
     background: var(--app-header-background-color, var(--primary-color)); color: var(--app-header-text-color, #fff);
     box-sizing: border-box; flex: none; }
@@ -202,6 +210,7 @@ const STYLE = `
   aside { width: 360px; flex: none; overflow-y: auto; border-left: 1px solid var(--divider-color);
     background: var(--card-background-color); box-sizing: border-box; padding: 12px; }
   .narrow .body { flex-direction: column; }
+  .narrow .map { min-height: 45%; }
   .narrow aside { width: auto; height: 45%; border-left: none; border-top: 1px solid var(--divider-color); }
   .banner { position: absolute; z-index: 1000; top: 10px; left: 50%; transform: translateX(-50%);
     background: var(--primary-color); color: var(--text-primary-color, #fff); padding: 8px 12px; border-radius: 8px;
@@ -247,6 +256,10 @@ const STYLE = `
   .suggest .msg { padding: 8px 10px; font-size: 13px; color: var(--secondary-text-color); }
   .taxon { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--secondary-text-color); }
   .taxon button { padding: 0 8px; font-size: 12px; }
+  .dates { display: grid; gap: 10px; }
+  .dates [hidden] { display: none; }
+  .backup { margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--divider-color); }
+  .backup h3 { margin: 0 0 4px; font-size: 14px; font-weight: 500; }
   .pin { width: 18px; height: 18px; border-radius: 50%; border: 3px solid #fff; box-sizing: border-box;
     box-shadow: 0 0 4px rgba(0,0,0,.6); }
   .pin.selected { width: 26px; height: 26px; border-color: #ffeb3b; }
@@ -265,7 +278,6 @@ class HomesteadPanel extends HTMLElement {
     this._drawing = null;
     this._form = null;
     this._zoneForm = null;
-    this._import = null;
     this._message = { text: "", error: false };
   }
 
@@ -300,9 +312,9 @@ class HomesteadPanel extends HTMLElement {
     this._mapWrap = h("div", { className: "map" }, this._mapEl);
     this._fileInput = h("input", {
       type: "file",
-      accept: ".kml,.kmz,.geojson,.json",
+      accept: ".json,application/json",
       hidden: true,
-      onchange: (ev) => this._readFile(ev.target),
+      onchange: (ev) => this._restoreBackup(ev.target),
     });
     this._messageEl = h("p");
     this._content = h("div");
@@ -366,7 +378,7 @@ class HomesteadPanel extends HTMLElement {
         if (first) this._fitAll();
         first = false;
         if (this._form) this._refreshForm();
-        else if (!this._zoneForm && !this._import) this._render();
+        else if (!this._zoneForm) this._render();
       },
       { type: "homestead/subscribe" },
     );
@@ -514,15 +526,6 @@ class HomesteadPanel extends HTMLElement {
         L.circleMarker(p, { radius: 5, color: "#ffeb3b", fillOpacity: 1, interactive: false }).addTo(this._previewLayer),
       );
     }
-    if (this._import) {
-      const style = { color: "#ff7043", weight: 2, dashArray: "4 4", interactive: false };
-      this._import.rows.forEach((row) => {
-        if (row.action === "skip") return;
-        const g = row.geometry;
-        if (g.type === "Point") L.circleMarker([g.coordinates[1], g.coordinates[0]], { ...style, radius: 7 }).addTo(this._previewLayer);
-        else L.polygon(toLatLngs(g), { ...style, fillOpacity: 0.1 }).addTo(this._previewLayer);
-      });
-    }
   }
 
   // ---------- interaction ----------
@@ -530,7 +533,6 @@ class HomesteadPanel extends HTMLElement {
   _clearSelection() {
     this._form = null;
     this._zoneForm = null;
-    this._import = null;
     this._selected = null;
     this._placing = null;
     this._drawing = null;
@@ -641,6 +643,7 @@ class HomesteadPanel extends HTMLElement {
       kind: "single",
       quantity: 1,
       status: "active",
+      origin: "planted",
       planted_on: new Date().toISOString().slice(0, 10),
       zone_id: this._zoneAt(latlng.lat, latlng.lng),
       latitude: latlng.lat,
@@ -685,19 +688,19 @@ class HomesteadPanel extends HTMLElement {
       variety: values.variety?.trim() || null,
       kind: values.kind,
       quantity: Number(values.quantity) || 1,
-      planted_on: values.planted_on || null,
+      ...datesFromForm(values),
       zone_id: values.zone_id || null,
       notes: values.notes?.trim() || null,
     };
     if (this._form.id) {
       data.status = values.status;
       const id = this._form.id;
-      if (await this._call("update_planting", { id, ...data })) this._select(id, { ...this._form, ...data });
+      if (await this._call("update_planting", { id, ...data })) this._saved(data.name);
     } else {
       data.latitude = round(this._form.latitude);
       data.longitude = round(this._form.longitude);
       const result = await this._call("add_planting", data);
-      if (result) this._select(result.id, { ...data, id: result.id });
+      if (result) this._saved(data.name);
     }
   }
 
@@ -716,111 +719,85 @@ class HomesteadPanel extends HTMLElement {
     };
     const id = this._zoneForm.id;
     if (id) {
-      if (await this._call("update_zone", { id, ...data })) this._selectZone(id, { ...this._zoneForm, ...data });
+      if (await this._call("update_zone", { id, ...data })) this._saved(data.name);
     } else {
       if (this._zoneForm.geometry) data.geometry = this._zoneForm.geometry;
       const result = await this._call("add_zone", data);
-      if (result) this._selectZone(result.id, { ...data, id: result.id });
+      if (result) this._saved(data.name);
     }
   }
 
   async _delete() {
     const { id, name } = this._form;
     if (!confirm(this.t("confirmDelete", { name }))) return;
-    if (await this._call("delete_planting", { id })) this._close();
+    if (await this._call("delete_planting", { id })) this._saved(name, "deleted");
   }
 
   async _deleteZone() {
     const { id, name } = this._zoneForm;
     if (!confirm(this.t("confirmDeleteZone", { name }))) return;
-    if (await this._call("delete_zone", { id })) this._close();
+    if (await this._call("delete_zone", { id })) this._saved(name, "deleted");
   }
 
   // ---------- import ----------
 
-  async _readFile(input) {
-    const file = input.files?.[0];
-    input.value = "";
-    if (!file) return;
-    if (file.size > MAX_FILE_BYTES) {
-      this._showMessage(this.t("tooLarge"), true);
-      return;
-    }
-    let result;
+  // ---------- backup ----------
+
+  async _exportBackup() {
+    let backup;
     try {
-      result = await this._hass.callWS({
-        type: "homestead/parse_map",
-        filename: file.name,
-        content: toBase64(await file.arrayBuffer()),
-      });
+      backup = await this._hass.callWS({ type: "homestead/backup/export" });
     } catch (err) {
       this._showMessage(err.message || String(err), true);
       return;
     }
-    this._clearSelection();
-    const byName = (items, name) => items.find((i) => i.name.trim().toLowerCase() === name.toLowerCase());
-    let points = 0;
-    let polygons = 0;
-    const rows = result.features.map((f) => {
-      const isPoint = f.geometry.type === "Point";
-      const name = f.name || `${this.t(isPoint ? "point" : "polygon")} ${isPoint ? ++points : ++polygons}`;
-      const match = f.name && byName(isPoint ? this._data.plantings : this._data.zones, f.name);
-      return { name, species: "", geometry: f.geometry, action: match ? match.id : "new" };
-    });
-    this._import = { rows, skipped: result.skipped, busy: false };
-    this._showMessage(rows.length ? "" : this.t("importNothing"), !rows.length);
-    this._drawPreview();
-    const bounds = L.latLngBounds([]);
-    rows.forEach((r) =>
-      r.geometry.type === "Point"
-        ? bounds.extend([r.geometry.coordinates[1], r.geometry.coordinates[0]])
-        : bounds.extend(L.polygon(toLatLngs(r.geometry)).getBounds()),
-    );
-    if (bounds.isValid()) this._map.fitBounds(bounds, { padding: [40, 40], maxZoom: 19 });
-    this._render();
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = h("a", { href: url, download: `homestead-backup-${backup.exported_at.slice(0, 10)}.json` });
+    this.shadowRoot.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
   }
 
-  async _applyImport() {
-    const rows = this._import.rows.filter((r) => r.action !== "skip");
-    const ordered = [...rows.filter((r) => r.geometry.type !== "Point"), ...rows.filter((r) => r.geometry.type === "Point")];
-    const created = [];
-    let done = 0;
-    this._import.busy = true;
-    for (const row of ordered) {
-      this._applyButton.textContent = this.t("importProgress", { done, count: ordered.length });
-      const g = row.geometry;
-      let result;
-      if (g.type === "Point") {
-        const [lng, lat] = g.coordinates;
-        result =
-          row.action === "new"
-            ? await this._call("add_planting", {
-                name: row.name,
-                species: row.species.trim() || row.name,
-                latitude: round(lat),
-                longitude: round(lng),
-                zone_id: this._zoneAt(lat, lng, created),
-              })
-            : await this._call("update_planting", { id: row.action, latitude: round(lat), longitude: round(lng) });
-      } else if (row.action === "new") {
-        result = await this._call("add_zone", { name: row.name, geometry: g });
-        if (result) created.push({ id: result.id, geometry: g, area_m2: polygonArea(g) });
-      } else {
-        result = await this._call("update_zone", { id: row.action, geometry: g });
-      }
-      if (!result) {
-        this._import.busy = false;
-        this._render();
-        return;
-      }
-      done++;
+  async _restoreBackup(input) {
+    const file = input.files?.[0];
+    input.value = "";
+    if (!file) return;
+    let backup;
+    try {
+      backup = JSON.parse(await file.text());
+    } catch {
+      backup = null;
     }
-    this._close();
-    this._fitAll();
-    this._showMessage(this.t("importDone", { count: done }));
+    if (backup?.format !== "ha-homestead-backup" || typeof backup.data !== "object") {
+      this._showMessage(this.t("notBackup"), true);
+      return;
+    }
+    const counts = Object.fromEntries(
+      ["plantings", "zones", "taxa", "expenses", "tools"].map((k) => [k, backup.data[k]?.length ?? 0]),
+    );
+    const date = (backup.exported_at || "?").slice(0, 16).replace("T", " ");
+    if (!confirm(this.t("confirmRestore", { date, summary: this._summary(counts) }))) return;
+    try {
+      const result = await this._hass.callWS({ type: "homestead/backup/import", backup });
+      this._close();
+      this._showMessage(`✓ ${this.t("restored", { summary: this._summary(result) })}`);
+      this._fitAll();
+    } catch (err) {
+      this._showMessage(err.message || String(err), true);
+    }
   }
 
   // ---------- rendering ----------
+
+  /** Back to the list with a confirmation that fades after a few seconds. */
+  _saved(name, key = "saved") {
+    this._close();
+    this._showMessage(`✓ ${this.t(key, { name })}`);
+    clearTimeout(this._messageTimer);
+    this._messageTimer = setTimeout(() => this._message.text.startsWith("✓") && this._showMessage(""), 4000);
+  }
 
   _showMessage(text, error = false) {
     this._message = { text, error };
@@ -863,10 +840,15 @@ class HomesteadPanel extends HTMLElement {
     this._renderBanner();
     this._showMessage(this._message.text, this._message.error);
     let content;
-    if (this._import) content = this._renderImport();
-    else if (this._form && !this._placing) content = this._renderForm();
+    if (this._form && !this._placing) content = this._renderForm();
     else if (this._zoneForm && !this._drawing) content = this._renderZoneForm();
-    else content = [this._renderTabs(), ...(this._tab === "zones" ? this._renderZoneList() : this._renderList())];
+    else {
+      content = [
+        this._renderTabs(),
+        ...(this._tab === "zones" ? this._renderZoneList() : this._renderList()),
+        this._renderBackup(),
+      ];
+    }
     this._content.replaceChildren(...content.filter(Boolean));
   }
 
@@ -876,8 +858,25 @@ class HomesteadPanel extends HTMLElement {
     return h("div", { className: "tabs" }, tab("plantings", this.t("tabPlantings")), tab("zones", this.t("tabZones")));
   }
 
-  _importButton() {
-    return h("button", { onclick: () => this._fileInput.click() }, `📂 ${this.t("import")}`);
+  _renderBackup() {
+    return h(
+      "div",
+      { className: "backup" },
+      h("h3", {}, this.t("backup")),
+      h("p", { className: "hint" }, this.t("backupHint")),
+      h(
+        "div",
+        { className: "actions" },
+        h("button", { onclick: () => this._exportBackup() }, `💾 ${this.t("exportBackup")}`),
+        this._hass.user?.is_admin === false
+          ? null
+          : h("button", { onclick: () => this._fileInput.click() }, `📂 ${this.t("importBackup")}`),
+      ),
+    );
+  }
+
+  _summary(counts) {
+    return this.t("summary", Object.fromEntries(Object.entries(counts).map(([k, v]) => [k, v ?? 0])));
   }
 
   _refreshForm() {
@@ -901,7 +900,6 @@ class HomesteadPanel extends HTMLElement {
         "div",
         { className: "actions" },
         h("button", { className: "primary", onclick: () => this._startPlacing(null) }, `+ ${this.t("add")}`),
-        this._importButton(),
       ),
       this._loaded === false ? h("p", { className: "error" }, this.t("notLoaded")) : null,
       plantings.length
@@ -927,6 +925,7 @@ class HomesteadPanel extends HTMLElement {
                       this._taxon(p.taxon_id)?.common_names?.[this._lang()],
                       p.species,
                       p.variety,
+                      ageOf(p) ? this.t("ageYears", { years: ageOf(p) }) : null,
                       this._zone(p.zone_id)?.name,
                       p.kind === "group" ? `×${p.quantity}` : null,
                     ]
@@ -961,7 +960,6 @@ class HomesteadPanel extends HTMLElement {
         "div",
         { className: "actions" },
         h("button", { className: "primary", onclick: () => this._startDrawing(null) }, `+ ${this.t("addZone")}`),
-        this._importButton(),
       ),
       ordered.length
         ? h(
@@ -1036,12 +1034,8 @@ class HomesteadPanel extends HTMLElement {
         this._speciesField(f),
         this._field(f, "variety"),
         h("div", { className: "row" }, kind, quantity),
-        h(
-          "div",
-          { className: "row" },
-          this._field(f, "planted_on", { type: "date" }),
-          this._selectField(f, "zone_id", this._zoneOptions()),
-        ),
+        this._datesFields(f),
+        this._selectField(f, "zone_id", this._zoneOptions()),
         f.id ? this._selectField(f, "status", ["active", "dead", "removed"].map((s) => [s, this.t(s)])) : null,
         this._notes(f),
         (this._positionEl = h("div", { className: "hint" }, this._positionText())),
@@ -1160,6 +1154,47 @@ class HomesteadPanel extends HTMLElement {
     return h("label", { className: "species" }, this.t("species"), input, list, hidden, linked);
   }
 
+  /** Origin decides which dates make sense: an estimated age, a planting date or sowing + transplant. */
+  _datesFields(f) {
+    const year = new Date().getFullYear();
+    const plantedYear = f.planted_on ? Number(f.planted_on.slice(0, 4)) : null;
+    const values = {
+      origin: f.origin || (f.sown_on ? "sown" : f.planted_on ? "planted" : f.birth_year ? "existing" : "planted"),
+      age_now: f.birth_year ? year - f.birth_year : "",
+      age_at_planting: f.birth_year && plantedYear ? plantedYear - f.birth_year : "",
+      planted_on: f.planted_on,
+      sown_on: f.sown_on,
+      transplanted_on: f.planted_on,
+    };
+    const age = { type: "number", min: 0, max: 500, step: 1, inputMode: "numeric" };
+    const groups = {
+      existing: h("div", { className: "row" }, this._field(values, "age_now", age)),
+      planted: h(
+        "div",
+        { className: "row" },
+        this._field(values, "planted_on", { type: "date" }),
+        this._field(values, "age_at_planting", age),
+      ),
+      sown: h(
+        "div",
+        { className: "row" },
+        this._field(values, "sown_on", { type: "date" }),
+        this._field(values, "transplanted_on", { type: "date" }),
+      ),
+    };
+    const origin = this._selectField(values, "origin", ["existing", "planted", "sown"].map((o) => [o, this.t(o)]));
+    const show = () => {
+      const current = origin.querySelector("select").value;
+      for (const [name, group] of Object.entries(groups)) {
+        group.hidden = name !== current;
+        group.querySelectorAll("input").forEach((input) => (input.disabled = name !== current));
+      }
+    };
+    origin.addEventListener("change", show);
+    show();
+    return h("div", { className: "dates" }, origin, ...Object.values(groups));
+  }
+
   _renderZoneForm() {
     const z = this._zoneForm;
     const exclude = z.id ? new Set([z.id, ...this._zoneDescendants(z.id)]) : new Set();
@@ -1195,76 +1230,37 @@ class HomesteadPanel extends HTMLElement {
       ),
     ];
   }
+}
 
-  _renderImport() {
-    const { rows, skipped, busy } = this._import;
-    const active = rows.filter((r) => r.action !== "skip").length;
-    this._applyButton = h(
-      "button",
-      { className: "primary", disabled: busy || !active, onclick: () => this._applyImport() },
-      this.t("importApply", { count: active }),
-    );
-    return [
-      h("h2", {}, this.t("importTitle")),
-      h("p", { className: "hint" }, this.t("importHint")),
-      skipped ? h("p", { className: "hint" }, this.t("importSkipped", { count: skipped })) : null,
-      ...rows.map((row) => this._renderImportRow(row)),
-      h(
-        "div",
-        { className: "row", style: "margin-top:12px" },
-        this._applyButton,
-        h("button", { onclick: () => this._close(), disabled: busy }, this.t("cancel")),
-      ),
-    ];
+/** Disabled inputs (other origins) are not in the form data, so absent dates become null. */
+function datesFromForm(values) {
+  const year = new Date().getFullYear();
+  const number = (value) => (value === undefined || value === "" ? null : Number(value));
+  if (values.origin === "existing") {
+    const age = number(values.age_now);
+    return { origin: "existing", sown_on: null, planted_on: null, birth_year: age == null ? null : year - age };
   }
+  if (values.origin === "sown") {
+    return {
+      origin: "sown",
+      sown_on: values.sown_on || null,
+      planted_on: values.transplanted_on || null,
+      birth_year: values.sown_on ? Number(values.sown_on.slice(0, 4)) : null,
+    };
+  }
+  const plantedOn = values.planted_on || null;
+  const age = number(values.age_at_planting);
+  return {
+    origin: "planted",
+    sown_on: null,
+    planted_on: plantedOn,
+    birth_year: plantedOn && age != null ? Number(plantedOn.slice(0, 4)) - age : null,
+  };
+}
 
-  _renderImportRow(row) {
-    const isPoint = row.geometry.type === "Point";
-    const existing = (isPoint ? this._data.plantings : this._data.zones)
-      .map((item) => [item.id, this.t("update", { name: item.name })])
-      .sort((a, b) => a[1].localeCompare(b[1]));
-    const options = [["new", this.t(isPoint ? "newPlanting" : "newZone")], ...existing, ["skip", this.t("skip")]];
-    const species = h("input", {
-      placeholder: `${this.t("species")} (${row.name})`,
-      value: row.species,
-      oninput: (ev) => (row.species = ev.target.value),
-    });
-    const name = h("input", { value: row.name, oninput: (ev) => (row.name = ev.target.value || row.name) });
-    const update = () => {
-      species.style.display = isPoint && row.action === "new" ? "" : "none";
-      name.style.display = row.action === "new" ? "" : "none";
-    };
-    const select = h(
-      "select",
-      {
-        onchange: (ev) => {
-          row.action = ev.target.value;
-          update();
-          this._drawPreview();
-          this._applyButton.textContent = this.t("importApply", {
-            count: this._import.rows.filter((r) => r.action !== "skip").length,
-          });
-          this._applyButton.disabled = !this._import.rows.some((r) => r.action !== "skip");
-        },
-      },
-      options.map(([v, text]) => h("option", { value: v, selected: v === row.action }, text)),
-    );
-    update();
-    const focus = () => {
-      const g = row.geometry;
-      if (isPoint) this._map.setView([g.coordinates[1], g.coordinates[0]], Math.max(this._map.getZoom(), 19));
-      else this._map.fitBounds(L.polygon(toLatLngs(g)).getBounds(), { padding: [40, 40] });
-    };
-    const area = isPoint ? "" : ` · ${formatArea(polygonArea(row.geometry))}`;
-    return h(
-      "div",
-      { className: "import-row" },
-      h("div", { className: "head", onclick: focus }, `${isPoint ? "📍" : "⬠"} ${row.name}${area}`),
-      select,
-      name,
-      species,
-    );
-  }
+function ageOf(planting) {
+  const year = planting.birth_year || (planting.sown_on ? Number(planting.sown_on.slice(0, 4)) : null);
+  return year ? Math.max(new Date().getFullYear() - year, 0) : null;
 }
 
 function hasPosition(item) {
@@ -1277,13 +1273,6 @@ function round(value) {
 
 function toLatLngs(geometry) {
   return geometry.coordinates.map((ring) => ring.map(([lng, lat]) => [lat, lng]));
-}
-
-function toBase64(buffer) {
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-  return btoa(binary);
 }
 
 function ringContains(ring, x, y) {

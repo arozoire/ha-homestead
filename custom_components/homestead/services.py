@@ -21,6 +21,7 @@ from .models import (
     InitialForm,
     Planting,
     PlantingKind,
+    PlantingOrigin,
     PlantingStatus,
     Tool,
     ToolPower,
@@ -63,7 +64,10 @@ ADD_PLANTING_SCHEMA = vol.Schema(
         vol.Optional("variety"): _opt_str,
         vol.Optional("kind", default=PlantingKind.SINGLE): vol.In([k.value for k in PlantingKind]),
         vol.Optional("quantity", default=1): vol.All(vol.Coerce(int), vol.Range(min=1)),
+        vol.Optional("origin"): vol.Any(None, vol.In([o.value for o in PlantingOrigin])),
+        vol.Optional("sown_on"): _opt_date,
         vol.Optional("planted_on"): _opt_date,
+        vol.Optional("birth_year"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1000, max=2200))),
         vol.Optional("initial_form"): vol.Any(None, vol.In([f.value for f in InitialForm])),
         vol.Optional("initial_height_cm"): vol.Any(None, _positive),
         vol.Optional("rootstock"): _opt_str,
@@ -209,6 +213,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         args: dict[str, Any] = dict(call.data)
         price = args.pop("price", None)
         args["planted_on"] = _iso(args.get("planted_on"))
+        args["sown_on"] = _iso(args.get("sown_on"))
         _check_ref(store.data.zones, args.get("zone_id"), "zone_id")
         _apply_taxon(store, args)
         if args["kind"] == PlantingKind.SINGLE:
@@ -244,6 +249,9 @@ def async_register_services(hass: HomeAssistant) -> None:
         if "planted_on" in args:
             args["planted_on"] = _iso(args["planted_on"])
             args["moon_phase"] = None
+        if "sown_on" in args:
+            args["sown_on"] = _iso(args["sown_on"])
+            args["sown_moon_phase"] = None
         planting = replace(store.data.plantings[planting_id], **args)
         if planting.kind == PlantingKind.SINGLE:
             planting.quantity = 1
