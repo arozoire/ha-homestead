@@ -11,6 +11,55 @@ const TEXT = {
     map: "Map",
     tabPlantings: "Plantings",
     tabZones: "Zones",
+    tabExpenses: "Expenses",
+    tabTools: "Tools",
+    noMap: "No map",
+    addExpense: "New expense",
+    addTool: "New tool",
+    emptyExpenses: "No expenses yet.",
+    emptyTools: "No tools yet.",
+    newExpenseTitle: "New expense",
+    editExpenseTitle: "Edit expense",
+    newToolTitle: "New tool",
+    editToolTitle: "Edit tool",
+    confirmDeleteExpense: "Delete this expense?",
+    confirmDeleteTool: "Delete “{name}”? Its expenses are kept.",
+    yearTotal: "{year}: {total}",
+    spent_on: "Date",
+    amount: "Amount",
+    category: "Category",
+    supplier: "Supplier",
+    planting_id: "Planting",
+    tool_id: "Tool",
+    brand: "Brand",
+    model: "Model",
+    purchased_on: "Purchased on",
+    power: "Power",
+    next_service_on: "Next service",
+    price: "Price (added as an expense)",
+    cat_plants: "Plants",
+    cat_seeds: "Seeds",
+    cat_tools: "Tools",
+    cat_fertilizers: "Fertilizers",
+    cat_treatments: "Treatments",
+    cat_water: "Water",
+    cat_other: "Other",
+    manual: "Manual",
+    battery: "Battery",
+    petrol: "Petrol",
+    electric: "Electric",
+    ok: "OK",
+    needs_service: "Needs service",
+    broken: "Broken",
+    serviceDue: "service due since {date}",
+    expensesOfPlanting: "Expenses: {total}",
+    addExpenseFor: "+ Expense",
+    photos: "Photos",
+    addPhoto: "📷 Add photo",
+    photosAfterSave: "Save the planting first to add photos.",
+    uploading: "Uploading…",
+    confirmDeletePhoto: "Delete this photo?",
+    close: "Close",
     add: "New planting",
     addZone: "New zone",
     empty: "No plantings yet. Press “New planting” and click on the map.",
@@ -75,7 +124,7 @@ const TEXT = {
     other: "Other",
     saved: "Saved: {name}",
     backup: "Backup",
-    backupHint: "All plantings, zones, species, expenses and tools in a JSON file. Home Assistant backups include them too.",
+    backupHint: "All plantings, zones, species, expenses and tools in a JSON file (photo files stay in the HA media folder). Home Assistant backups include everything.",
     exportBackup: "Export",
     importBackup: "Restore",
     confirmRestore: "Replace ALL current data with this backup ({date})?\n{summary}\nTip: export the current data first.",
@@ -98,6 +147,55 @@ const TEXT = {
     map: "Mappa",
     tabPlantings: "Piante",
     tabZones: "Zone",
+    tabExpenses: "Spese",
+    tabTools: "Attrezzi",
+    noMap: "Nessuna mappa",
+    addExpense: "Nuova spesa",
+    addTool: "Nuovo attrezzo",
+    emptyExpenses: "Nessuna spesa.",
+    emptyTools: "Nessun attrezzo.",
+    newExpenseTitle: "Nuova spesa",
+    editExpenseTitle: "Modifica spesa",
+    newToolTitle: "Nuovo attrezzo",
+    editToolTitle: "Modifica attrezzo",
+    confirmDeleteExpense: "Eliminare questa spesa?",
+    confirmDeleteTool: "Eliminare “{name}”? Le sue spese restano.",
+    yearTotal: "{year}: {total}",
+    spent_on: "Data",
+    amount: "Importo",
+    category: "Categoria",
+    supplier: "Fornitore",
+    planting_id: "Pianta",
+    tool_id: "Attrezzo",
+    brand: "Marca",
+    model: "Modello",
+    purchased_on: "Acquistato il",
+    power: "Alimentazione",
+    next_service_on: "Prossima manutenzione",
+    price: "Prezzo (diventa una spesa)",
+    cat_plants: "Piante",
+    cat_seeds: "Semi",
+    cat_tools: "Attrezzi",
+    cat_fertilizers: "Concimi",
+    cat_treatments: "Trattamenti",
+    cat_water: "Acqua",
+    cat_other: "Altro",
+    manual: "Manuale",
+    battery: "Batteria",
+    petrol: "Benzina",
+    electric: "Elettrico",
+    ok: "OK",
+    needs_service: "Da manutenere",
+    broken: "Rotto",
+    serviceDue: "manutenzione dal {date}",
+    expensesOfPlanting: "Spese: {total}",
+    addExpenseFor: "+ Spesa",
+    photos: "Foto",
+    addPhoto: "📷 Aggiungi foto",
+    photosAfterSave: "Salva prima la pianta per aggiungere foto.",
+    uploading: "Carico…",
+    confirmDeletePhoto: "Eliminare questa foto?",
+    close: "Chiudi",
     add: "Nuova pianta",
     addZone: "Nuova zona",
     empty: "Nessuna pianta. Premi “Nuova pianta” e clicca sulla mappa.",
@@ -162,7 +260,7 @@ const TEXT = {
     other: "Altro",
     saved: "Salvato: {name}",
     backup: "Backup",
-    backupHint: "Tutte le piante, zone, specie, spese e attrezzi in un file JSON. Sono inclusi anche nei backup di Home Assistant.",
+    backupHint: "Tutte le piante, zone, specie, spese e attrezzi in un file JSON (i file delle foto restano nella cartella media di HA). I backup di Home Assistant includono tutto.",
     exportBackup: "Esporta",
     importBackup: "Ripristina",
     confirmRestore: "Sostituire TUTTI i dati attuali con questo backup ({date})?\n{summary}\nConsiglio: esporta prima i dati attuali.",
@@ -181,6 +279,10 @@ const TEXT = {
   },
 };
 
+const EXPENSE_CATEGORIES = ["plants", "seeds", "tools", "fertilizers", "treatments", "water", "other"];
+const TOOL_POWER = ["manual", "battery", "petrol", "electric"];
+const TOOL_STATUS_COLOR = { ok: "#43a047", needs_service: "#ffa600", broken: "#e53935" };
+const PHOTO_MAX_PX = 1600;
 const STATUS_COLOR = { active: "#43a047", dead: "#e53935", removed: "#9e9e9e" };
 const ZONE_COLOR = "#ffca28";
 
@@ -258,6 +360,16 @@ const STYLE = `
   .taxon button { padding: 0 8px; font-size: 12px; }
   .dates { display: grid; gap: 10px; }
   .dates [hidden] { display: none; }
+  form + .taxon { margin-top: 16px; }
+  .summary { margin: 12px 0; padding: 8px 10px; border-radius: 6px; background: var(--secondary-background-color); }
+  h3 { margin: 8px 0 6px; font-size: 14px; font-weight: 500; }
+  .photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 6px; margin-bottom: 8px; }
+  .thumb { padding: 0; border: none; background: none; display: grid; gap: 2px; font-size: 11px; color: var(--secondary-text-color); }
+  .thumb img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; background: var(--secondary-background-color); }
+  .lightbox { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,.85); display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 12px; padding: 16px; box-sizing: border-box; color: #fff; }
+  .lightbox img { max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 6px; }
+  .lightbox .row { align-items: center; flex: none; }
   .backup { margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--divider-color); }
   .backup h3 { margin: 0 0 4px; font-size: 14px; font-weight: 500; }
   .pin { width: 18px; height: 18px; border-radius: 50%; border: 3px solid #fff; box-sizing: border-box;
@@ -268,7 +380,8 @@ const STYLE = `
 class HomesteadPanel extends HTMLElement {
   constructor() {
     super();
-    this._data = { plantings: [], zones: [], taxa: [] };
+    this._data = { plantings: [], zones: [], taxa: [], expenses: [], tools: [], photos: [] };
+    this._photoUrls = new Map();
     this._taxaPending = new Map();
     this._markers = new Map();
     this._polygons = new Map();
@@ -340,18 +453,22 @@ class HomesteadPanel extends HTMLElement {
     const satellite = L.tileLayer(
       "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
       {
-        maxZoom: 21,
+        maxZoom: 23,
         maxNativeZoom: 19,
         attribution: "Tiles © Esri — Esri, Maxar, Earthstar Geographics, GIS User Community",
       },
     );
     const streets = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 21,
+      maxZoom: 23,
       maxNativeZoom: 19,
       attribution: "© OpenStreetMap contributors",
     });
-    this._map = L.map(this._mapEl, { center: [latitude, longitude], zoom: 18, layers: [satellite] });
-    L.control.layers({ [this.t("satellite")]: satellite, [this.t("map")]: streets }).addTo(this._map);
+    // Without tiles the map can zoom further: a plan of a single bed.
+    const blank = L.layerGroup();
+    this._map = L.map(this._mapEl, { center: [latitude, longitude], zoom: 18, maxZoom: 23, layers: [satellite] });
+    L.control
+      .layers({ [this.t("satellite")]: satellite, [this.t("map")]: streets, [this.t("noMap")]: blank })
+      .addTo(this._map);
     L.circleMarker([latitude, longitude], { radius: 5, color: "#2196f3", interactive: false }).addTo(this._map);
     this._zoneLayer = L.layerGroup().addTo(this._map);
     this._previewLayer = L.layerGroup().addTo(this._map);
@@ -372,13 +489,20 @@ class HomesteadPanel extends HTMLElement {
     let first = true;
     this._unsub = this._hass.connection.subscribeMessage(
       (data) => {
-        this._data = { plantings: data.plantings || [], zones: data.zones || [], taxa: data.taxa || [] };
+        this._data = {
+          plantings: data.plantings || [],
+          zones: data.zones || [],
+          taxa: data.taxa || [],
+          expenses: data.expenses || [],
+          tools: data.tools || [],
+          photos: data.photos || [],
+        };
         this._loaded = !!data.plantings;
         this._syncMap();
         if (first) this._fitAll();
         first = false;
         if (this._form) this._refreshForm();
-        else if (!this._zoneForm) this._render();
+        else if (!this._zoneForm && !this._expenseForm && !this._toolForm) this._render();
       },
       { type: "homestead/subscribe" },
     );
@@ -533,6 +657,8 @@ class HomesteadPanel extends HTMLElement {
   _clearSelection() {
     this._form = null;
     this._zoneForm = null;
+    this._expenseForm = null;
+    this._toolForm = null;
     this._selected = null;
     this._placing = null;
     this._drawing = null;
@@ -644,7 +770,7 @@ class HomesteadPanel extends HTMLElement {
       quantity: 1,
       status: "active",
       origin: "planted",
-      planted_on: new Date().toISOString().slice(0, 10),
+      planted_on: today(),
       zone_id: this._zoneAt(latlng.lat, latlng.lng),
       latitude: latlng.lat,
       longitude: latlng.lng,
@@ -842,12 +968,16 @@ class HomesteadPanel extends HTMLElement {
     let content;
     if (this._form && !this._placing) content = this._renderForm();
     else if (this._zoneForm && !this._drawing) content = this._renderZoneForm();
+    else if (this._expenseForm) content = this._renderExpenseForm();
+    else if (this._toolForm) content = this._renderToolForm();
     else {
-      content = [
-        this._renderTabs(),
-        ...(this._tab === "zones" ? this._renderZoneList() : this._renderList()),
-        this._renderBackup(),
-      ];
+      const lists = {
+        plantings: () => this._renderList(),
+        zones: () => this._renderZoneList(),
+        expenses: () => this._renderExpenseList(),
+        tools: () => this._renderToolList(),
+      };
+      content = [this._renderTabs(), ...lists[this._tab](), this._renderBackup()];
     }
     this._content.replaceChildren(...content.filter(Boolean));
   }
@@ -855,7 +985,14 @@ class HomesteadPanel extends HTMLElement {
   _renderTabs() {
     const tab = (name, label) =>
       h("button", { className: this._tab === name ? "active" : "", onclick: () => this._setTab(name) }, label);
-    return h("div", { className: "tabs" }, tab("plantings", this.t("tabPlantings")), tab("zones", this.t("tabZones")));
+    return h(
+      "div",
+      { className: "tabs" },
+      tab("plantings", this.t("tabPlantings")),
+      tab("zones", this.t("tabZones")),
+      tab("expenses", this.t("tabExpenses")),
+      tab("tools", this.t("tabTools")),
+    );
   }
 
   _renderBackup() {
@@ -884,6 +1021,7 @@ class HomesteadPanel extends HTMLElement {
     if (this._form.id && !p) return this._close();
     if (p) Object.assign(this._form, { latitude: p.latitude, longitude: p.longitude });
     if (this._positionEl) this._positionEl.textContent = this._positionText();
+    this._fillPhotos();
   }
 
   _positionText() {
@@ -1054,6 +1192,8 @@ class HomesteadPanel extends HTMLElement {
             )
           : null,
       ),
+      f.id ? this._plantingExpenses(f) : null,
+      this._photosSection(f),
     ];
   }
 
@@ -1195,6 +1335,363 @@ class HomesteadPanel extends HTMLElement {
     return h("div", { className: "dates" }, origin, ...Object.values(groups));
   }
 
+  // ---------- expenses ----------
+
+  _money(value) {
+    const currency = this._hass.config.currency || "EUR";
+    try {
+      return new Intl.NumberFormat(this._lang(), { style: "currency", currency }).format(value);
+    } catch {
+      return `${value.toFixed(2)} ${currency}`;
+    }
+  }
+
+  _date(iso) {
+    return iso ? new Date(`${iso}T12:00:00`).toLocaleDateString(this._lang()) : "";
+  }
+
+  _openExpense(expense) {
+    this._clearSelection();
+    this._showMessage("");
+    this._tab = "expenses";
+    this._expenseForm = { ...expense };
+    this._syncMap();
+    this._render();
+  }
+
+  _renderExpenseList() {
+    const year = String(new Date().getFullYear());
+    const expenses = [...this._data.expenses].sort((a, b) => b.spent_on.localeCompare(a.spent_on));
+    const thisYear = expenses.filter((e) => e.spent_on.startsWith(year));
+    const byCategory = {};
+    thisYear.forEach((e) => (byCategory[e.category] = (byCategory[e.category] || 0) + e.amount));
+    const total = thisYear.reduce((sum, e) => sum + e.amount, 0);
+    const linked = (e) => this._planting(e.planting_id)?.name || this._data.tools.find((t) => t.id === e.tool_id)?.name;
+    return [
+      h(
+        "div",
+        { className: "actions" },
+        h(
+          "button",
+          { className: "primary", onclick: () => this._openExpense({ spent_on: today(), category: "plants" }) },
+          `+ ${this.t("addExpense")}`,
+        ),
+      ),
+      h(
+        "div",
+        { className: "summary" },
+        h("strong", {}, this.t("yearTotal", { year, total: this._money(total) })),
+        Object.entries(byCategory)
+          .sort((a, b) => b[1] - a[1])
+          .map(([cat, value]) => h("div", { className: "sub" }, `${this.t(`cat_${cat}`)}: ${this._money(value)}`)),
+      ),
+      expenses.length
+        ? h(
+            "ul",
+            {},
+            expenses.map((e) =>
+              h(
+                "li",
+                { onclick: () => this._openExpense(e) },
+                h(
+                  "div",
+                  { className: "main" },
+                  h("div", {}, `${this._money(e.amount)} · ${this.t(`cat_${e.category}`)}`),
+                  h(
+                    "div",
+                    { className: "sub" },
+                    [this._date(e.spent_on), linked(e), e.supplier].filter(Boolean).join(" · "),
+                  ),
+                ),
+              ),
+            ),
+          )
+        : h("p", { className: "hint" }, this.t("emptyExpenses")),
+    ];
+  }
+
+  _renderExpenseForm() {
+    const f = this._expenseForm;
+    const plantings = [
+      ["", this.t("noZone")],
+      ...[...this._data.plantings].sort((a, b) => a.name.localeCompare(b.name)).map((p) => [p.id, p.name]),
+    ];
+    const tools = [["", this.t("noZone")], ...this._data.tools.map((t) => [t.id, t.name])];
+    return [
+      h(
+        "form",
+        { onsubmit: (ev) => this._saveExpense(ev) },
+        h("h2", {}, f.id ? this.t("editExpenseTitle") : this.t("newExpenseTitle")),
+        h(
+          "div",
+          { className: "row" },
+          this._field(f, "amount", { type: "number", min: 0, step: "0.01", required: true, inputMode: "decimal" }),
+          this._field(f, "spent_on", { type: "date", required: true }),
+        ),
+        this._selectField(f, "category", EXPENSE_CATEGORIES.map((c) => [c, this.t(`cat_${c}`)])),
+        this._field(f, "supplier"),
+        h("div", { className: "row" }, this._selectField(f, "planting_id", plantings), this._selectField(f, "tool_id", tools)),
+        this._notes(f),
+        this._formButtons(f.id, () => this._deleteExpense()),
+      ),
+    ];
+  }
+
+  async _saveExpense(ev) {
+    ev.preventDefault();
+    const v = Object.fromEntries(new FormData(ev.target));
+    const data = {
+      amount: Number(v.amount),
+      spent_on: v.spent_on,
+      category: v.category,
+      supplier: v.supplier?.trim() || null,
+      planting_id: v.planting_id || null,
+      tool_id: v.tool_id || null,
+      notes: v.notes?.trim() || null,
+    };
+    const id = this._expenseForm.id;
+    const ok = await this._call(id ? "update_expense" : "add_expense", id ? { id, ...data } : data);
+    if (ok) this._saved(this._money(data.amount));
+  }
+
+  async _deleteExpense() {
+    if (!confirm(this.t("confirmDeleteExpense"))) return;
+    if (await this._call("delete_expense", { id: this._expenseForm.id })) this._saved(this._money(this._expenseForm.amount), "deleted");
+  }
+
+  _plantingExpenses(f) {
+    const mine = this._data.expenses.filter((e) => e.planting_id === f.id);
+    const total = mine.reduce((sum, e) => sum + e.amount, 0);
+    return h(
+      "div",
+      { className: "taxon" },
+      h("span", {}, this.t("expensesOfPlanting", { total: this._money(total) })),
+      h(
+        "button",
+        {
+          type: "button",
+          onclick: () => this._openExpense({ spent_on: today(), category: "plants", planting_id: f.id }),
+        },
+        this.t("addExpenseFor"),
+      ),
+    );
+  }
+
+  // ---------- tools ----------
+
+  _openTool(tool) {
+    this._clearSelection();
+    this._showMessage("");
+    this._tab = "tools";
+    this._toolForm = { ...tool };
+    this._syncMap();
+    this._render();
+  }
+
+  _renderToolList() {
+    const now = today();
+    const tools = [...this._data.tools].sort((a, b) => a.name.localeCompare(b.name));
+    return [
+      h(
+        "div",
+        { className: "actions" },
+        h(
+          "button",
+          { className: "primary", onclick: () => this._openTool({ power: "manual", status: "ok" }) },
+          `+ ${this.t("addTool")}`,
+        ),
+      ),
+      tools.length
+        ? h(
+            "ul",
+            {},
+            tools.map((t) => {
+              const due = t.next_service_on && t.next_service_on <= now;
+              const color = TOOL_STATUS_COLOR[t.status === "ok" && due ? "needs_service" : t.status] || TOOL_STATUS_COLOR.ok;
+              return h(
+                "li",
+                { onclick: () => this._openTool(t) },
+                h("span", { className: "dot", style: `background:${color}` }),
+                h(
+                  "div",
+                  { className: "main" },
+                  h("div", {}, t.name),
+                  h(
+                    "div",
+                    { className: "sub" },
+                    [t.category, [t.brand, t.model].filter(Boolean).join(" "), this.t(t.power), t.status !== "ok" ? this.t(t.status) : null]
+                      .filter(Boolean)
+                      .join(" · "),
+                  ),
+                  due ? h("div", { className: "sub warn" }, `🔧 ${this.t("serviceDue", { date: this._date(t.next_service_on) })}`) : null,
+                ),
+              );
+            }),
+          )
+        : h("p", { className: "hint" }, this.t("emptyTools")),
+    ];
+  }
+
+  _renderToolForm() {
+    const f = this._toolForm;
+    return [
+      h(
+        "form",
+        { onsubmit: (ev) => this._saveTool(ev) },
+        h("h2", {}, f.id ? this.t("editToolTitle") : this.t("newToolTitle")),
+        this._field(f, "name", { required: true, maxLength: 100 }),
+        this._field(f, "category", { placeholder: "potatura, scavo, irrigazione…" }),
+        h("div", { className: "row" }, this._field(f, "brand"), this._field(f, "model")),
+        h(
+          "div",
+          { className: "row" },
+          this._selectField(f, "power", TOOL_POWER.map((p) => [p, this.t(p)])),
+          this._selectField(f, "status", Object.keys(TOOL_STATUS_COLOR).map((st) => [st, this.t(st)])),
+        ),
+        h(
+          "div",
+          { className: "row" },
+          this._field(f, "purchased_on", { type: "date" }),
+          this._field(f, "next_service_on", { type: "date" }),
+        ),
+        f.id ? null : this._field(f, "price", { type: "number", min: 0, step: "0.01", inputMode: "decimal" }),
+        this._notes(f),
+        this._formButtons(f.id, () => this._deleteTool()),
+      ),
+    ];
+  }
+
+  async _saveTool(ev) {
+    ev.preventDefault();
+    const v = Object.fromEntries(new FormData(ev.target));
+    const data = {
+      name: v.name.trim(),
+      category: v.category?.trim() || null,
+      brand: v.brand?.trim() || null,
+      model: v.model?.trim() || null,
+      power: v.power,
+      status: v.status,
+      purchased_on: v.purchased_on || null,
+      next_service_on: v.next_service_on || null,
+      notes: v.notes?.trim() || null,
+    };
+    const id = this._toolForm.id;
+    if (!id && v.price) data.price = Number(v.price);
+    if (await this._call(id ? "update_tool" : "add_tool", id ? { id, ...data } : data)) this._saved(data.name);
+  }
+
+  async _deleteTool() {
+    const { id, name } = this._toolForm;
+    if (!confirm(this.t("confirmDeleteTool", { name }))) return;
+    if (await this._call("delete_tool", { id })) this._saved(name, "deleted");
+  }
+
+  _formButtons(id, onDelete) {
+    return [
+      h(
+        "div",
+        { className: "row" },
+        h("button", { type: "submit", className: "primary" }, this.t("save")),
+        h("button", { type: "button", onclick: () => this._close() }, this.t("cancel")),
+      ),
+      id ? h("div", { className: "row" }, h("button", { type: "button", className: "danger", onclick: onDelete }, this.t("delete"))) : null,
+    ];
+  }
+
+  // ---------- photos ----------
+
+  _photosSection(f) {
+    this._photosEl = h("div", { className: "photos" });
+    this._photoInput = h("input", {
+      type: "file",
+      accept: "image/*",
+      hidden: true,
+      onchange: (ev) => this._uploadPhoto(ev.target),
+    });
+    const section = h(
+      "div",
+      {},
+      h("h3", {}, this.t("photos")),
+      f.id
+        ? [
+            this._photosEl,
+            h("button", { type: "button", onclick: () => this._photoInput.click() }, this.t("addPhoto")),
+            this._photoInput,
+          ]
+        : h("p", { className: "hint" }, this.t("photosAfterSave")),
+    );
+    this._fillPhotos();
+    return section;
+  }
+
+  async _photoUrl(id) {
+    if (!this._photoUrls.has(id)) {
+      const signed = this._hass.callWS({ type: "auth/sign_path", path: `/api/homestead/photo/${id}`, expires: 86400 });
+      this._photoUrls.set(id, signed.then((r) => r.path));
+    }
+    return this._photoUrls.get(id);
+  }
+
+  _fillPhotos() {
+    if (!this._photosEl || !this._form?.id) return;
+    const photos = this._data.photos
+      .filter((p) => p.planting_id === this._form.id)
+      .sort((a, b) => (b.taken_on || "").localeCompare(a.taken_on || ""));
+    this._photosEl.replaceChildren(
+      ...photos.map((photo) => {
+        const img = h("img", { alt: photo.caption || this._date(photo.taken_on), loading: "lazy" });
+        this._photoUrl(photo.id).then((url) => (img.src = url));
+        return h(
+          "button",
+          { type: "button", className: "thumb", onclick: () => this._showPhoto(photo, img) },
+          img,
+          h("span", {}, this._date(photo.taken_on)),
+        );
+      }),
+    );
+  }
+
+  _showPhoto(photo, img) {
+    const overlay = h(
+      "div",
+      { className: "lightbox", onclick: (ev) => ev.target === overlay && overlay.remove() },
+      h("img", { src: img.src, alt: img.alt }),
+      h(
+        "div",
+        { className: "row" },
+        h("span", {}, this._date(photo.taken_on)),
+        h(
+          "button",
+          {
+            type: "button",
+            className: "danger",
+            onclick: async () => {
+              if (!confirm(this.t("confirmDeletePhoto"))) return;
+              if (await this._call("delete_photo", { id: photo.id })) overlay.remove();
+            },
+          },
+          this.t("delete"),
+        ),
+        h("button", { type: "button", onclick: () => overlay.remove() }, this.t("close")),
+      ),
+    );
+    this.shadowRoot.append(overlay);
+  }
+
+  async _uploadPhoto(input) {
+    const file = input.files?.[0];
+    input.value = "";
+    if (!file || !this._form?.id) return;
+    this._showMessage(this.t("uploading"));
+    try {
+      const content = await shrinkImage(file, PHOTO_MAX_PX);
+      await this._hass.callWS({ type: "homestead/photo/upload", planting_id: this._form.id, content });
+      this._showMessage("");
+    } catch (err) {
+      this._showMessage(err.message || String(err), true);
+    }
+  }
+
   _renderZoneForm() {
     const z = this._zoneForm;
     const exclude = z.id ? new Set([z.id, ...this._zoneDescendants(z.id)]) : new Set();
@@ -1230,6 +1727,27 @@ class HomesteadPanel extends HTMLElement {
       ),
     ];
   }
+}
+
+function today() {
+  const now = new Date();
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+}
+
+/** Phone photos are several MB: send a JPEG of at most `maxPx` per side, as base64. */
+async function shrinkImage(file, maxPx) {
+  const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+  const scale = Math.min(1, maxPx / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.85));
+  const bytes = new Uint8Array(await blob.arrayBuffer());
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(binary);
 }
 
 /** Disabled inputs (other origins) are not in the form data, so absent dates become null. */

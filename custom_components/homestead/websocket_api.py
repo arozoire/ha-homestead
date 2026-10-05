@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import base64
+import binascii
 import time
 from typing import Any
 
 import voluptuous as vol
 from homeassistant.components import websocket_api
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.loader import async_get_integration
@@ -15,6 +18,8 @@ from homeassistant.util import dt as dt_util
 
 from .backup import BackupError, make_backup, read_backup, summary
 from .const import DOMAIN, SIGNAL_DATA_UPDATED
+from .models import Photo
+from .photos import MAX_PHOTO_BYTES, image_type, photo_dir, write_photo
 from .species import SourcesUnavailable, combine, search_local, search_remote
 from .store import get_store
 
@@ -28,6 +33,7 @@ def async_register_websocket(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, ws_subscribe)
     websocket_api.async_register_command(hass, ws_backup_export)
     websocket_api.async_register_command(hass, ws_backup_import)
+    websocket_api.async_register_command(hass, ws_photo_upload)
     websocket_api.async_register_command(hass, ws_search_species)
 
 
@@ -120,3 +126,41 @@ async def ws_backup_import(
     store.data = data
     await store.async_save()
     connection.send_result(msg["id"], summary(data))
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "homestead/photo/upload",
+        vol.Required("planting_id"): str,
+        vol.Required("content"): str,
+        vol.Optional("taken_on"): vol.Any(None, cv.date),
+        vol.Optional("caption"): vol.Any(None, str),
+    }
+)
+@websocket_api.async_response
+async def ws_photo_upload(
+    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]
+) -> None:
+    """Store a photo (base64; the panel already shrinks it) for a planting."""
+    store = get_store(hass)
+    if store is None or msg["planting_id"] not in store.data.plantings:
+        connection.send_error(msg["id"], "not_found", "unknown planting")
+        return
+    try:
+        content = base64.b64decode(msg["content"], validate=True)
+    except (binascii.Error, ValueError):
+        connection.send_error(msg["id"], "invalid_format", "invalid base64 content")
+        return
+    kind = image_type(content)
+    if kind is None or len(content) > MAX_PHOTO_BYTES:
+        connection.send_error(msg["id"], "invalid_format", "JPEG, PNG or WebP up to 3 MB")
+        return
+    taken_on = msg.get("taken_on") or dt_util.now().date()
+    photo = Photo(
+        planting_id=msg["planting_id"], file="", taken_on=taken_on.isoformat(), caption=msg.get("caption")
+    )
+    photo.file = f"{photo.planting_id}/{photo.id}.{kind[0]}"
+    await hass.async_add_executor_job(write_photo, photo_dir(hass), photo.file, content)
+    store.data.photos[photo.id] = photo
+    await store.async_save()
+    connection.send_result(msg["id"], {"id": photo.id})

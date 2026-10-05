@@ -30,6 +30,8 @@
 | Import (v0.3) | KML, **KMZ** (default di Google My Maps), GeoJSON; punti → piante, poligoni → zone, linee ignorate; abbinamento per nome con scelta manuale | L'autore carica il file dal telefono quando serve |
 | Prima prova dal vivo (v0.4.1) | Pannello a tutta altezza (mappa invisibile nell'app), ricerca specie solo piante, conferma dopo Salva | Problemi visti in HA reale |
 | Date della pianta (v0.4.1) | Origine + date adatte (età stimata, messa a dimora + età all'impianto, semina + trapianto); salvato l'anno di nascita stimato | Per le piante già presenti la data è ignota; un albero piantato ha già qualche anno; l'orto ha semina e trapianto |
+| Fine V1 (v0.4.2) | Spese e attrezzi gestiti nel pannello; foto per pianta; sfondo "Nessuna mappa" per zoomare dentro le zone; icone per tipo rimandate (servono il tipo di pianta e uno zoom alto) | Uso quotidiano senza passare dai servizi HA |
+| Diario (UI decisa) | Sezione "Diario" nella scheda pianta/zona + scheda Diario con filtri; un evento sulla zona vale per tutte le sue piante | Prossimo passo (v2) |
 | Import mappa **tolto** (v0.4.1) | Al suo posto **backup JSON** (esporta / ripristina tutto) | Disegnare nel pannello basta; serve invece poter salvare e ripristinare i dati |
 | Specie (v0.4) | Ricerca combinata Wikidata (nomi comuni) + GBIF (tassonomia); la specie scelta è copiata in locale con id GBIF/Wikidata e data di import | Funziona offline dopo l'import, tracciabilità come da §4 |
 | Licenza | MIT | Richiesta da HACS; la più diffusa tra le integrazioni custom |

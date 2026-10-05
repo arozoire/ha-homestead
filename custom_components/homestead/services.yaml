@@ -402,4 +402,113 @@ add_tool:
         text:
           multiline: true
 
+update_expense:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+    amount:
+      selector:
+        number:
+          min: 0
+          step: 0.01
+          mode: box
+    category:
+      selector:
+        select:
+          translation_key: expense_category
+          options:
+            - plants
+            - seeds
+            - tools
+            - fertilizers
+            - treatments
+            - water
+            - other
+    spent_on:
+      selector:
+        date:
+    supplier:
+      selector:
+        text:
+    planting_id:
+      selector:
+        text:
+    tool_id:
+      selector:
+        text:
+    notes:
+      selector:
+        text:
+          multiline: true
+
+delete_expense:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+
+update_tool:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+    name:
+      example: "Seghetto da potatura"
+      selector:
+        text:
+    category:
+      selector:
+        text:
+    brand:
+      selector:
+        text:
+    model:
+      selector:
+        text:
+    purchased_on:
+      selector:
+        date:
+    power:
+      selector:
+        select:
+          translation_key: tool_power
+          options:
+            - manual
+            - battery
+            - petrol
+            - electric
+    status:
+      selector:
+        select:
+          translation_key: tool_status
+          options:
+            - ok
+            - needs_service
+            - broken
+    next_service_on:
+      selector:
+        date:
+    notes:
+      selector:
+        text:
+          multiline: true
+
+delete_tool:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+
+delete_photo:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+
 export:

@@ -2,13 +2,13 @@
 
 Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, alberi da frutto, aiuole, spese, attrezzi e, nelle prossime versioni, raccolto e consigli basati sul meteo.
 
-> Stato: **v0.4.1 — backup e prima prova dal vivo**. Specifiche complete in [SPEC.md](SPEC.md).
+> Stato: **v0.4.2 — V1 completa: spese, attrezzi, foto**. Specifiche complete in [SPEC.md](SPEC.md).
 
 ## Principio guida
 
 **Non sporcare Home Assistant**: nessuna area creata, poche entità aggregate, rimozione pulita (disinstallando l'integrazione i dati vengono cancellati).
 
-## Cosa fa oggi (v0.4.1)
+## Cosa fa oggi (v0.4.2)
 
 | Funzione | Come |
 |---|---|
@@ -18,8 +18,10 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 | Specie | Campo "Specie" con ricerca su **GBIF** e **Wikidata** (nome comune o scientifico); la specie scelta viene importata e salvata in locale (nomi comuni it/fr/en, famiglia, genere). Servizio `homestead.import_taxon` |
 | Date della pianta | Origine: *già presente* (età stimata), *piantata da me* (messa a dimora + età all'impianto), *seminata da me* (semina + trapianto); l'età si aggiorna da sola |
 | Fase lunare | Registrata automaticamente alla semina e alla messa a dimora |
-| Spese | Servizio `homestead.add_expense`; il prezzo di piante e attrezzi diventa una spesa |
-| Attrezzi | Servizio `homestead.add_tool` con stato e prossima manutenzione |
+| Spese | Scheda *Spese* nel pannello (totale dell'anno per categoria, modifica, eliminazione) o servizi `add_expense`/`update_expense`/`delete_expense`; il prezzo di piante e attrezzi diventa una spesa; nella scheda pianta: totale speso + *+ Spesa* |
+| Attrezzi | Scheda *Attrezzi* (stato a colori, 🔧 manutenzione scaduta) o servizi `add_tool`/`update_tool`/`delete_tool` |
+| Foto | Nella scheda pianta: *📷 Aggiungi foto* (fotocamera o galleria del telefono), ridotte a 1600 px e salvate in `/media/homestead/`; visibili solo agli utenti HA |
+| Sfondo "Nessuna mappa" | Dal selettore dei livelli: zoom fino al livello 23 per lavorare dentro un'aiuola |
 | Esportazione | Servizio `homestead.export` (risposta con tutti i dati) |
 
 ### Pannello "Giardino"

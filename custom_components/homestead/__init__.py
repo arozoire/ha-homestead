@@ -10,6 +10,7 @@ from homeassistant.helpers.typing import ConfigType
 
 from .const import DOMAIN
 from .panel import async_register_panel, async_unregister_panel
+from .photos import PhotoView, delete_all, photo_dir
 from .services import async_register_services
 from .store import HomesteadStore
 from .websocket_api import async_register_websocket
@@ -23,6 +24,7 @@ type HomesteadConfigEntry = ConfigEntry[HomesteadStore]
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     async_register_services(hass)
     async_register_websocket(hass)
+    hass.http.register_view(PhotoView(hass))
     return True
 
 
@@ -42,3 +44,4 @@ async def async_unload_entry(hass: HomeAssistant, entry: HomesteadConfigEntry) -
 
 async def async_remove_entry(hass: HomeAssistant, entry: HomesteadConfigEntry) -> None:
     await HomesteadStore(hass).async_remove()
+    await hass.async_add_executor_job(delete_all, photo_dir(hass))
