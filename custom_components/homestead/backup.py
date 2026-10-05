@@ -18,6 +18,7 @@ REQUIRED = {
     "expenses": ("spent_on", "amount", "category"),
     "tools": ("name",),
     "photos": ("file",),
+    "events": ("kind", "done_on"),
 }
 
 # (collection, field, referenced collection): dangling references are cleared.
@@ -28,6 +29,10 @@ REFERENCES = (
     ("expenses", "planting_id", "plantings"),
     ("expenses", "tool_id", "tools"),
     ("photos", "planting_id", "plantings"),
+    ("events", "planting_id", "plantings"),
+    ("events", "zone_id", "zones"),
+    ("expenses", "event_id", "events"),
+    ("photos", "event_id", "events"),
 )
 
 

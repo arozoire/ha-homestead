@@ -61,7 +61,39 @@ class ExpenseCategory(StrEnum):
     FERTILIZERS = "fertilizers"
     TREATMENTS = "treatments"
     WATER = "water"
+    SERVICES = "services"  # labour, pressing olives, a gardener…
+    SALES = "sales"  # for incomes
     OTHER = "other"
+
+
+class EventKind(StrEnum):
+    PRUNING = "pruning"
+    FERTILIZING = "fertilizing"
+    WATERING = "watering"
+    TREATMENT = "treatment"
+    SOWING = "sowing"
+    HARVEST = "harvest"
+    GRAFTING = "grafting"
+    PROBLEM = "problem"
+    NOTE = "note"
+
+
+# Expense category used when an event records a cost.
+EVENT_COST_CATEGORY = {
+    EventKind.PRUNING: ExpenseCategory.SERVICES,
+    EventKind.FERTILIZING: ExpenseCategory.FERTILIZERS,
+    EventKind.WATERING: ExpenseCategory.WATER,
+    EventKind.TREATMENT: ExpenseCategory.TREATMENTS,
+    EventKind.SOWING: ExpenseCategory.SEEDS,
+    EventKind.HARVEST: ExpenseCategory.SERVICES,
+    EventKind.GRAFTING: ExpenseCategory.SERVICES,
+}
+
+
+class HarvestUnit(StrEnum):
+    KG = "kg"
+    PIECES = "pieces"
+    LITRES = "l"
 
 
 class ToolStatus(StrEnum):
@@ -163,7 +195,30 @@ class Expense(_Record):
     supplier: str | None = None
     planting_id: str | None = None
     tool_id: str | None = None
+    event_id: str | None = None
+    income: bool = False
     notes: str | None = None
+
+
+@dataclass(kw_only=True)
+class Event(_Record):
+    """A diary entry on a planting or on a zone (then valid for all its plantings)."""
+
+    kind: str
+    done_on: str
+    id: str = field(default_factory=new_id)
+    planting_id: str | None = None
+    zone_id: str | None = None
+    product: str | None = None
+    dose: str | None = None
+    quantity: float | None = None
+    unit: str | None = None
+    moon_phase: str | None = None
+    notes: str | None = None
+
+    def __post_init__(self) -> None:
+        if not self.moon_phase:
+            self.moon_phase = moon_phase(date.fromisoformat(self.done_on))
 
 
 @dataclass(kw_only=True)
@@ -187,6 +242,7 @@ class Photo(_Record):
     file: str
     id: str = field(default_factory=new_id)
     planting_id: str | None = None
+    event_id: str | None = None
     taken_on: str | None = None
     caption: str | None = None
 
@@ -198,6 +254,7 @@ _COLLECTIONS: dict[str, type[_Record]] = {
     "expenses": Expense,
     "tools": Tool,
     "photos": Photo,
+    "events": Event,
 }
 
 
@@ -209,6 +266,7 @@ class HomesteadData:
     expenses: dict[str, Expense] = field(default_factory=dict)
     tools: dict[str, Tool] = field(default_factory=dict)
     photos: dict[str, Photo] = field(default_factory=dict)
+    events: dict[str, Event] = field(default_factory=dict)
 
     @classmethod
     def from_dict(cls, raw: dict[str, Any]) -> HomesteadData:
@@ -245,7 +303,11 @@ class HomesteadData:
 
     def expenses_total(self, year: int) -> float:
         return round(
-            sum(e.amount for e in self.expenses.values() if e.spent_on.startswith(f"{year:04d}-")),
+            sum(
+                e.amount
+                for e in self.expenses.values()
+                if not e.income and e.spent_on.startswith(f"{year:04d}-")
+            ),
             2,
         )
 

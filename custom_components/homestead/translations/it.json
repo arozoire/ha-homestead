@@ -70,6 +70,8 @@
         "fertilizers": "Concimi",
         "treatments": "Trattamenti",
         "water": "Acqua",
+        "services": "Servizi e manodopera",
+        "sales": "Vendite",
         "other": "Altro"
       }
     },
@@ -111,6 +113,26 @@
         "existing": "Già presente",
         "planted": "Piantata da me",
         "sown": "Seminata da me"
+      }
+    },
+    "event_kind": {
+      "options": {
+        "pruning": "Potatura",
+        "fertilizing": "Concimazione",
+        "watering": "Irrigazione",
+        "treatment": "Trattamento",
+        "sowing": "Semina",
+        "harvest": "Raccolta",
+        "grafting": "Innesto",
+        "problem": "Problema",
+        "note": "Nota"
+      }
+    },
+    "harvest_unit": {
+      "options": {
+        "kg": "kg",
+        "pieces": "Pezzi",
+        "l": "Litri"
       }
     }
   },
@@ -409,6 +431,14 @@
           "name": "Attrezzo",
           "description": "ID dell'attrezzo collegato."
         },
+        "event_id": {
+          "name": "Evento del diario",
+          "description": "ID dell'evento collegato."
+        },
+        "income": {
+          "name": "Ricavo",
+          "description": "Un ricavo (es. una vendita) invece di una spesa."
+        },
         "notes": {
           "name": "Note",
           "description": "Note libere."
@@ -493,6 +523,14 @@
           "name": "Attrezzo",
           "description": "ID dell'attrezzo collegato."
         },
+        "event_id": {
+          "name": "Evento del diario",
+          "description": "ID dell'evento collegato."
+        },
+        "income": {
+          "name": "Ricavo",
+          "description": "Un ricavo (es. una vendita) invece di una spesa."
+        },
         "notes": {
           "name": "Note",
           "description": "Note libere."
@@ -572,6 +610,112 @@
         "id": {
           "name": "ID",
           "description": "ID della foto."
+        }
+      }
+    },
+    "add_event": {
+      "name": "Aggiungi evento al diario",
+      "description": "Registra cosa è stato fatto su una pianta o una zona (potatura, trattamento, raccolta…).",
+      "fields": {
+        "kind": {
+          "name": "Tipo",
+          "description": "Tipo di evento."
+        },
+        "done_on": {
+          "name": "Data",
+          "description": "Di default oggi; la fase lunare viene registrata."
+        },
+        "planting_id": {
+          "name": "Pianta",
+          "description": "ID della pianta (oppure indica una zona)."
+        },
+        "zone_id": {
+          "name": "Zona",
+          "description": "ID della zona: l'evento vale per tutte le sue piante."
+        },
+        "product": {
+          "name": "Prodotto",
+          "description": "Concime o prodotto del trattamento."
+        },
+        "dose": {
+          "name": "Dose",
+          "description": "Es. 30 g / 10 L."
+        },
+        "quantity": {
+          "name": "Quantità",
+          "description": "Quantità raccolta."
+        },
+        "unit": {
+          "name": "Unità",
+          "description": "kg, pezzi o litri."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        },
+        "cost": {
+          "name": "Costo",
+          "description": "Registrato come spesa collegata all'evento."
+        },
+        "revenue": {
+          "name": "Ricavo",
+          "description": "Registrato come ricavo collegato all'evento."
+        }
+      }
+    },
+    "update_event": {
+      "name": "Modifica evento",
+      "description": "Modifica i campi indicati di un evento.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID dell'evento."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Tipo di evento."
+        },
+        "done_on": {
+          "name": "Data",
+          "description": "Di default oggi; la fase lunare viene registrata."
+        },
+        "planting_id": {
+          "name": "Pianta",
+          "description": "ID della pianta (oppure indica una zona)."
+        },
+        "zone_id": {
+          "name": "Zona",
+          "description": "ID della zona: l'evento vale per tutte le sue piante."
+        },
+        "product": {
+          "name": "Prodotto",
+          "description": "Concime o prodotto del trattamento."
+        },
+        "dose": {
+          "name": "Dose",
+          "description": "Es. 30 g / 10 L."
+        },
+        "quantity": {
+          "name": "Quantità",
+          "description": "Quantità raccolta."
+        },
+        "unit": {
+          "name": "Unità",
+          "description": "kg, pezzi o litri."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "delete_event": {
+      "name": "Elimina evento",
+      "description": "Elimina un evento e le sue foto; le spese restano.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID dell'evento."
         }
       }
     },
