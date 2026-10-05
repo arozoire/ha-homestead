@@ -170,4 +170,9 @@ async def test_options_flow(hass: HomeAssistant) -> None:
     result = await hass.config_entries.options.async_configure(
         result["flow_id"], {CONF_TEMPERATURE: TEMP, CONF_RAIN: RAIN, "open_meteo": False}
     )
-    assert entry.options == {CONF_TEMPERATURE: TEMP, CONF_RAIN: RAIN, "open_meteo": False}
+    assert entry.options == {
+        CONF_TEMPERATURE: TEMP,
+        CONF_RAIN: RAIN,
+        "open_meteo": False,
+        "notify_time": "08:00:00",
+    }
