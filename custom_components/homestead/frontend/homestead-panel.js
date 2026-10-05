@@ -6,7 +6,7 @@ const ZONE_KINDS = ["vegetable_garden", "orchard", "flower_bed", "greenhouse", "
 
 const TEXT = {
   en: {
-    title: "Garden",
+    panelTitle: "Garden",
     satellite: "Satellite",
     map: "Map",
     tabPlantings: "Plantings",
@@ -226,7 +226,7 @@ const TEXT = {
     local: "imported",
   },
   it: {
-    title: "Giardino",
+    panelTitle: "Giardino",
     satellite: "Satellite",
     map: "Mappa",
     tabPlantings: "Piante",
@@ -673,7 +673,7 @@ class HomesteadPanel extends HTMLElement {
         "header",
         {},
         this._menu,
-        h("h1", {}, this.t("title")),
+        h("h1", {}, this.t("panelTitle")),
         h("button", { className: "map-toggle", title: this.t("toggleMap"), onclick: () => this._toggleMap() }, "🗺️"),
         h(
           "button",
