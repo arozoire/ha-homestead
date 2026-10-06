@@ -41,6 +41,7 @@ REFERENCES = (
     ("tasks", "event_id", "events"),
     ("seeds", "taxon_id", "taxa"),
     ("plantings", "seed_lot_id", "seeds"),
+    ("plantings", "from_planting_id", "plantings"),
 )
 
 

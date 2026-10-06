@@ -157,6 +157,7 @@
         "woodland": "Woodland",
         "compost": "Compost bin",
         "coop": "Hen house",
+        "nursery": "Nursery (seed trays)",
         "other": "Other"
       }
     },
@@ -178,7 +179,7 @@
         "grafting": "Grafting",
         "problem": "Problem",
         "note": "Note",
-        "removal": "End of crop",
+        "removal": "End of planting",
         "review": "Season review",
         "tillage": "Tillage (hoeing, digging)",
         "weeding": "Weeding",
@@ -214,14 +215,27 @@
         "abundant": "Abundant"
       }
     },
-    "leave_reason": {
+    "event_reason": {
       "options": {
+        "finished": "Finished (season over)",
+        "died": "Died",
+        "removed": "Removed (moved, given away…)",
         "predator": "Predator (fox…)",
         "illness": "Illness",
         "age": "Old age",
         "sold": "Sold or given",
         "slaughtered": "Slaughtered",
         "other": "Other"
+      }
+    },
+    "death_cause": {
+      "options": {
+        "frost": "Frost",
+        "drought": "Drought",
+        "disease": "Disease",
+        "pests": "Pests",
+        "animals": "Animals",
+        "unknown": "Unknown"
       }
     },
     "month": {
@@ -422,6 +436,18 @@
           "name": "Seed lot",
           "description": "Seeds used (id of a seed lot)."
         },
+        "sown_count": {
+          "name": "Seeds sown",
+          "description": "Seeds or cells sown."
+        },
+        "germinated_on": {
+          "name": "Came up on",
+          "description": "Day the first seedlings appeared."
+        },
+        "germinated_count": {
+          "name": "Seedlings",
+          "description": "How many came up."
+        },
         "notes": {
           "name": "Notes",
           "description": "Free notes."
@@ -515,6 +541,18 @@
         "seed_lot_id": {
           "name": "Seed lot",
           "description": "Seeds used (id of a seed lot)."
+        },
+        "sown_count": {
+          "name": "Seeds sown",
+          "description": "Seeds or cells sown."
+        },
+        "germinated_on": {
+          "name": "Came up on",
+          "description": "Day the first seedlings appeared."
+        },
+        "germinated_count": {
+          "name": "Seedlings",
+          "description": "How many came up."
         },
         "notes": {
           "name": "Notes",
@@ -818,7 +856,11 @@
         },
         "reason": {
           "name": "Reason",
-          "description": "Hens gone: why."
+          "description": "End of planting: finished, died or removed. Hens gone: why."
+        },
+        "cause": {
+          "name": "Cause",
+          "description": "A planting that died: what killed it."
         },
         "notes": {
           "name": "Notes",
@@ -896,7 +938,11 @@
         },
         "reason": {
           "name": "Reason",
-          "description": "Hens gone: why."
+          "description": "End of planting: finished, died or removed. Hens gone: why."
+        },
+        "cause": {
+          "name": "Cause",
+          "description": "A planting that died: what killed it."
         },
         "notes": {
           "name": "Notes",
@@ -935,6 +981,36 @@
         "year": {
           "name": "Year",
           "description": "Default: next year."
+        }
+      }
+    },
+    "transplant": {
+      "name": "Plant out",
+      "description": "Moves seedlings out of the nursery; part of them becomes a new planting, the rest stays.",
+      "fields": {
+        "id": {
+          "name": "Planting",
+          "description": "Seedlings in the nursery."
+        },
+        "quantity": {
+          "name": "How many",
+          "description": "Default: all of them."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "Where they go."
+        },
+        "done_on": {
+          "name": "Date",
+          "description": "Default: today."
+        },
+        "latitude": {
+          "name": "Latitude",
+          "description": "Position (optional)."
+        },
+        "longitude": {
+          "name": "Longitude",
+          "description": "Position (optional)."
         }
       }
     },

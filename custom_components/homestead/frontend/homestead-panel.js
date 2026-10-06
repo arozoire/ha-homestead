@@ -2,7 +2,7 @@ import * as L from "./vendor/leaflet.js";
 
 const BASE = new URL(".", import.meta.url).href;
 
-const ZONE_KINDS = ["vegetable_garden", "orchard", "flower_bed", "greenhouse", "pots", "lawn", "woodland", "compost", "coop", "other"];
+const ZONE_KINDS = ["vegetable_garden", "orchard", "flower_bed", "greenhouse", "pots", "lawn", "woodland", "compost", "coop", "nursery", "other"];
 
 const TEXT = {
   en: {
@@ -53,7 +53,7 @@ const TEXT = {
     ev_grafting: "Grafting",
     ev_problem: "Problem",
     ev_note: "Note",
-    ev_removal: "End of crop",
+    ev_removal: "End of planting",
     ev_clearing: "Woodland clearing",
     ev_wood_cutting: "Firewood cutting",
     ev_brushwood: "Branches",
@@ -65,6 +65,70 @@ const TEXT = {
     what: "What (porcini, chestnuts…)",
     essence: "Species",
     woodBox: "🪵 Wood and woodland harvests",
+    nursery: "Nursery (seed trays)",
+    sow: "Sow",
+    sowTitle: "🌱 Sow",
+    sowCount: "Seeds or cells",
+    sowWhere: "Where",
+    sowLot: "Seed lot",
+    sowNoLot: "— no lot —",
+    sowExpect: "What to expect",
+    sowHistory: "Previous years: came up in {min}–{max} days, {rate}% came up",
+    sowHistoryOne: "Last time: came up in {days} days, {rate}% came up",
+    sowLotAge: "Seeds of {year}: year {age} of about {life}{old}",
+    sowLotOld: " — old, sow a few more",
+    sowDone: "{name}: {count} sown",
+    nurseryTitle: "🌱 In the nursery",
+    nurseryCount: "{batches} batches · {plants} seedlings",
+    germTitle: "🌿 Came up",
+    germDay: "When the first ones appeared",
+    germCount: "How many came up",
+    germAfter: "{days} days · {rate}% came up",
+    germDone: "{name}: {count} seedlings",
+    germWaiting: "day {days}",
+    germExpected: "usually {min}–{max} days",
+    germLate: "⚠️ day {days} · usually {min}–{max}",
+    germBorn: "{days} days since they came up",
+    germReady: "✅ ready to plant out",
+    germScaleSow: "came up in the past years: {min}–{max} days",
+    germScaleOut: "planting out: {months} · now {days} days old",
+    germ: "🌿 Came up",
+    transplant: "↪️ Plant out",
+    tpTitle: "↪️ Plant out",
+    tpHow: "How many now",
+    tpAll: "all",
+    tpZone: "Into which zone",
+    tpLeft: "Becomes a new planting ({moved}); the other {left} stay in the nursery.",
+    tpAllNote: "All {count} seedlings leave the nursery.",
+    tpCold: "⚠️ Night at {temp} °C on {date}: tender seedlings, better wait",
+    tpDone: "{name}: {count} planted out",
+    tpPlace: "Tap the map to place them, or Cancel to leave them without a position",
+    ev_germinated: "Came up",
+    germText: "Came up: {count}{rate}{days}",
+    endReason: "Why",
+    end_finished: "Finished",
+    end_died: "Died",
+    end_removed: "Removed",
+    cause: "Cause",
+    cause_frost: "Frost",
+    cause_drought: "Drought",
+    cause_disease: "Disease",
+    cause_pests: "Pests",
+    cause_animals: "Animals",
+    cause_unknown: "Unknown",
+    zoneHere: "+ Plant here",
+    zoneSowHere: "🌱 Sow here",
+    zoneFromNursery: "↪️ Plant out from the nursery ({count})",
+    zoneCard: "Zone card",
+    zoneTapSub: "{count} plantings",
+    anGerm: "🌱 Germination over the years",
+    anGermYear: "year",
+    anGermDays: "days to come up",
+    anGermRate: "came up",
+    anGermLot: "seeds of",
+    anGermEmpty: "No sowing with a “came up” date yet.",
+    anLosses: "💀 Losses over the years",
+    anLossesEmpty: "No planting died. 🎉",
     typesTitle: "Fill in the missing plant types",
     typesHintOne: "1 planting: the type comes from its species",
     typesHintMany: "{count} plantings: the type comes from their species",
@@ -546,7 +610,7 @@ const TEXT = {
     ev_grafting: "Innesto",
     ev_problem: "Problema",
     ev_note: "Nota",
-    ev_removal: "Fine coltura",
+    ev_removal: "Fine della pianta",
     ev_clearing: "Pulizia bosco",
     ev_wood_cutting: "Taglio legna",
     ev_brushwood: "Raccolta rami",
@@ -558,6 +622,70 @@ const TEXT = {
     what: "Cosa (porcini, castagne…)",
     essence: "Essenza",
     woodBox: "🪵 Legna e raccolti del bosco",
+    nursery: "Semenzaio",
+    sow: "Semina",
+    sowTitle: "🌱 Semina",
+    sowCount: "Semi o alveoli",
+    sowWhere: "Dove",
+    sowLot: "Lotto di semi",
+    sowNoLot: "— nessun lotto —",
+    sowExpect: "Cosa aspettarsi",
+    sowHistory: "Negli anni scorsi: nati in {min}–{max} giorni, {rate}% di nascita",
+    sowHistoryOne: "L'ultima volta: nati in {days} giorni, {rate}% di nascita",
+    sowLotAge: "Semi del {year}: anno {age} di circa {life}{old}",
+    sowLotOld: " — vecchi, semina qualche seme in più",
+    sowDone: "{name}: {count} seminati",
+    nurseryTitle: "🌱 In semenzaio",
+    nurseryCount: "{batches} covate · {plants} piantine",
+    germTitle: "🌿 Nate",
+    germDay: "Quando sono spuntate le prime",
+    germCount: "Quante sono nate",
+    germAfter: "{days} giorni · {rate}% di nascita",
+    germDone: "{name}: {count} piantine",
+    germWaiting: "giorno {days}",
+    germExpected: "di solito {min}–{max} giorni",
+    germLate: "⚠️ giorno {days} · di solito {min}–{max}",
+    germBorn: "{days} giorni dalla nascita",
+    germReady: "✅ pronte da trapiantare",
+    germScaleSow: "nascita negli anni: {min}–{max} giorni",
+    germScaleOut: "trapianto: {months} · ora {days} giorni",
+    germ: "🌿 Nate",
+    transplant: "↪️ Trapianta",
+    tpTitle: "↪️ Trapianto",
+    tpHow: "Quante ne trapianti adesso",
+    tpAll: "tutte",
+    tpZone: "In quale zona",
+    tpLeft: "Diventa una pianta nuova ({moved}); le altre {left} restano nel semenzaio.",
+    tpAllNote: "Tutte le {count} piantine lasciano il semenzaio.",
+    tpCold: "⚠️ Notte a {temp} °C il {date}: piantine tenere, meglio aspettare",
+    tpDone: "{name}: {count} trapiantate",
+    tpPlace: "Tocca la mappa per posizionarle, o Annulla per lasciarle senza posto",
+    ev_germinated: "Nate",
+    germText: "Nate: {count}{rate}{days}",
+    endReason: "Perché",
+    end_finished: "Finita",
+    end_died: "Morta",
+    end_removed: "Tolta",
+    cause: "Causa",
+    cause_frost: "Gelo",
+    cause_drought: "Siccità",
+    cause_disease: "Malattia",
+    cause_pests: "Parassiti",
+    cause_animals: "Animali",
+    cause_unknown: "Sconosciuta",
+    zoneHere: "+ Pianta qui",
+    zoneSowHere: "🌱 Semina qui",
+    zoneFromNursery: "↪️ Trapianta dal semenzaio ({count})",
+    zoneCard: "Scheda zona",
+    zoneTapSub: "{count} piante",
+    anGerm: "🌱 Germinazione negli anni",
+    anGermYear: "anno",
+    anGermDays: "giorni per nascere",
+    anGermRate: "nate",
+    anGermLot: "semi del",
+    anGermEmpty: "Ancora nessuna semina con la data di nascita.",
+    anLosses: "💀 Perdite negli anni",
+    anLossesEmpty: "Nessuna pianta morta. 🎉",
     typesTitle: "Completa i tipi mancanti",
     typesHintOne: "1 pianta: il tipo si ricava dalla specie",
     typesHintMany: "{count} piante: il tipo si ricava dalla specie",
@@ -1033,6 +1161,10 @@ const COMPOST_TURN_DAYS = 28;
 // Diary entries drawn at once (more on request).
 const DIARY_PAGE = 60;
 const LEAVE_REASONS = ["predator", "illness", "age", "sold", "slaughtered", "other"];
+const END_REASONS = { finished: "✅", died: "💀", removed: "🗑️" };
+const DEATH_CAUSES = { frost: "❄️", drought: "🏜️", disease: "🦠", pests: "🐛", animals: "🐾", unknown: "❔" };
+// Seedlings are usually planted out a few weeks after they come up.
+const READY_DAYS = 21;
 const LEAVE_ICONS = { predator: "🦊", illness: "🤒", age: "⌛", sold: "🤝", slaughtered: "🔪", other: "❔" };
 // Quantity label when it is not a harvest.
 const QUANTITY_LABEL = { eggs: "eggCount", flock_in: "henCount", flock_out: "henCount" };
@@ -1063,7 +1195,7 @@ const SEED_VIABILITY = {
   Malvaceae: 3,
 };
 const ROTATION_YEARS = 3;
-const ZONE_ICONS = { vegetable_garden: "🥕", orchard: "🍎", flower_bed: "🌸", greenhouse: "🏠", pots: "🪴", lawn: "🌾", woodland: "🌲", compost: "♻️", coop: "🐔", other: "📍" };
+const ZONE_ICONS = { vegetable_garden: "🥕", orchard: "🍎", flower_bed: "🌸", greenhouse: "🏠", pots: "🪴", lawn: "🌾", woodland: "🌲", compost: "♻️", coop: "🐔", nursery: "🌱", other: "📍" };
 // Typical work of a whole zone, shown on the calendar when the zone itself has no plantings.
 const ZONE_SEASONS = { woodland: [["wood", [11, 12, 1, 2, 3]], ["foraging", [9, 10, 11]]] };
 const CAL_COLOR = { wood: "#6d4c41", foraging: "#8e7cc3" };
@@ -1081,7 +1213,7 @@ const CROP_COLOR = {
 // Plant type proposed for a new planting from the kind of its zone.
 const ZONE_PLANT_TYPE = { orchard: "fruit_tree", vegetable_garden: "vegetable", greenhouse: "vegetable", flower_bed: "flower" };
 // Start of a planting, shown in the diary from its own dates (not stored as events).
-const START_ICONS = { sowing: "🌱", planted: "🪴", since: "🌳" };
+const START_ICONS = { sowing: "🌱", germinated: "🌿", planted: "🪴", since: "🌳" };
 const MOON_ICONS = {
   new_moon: "🌑",
   waxing_crescent: "🌒",
@@ -1163,6 +1295,28 @@ const STYLE = `
   .repeat-row { display: flex; align-items: center; gap: 10px; min-height: 44px; border-bottom: 1px solid var(--divider-color); }
   .repeat-row input { width: 22px; height: 22px; flex: none; }
   .repeat-name { flex: 1; display: grid; }
+  .sow-button { flex: none; border-radius: 20px; font-weight: 700; align-self: center; }
+  .nursery { display: grid; gap: 8px; margin: 12px 0; }
+  .batch { border: 2px solid var(--divider-color); border-radius: 12px; padding: 8px 10px; display: grid; gap: 6px; }
+  .batch.late { border-color: #e69100; background: rgba(230, 145, 0, .07); }
+  .batch.ready { border-color: #2f7d32; background: rgba(47, 125, 50, .07); }
+  .batch-head { display: flex; gap: 8px; align-items: center; }
+  .batch-head .main { flex: 1; display: grid; min-width: 0; }
+  .batch .sub { white-space: normal; }
+  .batch-state { font-size: 13px; font-weight: 700; text-align: right; }
+  .batch.late .batch-state { color: #8a4b00; }
+  .batch.ready .batch-state { color: #1f5e24; }
+  .batch-bar { position: relative; height: 10px; border-radius: 5px; background: var(--secondary-background-color, #e6e9e1); }
+  .batch-bar i { position: absolute; top: 0; bottom: 0; border-radius: 5px; background: #b9d7b4; }
+  .batch-bar b { position: absolute; top: -3px; width: 4px; height: 16px; border-radius: 2px; background: var(--primary-text-color); }
+  .batch .row button { flex: 1; border-radius: 20px; font-weight: 700; min-height: 40px; }
+  .stepper { display: flex; align-items: center; gap: 8px; }
+  .stepper button { width: 44px; height: 44px; border-radius: 22px; font-size: 22px; padding: 0; flex: none; }
+  .stepper input { flex: 1; text-align: center; font-size: 20px; font-weight: 700; min-width: 0; }
+  .expect { font-size: 14px; background: rgba(58, 125, 68, .1); border-radius: 10px; padding: 8px 12px; display: grid; gap: 2px; }
+  .zone-tap { display: grid; gap: 10px; }
+  .zone-tap .big { min-height: 52px; font-size: 17px; font-weight: 700; border-radius: 12px; background: #2f7d32; color: #fff; border-color: transparent; }
+  .zone-tap .outline { min-height: 46px; font-weight: 700; border-radius: 12px; border: 2px solid #2f7d32; color: #1f5e24; }
   .show-gone { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 14px; color: var(--secondary-text-color); }
   .more-list { display: grid; border: 1px solid var(--divider-color); border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
   .more-item { display: flex; align-items: center; gap: 12px; text-align: left; border: none; border-bottom: 1px solid var(--divider-color);
@@ -1172,6 +1326,7 @@ const STYLE = `
   .more-text { flex: 1; display: grid; font-size: 15px; color: var(--primary-text-color); }
   .more-text .sub { white-space: normal; }
   .sub.warn { color: var(--error-color, #db4437); }
+  .link-plain { border: none; background: none; padding: 0; text-align: left; color: inherit; }
   .reset-box { margin-top: 16px; border: 1px solid #e3b5ab; background: rgba(179, 38, 30, .06); border-radius: 12px; padding: 10px 12px; display: grid; gap: 8px; }
   .reset-box h3 { margin: 0; color: #8f2b17; }
   .reset-box label { display: grid; gap: 4px; }
@@ -1693,7 +1848,7 @@ class HomesteadPanel extends HTMLElement {
     for (const z of this._data.zones) {
       if (!z.geometry) continue;
       seen.add(z.id);
-      const selected = this._zoneForm?.id === z.id || this._eventForm?.zone_id === z.id;
+      const selected = this._zoneForm?.id === z.id || this._eventForm?.zone_id === z.id || this._zoneTap?.id === z.id;
       const style = {
         color: selected ? "#ffeb3b" : ZONE_COLOR,
         weight: selected ? 4 : 2,
@@ -1702,7 +1857,7 @@ class HomesteadPanel extends HTMLElement {
       let polygon = this._polygons.get(z.id);
       if (!polygon) {
         polygon = L.polygon(toLatLngs(z.geometry), style).addTo(this._zoneLayer);
-        polygon.on("click", () => !this._placing && !this._drawing && this._selectZone(z.id));
+        polygon.on("click", (ev) => !this._placing && !this._drawing && this._tapZone(z.id, ev.latlng));
         this._polygons.set(z.id, polygon);
       } else {
         polygon.setLatLngs(toLatLngs(z.geometry)).setStyle(style);
@@ -1784,6 +1939,10 @@ class HomesteadPanel extends HTMLElement {
     this._import = null;
     this._eventForm = null;
     this._taskForm = null;
+    this._sowForm = null;
+    this._germForm = null;
+    this._transplantForm = null;
+    this._zoneTap = null;
     this._selected = null;
     this._placing = null;
     this._drawing = null;
@@ -1889,9 +2048,13 @@ class HomesteadPanel extends HTMLElement {
       else this._render();
       return;
     }
+    this._newPlantingAt(latlng);
+  }
+
+  _newPlantingAt(latlng, zoneId = this._zoneAt(latlng.lat, latlng.lng)) {
     this._clearSelection();
     this._showMessage("");
-    const zoneId = this._zoneAt(latlng.lat, latlng.lng);
+    this._tab = "plantings";
     this._form = {
       name: "",
       species: "",
@@ -2111,6 +2274,10 @@ class HomesteadPanel extends HTMLElement {
     else if (this._import) content = this._renderImport();
     else if (this._eventForm) content = this._renderEventForm();
     else if (this._taskForm) content = this._renderTaskForm();
+    else if (this._sowForm) content = this._renderSowForm();
+    else if (this._germForm) content = this._renderGermForm();
+    else if (this._transplantForm) content = this._renderTransplantForm();
+    else if (this._zoneTap) content = this._renderZoneTap();
     else {
       const back = h("button", { type: "button", className: "back", onclick: () => this._setTab("more") }, `‹ ${this.t("tabMore")}`);
       const lists = {
@@ -3152,6 +3319,7 @@ class HomesteadPanel extends HTMLElement {
     if (planting.sown_on && !real.has(`sowing:${planting.sown_on}`)) {
       out.push(virtual("sowing", planting.sown_on, planting.sown_moon_phase));
     }
+    if (planting.germinated_on) out.push({ ...virtual("germinated", planting.germinated_on, null), planting });
     if (planting.planted_on) out.push(virtual("planted", planting.planted_on, planting.moon_phase));
     if (!out.length && planting.birth_year) out.push(virtual("since", `${planting.birth_year}-01-01`, null));
     return out;
@@ -3192,6 +3360,9 @@ class HomesteadPanel extends HTMLElement {
       return this.t("ev_since", { years: new Date().getFullYear() - year, year });
     }
     if (e.kind === "planted" && this._planting(e.planting_id)?.sown_on) return this.t("ev_transplanted");
+    if (e.kind === "germinated") return this._germText(e.planting);
+    if (e.kind === "removal" && e.reason)
+      return `${this.t(`end_${e.reason}`)}${e.cause ? ` · ${DEATH_CAUSES[e.cause] || ""} ${this.t(`cause_${e.cause}`)}` : ""}`;
     return this.t(`ev_${e.kind}`);
   }
 
@@ -3304,7 +3475,7 @@ class HomesteadPanel extends HTMLElement {
   _zoneFamily(target) {
     const planting = target.planting_id && this._planting(target.planting_id);
     for (let z = this._zone(target.zone_id || planting?.zone_id), guard = 0; z && guard < 20; z = this._zone(z.parent_id), guard++) {
-      if (["woodland", "compost", "coop"].includes(z.kind)) return z.kind;
+      if (["woodland", "compost", "coop", "nursery"].includes(z.kind)) return z.kind;
     }
     return null;
   }
@@ -3685,6 +3856,7 @@ class HomesteadPanel extends HTMLElement {
       this._alertsBox(),
       this._todoBox(soon, null, h("button", { type: "button", onclick: () => this._openTask({ kind: "note", due_on: today() }) }, this.t("addTask"))),
       later ? h("button", { type: "button", className: "link todo-later", onclick: () => this._setTab("calendar") }, this.t("todoLater", { count: later })) : null,
+      this._nurseryBox(),
       this._compostBoxes(),
       this._quickButtons(),
       this._quickPlants(),
@@ -3767,7 +3939,7 @@ class HomesteadPanel extends HTMLElement {
       if ((e.kind === "harvest" || e.kind === "eggs") && e.quantity && (!lastHarvest.has(key) || e.done_on > lastHarvest.get(key).done_on)) lastHarvest.set(key, e);
     }
     const rows = this._data.plantings
-      .filter((p) => p.status === "active")
+      .filter((p) => p.status === "active" && !this._inNursery(p))
       .map((p) => {
         const key = `p:${p.id}`;
         const harvest = lastHarvest.get(key);
@@ -3910,7 +4082,7 @@ class HomesteadPanel extends HTMLElement {
     };
     const sameCrop = (a, b) => (a.taxon_id && a.taxon_id === b.taxon_id) || this._cropKey(a.species) === this._cropKey(b.species);
     const list = this._data.plantings
-      .filter((p) => annual(p) && this._plantingYear(p) === target - 1)
+      .filter((p) => annual(p) && p.status !== "dead" && this._plantingYear(p) === target - 1)
       .filter((p) => !this._data.plantings.some((o) => o !== p && o.zone_id === p.zone_id && sameCrop(o, p) && (this._plantingYear(o) === target || o.name.includes(String(target)))))
       .map((p) => {
         const review = this._data.events.find((e) => e.kind === "review" && e.planting_id === p.id);
@@ -3970,6 +4142,490 @@ class HomesteadPanel extends HTMLElement {
     );
   }
 
+  // ----- seed → nursery → garden -----
+
+  _inNursery(planting) {
+    return this._zoneFamily({ planting_id: planting.id }) === "nursery";
+  }
+
+  _nurseryZones() {
+    return this._data.zones.filter((z) => this._zoneFamily({ zone_id: z.id }) === "nursery");
+  }
+
+  /** Past sowings of the same crop: days to come up and share of seeds that did. */
+  _germStats(species, except = null) {
+    const key = this._cropKey(species);
+    return this._data.plantings
+      // A part planted out keeps the dates of its batch: count the batch once.
+      .filter((p) => p.id !== except && !p.from_planting_id && p.sown_on && p.germinated_on && this._cropKey(p.species) === key)
+      .map((p) => {
+        const lot = p.seed_lot_id && this._data.seeds.find((x) => x.id === p.seed_lot_id);
+        return {
+          planting: p,
+          year: p.sown_on.slice(0, 4),
+          days: daysBetween(p.sown_on, p.germinated_on),
+          rate: p.sown_count && p.germinated_count != null ? Math.round((p.germinated_count / p.sown_count) * 100) : null,
+          lotAge: lot?.year ? Number(p.sown_on.slice(0, 4)) - lot.year + 1 : null,
+        };
+      })
+      .filter((x) => x.days >= 0)
+      .sort((a, b) => a.planting.sown_on.localeCompare(b.planting.sown_on));
+  }
+
+  _germRange(stats) {
+    if (!stats.length) return null;
+    const days = stats.map((x) => x.days);
+    const rates = stats.map((x) => x.rate).filter((r) => r != null);
+    return { min: Math.min(...days), max: Math.max(...days), rate: rates.length ? Math.round(rates.reduce((a, b) => a + b, 0) / rates.length) : null };
+  }
+
+  _germHistoryText(species, except = null) {
+    const stats = this._germStats(species, except);
+    if (!stats.length) return "";
+    const last = stats.at(-1);
+    if (stats.length === 1) return this.t("sowHistoryOne", { days: last.days, rate: last.rate ?? "?" });
+    const range = this._germRange(stats);
+    return this.t("sowHistory", { min: range.min, max: range.max, rate: range.rate ?? "?" });
+  }
+
+  _germText(planting) {
+    if (!planting) return this.t("ev_germinated");
+    const rate = planting.sown_count && planting.germinated_count != null ? ` / ${planting.sown_count} (${Math.round((planting.germinated_count / planting.sown_count) * 100)}%)` : "";
+    const days = planting.sown_on && planting.germinated_on ? ` · ${daysBetween(planting.sown_on, planting.germinated_on)} gg` : "";
+    return this.t("germText", { count: planting.germinated_count ?? "", rate, days });
+  }
+
+  /** Number input with − and + buttons. */
+  _stepper(name, value, min = 1, max = 9999, onchange = () => {}) {
+    const input = h("input", { name, type: "number", min, max, step: 1, value, inputMode: "numeric", oninput: () => onchange(Number(input.value)) });
+    const move = (delta) => {
+      input.value = Math.min(max, Math.max(min, Number(input.value || 0) + delta));
+      onchange(Number(input.value));
+    };
+    return h(
+      "div",
+      { className: "stepper" },
+      h("button", { type: "button", "aria-label": "−", onclick: () => move(-1) }, "−"),
+      input,
+      h("button", { type: "button", "aria-label": "+", onclick: () => move(1) }, "+"),
+    );
+  }
+
+  _openSow(preset = {}) {
+    const nursery = this._nurseryZones()[0];
+    this._clearSelection();
+    this._showMessage("");
+    this._sowForm = { count: 24, zone_id: nursery?.id || "", sown_on: today(), ...preset };
+    this._render();
+  }
+
+  _renderSowForm() {
+    const f = this._sowForm;
+    const lots = this._data.seeds.filter((x) => !x.finished || x.id === f.seed_lot_id);
+    const lotSelect = h(
+      "select",
+      { name: "seed_lot_id" },
+      h("option", { value: "" }, this.t("sowNoLot")),
+      lots.map((lot) => h("option", { value: lot.id, selected: lot.id === f.seed_lot_id }, `${this._seedName(lot)}${lot.year ? ` · ${lot.year}` : ""}`)),
+    );
+    const species = h("input", { name: "species", value: f.species || "", placeholder: "Solanum lycopersicum" });
+    const speciesLabel = h("label", {}, this.t("species"), species);
+    const expect = h("div", { className: "expect" });
+    const update = () => {
+      const lot = lots.find((x) => x.id === lotSelect.value);
+      speciesLabel.hidden = !!lot;
+      const name = lot ? lot.species : species.value;
+      const lines = [];
+      const history = this._germHistoryText(name);
+      if (history) lines.push(history);
+      if (lot?.year) {
+        const age = new Date().getFullYear() - lot.year + 1;
+        const life = lot.viability_years || SEED_VIABILITY[this._taxon(lot.taxon_id)?.family || this._crop(lot.species)?.family] || 3;
+        lines.push(this.t("sowLotAge", { year: lot.year, age, life, old: age > life ? this.t("sowLotOld") : "" }));
+      }
+      expect.replaceChildren(h("strong", {}, this.t("sowExpect")), ...lines.map((line) => h("span", {}, line)));
+      expect.hidden = !lines.length;
+    };
+    lotSelect.addEventListener("change", update);
+    species.addEventListener("change", update);
+    update();
+    const zones = [...this._data.zones].sort((a, b) => (b.kind === "nursery") - (a.kind === "nursery") || a.name.localeCompare(b.name));
+    return [
+      h(
+        "form",
+        { onsubmit: (ev) => this._saveSow(ev) },
+        h("h2", {}, this.t("sowTitle")),
+        h("label", {}, this.t("sowLot"), lotSelect),
+        speciesLabel,
+        h("label", {}, this.t("sowCount"), this._stepper("count", f.count, 1, 999)),
+        h(
+          "label",
+          {},
+          this.t("sowWhere"),
+          h("select", { name: "zone_id" }, zones.map((z) => h("option", { value: z.id, selected: z.id === f.zone_id }, `${ZONE_ICONS[z.kind] || "📍"} ${this._zonePath(z.id)}`))),
+        ),
+        this._field(f, "sown_on", { type: "date", required: true }),
+        expect,
+        this._formButtons(null, null),
+      ),
+    ];
+  }
+
+  async _saveSow(ev) {
+    ev.preventDefault();
+    const v = Object.fromEntries(new FormData(ev.target));
+    const lot = this._data.seeds.find((x) => x.id === v.seed_lot_id);
+    const species = lot ? lot.species : v.species?.trim();
+    if (!species) return this._showMessage(this.t("species"), true);
+    const count = Math.max(1, Number(v.count) || 1);
+    const name = lot ? this._seedName(lot).replace(" · ", " ") : species;
+    const data = {
+      name,
+      species,
+      taxon_id: lot?.taxon_id || null,
+      variety: lot?.variety || null,
+      seed_lot_id: lot?.id || null,
+      plant_type: this._plantTypeFor(species),
+      origin: "sown",
+      sown_on: v.sown_on,
+      kind: count > 1 ? "group" : "single",
+      quantity: count,
+      sown_count: count,
+      zone_id: v.zone_id || null,
+    };
+    if (await this._call("add_planting", data)) {
+      this._close();
+      this._showMessage(`✓ ${this.t("sowDone", { name, count })}`);
+    }
+  }
+
+  /** Diary: every batch in a nursery, how long since sowing, and what comes next. */
+  _nurseryBox() {
+    const batches = this._data.plantings.filter((p) => p.status === "active" && this._inNursery(p));
+    if (!batches.length) return null;
+    const now = today();
+    const month = Number(now.slice(5, 7));
+    const cards = batches
+      .sort((a, b) => (a.sown_on || "").localeCompare(b.sown_on || ""))
+      .map((p) => {
+        const range = this._germRange(this._germStats(p.species, p.id));
+        const lot = p.seed_lot_id && this._data.seeds.find((x) => x.id === p.seed_lot_id);
+        let state = "";
+        let label;
+        let window = null;
+        let pos;
+        let scale;
+        if (!p.germinated_on) {
+          const days = p.sown_on ? daysBetween(p.sown_on, now) : 0;
+          const late = range && days > range.max;
+          state = late ? "late" : "";
+          label = late ? this.t("germLate", { days, min: range.min, max: range.max }) : this.t("germWaiting", { days });
+          const end = Math.max((range?.max || 14) * 1.6, days + 2);
+          if (range) window = [range.min / end, range.max / end];
+          pos = days / end;
+          scale = range ? this.t("germScaleSow", { min: range.min, max: range.max }) : "";
+        } else {
+          const days = daysBetween(p.germinated_on, now);
+          const out = this._crop(p.species)?.plant_out || [];
+          const season = !out.length || out.includes(month) || out.includes((month % 12) + 1);
+          const ready = days >= READY_DAYS && season;
+          state = ready ? "ready" : "";
+          label = ready ? this.t("germReady") : this.t("germBorn", { days });
+          const end = 60;
+          window = [READY_DAYS / end, 45 / end];
+          pos = Math.min(days, end) / end;
+          const names = out.map((m) => new Intl.DateTimeFormat(this._lang(), { month: "short" }).format(new Date(2025, m - 1, 15)));
+          scale = this.t("germScaleOut", { months: names.join(", ") || "—", days });
+        }
+        const sub = [
+          `${p.quantity} · ${this._zone(p.zone_id)?.name || ""}`,
+          p.sown_on ? `${this.t("ev_sowing")} ${this._date(p.sown_on, false)}` : null,
+          p.germinated_on ? this._germText(p) : null,
+          lot?.year ? `${this.t("anGermLot")} ${lot.year}` : null,
+        ].filter(Boolean);
+        return h(
+          "div",
+          { className: `batch ${state}` },
+          h(
+            "div",
+            { className: "batch-head" },
+            h("button", { type: "button", className: "main link-plain", onclick: () => this._select(p.id) }, h("strong", {}, p.name), h("span", { className: "sub" }, sub.join(" · "))),
+            h("span", { className: "batch-state" }, label),
+          ),
+          h(
+            "div",
+            { className: "batch-bar" },
+            window ? h("i", { style: `left:${window[0] * 100}%;width:${(window[1] - window[0]) * 100}%` }) : null,
+            h("b", { style: `left:calc(${Math.min(pos, 1) * 100}% - 2px)` }),
+          ),
+          scale ? h("div", { className: "sub" }, scale) : null,
+          h(
+            "div",
+            { className: "row" },
+            h("button", { type: "button", onclick: () => this._openGerm(p) }, this.t("germ")),
+            p.germinated_on ? h("button", { type: "button", className: "primary", onclick: () => this._openTransplant(p) }, this.t("transplant")) : null,
+          ),
+        );
+      });
+    const plants = batches.reduce((n, p) => n + (p.quantity || 1), 0);
+    return h(
+      "div",
+      { className: "nursery" },
+      h("div", { className: "cal-head" }, h("h3", {}, this.t("nurseryTitle")), h("span", { className: "sub" }, this.t("nurseryCount", { batches: batches.length, plants }))),
+      cards,
+    );
+  }
+
+  _openGerm(planting) {
+    this._clearSelection();
+    this._showMessage("");
+    this._germForm = {
+      planting,
+      germinated_on: planting.germinated_on || today(),
+      count: planting.germinated_count ?? planting.sown_count ?? planting.quantity,
+    };
+    this._render();
+  }
+
+  _renderGermForm() {
+    const f = this._germForm;
+    const p = f.planting;
+    const after = h("div", { className: "expect" });
+    const date = this._field(f, "germinated_on", { type: "date", required: true, max: today() });
+    const update = () => {
+      const day = date.querySelector("input").value;
+      const count = Number(form?.elements.count.value ?? f.count);
+      const days = p.sown_on && day ? daysBetween(p.sown_on, day) : null;
+      const rate = p.sown_count ? Math.round((count / p.sown_count) * 100) : null;
+      const history = this._germHistoryText(p.species, p.id);
+      after.replaceChildren(
+        days != null ? h("strong", {}, this.t("germAfter", { days, rate: rate ?? "?" })) : null,
+        history ? h("span", {}, history) : null,
+      );
+    };
+    let form = null;
+    date.querySelector("input").addEventListener("input", update);
+    form = h(
+      "form",
+      { onsubmit: (ev) => this._saveGerm(ev) },
+      h("h2", {}, `${this.t("germTitle")} · ${p.name}`),
+      date,
+      h("label", {}, `${this.t("germCount")}${p.sown_count ? ` (/${p.sown_count})` : ""}`, this._stepper("count", f.count, 0, p.sown_count || 9999, update)),
+      after,
+      this._formButtons(null, null),
+    );
+    update();
+    return [form];
+  }
+
+  async _saveGerm(ev) {
+    ev.preventDefault();
+    const v = Object.fromEntries(new FormData(ev.target));
+    const p = this._germForm.planting;
+    const count = Math.max(0, Number(v.count) || 0);
+    const data = { id: p.id, germinated_on: v.germinated_on, germinated_count: count };
+    if (count > 0) Object.assign(data, { quantity: count, kind: count > 1 ? "group" : "single" });
+    if (await this._call("update_planting", data)) {
+      this._close();
+      this._showMessage(`✓ ${this.t("germDone", { name: p.name, count })}`);
+    }
+  }
+
+  _openTransplant(planting, preset = {}) {
+    const garden = this._data.zones.find((z) => ["vegetable_garden", "greenhouse"].includes(z.kind));
+    this._clearSelection();
+    this._showMessage("");
+    this._transplantForm = { planting, quantity: planting.quantity, zone_id: garden?.id || "", done_on: today(), ...preset };
+    this._render();
+  }
+
+  /** A cold night soon after planting out tender seedlings. */
+  _coldWarning(planting, day) {
+    const crop = this._crop(planting.species);
+    const tender = crop?.warm || (crop?.hardiness_c ?? -5) > 0;
+    const limit = tender ? 10 : 2;
+    const cold = (this._outlook?.forecast || []).find((d) => d.date >= day && daysBetween(day, d.date) <= 3 && d.t_min != null && d.t_min < limit);
+    return cold ? this.t("tpCold", { temp: Math.round(cold.t_min), date: this._date(cold.date, false) }) : "";
+  }
+
+  _renderTransplantForm() {
+    const f = this._transplantForm;
+    const p = f.planting;
+    const note = h("div", { className: "expect" });
+    const cold = h("div", { className: "alert-line" });
+    let form = null;
+    const update = () => {
+      const moved = Math.min(p.quantity, Math.max(1, Number(form?.elements.quantity.value ?? f.quantity)));
+      const left = p.quantity - moved;
+      note.textContent = left ? this.t("tpLeft", { moved, left }) : this.t("tpAllNote", { count: p.quantity });
+      const warning = this._coldWarning(p, form?.elements.done_on.value || f.done_on);
+      cold.textContent = warning;
+      cold.hidden = !warning;
+    };
+    const stepper = this._stepper("quantity", f.quantity, 1, p.quantity, update);
+    const zones = this._data.zones.filter((z) => z.kind !== "nursery" && !["compost", "coop", "woodland"].includes(z.kind));
+    form = h(
+      "form",
+      { onsubmit: (ev) => this._saveTransplant(ev) },
+      h("h2", {}, `${this.t("tpTitle")} · ${p.name}`),
+      h("p", { className: "hint" }, [this.t("nurseryCount", { batches: 1, plants: p.quantity }).split(" · ")[1], p.germinated_on ? this._germText(p) : null].filter(Boolean).join(" · ")),
+      h(
+        "label",
+        {},
+        this.t("tpHow"),
+        h("div", { className: "row" }, stepper, h("button", { type: "button", style: "flex:none", onclick: () => ((form.elements.quantity.value = p.quantity), update()) }, this.t("tpAll"))),
+      ),
+      h(
+        "label",
+        {},
+        this.t("tpZone"),
+        h("select", { name: "zone_id", required: true }, zones.map((z) => h("option", { value: z.id, selected: z.id === f.zone_id }, `${ZONE_ICONS[z.kind] || "📍"} ${this._zonePath(z.id)}`))),
+      ),
+      this._field(f, "done_on", { type: "date", required: true, oninput: update }),
+      note,
+      cold,
+      this._formButtons(null, null),
+    );
+    update();
+    return [form];
+  }
+
+  async _saveTransplant(ev) {
+    ev.preventDefault();
+    const v = Object.fromEntries(new FormData(ev.target));
+    const f = this._transplantForm;
+    const quantity = Math.min(f.planting.quantity, Math.max(1, Number(v.quantity) || 1));
+    const data = { id: f.planting.id, quantity, zone_id: v.zone_id, done_on: v.done_on };
+    if (f.latlng) Object.assign(data, { latitude: round(f.latlng.lat), longitude: round(f.latlng.lng) });
+    const result = await this._call("transplant", data);
+    if (!result) return;
+    const message = `✓ ${this.t("tpDone", { name: f.planting.name, count: quantity })}`;
+    if (!f.latlng && this._zone(v.zone_id)?.geometry) {
+      // Without a point yet: let the user tap where they went.
+      this._tab = "plantings";
+      this._startPlacing(result.id);
+      this._showMessage(`${message} — ${this.t("tpPlace")}`);
+      return;
+    }
+    this._close();
+    this._showMessage(message);
+  }
+
+  /** Tap on a zone of the map: the usual next step first, the zone card one tap away. */
+  _tapZone(id, latlng) {
+    const zone = this._zone(id);
+    if (!zone || ["compost", "coop", "woodland"].includes(zone.kind)) return this._selectZone(id);
+    this._clearSelection();
+    this._showMessage("");
+    this._zoneTap = { id, latlng };
+    this._syncMap();
+    this._render();
+  }
+
+  _renderZoneTap() {
+    const { id, latlng } = this._zoneTap;
+    const zone = this._zone(id);
+    if (!zone) return [];
+    const inside = new Set([id, ...this._zoneDescendants(id)]);
+    const count = this._data.plantings.filter((p) => p.status === "active" && inside.has(p.zone_id)).length;
+    const nursery = zone.kind === "nursery";
+    const ready = nursery ? [] : this._data.plantings.filter((p) => p.status === "active" && p.germinated_on && this._inNursery(p));
+    const outList = this._zoneTapOut
+      ? ready.map((p) =>
+          h("button", { type: "button", className: "outline", onclick: () => this._openTransplant(p, { zone_id: id, latlng }) }, `${p.name} · ${p.quantity}`),
+        )
+      : [];
+    return [
+      h(
+        "div",
+        { className: "zone-tap" },
+        h("div", { className: "batch-head" }, h("span", { style: "font-size:26px" }, ZONE_ICONS[zone.kind] || "📍"), h("div", { className: "main" }, h("strong", {}, zone.name), h("span", { className: "sub" }, this.t("zoneTapSub", { count })))),
+        nursery
+          ? h("button", { type: "button", className: "big", onclick: () => this._openSow({ zone_id: id }) }, this.t("zoneSowHere"))
+          : h("button", { type: "button", className: "big", onclick: () => this._newPlantingAt(latlng, id) }, this.t("zoneHere")),
+        ready.length
+          ? h(
+              "button",
+              {
+                type: "button",
+                className: "outline",
+                onclick: () => (ready.length === 1 ? this._openTransplant(ready[0], { zone_id: id, latlng }) : ((this._zoneTapOut = !this._zoneTapOut), this._render())),
+              },
+              this.t("zoneFromNursery", { count: ready.length }),
+            )
+          : null,
+        outList,
+        h(
+          "div",
+          { className: "row" },
+          h("button", { type: "button", onclick: () => this._newEvent({ zone_id: id }, { zone_id: id }) }, `+ ${this.t("quickEvent")}`),
+          h("button", { type: "button", onclick: () => this._selectZone(id) }, this.t("zoneCard")),
+          h("button", { type: "button", onclick: () => this._close() }, "✕"),
+        ),
+      ),
+    ];
+  }
+
+  /** Analysis: days to come up and share of seeds that did, per crop and year (with the age of the seeds). */
+  _germinationBox() {
+    const keys = new Map();
+    for (const p of this._data.plantings) {
+      if (!p.sown_on || !p.germinated_on || p.from_planting_id) continue;
+      const key = this._cropKey(p.species);
+      if (!keys.has(key)) keys.set(key, p);
+    }
+    if (!keys.size) return null;
+    return h(
+      "div",
+      { className: "an-box" },
+      h("h3", {}, this.t("anGerm")),
+      [...keys.values()].map((first) => {
+        const stats = this._germStats(first.species);
+        const max = Math.max(...stats.map((x) => x.days), 1);
+        return h(
+          "div",
+          { className: "an-timing" },
+          h("strong", {}, capitalize(this._taxon(first.taxon_id)?.common_names?.[this._lang()]) || first.species),
+          stats.map((x) =>
+            h(
+              "div",
+              { className: "an-cmp" },
+              h("span", {}, `${x.year}${x.lotAge ? ` (${x.lotAge})` : ""}`),
+              h("i", { className: x.rate != null && x.rate < 65 ? "" : "good", style: `width:${Math.max((x.days / max) * 100, 6)}%` }),
+              h("span", {}, `${x.days} gg${x.rate != null ? ` · ${x.rate}%` : ""}`),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  /** Analysis: the plantings that died, per year and cause. */
+  _lossesBox() {
+    const deaths = this._data.events.filter((e) => e.kind === "removal" && e.reason === "died").sort((a, b) => b.done_on.localeCompare(a.done_on));
+    if (!deaths.length) return null;
+    const years = new Map();
+    for (const e of deaths) {
+      const year = e.done_on.slice(0, 4);
+      if (!years.has(year)) years.set(year, []);
+      years.get(year).push(e);
+    }
+    return h(
+      "div",
+      { className: "an-box" },
+      h("h3", {}, this.t("anLosses")),
+      [...years.entries()].map(([year, list]) =>
+        h(
+          "div",
+          { className: "sub", style: "white-space:normal" },
+          h("strong", {}, `${year}: `),
+          list.map((e) => `${this._targetName(e)} (${DEATH_CAUSES[e.cause] || "❔"} ${this.t(`cause_${e.cause || "unknown"}`)})`).join(", "),
+        ),
+      ),
+    );
+  }
+
+
   /** Planting or zone picker; value "p:<id>" / "z:<id>" ("" = none, allowed only for tasks). */
   _targetSelect(f, required) {
     const target = f.planting_id ? `p:${f.planting_id}` : f.zone_id ? `z:${f.zone_id}` : "";
@@ -4010,6 +4666,19 @@ class HomesteadPanel extends HTMLElement {
     };
     extras.stars = h("div", { className: "review" }, this._starsField(f.rating));
     extras.reason = this._selectField(f, "reason", LEAVE_REASONS.map((r) => [r, `${LEAVE_ICONS[r]} ${this.t(`lr_${r}`)}`]));
+    const causeField = h(
+      "label",
+      {},
+      this.t("cause"),
+      h("select", { name: "cause" }, Object.entries(DEATH_CAUSES).map(([c, icon]) => h("option", { value: c, selected: c === (f.cause || "unknown") }, `${icon} ${this.t(`cause_${c}`)}`))),
+    );
+    const endSelect = h(
+      "select",
+      { name: "end_reason", onchange: () => (causeField.hidden = endSelect.value !== "died") },
+      Object.entries(END_REASONS).map(([r, icon]) => h("option", { value: r, selected: r === (f.reason && END_REASONS[f.reason] ? f.reason : "finished") }, `${icon} ${this.t(`end_${r}`)}`)),
+    );
+    extras.end = h("div", { className: "row" }, h("label", {}, this.t("endReason"), endSelect), causeField);
+    causeField.hidden = endSelect.value !== "died";
     extras.review = h(
       "div",
       { className: "review" },
@@ -4047,6 +4716,7 @@ class HomesteadPanel extends HTMLElement {
       extras.review.hidden = kind !== "review";
       extras.stars.hidden = !["review", "compost_harvest"].includes(kind);
       extras.reason.hidden = kind !== "flock_out";
+      extras.end.hidden = kind !== "removal";
       quantityLabel.firstChild.textContent = this.t(QUANTITY_LABEL[kind] || "quantity_h");
       unitLabel.hidden = (QUANTITY_UNITS[kind] || []).length < 2;
       extras.product.hidden = !PRODUCT_LABEL[kind];
@@ -4159,6 +4829,7 @@ class HomesteadPanel extends HTMLElement {
       extras.product,
       extras.harvest,
       extras.reason,
+      extras.end,
       extras.stars,
       extras.review,
       money,
@@ -4206,7 +4877,8 @@ class HomesteadPanel extends HTMLElement {
       dose: v.dose?.trim() || null,
       quantity: QUANTITY_UNITS[v.kind] && v.quantity ? Number(v.quantity) : null,
       rating: ["review", "compost_harvest"].includes(v.kind) && v.rating ? Number(v.rating) : null,
-      reason: v.kind === "flock_out" ? v.reason || null : null,
+      reason: v.kind === "flock_out" ? v.reason || null : v.kind === "removal" ? v.end_reason || null : null,
+      cause: v.kind === "removal" && v.end_reason === "died" ? v.cause || "unknown" : null,
       abundance: v.kind === "review" ? v.abundance || null : null,
       keep: v.kind === "review" ? v.keep?.trim() || null : null,
       avoid: v.kind === "review" ? v.avoid?.trim() || null : null,
@@ -4233,7 +4905,7 @@ class HomesteadPanel extends HTMLElement {
         return;
       }
     }
-    if (data.kind === "removal" && !id) {
+    if (data.kind === "removal" && !id && data.reason !== "died" && data.reason !== "removed") {
       // End of a crop: ask for the season review right away.
       const back = this._eventBack;
       const target = data.planting_id ? { planting_id: data.planting_id } : { zone_id: data.zone_id };
@@ -4657,7 +5329,22 @@ class HomesteadPanel extends HTMLElement {
                   !lot.finished && this._inMonth(this._crop(lot.species), ["sow_indoor", "sow_outdoor"])
                     ? h("div", { className: "sub info" }, this.t("sowNow"))
                     : null,
+                  this._germHistoryText(lot.species) ? h("div", { className: "sub" }, this._germHistoryText(lot.species)) : null,
                 ),
+                lot.finished
+                  ? null
+                  : h(
+                      "button",
+                      {
+                        type: "button",
+                        className: "primary sow-button",
+                        onclick: (ev) => {
+                          ev.stopPropagation();
+                          this._openSow({ seed_lot_id: lot.id });
+                        },
+                      },
+                      `🌱 ${this.t("sow")}`,
+                    ),
               );
             }),
           )
@@ -5994,6 +6681,8 @@ class HomesteadPanel extends HTMLElement {
         h("p", { className: "hint" }, this.t("anYieldsHint")),
       ),
       this._eggsBox(years),
+      this._germinationBox(),
+      this._lossesBox(),
       selected ? this._weatherYieldBox(selected, years, weatherOf, perPlant) : null,
       this._timingBox(rows),
       this._moonBox(),

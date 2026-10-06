@@ -21,6 +21,8 @@ from .models import (
     EVENT_COST_CATEGORY,
     Abundance,
     CropProfile,
+    DeathCause,
+    EndReason,
     Event,
     EventKind,
     Expense,
@@ -40,6 +42,7 @@ from .models import (
     ToolStatus,
     Zone,
     ZoneKind,
+    new_id,
 )
 from .photos import delete_photo_file, photo_dir
 from .species import SourcesUnavailable, fetch_details, upsert_taxon
@@ -96,6 +99,9 @@ ADD_PLANTING_SCHEMA = vol.Schema(
         vol.Optional("latitude"): vol.Any(None, cv.latitude),
         vol.Optional("longitude"): vol.Any(None, cv.longitude),
         vol.Optional("seed_lot_id"): _opt_str,
+        vol.Optional("sown_count"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1))),
+        vol.Optional("germinated_on"): _opt_date,
+        vol.Optional("germinated_count"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0))),
         vol.Optional("price"): vol.Any(None, _positive),
         vol.Optional("notes"): _opt_str,
     }
@@ -228,9 +234,21 @@ _EVENT_FIELDS = {
     vol.Optional("abundance"): vol.Any(None, vol.In([a.value for a in Abundance])),
     vol.Optional("keep"): _opt_str,
     vol.Optional("avoid"): _opt_str,
-    vol.Optional("reason"): vol.Any(None, vol.In([r.value for r in LeaveReason])),
+    vol.Optional("reason"): vol.Any(None, vol.In([r.value for r in (*LeaveReason, *EndReason)])),
+    vol.Optional("cause"): vol.Any(None, vol.In([c.value for c in DeathCause])),
     vol.Optional("notes"): _opt_str,
 }
+
+TRANSPLANT_SCHEMA = vol.Schema(
+    {
+        vol.Required("id"): cv.string,
+        vol.Optional("quantity"): vol.All(vol.Coerce(int), vol.Range(min=1)),
+        vol.Required("zone_id"): cv.string,
+        vol.Optional("done_on"): _opt_date,
+        vol.Inclusive("latitude", "position"): cv.latitude,
+        vol.Inclusive("longitude", "position"): cv.longitude,
+    }
+)
 
 REPEAT_PLANTING_SCHEMA = vol.Schema(
     {
@@ -300,6 +318,10 @@ def _store(hass: HomeAssistant) -> HomesteadStore:
     if store := get_store(hass):
         return store
     raise ServiceValidationError(translation_domain=DOMAIN, translation_key="not_loaded")
+
+
+def _end_status(event: Event) -> str:
+    return PlantingStatus.DEAD if event.reason == EndReason.DIED else PlantingStatus.REMOVED
 
 
 def _iso(value: date | None) -> str | None:
@@ -392,8 +414,8 @@ def async_register_services(hass: HomeAssistant) -> None:
         store = _store(hass)
         args: dict[str, Any] = dict(call.data)
         price = args.pop("price", None)
-        args["planted_on"] = _iso(args.get("planted_on"))
-        args["sown_on"] = _iso(args.get("sown_on"))
+        for key in ("planted_on", "sown_on", "germinated_on"):
+            args[key] = _iso(args.get(key))
         _check_ref(store.data.zones, args.get("zone_id"), "zone_id")
         _check_ref(store.data.seeds, args.get("seed_lot_id"), "seed_lot_id")
         _apply_taxon(store, args)
@@ -434,6 +456,8 @@ def async_register_services(hass: HomeAssistant) -> None:
         if "sown_on" in args:
             args["sown_on"] = _iso(args["sown_on"])
             args["sown_moon_phase"] = None
+        if "germinated_on" in args:
+            args["germinated_on"] = _iso(args["germinated_on"])
         planting = replace(store.data.plantings[planting_id], **args)
         if planting.kind == PlantingKind.SINGLE:
             planting.quantity = 1
@@ -656,7 +680,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         if revenue:
             _add_expense(store, amount=revenue, category=ExpenseCategory.SALES, income=True, **link)
         if event.kind == EventKind.REMOVAL and event.planting_id:
-            store.data.plantings[event.planting_id].status = PlantingStatus.REMOVED
+            store.data.plantings[event.planting_id].status = _end_status(event)
         if task_id:
             mark_task_done(store, task_id, event)
         await store.async_save()
@@ -721,7 +745,9 @@ def async_register_services(hass: HomeAssistant) -> None:
         old = store.data.events[event_id]
         if args.get("done_on", old.done_on) != old.done_on or args.get("kind", old.kind) != old.kind:
             args["weather"] = None
-        store.data.events[event_id] = replace(old, **args)
+        store.data.events[event_id] = event = replace(old, **args)
+        if event.kind == EventKind.REMOVAL and event.planting_id in store.data.plantings and "reason" in args:
+            store.data.plantings[event.planting_id].status = _end_status(event)
         await store.async_save()
         if store.data.events[event_id].weather is None:
             schedule_weather(hass, store, event_id)
@@ -761,6 +787,43 @@ def async_register_services(hass: HomeAssistant) -> None:
         store.data.plantings[planting.id] = planting
         await store.async_save()
         return {"id": planting.id, "name": planting.name}
+
+    async def transplant(call: ServiceCall) -> ServiceResponse:
+        """Seedlings out of the nursery: all of them move, or a part becomes a new planting."""
+        store = _store(hass)
+        _check_ref(store.data.plantings, call.data["id"], "id")
+        _check_ref(store.data.zones, call.data["zone_id"], "zone_id")
+        batch = store.data.plantings[call.data["id"]]
+        count = min(call.data.get("quantity") or batch.quantity, batch.quantity)
+        day = _iso(call.data.get("done_on")) or dt_util.now().date().isoformat()
+        place = {
+            "zone_id": call.data["zone_id"],
+            "latitude": call.data.get("latitude"),
+            "longitude": call.data.get("longitude"),
+            "planted_on": day,
+            "moon_phase": None,
+        }
+        if count >= batch.quantity:
+            moved = replace(batch, **place)
+            store.data.plantings[batch.id] = moved
+        else:
+            moved = replace(
+                batch,
+                id=new_id(),
+                **place,
+                kind=PlantingKind.GROUP if count > 1 else PlantingKind.SINGLE,
+                quantity=count,
+                from_planting_id=batch.id,
+                sown_count=None,
+                germinated_count=None,
+            )
+            batch.quantity -= count
+            if batch.quantity == 1:
+                batch.kind = PlantingKind.SINGLE
+            store.data.plantings[moved.id] = moved
+        _check_position(moved)
+        await store.async_save()
+        return {"id": moved.id, "name": moved.name, "left": 0 if moved.id == batch.id else batch.quantity}
 
     async def delete_event(call: ServiceCall) -> ServiceResponse:
         store = _store(hass)
@@ -812,6 +875,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         ("delete_event", delete_event, ID_SCHEMA, SupportsResponse.OPTIONAL),
         ("refresh_weather", refresh_weather, REFRESH_WEATHER_SCHEMA, SupportsResponse.OPTIONAL),
         ("repeat_planting", repeat_planting, REPEAT_PLANTING_SCHEMA, SupportsResponse.OPTIONAL),
+        ("transplant", transplant, TRANSPLANT_SCHEMA, SupportsResponse.OPTIONAL),
         ("add_task", add_task, ADD_TASK_SCHEMA, SupportsResponse.OPTIONAL),
         ("update_task", update_task, UPDATE_TASK_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_task", delete_task, ID_SCHEMA, SupportsResponse.OPTIONAL),
