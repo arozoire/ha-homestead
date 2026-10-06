@@ -143,6 +143,17 @@ const TEXT = {
     incomesTotal: "Income",
     balance: "Balance",
     cropBox: "🌿 Crop data",
+    calendar: "Calendar: next two weeks and the year",
+    calPlan: "📅 Year plan",
+    calHistory: "📜 History",
+    calPlanned: "planned",
+    calWeather: "Weather",
+    calNoForecast: "No forecast yet: choose a weather entity in the settings, or allow Open-Meteo.",
+    xt_frost: "frost",
+    xt_heatwave: "heatwave",
+    xt_heat_extreme: "extreme heat",
+    xt_hail: "hail",
+    xt_heavy_rain: "heavy rain",
     pruning: "Pruning",
     fertilizing: "Fertilizing",
     end: "End of crop",
@@ -485,6 +496,17 @@ const TEXT = {
     incomesTotal: "Ricavi",
     balance: "Saldo",
     cropBox: "🌿 Scheda colturale",
+    calendar: "Calendario: prossime due settimane e l'anno",
+    calPlan: "📅 Programma",
+    calHistory: "📜 Storico",
+    calPlanned: "previsto",
+    calWeather: "Meteo",
+    calNoForecast: "Ancora nessuna previsione: scegli un'entità meteo nelle impostazioni, oppure lascia attivo Open-Meteo.",
+    xt_frost: "gelo",
+    xt_heatwave: "ondata di calore",
+    xt_heat_extreme: "caldo estremo",
+    xt_hail: "grandine",
+    xt_heavy_rain: "pioggia forte",
     pruning: "Potatura",
     fertilizing: "Concimazione",
     end: "Fine coltura",
@@ -922,6 +944,37 @@ const STYLE = `
   .csv-row.off { opacity: .5; }
   .csv-row .err { font-size: 12px; color: var(--warning-color, #ffa600); }
   .csv-list { display: grid; gap: 8px; margin: 12px 0; }
+  .calendar { flex: 1; min-width: 0; overflow: auto; padding: 8px; box-sizing: border-box; display: none;
+    background: var(--primary-background-color); }
+  .calendar-on .calendar { display: block; }
+  .calendar-on .map { display: none; }
+  .narrow.calendar-on .calendar { flex: 0 0 55%; }
+  .days { display: grid; grid-template-columns: repeat(14, minmax(46px, 1fr)); gap: 2px; text-align: center; font-size: 13px;
+    margin-bottom: 8px; overflow-x: auto; }
+  .day-col { display: grid; gap: 1px; align-content: start; padding: 4px 2px; border-radius: 6px; background: var(--card-background-color); }
+  .day-col.alert { box-shadow: inset 0 0 0 2px var(--warning-color, #ffa600); }
+  .day-col .sub { white-space: normal; }
+  .day-col .wx { font-size: 20px; }
+  .day-col .rain { color: #1e88e5; min-height: 14px; }
+  .alert-chip { font-size: 14px; }
+  .task-chip { padding: 0; border: none; background: none; font-size: 16px; border-radius: 4px; }
+  .task-chip.good { box-shadow: inset 0 -3px 0 #43a047; }
+  .task-chip.warn { box-shadow: inset 0 -3px 0 #ffa600; }
+  .task-chip.better { opacity: .7; font-weight: 700; color: #43a047; }
+  .cal-grid { display: grid; grid-template-columns: minmax(100px, 170px) repeat(12, minmax(22px, 1fr)); gap: 2px; font-size: 12px; }
+  .cal-month { text-align: center; color: var(--secondary-text-color); }
+  .cal-month.now { color: var(--primary-color); font-weight: 700; }
+  .cal-name { text-align: left; border: none; background: none; padding: 2px 4px; white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis; font-size: 12px; border-radius: 4px; }
+  .cal-name.static { color: var(--secondary-text-color); }
+  .cal-cell { position: relative; min-height: 24px; display: flex; flex-direction: column; justify-content: center; gap: 1px;
+    background: var(--card-background-color); border: none; padding: 1px; border-radius: 3px; font-size: 12px; }
+  .cal-cell.now { box-shadow: inset 0 0 0 1px var(--primary-color); }
+  .cal-cell.icons { align-items: center; }
+  .cal-band { display: block; height: 4px; border-radius: 2px; }
+  .cal-task { position: absolute; top: -2px; right: -2px; border: none; background: none; padding: 0; font-size: 11px; }
+  .legend { margin-bottom: 6px; }
+  .legend i { display: inline-block; width: 12px; height: 6px; border-radius: 2px; margin-right: 4px; }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .chip { display: inline-flex; gap: 4px; align-items: center; padding: 2px 4px 2px 10px; border-radius: 14px; font-size: 13px;
     background: var(--secondary-background-color); color: var(--primary-text-color); }
@@ -993,6 +1046,7 @@ class HomesteadPanel extends HTMLElement {
         {},
         this._menu,
         h("h1", {}, this.t("panelTitle")),
+        h("button", { className: "map-toggle", title: this.t("calendar"), onclick: () => this._toggleCalendar() }, "📅"),
         h("button", { className: "map-toggle", title: this.t("toggleMap"), onclick: () => this._toggleMap() }, "🗺️"),
         h(
           "button",
@@ -1007,7 +1061,7 @@ class HomesteadPanel extends HTMLElement {
           "⚙️",
         ),
       ),
-      h("div", { className: "body" }, this._mapWrap, this._aside),
+      h("div", { className: "body" }, this._mapWrap, (this._calWrap = h("div", { className: "calendar" })), this._aside),
     );
     root.append(
       h("link", { rel: "stylesheet", href: `${BASE}vendor/leaflet.css` }),
@@ -1017,6 +1071,7 @@ class HomesteadPanel extends HTMLElement {
     this._createMap();
     try {
       if (localStorage.getItem("homestead-map-hidden")) this._toggleMap(true);
+      if (localStorage.getItem("homestead-calendar")) this._toggleCalendar(true);
     } catch {
       // storage unavailable: the map stays visible
     }
@@ -1026,6 +1081,7 @@ class HomesteadPanel extends HTMLElement {
 
   _toggleMap(hidden = !this._layout.classList.contains("no-map")) {
     this._layout.classList.toggle("no-map", hidden);
+    if (hidden && this._calendarOn) this._toggleCalendar(false);
     try {
       localStorage.setItem("homestead-map-hidden", hidden ? "1" : "");
     } catch {
@@ -1081,6 +1137,7 @@ class HomesteadPanel extends HTMLElement {
       .subscribeMessage(
         (outlook) => {
           this._outlook = outlook;
+          this._renderCalendar();
           if (this._tab === "diary" && !this._eventForm && !this._taskForm) this._render();
         },
         { type: "homestead/outlook/subscribe" },
@@ -1110,6 +1167,7 @@ class HomesteadPanel extends HTMLElement {
         };
         this._loaded = !!data.plantings;
         this._syncMap();
+        this._renderCalendar();
         if (first) this._fitAll();
         first = false;
         if (window.location.search.includes("task=")) {
@@ -4094,6 +4152,254 @@ class HomesteadPanel extends HTMLElement {
     this._showMessage(`${failed ? "" : "✓ "}${this.t("csvDone", { ok, failed })}`, !!failed);
   }
 
+
+  // ---------- calendar view (instead of the map) ----------
+
+  _toggleCalendar(on = !this._calendarOn) {
+    this._calendarOn = on;
+    this._layout.classList.toggle("calendar-on", on);
+    this._layout.classList.remove("no-map");
+    try {
+      localStorage.setItem("homestead-calendar", on ? "1" : "");
+    } catch {
+      // private mode: the choice is just not remembered
+    }
+    if (on) this._renderCalendar();
+    else setTimeout(() => this._map.invalidateSize(), 0);
+  }
+
+  _renderCalendar() {
+    if (!this._calendarOn || !this._calWrap) return;
+    const mode = this._calendarMode || "plan";
+    const tab = (name, label) =>
+      h(
+        "button",
+        {
+          className: mode === name ? "active" : "",
+          onclick: () => {
+            this._calendarMode = name;
+            this._renderCalendar();
+          },
+        },
+        label,
+      );
+    this._calWrap.replaceChildren(
+      this._daysStrip(),
+      h("div", { className: "tabs" }, tab("plan", this.t("calPlan")), tab("history", this.t("calHistory"))),
+      mode === "history" ? this._historyGrid() : this._planGrid(),
+    );
+  }
+
+  _weatherIcon(day) {
+    const code = day.code;
+    if (code != null) {
+      if (code >= 95) return "⛈️";
+      if (code >= 71 && code <= 86 && !(code >= 80 && code <= 82)) return "🌨️";
+      if (code >= 51) return "🌧️";
+      if (code === 45 || code === 48) return "🌫️";
+      if (code === 3) return "☁️";
+      if (code === 2) return "⛅";
+      return "☀️";
+    }
+    const byCondition = {
+      sunny: "☀️",
+      "clear-night": "☀️",
+      partlycloudy: "⛅",
+      cloudy: "☁️",
+      fog: "🌫️",
+      rainy: "🌧️",
+      pouring: "🌧️",
+      snowy: "🌨️",
+      "snowy-rainy": "🌨️",
+      lightning: "⛈️",
+      "lightning-rainy": "⛈️",
+      hail: "⛈️",
+      windy: "💨",
+    };
+    return byCondition[day.condition] || ((day.rain_mm || 0) >= 1 ? "🌧️" : "☀️");
+  }
+
+  /** The next two weeks: weather, alerts and the planned activities with their weather verdict. */
+  _daysStrip() {
+    const days = (this._outlook?.forecast || []).slice(0, 14);
+    if (!days.length) return h("p", { className: "hint" }, this.t("calNoForecast"));
+    const alerts = this._outlook?.alerts || [];
+    const advice = this._outlook?.advice || {};
+    const tasks = this._data.tasks.filter((t) => !t.done_on);
+    const weekday = new Intl.DateTimeFormat(this._lang(), { weekday: "short" });
+    const alertIcon = { frost: "❄️", cold: "🥶", heatwave: "🔥", heat_extreme: "🔥", heat_stress: "🥵" };
+    const columns = days.map((day) => {
+      const dayAlerts = alerts.filter((a) => a.start <= day.date && day.date <= a.end);
+      const due = tasks.filter((t) => t.due_on === day.date);
+      const better = tasks.filter((t) => advice[t.id]?.best === day.date);
+      return h(
+        "div",
+        { className: `day-col${dayAlerts.length ? " alert" : ""}` },
+        h("div", { className: "sub" }, `${weekday.format(new Date(`${day.date}T12:00:00`))} ${this._date(day.date, false)}`),
+        h("div", { className: "wx" }, this._weatherIcon(day)),
+        h("div", {}, `${day.t_max != null ? Math.round(day.t_max) : "–"}°`),
+        h("div", { className: "sub" }, `${day.t_min != null ? Math.round(day.t_min) : "–"}°`),
+        h("div", { className: "sub rain" }, day.rain_mm ? `${Math.round(day.rain_mm)} mm` : ""),
+        dayAlerts.map((a) =>
+          h("div", { className: `alert-chip ${a.kind}`, title: this.t(`al_${a.kind}`, { when: this._date(a.start, false), value: a.value }) }, alertIcon[a.kind]),
+        ),
+        due.map((t) => {
+          const verdict = advice[t.id];
+          const state = !verdict ? "" : verdict.issues.length ? " warn" : " good";
+          return h(
+            "button",
+            { className: `task-chip${state}`, title: this._taskLabel(t), onclick: () => this._openTask(t) },
+            EVENT_ICONS[t.kind] || "📝",
+          );
+        }),
+        better.map((t) => h("button", { className: "task-chip better", title: `↪ ${this._taskLabel(t)}`, onclick: () => this._openTask(t) }, "↪")),
+      );
+    });
+    return h("div", { className: "days" }, columns);
+  }
+
+  _monthHeader(first) {
+    const letters = this._monthLetters();
+    const now = new Date().getMonth();
+    return [first, ...letters.map((m, i) => h("div", { className: `cal-month${i === now ? " now" : ""}` }, m))];
+  }
+
+  _plantRows() {
+    const order = Object.keys(PLANT_ICONS);
+    return this._data.plantings
+      .filter((p) => p.status === "active")
+      .sort((a, b) => {
+        const ta = order.indexOf(a.plant_type);
+        const tb = order.indexOf(b.plant_type);
+        return (ta < 0 ? 99 : ta) - (tb < 0 ? 99 : tb) || a.name.localeCompare(b.name);
+      });
+  }
+
+  /** Every active plant over the 12 months: what its crop data says, plus the planned activities. */
+  _planGrid() {
+    const now = new Date().getMonth() + 1;
+    const year = new Date().getFullYear();
+    const plants = this._plantRows();
+    if (!plants.length) return h("p", { className: "hint" }, this.t("empty"));
+    const legend = h(
+      "div",
+      { className: "chips legend" },
+      CROP_MONTHS.map((key) => h("span", { className: "chip" }, h("i", { style: `background:${CROP_COLOR[key]}` }), this.t(key))),
+      h("span", { className: "chip" }, "📋 ", this.t("calPlanned")),
+    );
+    const cells = [];
+    for (const p of plants) {
+      const crop = this._crop(p.species);
+      const keys = CROP_MONTHS.filter((key) => crop?.[key]?.length);
+      const tasks = this._data.tasks.filter(
+        (t) => !t.done_on && (t.planting_id === p.id || (t.zone_id && this._inZone(p, t.zone_id))) && Number(t.due_on.slice(0, 4)) <= year + 1,
+      );
+      cells.push(
+        h(
+          "button",
+          { className: "cal-name", title: [p.name, p.species].join(" — "), onclick: () => this._select(p.id) },
+          `${PLANT_ICONS[p.plant_type] || "🌱"} ${p.name}`,
+        ),
+      );
+      for (let month = 1; month <= 12; month++) {
+        const planned = tasks.filter((t) => Number(t.due_on.slice(5, 7)) === month);
+        cells.push(
+          h(
+            "div",
+            {
+              className: `cal-cell${month === now ? " now" : ""}`,
+              title: keys.filter((key) => crop[key].includes(month)).map((key) => this.t(key)).join(", "),
+            },
+            keys.map((key) => h("i", { className: "cal-band", style: crop[key].includes(month) ? `background:${CROP_COLOR[key]}` : "" })),
+            planned.length
+              ? h(
+                  "button",
+                  { className: "cal-task", title: planned.map((t) => `${this._date(t.due_on)} ${this._taskLabel(t)}`).join("\n"), onclick: () => this._openTask(planned[0]) },
+                  "📋",
+                )
+              : null,
+          ),
+        );
+      }
+    }
+    return h("div", {}, legend, h("div", { className: "cal-grid" }, this._monthHeader(h("div")), cells));
+  }
+
+  /** A past year: what was really done, month by month, under the weather extremes of that year. */
+  _historyGrid() {
+    const extremes = this._outlook?.climate?.extremes || [];
+    const events = this._data.events;
+    const years = [...new Set([...events.map((e) => e.done_on.slice(0, 4)), ...extremes.map((x) => x.start.slice(0, 4))])].sort().reverse();
+    const year = this._calendarYear && years.includes(this._calendarYear) ? this._calendarYear : years[0] || String(new Date().getFullYear());
+    const yearSelect = h(
+      "select",
+      {
+        style: "flex:none",
+        onchange: (ev) => {
+          this._calendarYear = ev.target.value;
+          this._renderCalendar();
+        },
+      },
+      years.map((y) => h("option", { value: y, selected: y === year }, y)),
+    );
+    const extremeIcon = { frost: "❄️", heatwave: "🔥", heat_extreme: "🔥", hail: "🧊", heavy_rain: "🌧️" };
+    const cells = [h("div", { className: "cal-name static" }, `🌦️ ${this.t("calWeather")}`)];
+    for (let month = 1; month <= 12; month++) {
+      const inMonth = extremes.filter((x) => x.start.slice(0, 4) === year && Number(x.start.slice(5, 7)) === month);
+      const icons = [...new Set(inMonth.map((x) => extremeIcon[x.kind]))].join("");
+      const title = inMonth
+        .map((x) => `${extremeIcon[x.kind]} ${this.t(`xt_${x.kind}`)} ${this._date(x.start, false)}${x.end !== x.start ? `–${this._date(x.end, false)}` : ""}${x.value != null ? ` (${x.value}${x.kind === "heavy_rain" ? " mm" : " °C"})` : ""}`)
+        .join("\n");
+      cells.push(h("div", { className: "cal-cell icons", title }, icons));
+    }
+    const ofYear = events.filter((e) => e.done_on.startsWith(year));
+    const targets = new Map();
+    for (const e of ofYear) {
+      const key = e.planting_id ? `p:${e.planting_id}` : `z:${e.zone_id}`;
+      if (!targets.has(key)) targets.set(key, []);
+      targets.get(key).push(e);
+    }
+    const rows = [...targets.entries()]
+      .map(([key, list]) => {
+        const [type, id] = key.split(":");
+        const item = type === "p" ? this._planting(id) : this._zone(id);
+        return item ? { type, item, list } : null;
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.type.localeCompare(b.type) || a.item.name.localeCompare(b.item.name));
+    for (const { type, item, list } of rows) {
+      const icon = type === "p" ? PLANT_ICONS[item.plant_type] || "🌱" : "▭";
+      cells.push(
+        h(
+          "button",
+          { className: "cal-name", onclick: () => (type === "p" ? this._select(item.id) : this._selectZone(item.id)) },
+          `${icon} ${item.name}`,
+        ),
+      );
+      for (let month = 1; month <= 12; month++) {
+        const done = list.filter((e) => Number(e.done_on.slice(5, 7)) === month).sort((a, b) => a.done_on.localeCompare(b.done_on));
+        const shown = done.slice(0, 2).map((e) => EVENT_ICONS[e.kind] || "📝").join("");
+        cells.push(
+          h(
+            "button",
+            {
+              className: "cal-cell icons",
+              title: done.map((e) => `${this._date(e.done_on)} ${this._eventLabel(e)}${e.quantity ? ` ${this._quantity(e.quantity, e.unit)}` : ""}`).join("\n"),
+              onclick: () => done[0] && this._openEvent(done[0]),
+            },
+            `${shown}${done.length > 2 ? `+${done.length - 2}` : ""}`,
+          ),
+        );
+      }
+    }
+    return h(
+      "div",
+      {},
+      h("div", { className: "row", style: "margin-bottom:6px" }, yearSelect),
+      h("div", { className: "cal-grid" }, this._monthHeader(h("div")), cells),
+      rows.length ? null : h("p", { className: "hint" }, this.t("emptyDiary")),
+    );
+  }
 
   // ---------- rotation ----------
 

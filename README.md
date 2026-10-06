@@ -8,7 +8,7 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 
 **Non sporcare Home Assistant**: nessuna area creata, poche entità aggregate, rimozione pulita (disinstallando l'integrazione i dati vengono cancellati).
 
-## Cosa fa oggi (v0.8.2)
+## Cosa fa oggi (v0.9)
 
 | Funzione | Come |
 |---|---|
@@ -31,6 +31,11 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 | Attrezzi | Scheda *Attrezzi* (stato a colori, 🔧 manutenzione scaduta) o servizi `add_tool`/`update_tool`/`delete_tool` |
 | Foto | Nella scheda pianta: *📷 Aggiungi foto* (fotocamera o galleria del telefono), ridotte a 1600 px e salvate in `/media/homestead/`; visibili solo agli utenti HA |
 | Sfondo "Nessuna mappa" | Dal selettore dei livelli: zoom fino al livello 23 per lavorare dentro un'aiuola |
+| 📅 Calendario | Pulsante 📅 in alto: al posto della mappa, le **prossime 2 settimane** (meteo, allerte, attività con ✅/⚠️ e ↪ giorno migliore) e i **12 mesi** per pianta (semina, messa a dimora, fioritura, raccolta, potatura, concimazione, fine coltura, 📋 attività); *📜 Storico*: per anno, gli eventi fatti mese per mese sotto il meteo estremo (gelo, ondate di calore, grandine, piogge forti) |
+| Allerte gelo e caldo | Gelo sotto la rusticità di ogni pianta (piante giovani o tenere da 0 °C), ondata di calore (3 giorni con massima ≥ 35 °C **e** minima ≥ 22 °C), caldo estremo (≥ 40 °C), troppo caldo per le colture fresche; riquadro nel Diario, sensore `sensor.ha_homestead_weather_alerts`, notifica sul telefono a scelta: mai, solo con un'attività prevista quei giorni, sempre |
+| Regole meteo | Per ogni attività prevista: trattamento (pioggia entro 48 h, vento, caldo), potatura (gelo nei giorni dopo, pioggia), semina (notti fredde per le colture calde), irrigazione (pioggia in arrivo)… con il giorno buono più vicino; anche nel promemoria sul telefono |
+| Date di gelo e storico | Calcolate dai tuoi sensori (statistiche di HA), Open-Meteo per gli anni mancanti; usate per adattare il calendario colturale |
+| Calendario colturale esteso | ~1.350 specie da CropGraph con le date adattate alle tue gelate, famiglia e consociazioni (🤝 sta bene con / 🚫 tenere lontano da, ✓ quelle già nel giardino) |
 | Import CSV | Schede *Piante* e *Semi*: *📄 Modello CSV* scarica il file con le colonne (separatore `;`, apribile con Excel); *📥 Importa CSV* mostra ogni riga prima di importare: valori non capiti (zona, tipo, data gg/mm/aaaa, numeri) si correggono lì, le righe già presenti restano senza spunta |
 | Immagine della specie | Nei suggerimenti della ricerca specie e accanto alla specie collegata: foto da Wikimedia Commons (proprietà P18 di Wikidata); un tocco la apre in grande; le specie importate prima la recuperano quando le scegli di nuovo |
 | Prezzo alla creazione | Nuova pianta: *Prezzo* e *Fornitore* diventano subito una spesa |
@@ -72,6 +77,10 @@ Mappe: satellite **Esri World Imagery** (gratuito, senza account né pubblicità
 | Sensori meteo (temperatura, umidità, pioggia, umidità suolo) | nessuno: si usa Open-Meteo |
 | **Invia i promemoria a** (uno o più `notify.mobile_app_…`) | nessuno: niente notifiche |
 | **Ora dei promemoria** | 08:00 |
+| **Previsioni meteo** (entità meteo di HA, es. Met.no) | nessuna: si usa Open-Meteo |
+| **Allerte gelo e caldo sui telefoni** | solo con un'attività prevista in quei giorni |
+| Ondata di calore: massima / minima notturna / giorni di fila | 35 °C / 22 °C / 3 |
+| Caldo estremo: massima (anche un giorno) | 40 °C |
 
 Ogni giorno, all'ora scelta, arriva una notifica per ogni attività prevista oggi (più un riepilogo delle attività in ritardo). **Toccandola** si apre il pannello sul form del diario già compilato; il pulsante **✔ Fatto** la registra subito nel diario.
 
