@@ -296,3 +296,76 @@ def alerts(
     for alert in out:
         alert["key"] = f"{alert['kind']}:{alert['start']}"
     return sorted(out, key=lambda a: (a["start"], a["kind"]))
+
+
+# Weather rules per activity: reasons to avoid a day (empty list = good day).
+TREATMENT_RAIN_MM = 2
+WATERING_RAIN_MM = 5
+WIND_KMH = 20
+GUST_KMH = 50
+TREATMENT_HOT = 30
+WARM_SOIL = 10  # nights below it: warm-season crops do not germinate or stall once planted out
+
+
+def _rain(day: dict) -> float:
+    return day.get("rain_mm") or 0
+
+
+def day_issues(kind: str, days: list[dict[str, Any]], i: int, tender: bool = False) -> list[str]:
+    """Why ``days[i]`` is a bad day for ``kind`` (needs the following days of the forecast too)."""
+    day = days[i]
+    after = days[i : i + 3]  # today and the next 2 days
+    week = days[i : i + 7]
+    issues = []
+    if kind == "treatment":
+        if any(_rain(d) >= TREATMENT_RAIN_MM for d in after):
+            issues.append("rain_48h")
+        if (day.get("wind_kmh") or 0) >= WIND_KMH:
+            issues.append("wind")
+        if (day.get("t_max") or 0) >= TREATMENT_HOT:
+            issues.append("hot")
+    elif kind in ("pruning", "grafting"):
+        if any(d.get("t_min") is not None and d["t_min"] <= 0 for d in days[i : i + 4]):
+            issues.append("frost_next")
+        if _rain(day) >= TREATMENT_RAIN_MM:
+            issues.append("rain_today")
+    elif kind == "sowing":
+        lows = [d["t_min"] for d in week if d.get("t_min") is not None]
+        if lows and min(lows) < (WARM_SOIL if tender else 0.5):
+            issues.append("cold_nights")
+        if _rain(day) >= 20:
+            issues.append("heavy_rain")
+    elif kind == "watering":
+        if any(_rain(d) >= WATERING_RAIN_MM for d in after):
+            issues.append("rain_coming")
+    elif kind == "fertilizing":
+        if any(_rain(d) >= 20 for d in after):
+            issues.append("heavy_rain")
+        if day.get("t_min") is not None and day["t_min"] <= 0:
+            issues.append("frozen")
+    elif kind in ("harvest", "mowing", "tillage"):
+        if _rain(day) >= TREATMENT_RAIN_MM:
+            issues.append("rain_today")
+    elif kind in ("wood_cutting", "brushwood", "clearing"):
+        if (day.get("gust_kmh") or 0) >= GUST_KMH:
+            issues.append("gusts")
+    return issues
+
+
+def advice(kind: str, days: list[dict[str, Any]], due: str, tender: bool = False) -> dict[str, Any] | None:
+    """Verdict for a planned activity: its day's issues and the best day around it (−3/+7 days)."""
+    index = {d["date"]: i for i, d in enumerate(days)}
+    if due not in index:
+        return None
+    issues = day_issues(kind, days, index[due], tender)
+    best = None
+    if issues:
+        target = date.fromisoformat(due)
+        good = [
+            (abs(offset), offset < 0, day["date"])
+            for i, day in enumerate(days)
+            if -3 <= (offset := (date.fromisoformat(day["date"]) - target).days) <= 7
+            and not day_issues(kind, days, i, tender)
+        ]
+        best = min(good)[2] if good else None  # the closest good day, later rather than earlier
+    return {"issues": issues, "best": best}

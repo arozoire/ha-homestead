@@ -1173,6 +1173,17 @@
     "alert_cold": "🥶 Cold {when}: {value} °C for {plants}",
     "alert_heatwave": "🔥 Heatwave {when}: up to {value} °C",
     "alert_heat_extreme": "🔥 Extreme heat {when}: {value} °C",
-    "alert_heat_stress": "🥵 Too hot for {plants}: {when}, up to {value} °C"
+    "alert_heat_stress": "🥵 Too hot for {plants}: {when}, up to {value} °C",
+    "issue_rain_48h": "rain within 48 h",
+    "issue_wind": "wind",
+    "issue_hot": "too hot",
+    "issue_frost_next": "frost in the next days",
+    "issue_rain_today": "rain that day",
+    "issue_cold_nights": "cold nights this week",
+    "issue_heavy_rain": "heavy rain",
+    "issue_rain_coming": "rain coming",
+    "issue_frozen": "frozen soil",
+    "issue_gusts": "strong gusts",
+    "better_on": "better on {date}"
   }
 }

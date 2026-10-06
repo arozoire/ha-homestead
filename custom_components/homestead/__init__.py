@@ -57,6 +57,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: HomesteadConfigEntry) ->
     outlook = Outlook(hass, store, dict(entry.options))
     await outlook.async_load()
     hass.data[OUTLOOK] = outlook
+    entry.async_on_unload(outlook.async_listen())
 
     async def refresh_outlook(_now: Any = None) -> None:
         try:

@@ -9,13 +9,16 @@ from custom_components.homestead.const import DOMAIN
 from custom_components.homestead.forecast import ARCHIVE_API, get_outlook
 from custom_components.homestead.outlook import (
     PlantRisk,
+    advice,
     alerts,
+    day_issues,
     extremes,
     frost_dates,
     merge_days,
     parse_ha_forecast,
     parse_open_meteo_daily,
 )
+from custom_components.homestead.reminders import async_send_reminders
 
 
 def _day(when: str, t_min: float, t_max: float, **extra) -> dict:
@@ -151,3 +154,51 @@ async def test_outlook_alerts_notify_and_history(
     assert (await ws.receive_json())["success"]
     event = (await ws.receive_json())["event"]
     assert event["alerts"][0]["kind"] == "frost" and len(event["forecast"]) == 3
+
+
+def test_rules_and_best_day():
+    days = [
+        _day("2026-05-04", 12, 24, rain_mm=0, wind_kmh=5),
+        _day("2026-05-05", 12, 22, rain_mm=0, wind_kmh=30),
+        _day("2026-05-06", 11, 21, rain_mm=6),
+        _day("2026-05-07", 9, 23, rain_mm=0),
+        _day("2026-05-08", 13, 26, rain_mm=0),
+        _day("2026-05-09", 14, 27, rain_mm=0),
+        _day("2026-05-10", 14, 28, rain_mm=0),
+        _day("2026-05-11", 15, 28, rain_mm=0),
+    ]
+    assert day_issues("treatment", days, 1) == ["rain_48h", "wind"]
+    assert advice("treatment", days, "2026-05-05") == {"issues": ["rain_48h", "wind"], "best": "2026-05-07"}
+    assert advice("watering", days, "2026-05-05")["issues"] == ["rain_coming"]
+    # Tomatoes (tender) wait for nights above 10 °C; hardy crops only need no frost.
+    assert advice("sowing", days, "2026-05-04", tender=True) == {
+        "issues": ["cold_nights"],
+        "best": "2026-05-08",
+    }
+    assert advice("sowing", days, "2026-05-04") == {"issues": [], "best": None}
+    assert advice("pruning", days, "2026-06-01") is None  # beyond the forecast
+
+
+@pytest.mark.freeze_time("2026-05-05 18:00:00+00:00")
+async def test_reminder_carries_weather_advice(hass: HomeAssistant) -> None:
+    notify = async_mock_service(hass, "notify", "mobile_app_phone")
+    forecast = [
+        _day("2026-05-05", 12, 22, rain_mm=0, wind_kmh=5),
+        _day("2026-05-06", 11, 21, rain_mm=8),
+        _day("2026-05-07", 10, 22, rain_mm=0),
+        _day("2026-05-08", 10, 23, rain_mm=0),
+        _day("2026-05-09", 10, 23, rain_mm=0),
+    ]
+    options = {"weather_entity": "weather.home", "notify_services": ["notify.mobile_app_phone"]}
+    entry = MockConfigEntry(domain=DOMAIN, title="HA Homestead", options=options)
+    entry.add_to_hass(hass)
+    with patch(
+        "custom_components.homestead.forecast._forecast_from_entity", AsyncMock(return_value=forecast)
+    ):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+        task = (await _call(hass, "add_task", {"kind": "treatment", "due_on": "2026-05-05"}))["id"]
+        await hass.async_block_till_done()
+    assert get_outlook(hass).advice[task] == {"issues": ["rain_48h"], "best": "2026-05-07"}
+    await async_send_reminders(hass, entry.runtime_data, ["notify.mobile_app_phone"])
+    assert notify[0].data["message"].endswith("⚠️ rain within 48 h · better on 07/05")

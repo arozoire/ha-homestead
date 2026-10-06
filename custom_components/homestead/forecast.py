@@ -8,13 +8,14 @@ long-term statistics), Open-Meteo for the years or values they lack. Kept in ``.
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from datetime import date, datetime, timedelta
 from typing import Any
 
 import aiohttp
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.dispatcher import async_dispatcher_send
+from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dispatcher_send
 from homeassistant.helpers.storage import Store
 from homeassistant.helpers.translation import async_get_translations
 from homeassistant.util import dt as dt_util
@@ -32,6 +33,7 @@ from .const import (
     CONF_WEATHER_ENTITY,
     DEFAULT_ALERT_NOTIFY,
     DOMAIN,
+    SIGNAL_DATA_UPDATED,
     SIGNAL_OUTLOOK_UPDATED,
 )
 from .crops import crop_traits, load_defaults
@@ -39,6 +41,7 @@ from .outlook import (
     YOUNG_DAYS,
     PlantRisk,
     Thresholds,
+    advice,
     alerts,
     daily_from_statistics,
     extremes,
@@ -215,6 +218,7 @@ class Outlook:
         self.forecast: list[dict[str, Any]] = []
         self.source: str | None = None
         self.alerts: list[dict[str, Any]] = []
+        self.advice: dict[str, dict[str, Any]] = {}
         self.climate: dict[str, Any] = {}
         self.updated: str | None = None
         self._notified: list[str] = []
@@ -243,11 +247,37 @@ class Outlook:
             risks.append(PlantRisk(planting.id, traits.get("hardiness_c"), traits.get("heat_max_c"), young))
         return risks
 
+    async def _async_evaluate(self) -> None:
+        """Alerts and per-activity advice from the forecast already fetched."""
+        risks = await self.async_plant_risks()
+        self.alerts = alerts(self.forecast, risks, self.thresholds)
+        tender = {r.id for r in risks if r.hardiness_c is not None and r.hardiness_c > 0}
+        self.advice = {}
+        for task in self.store.data.tasks.values():
+            if task.done_on:
+                continue
+            verdict = advice(task.kind, self.forecast, task.due_on, task.planting_id in tender)
+            if verdict is not None:
+                self.advice[task.id] = verdict
+
+    def async_listen(self) -> Callable[[], None]:
+        """Re-evaluate when plantings or tasks change; returns the unsubscribe."""
+
+        async def changed() -> None:
+            await self._async_evaluate()
+            async_dispatcher_send(self.hass, SIGNAL_OUTLOOK_UPDATED)
+
+        @callback
+        def on_data() -> None:
+            self.hass.async_create_task(changed(), f"{DOMAIN} outlook re-evaluation")
+
+        return async_dispatcher_connect(self.hass, SIGNAL_DATA_UPDATED, on_data)
+
     async def async_refresh(self, history: bool = False) -> None:
         self.forecast, self.source = await async_fetch_forecast(self.hass, self.options)
         today = dt_util.now().date().isoformat()
         self.forecast = [d for d in self.forecast if d["date"] >= today]
-        self.alerts = alerts(self.forecast, await self.async_plant_risks(), self.thresholds)
+        await self._async_evaluate()
         if history or self._stale():
             self.climate = await async_history(self.hass, self.options, self.thresholds)
         self.updated = dt_util.now().isoformat()
@@ -303,6 +333,7 @@ class Outlook:
             "forecast": self.forecast,
             "source": self.source,
             "alerts": self.alerts,
+            "advice": self.advice,
             "climate": self.climate,
             "thresholds": vars(self.thresholds),
             "updated": self.updated,
@@ -313,6 +344,19 @@ async def _texts(hass: HomeAssistant) -> dict[str, str]:
     strings = await async_get_translations(hass, hass.config.language, "common", [DOMAIN])
     prefix = f"component.{DOMAIN}.common."
     return {key.removeprefix(prefix): value for key, value in strings.items() if key.startswith(prefix)}
+
+
+def advice_text(verdict: dict[str, Any] | None, texts: dict[str, str]) -> str:
+    """ "⚠️ rain within 48 h · better on 08/10" (empty for a good day)."""
+    if not verdict or not verdict["issues"]:
+        return ""
+    reasons = ", ".join(texts.get(f"issue_{issue}", issue) for issue in verdict["issues"])
+    text = f"⚠️ {reasons}"
+    if best := verdict.get("best"):
+        text += " · " + texts.get("better_on", "better on {date}").replace(
+            "{date}", f"{best[8:10]}/{best[5:7]}"
+        )
+    return text
 
 
 def alert_text(alert: dict[str, Any], texts: dict[str, str], store: HomesteadStore) -> str:

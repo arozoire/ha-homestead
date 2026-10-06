@@ -170,6 +170,18 @@ const TEXT = {
     monthSowOutdoor: "🌱 Sow outdoors: {names}",
     monthPlantOut: "🪴 Plant out: {names}",
     monthHarvest: "🍎 Harvest: {names}",
+    goodDay: "✅ good weather",
+    better_on: "better on {date}",
+    issue_rain_48h: "rain within 48 h",
+    issue_wind: "wind",
+    issue_hot: "too hot",
+    issue_frost_next: "frost in the next days",
+    issue_rain_today: "rain that day",
+    issue_cold_nights: "cold nights this week",
+    issue_heavy_rain: "heavy rain",
+    issue_rain_coming: "rain coming",
+    issue_frozen: "frozen soil",
+    issue_gusts: "strong gusts",
     alertsTitle: "⚠️ Weather alerts",
     al_frost: "❄️ Frost {when}: {value} °C",
     al_cold: "🥶 Cold {when}: {value} °C",
@@ -490,6 +502,18 @@ const TEXT = {
     monthSowOutdoor: "🌱 Semina all'aperto: {names}",
     monthPlantOut: "🪴 Messa a dimora: {names}",
     monthHarvest: "🍎 Raccolta: {names}",
+    goodDay: "✅ meteo adatto",
+    better_on: "meglio il {date}",
+    issue_rain_48h: "pioggia entro 48 h",
+    issue_wind: "vento",
+    issue_hot: "troppo caldo",
+    issue_frost_next: "gelo nei prossimi giorni",
+    issue_rain_today: "pioggia quel giorno",
+    issue_cold_nights: "notti fredde in settimana",
+    issue_heavy_rain: "pioggia forte",
+    issue_rain_coming: "pioggia in arrivo",
+    issue_frozen: "terreno gelato",
+    issue_gusts: "raffiche forti",
     alertsTitle: "⚠️ Allerte meteo",
     al_frost: "❄️ Gelo {when}: {value} °C",
     al_cold: "🥶 Freddo {when}: {value} °C",
@@ -3058,11 +3082,22 @@ class HomesteadPanel extends HTMLElement {
                   { className: "sub" },
                   `${this._date(t.due_on)}${t.due_on < now ? ` · ${this.t("overdue")}` : ""}${t.yearly ? " · 🔁" : ""}`,
                 ),
+                this._adviceLine(t),
               ),
             ),
           )
         : h("p", { className: "hint" }, this.t("nothingToDo")),
     );
+  }
+
+  /** Weather verdict of a planned activity in the forecast range: good day, or why not and when instead. */
+  _adviceLine(task) {
+    const verdict = this._outlook?.advice?.[task.id];
+    if (!verdict) return null;
+    if (!verdict.issues.length) return h("span", { className: "sub info" }, this.t("goodDay"));
+    const reasons = verdict.issues.map((issue) => this.t(`issue_${issue}`)).join(", ");
+    const better = verdict.best ? ` · ${this.t("better_on", { date: this._date(verdict.best, false) })}` : "";
+    return h("span", { className: "sub warn", style: "white-space:normal" }, `⚠️ ${reasons}${better}`);
   }
 
   /** The diary form filled in from a planned activity (✔, or a tapped phone notification). */

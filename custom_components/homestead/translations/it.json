@@ -1173,6 +1173,17 @@
     "alert_cold": "🥶 Freddo {when}: {value} °C per {plants}",
     "alert_heatwave": "🔥 Ondata di calore {when}: fino a {value} °C",
     "alert_heat_extreme": "🔥 Caldo estremo {when}: {value} °C",
-    "alert_heat_stress": "🥵 Troppo caldo per {plants}: {when}, fino a {value} °C"
+    "alert_heat_stress": "🥵 Troppo caldo per {plants}: {when}, fino a {value} °C",
+    "issue_rain_48h": "pioggia entro 48 h",
+    "issue_wind": "vento",
+    "issue_hot": "troppo caldo",
+    "issue_frost_next": "gelo nei prossimi giorni",
+    "issue_rain_today": "pioggia quel giorno",
+    "issue_cold_nights": "notti fredde in settimana",
+    "issue_heavy_rain": "pioggia forte",
+    "issue_rain_coming": "pioggia in arrivo",
+    "issue_frozen": "terreno gelato",
+    "issue_gusts": "raffiche forti",
+    "better_on": "meglio il {date}"
   }
 }
