@@ -19,6 +19,8 @@ add_zone:
             - pots
             - lawn
             - woodland
+            - compost
+            - coop
             - other
     area_id:
       selector:
@@ -59,6 +61,8 @@ update_zone:
             - pots
             - lawn
             - woodland
+            - compost
+            - coop
             - other
     area_id:
       selector:
@@ -376,6 +380,7 @@ add_expense:
             - water
             - services
             - sales
+            - animals
             - other
     spent_on:
       selector:
@@ -477,6 +482,7 @@ update_expense:
             - water
             - services
             - sales
+            - animals
             - other
     spent_on:
       selector:
@@ -596,6 +602,13 @@ add_event:
             - wood_cutting
             - brushwood
             - foraging
+            - compost_turn
+            - compost_harvest
+            - eggs
+            - flock_in
+            - flock_out
+            - animal_care
+            - coop_cleaning
     done_on:
       selector:
         date:
@@ -652,6 +665,17 @@ add_event:
       selector:
         text:
           multiline: true
+    reason:
+      selector:
+        select:
+          translation_key: leave_reason
+          options:
+            - predator
+            - illness
+            - age
+            - sold
+            - slaughtered
+            - other
     notes:
       selector:
         text:
@@ -702,6 +726,13 @@ update_event:
             - wood_cutting
             - brushwood
             - foraging
+            - compost_turn
+            - compost_harvest
+            - eggs
+            - flock_in
+            - flock_out
+            - animal_care
+            - coop_cleaning
     done_on:
       selector:
         date:
@@ -758,6 +789,17 @@ update_event:
       selector:
         text:
           multiline: true
+    reason:
+      selector:
+        select:
+          translation_key: leave_reason
+          options:
+            - predator
+            - illness
+            - age
+            - sold
+            - slaughtered
+            - other
     notes:
       selector:
         text:
@@ -816,6 +858,13 @@ add_task:
             - wood_cutting
             - brushwood
             - foraging
+            - compost_turn
+            - compost_harvest
+            - eggs
+            - flock_in
+            - flock_out
+            - animal_care
+            - coop_cleaning
     due_on:
       required: true
       selector:
@@ -868,6 +917,13 @@ update_task:
             - wood_cutting
             - brushwood
             - foraging
+            - compost_turn
+            - compost_harvest
+            - eggs
+            - flock_in
+            - flock_out
+            - animal_care
+            - coop_cleaning
     due_on:
       selector:
         date:

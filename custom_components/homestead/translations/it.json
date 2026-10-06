@@ -120,6 +120,7 @@
         "water": "Acqua",
         "services": "Servizi e manodopera",
         "sales": "Vendite",
+        "animals": "Animali (mangime, cure)",
         "other": "Altro"
       }
     },
@@ -154,6 +155,8 @@
         "pots": "Vasi",
         "lawn": "Prato",
         "woodland": "Bosco",
+        "compost": "Compostiera",
+        "coop": "Pollaio",
         "other": "Altro"
       }
     },
@@ -184,7 +187,14 @@
         "clearing": "Pulizia bosco",
         "wood_cutting": "Taglio legna",
         "brushwood": "Raccolta rami, fascine",
-        "foraging": "Raccolta spontanea (funghi, castagne…)"
+        "foraging": "Raccolta spontanea (funghi, castagne…)",
+        "compost_turn": "Rivoltare il compost",
+        "compost_harvest": "Raccolta compost",
+        "eggs": "Uova",
+        "flock_in": "Arrivo galline",
+        "flock_out": "Uscita galline",
+        "animal_care": "Mangime e cure",
+        "coop_cleaning": "Pulizia pollaio"
       }
     },
     "harvest_unit": {
@@ -202,6 +212,16 @@
         "poor": "Scarso",
         "normal": "Normale",
         "abundant": "Abbondante"
+      }
+    },
+    "leave_reason": {
+      "options": {
+        "predator": "Predatore (volpe…)",
+        "illness": "Malattia",
+        "age": "Vecchiaia",
+        "sold": "Venduta o regalata",
+        "slaughtered": "Macellata",
+        "other": "Altro"
       }
     },
     "month": {
@@ -788,6 +808,10 @@
           "name": "Da evitare",
           "description": "Cosa è andato storto."
         },
+        "reason": {
+          "name": "Motivo",
+          "description": "Uscita galline: perché."
+        },
         "notes": {
           "name": "Note",
           "description": "Note libere."
@@ -861,6 +885,10 @@
         "avoid": {
           "name": "Da evitare",
           "description": "Cosa è andato storto."
+        },
+        "reason": {
+          "name": "Motivo",
+          "description": "Uscita galline: perché."
         },
         "notes": {
           "name": "Note",
@@ -1196,6 +1224,7 @@
     "issue_rain_coming": "pioggia in arrivo",
     "issue_frozen": "terreno gelato",
     "issue_gusts": "raffiche forti",
-    "better_on": "meglio il {date}"
+    "better_on": "meglio il {date}",
+    "notification_compost": "♻️ {zone}: rivoltare il compost ({days} giorni dall'ultima volta)"
   }
 }

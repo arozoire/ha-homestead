@@ -19,6 +19,7 @@ from homeassistant.util import dt as dt_util
 from .const import CONF_NOTIFY, CONF_NOTIFY_TIME, DEFAULT_NOTIFY_TIME, DOMAIN
 from .forecast import advice_text, get_outlook
 from .labels import async_kind_names, summary
+from .models import COMPOST_TURN_DAYS, compost_due
 from .store import HomesteadStore
 from .tasks import async_complete_task
 
@@ -32,6 +33,10 @@ def task_url(task_id: str) -> str:
     return f"{PANEL_URL}?task={task_id}"
 
 
+def turn_url(zone_id: str) -> str:
+    return f"{PANEL_URL}?zone={zone_id}&kind=compost_turn"
+
+
 async def _texts(hass: HomeAssistant) -> dict[str, str]:
     strings = await async_get_translations(hass, hass.config.language, "common", [DOMAIN])
     prefix = f"component.{DOMAIN}.common."
@@ -39,12 +44,20 @@ async def _texts(hass: HomeAssistant) -> dict[str, str]:
 
 
 async def async_send_reminders(hass: HomeAssistant, store: HomesteadStore, services: list[str]) -> int:
-    """One notification per task due today, plus one summary of the overdue ones."""
-    today = dt_util.now().date().isoformat()
+    """One notification per task due today, one summary of the overdue ones, compost to turn."""
+    now = dt_util.now().date()
+    today = now.isoformat()
     open_tasks = [t for t in store.data.tasks.values() if not t.done_on]
     due = sorted((t for t in open_tasks if t.due_on == today), key=lambda t: t.id)
     late = [t for t in open_tasks if t.due_on < today]
-    if not services or not (due or late):
+    planned = {t.zone_id for t in open_tasks if t.kind == "compost_turn"}
+    # Once at four weeks, then once a week until it is done (or planned as a task).
+    compost = [
+        (zone, days)
+        for zone, days in compost_due(store.data, now)
+        if zone.id not in planned and (days - COMPOST_TURN_DAYS) % 7 == 0
+    ]
+    if not services or not (due or late or compost):
         return 0
     kinds = await async_kind_names(hass)
     texts = await _texts(hass)
@@ -70,6 +83,17 @@ async def async_send_reminders(hass: HomeAssistant, store: HomesteadStore, servi
         }
         for t in due
     ]
+    for zone, days in compost:
+        url = turn_url(zone.id)
+        messages.append(
+            {
+                "title": title,
+                "message": texts.get("notification_compost", "♻️ {zone}: turn the compost ({days} days)")
+                .replace("{zone}", zone.name)
+                .replace("{days}", str(days)),
+                "data": {"url": url, "clickAction": url, "tag": f"{DOMAIN}-compost-{zone.id}"},
+            }
+        )
     if late:
         messages.append(
             {

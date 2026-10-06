@@ -27,6 +27,7 @@ from .models import (
     ExpenseCategory,
     HarvestUnit,
     InitialForm,
+    LeaveReason,
     Planting,
     PlantingKind,
     PlantingOrigin,
@@ -226,6 +227,7 @@ _EVENT_FIELDS = {
     vol.Optional("abundance"): vol.Any(None, vol.In([a.value for a in Abundance])),
     vol.Optional("keep"): _opt_str,
     vol.Optional("avoid"): _opt_str,
+    vol.Optional("reason"): vol.Any(None, vol.In([r.value for r in LeaveReason])),
     vol.Optional("notes"): _opt_str,
 }
 
