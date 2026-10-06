@@ -1140,6 +1140,18 @@
           "name": "Harvest",
           "description": "Harvest months."
         },
+        "pruning": {
+          "name": "Pruning",
+          "description": "Pruning months."
+        },
+        "fertilizing": {
+          "name": "Fertilizing",
+          "description": "Fertilizing months."
+        },
+        "end": {
+          "name": "End of crop",
+          "description": "Months the crop usually ends (annuals)."
+        },
         "spacing_cm": {
           "name": "Spacing",
           "description": "Distance between plants."

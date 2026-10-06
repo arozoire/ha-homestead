@@ -37,6 +37,7 @@ class PlantRisk:
     hardiness_c: float | None = None
     heat_max_c: float | None = None
     young: bool = False
+    warm: bool = False  # warm-season crop: needs warm nights to sow or plant out
 
 
 def _num(value: Any) -> float | None:

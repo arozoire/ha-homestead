@@ -36,7 +36,7 @@ from .const import (
     SIGNAL_DATA_UPDATED,
     SIGNAL_OUTLOOK_UPDATED,
 )
-from .crops import crop_traits, load_defaults
+from .crops import crop_traits, full_table, load_cropgraph, load_defaults
 from .outlook import (
     YOUNG_DAYS,
     PlantRisk,
@@ -70,10 +70,17 @@ ARCHIVE_DAILY = "temperature_2m_max,temperature_2m_min,precipitation_sum,weather
 
 
 async def async_crop_defaults(hass: HomeAssistant) -> dict[str, dict[str, Any]]:
-    """The built-in crop table, read once."""
-    if CROP_DEFAULTS not in hass.data:
-        hass.data[CROP_DEFAULTS] = await hass.async_add_executor_job(load_defaults)
-    return hass.data[CROP_DEFAULTS]
+    """Built-in table completed by CropGraph, its months set on the garden's frost dates."""
+    cache = hass.data.setdefault(CROP_DEFAULTS, {})
+    if "sources" not in cache:
+        cache["sources"] = await hass.async_add_executor_job(lambda: (load_defaults(), load_cropgraph()))
+    outlook = get_outlook(hass)
+    frost = (outlook.climate.get("frost") if outlook else None) or None
+    key = repr(frost)
+    if cache.get("key") != key:
+        cache["table"] = full_table(*cache["sources"], frost)
+        cache["key"] = key
+    return cache["table"]
 
 
 def get_outlook(hass: HomeAssistant) -> Outlook | None:
@@ -244,14 +251,22 @@ class Outlook:
             traits = crop_traits(planting.species, table, list(self.store.data.crops.values())) or {}
             started = max(filter(None, [planting.sown_on, planting.planted_on]), default=None)
             young = bool(started) and date.fromisoformat(started) + timedelta(days=YOUNG_DAYS) > today
-            risks.append(PlantRisk(planting.id, traits.get("hardiness_c"), traits.get("heat_max_c"), young))
+            risks.append(
+                PlantRisk(
+                    planting.id,
+                    traits.get("hardiness_c"),
+                    traits.get("heat_max_c"),
+                    young,
+                    bool(traits.get("warm")),
+                )
+            )
         return risks
 
     async def _async_evaluate(self) -> None:
         """Alerts and per-activity advice from the forecast already fetched."""
         risks = await self.async_plant_risks()
         self.alerts = alerts(self.forecast, risks, self.thresholds)
-        tender = {r.id for r in risks if r.hardiness_c is not None and r.hardiness_c > 0}
+        tender = {r.id for r in risks if r.warm or (r.hardiness_c is not None and r.hardiness_c > 0)}
         self.advice = {}
         for task in self.store.data.tasks.values():
             if task.done_on:

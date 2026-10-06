@@ -1140,6 +1140,18 @@
           "name": "Raccolta",
           "description": "Mesi di raccolta."
         },
+        "pruning": {
+          "name": "Potatura",
+          "description": "Mesi di potatura."
+        },
+        "fertilizing": {
+          "name": "Concimazione",
+          "description": "Mesi di concimazione."
+        },
+        "end": {
+          "name": "Fine coltura",
+          "description": "Mesi in cui di solito la coltura finisce (annuali)."
+        },
         "spacing_cm": {
           "name": "Distanza",
           "description": "Distanza tra le piante."

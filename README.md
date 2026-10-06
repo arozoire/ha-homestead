@@ -77,6 +77,15 @@ Ogni giorno, all'ora scelta, arriva una notifica per ogni attività prevista ogg
 
 Entità create: `sensor.ha_homestead_plantings`, `sensor.ha_homestead_expenses_this_year`, `sensor.ha_homestead_tools_needing_service`, `todo.ha_homestead_garden_tasks`, `calendar.ha_homestead_garden` (tutte sotto un solo dispositivo "HA Homestead").
 
+## Fonti dei dati
+
+| Dati | Fonte | Licenza |
+|---|---|---|
+| Specie (nomi, famiglia, immagini) | [Wikidata](https://www.wikidata.org), [GBIF](https://www.gbif.org), [Wikimedia Commons](https://commons.wikimedia.org) | CC0 / CC-BY / licenze dei file Commons |
+| Calendario colturale, consociazioni, famiglie | [CropGraph](https://github.com/Cropgraph/cropgraph) (USDA Cooperative Extension e altri), estratto in `data/cropgraph.json` con `scripts/build_cropgraph.mjs` | codice MIT, dati **CC-BY-4.0** |
+| Tabella colturale di base (~85 specie) | valori indicativi per clima temperato, scritti per questo progetto | MIT |
+| Meteo | i tuoi sensori, l'entità meteo di HA, [Open-Meteo](https://open-meteo.com) | CC-BY-4.0 (Open-Meteo) |
+
 ## Installazione (HACS, repository personalizzato)
 
 1. HACS → menu ⋮ → *Repository personalizzati* → `https://github.com/arozoire/ha-homestead`, categoria *Integrazione*.

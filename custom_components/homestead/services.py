@@ -197,6 +197,9 @@ SET_CROP_PROFILE_SCHEMA = vol.Schema(
         vol.Optional("plant_out"): _months,
         vol.Optional("flowering"): _months,
         vol.Optional("harvest"): _months,
+        vol.Optional("pruning"): _months,
+        vol.Optional("fertilizing"): _months,
+        vol.Optional("end"): _months,
         vol.Optional("spacing_cm"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=5000))),
         vol.Optional("heat_max_c"): vol.Any(None, vol.All(vol.Coerce(float), vol.Range(min=10, max=50))),
         vol.Optional("notes"): _opt_str,
@@ -594,7 +597,17 @@ def async_register_services(hass: HomeAssistant) -> None:
         """Replace the user's crop data for a species (one record per species)."""
         store = _store(hass)
         args: dict[str, Any] = dict(call.data)
-        for key in ("exposure", "sow_indoor", "sow_outdoor", "plant_out", "flowering", "harvest"):
+        for key in (
+            "exposure",
+            "sow_indoor",
+            "sow_outdoor",
+            "plant_out",
+            "flowering",
+            "harvest",
+            "pruning",
+            "fertilizing",
+            "end",
+        ):
             args[key] = sorted(set(args.get(key) or []))
         key = normalize(args["species"])
         old = next((c for c in store.data.crops.values() if normalize(c.species) == key), None)

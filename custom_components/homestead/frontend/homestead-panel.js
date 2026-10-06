@@ -143,6 +143,16 @@ const TEXT = {
     incomesTotal: "Income",
     balance: "Balance",
     cropBox: "🌿 Crop data",
+    pruning: "Pruning",
+    fertilizing: "Fertilizing",
+    end: "End of crop",
+    family: "Family",
+    goodWith: "🤝 Good with",
+    badWith: "🚫 Keep away from",
+    inGarden: "in your garden",
+    cropGraph: "CropGraph data (CC-BY-4.0), dates set on your frosts: last ~{spring}, first ~{fall}",
+    cropGraphFallback: "CropGraph data (CC-BY-4.0), dates for typical frosts (mid April, end of October) until your history is known",
+    heat_max_c: "Heat limit (°C)",
     cropDefault: "indicative values, temperate climate",
     cropMine: "your values",
     cropMissing: "No crop data for this species.",
@@ -475,6 +485,16 @@ const TEXT = {
     incomesTotal: "Ricavi",
     balance: "Saldo",
     cropBox: "🌿 Scheda colturale",
+    pruning: "Potatura",
+    fertilizing: "Concimazione",
+    end: "Fine coltura",
+    family: "Famiglia",
+    goodWith: "🤝 Sta bene con",
+    badWith: "🚫 Tenere lontano da",
+    inGarden: "nel tuo giardino",
+    cropGraph: "Dati CropGraph (CC-BY-4.0), date sulle tue gelate: ultima ~{spring}, prima ~{fall}",
+    cropGraphFallback: "Dati CropGraph (CC-BY-4.0), date per gelate tipiche (metà aprile, fine ottobre) finché non c'è il tuo storico",
+    heat_max_c: "Limite di caldo (°C)",
     cropDefault: "valori indicativi, clima temperato",
     cropMine: "valori tuoi",
     cropMissing: "Nessun dato colturale per questa specie.",
@@ -720,8 +740,17 @@ const SEED_VIABILITY = {
   Malvaceae: 3,
 };
 const ROTATION_YEARS = 3;
-const CROP_MONTHS = ["sow_indoor", "sow_outdoor", "plant_out", "flowering", "harvest"];
-const CROP_COLOR = { sow_indoor: "#8d6e63", sow_outdoor: "#7cb342", plant_out: "#26a69a", flowering: "#ec407a", harvest: "#ffa000" };
+const CROP_MONTHS = ["sow_indoor", "sow_outdoor", "plant_out", "flowering", "harvest", "pruning", "fertilizing", "end"];
+const CROP_COLOR = {
+  sow_indoor: "#8d6e63",
+  sow_outdoor: "#7cb342",
+  plant_out: "#26a69a",
+  flowering: "#ec407a",
+  harvest: "#ffa000",
+  pruning: "#5c6bc0",
+  fertilizing: "#9e9d24",
+  end: "#757575",
+};
 // Plant type proposed for a new planting from the kind of its zone.
 const ZONE_PLANT_TYPE = { orchard: "fruit_tree", vegetable_garden: "vegetable", greenhouse: "vegetable", flower_bed: "flower" };
 // Start of a planting, shown in the diary from its own dates (not stored as events).
@@ -3507,9 +3536,12 @@ class HomesteadPanel extends HTMLElement {
     const key = this._cropKey(species);
     if (!key) return null;
     const mine = this._data.crops.find((c) => this._cropKey(c.species) === key);
-    if (mine) return { ...mine, source: "user" };
     const builtIn = this._cropDefaults[key] || this._cropDefaults[key.split(" ")[0]];
-    return builtIn ? { ...builtIn, source: "default" } : null;
+    if (mine) {
+      const { family, good, bad, name_en, warm } = builtIn || {};
+      return { family, good, bad, name_en, warm, ...mine, source: "user" };
+    }
+    return builtIn ? { ...builtIn, source: builtIn.source === "cropgraph" ? "cropgraph" : "default" } : null;
   }
 
   _inMonth(crop, keys, month = new Date().getMonth() + 1) {
@@ -3568,11 +3600,44 @@ class HomesteadPanel extends HTMLElement {
         ? [
             facts.length ? h("div", {}, facts.join(" · ")) : null,
             this._cropMonths(crop),
+            crop.family ? h("div", { className: "sub" }, `${this.t("family")}: ${crop.family}`) : null,
+            this._companionsLine("goodWith", crop.good),
+            this._companionsLine("badWith", crop.bad),
             crop.notes ? h("div", { className: "sub" }, crop.notes) : null,
-            h("div", { className: "sub" }, this.t(crop.source === "user" ? "cropMine" : "cropDefault")),
+            h("div", { className: "sub" }, this._cropSource(crop)),
           ]
         : h("p", { className: "hint" }, this.t("cropMissing")),
     );
+  }
+
+  _cropSource(crop) {
+    if (crop.source === "user") return this.t("cropMine");
+    if (crop.source !== "cropgraph") return this.t("cropDefault");
+    const frost = this._outlook?.climate?.frost;
+    if (!frost?.last_spring || !frost?.first_fall) return this.t("cropGraphFallback");
+    const day = (mmdd) => this._date(`2025-${mmdd}`, false);
+    return this.t("cropGraph", { spring: day(frost.last_spring), fall: day(frost.first_fall) });
+  }
+
+  /** Name of a species key in the user's words: their plantings or imported species first. */
+  _speciesLabel(key) {
+    const planting = this._data.plantings.find((p) => this._cropKey(p.species) === key);
+    const taxon = this._data.taxa.find((t) => this._cropKey(t.scientific_name) === key);
+    const common = taxon?.common_names?.[this._lang()];
+    if (common) return common;
+    if (planting) return planting.name;
+    const entry = this._cropDefaults[key];
+    return entry?.name_en ? `${entry.name_en} (${entry.species})` : key;
+  }
+
+  /** Companions: those already in the garden first (✓), then a few others. */
+  _companionsLine(label, keys) {
+    if (!keys?.length) return null;
+    const here = new Set(this._data.plantings.filter((p) => p.status === "active").map((p) => this._cropKey(p.species)));
+    const mine = keys.filter((k) => here.has(k));
+    const others = keys.filter((k) => !here.has(k)).slice(0, Math.max(0, 6 - mine.length));
+    const names = [...mine.map((k) => `✓ ${this._speciesLabel(k)}`), ...others.map((k) => this._speciesLabel(k))];
+    return h("div", { className: "sub", style: "white-space:normal" }, `${this.t(label)}: ${names.join(", ")}${keys.length > names.length ? " …" : ""}`);
   }
 
   _openCrop(species, crop, back) {
@@ -3643,6 +3708,7 @@ class HomesteadPanel extends HTMLElement {
           { className: "row" },
           this._field(f, "hardiness_c", { type: "number", min: -60, max: 30, step: 1 }),
           this._field(f, "spacing_cm", { type: "number", min: 1, max: 5000, step: 1 }),
+          this._field(f, "heat_max_c", { type: "number", min: 10, max: 50, step: 1 }),
         ),
         grid,
         this._notes(f),
@@ -3662,6 +3728,7 @@ class HomesteadPanel extends HTMLElement {
       exposure: ["sun", "partial", "shade"].filter((e) => v[`ex_${e}`] === "on"),
       hardiness_c: v.hardiness_c === "" ? null : Number(v.hardiness_c),
       spacing_cm: v.spacing_cm ? Number(v.spacing_cm) : null,
+      heat_max_c: v.heat_max_c ? Number(v.heat_max_c) : null,
       notes: v.notes?.trim() || null,
       ...Object.fromEntries(CROP_MONTHS.map((key) => [key, [...this._cropMonthsState[key]].sort((a, b) => a - b)])),
     };
@@ -4036,7 +4103,7 @@ class HomesteadPanel extends HTMLElement {
   }
 
   _family(p) {
-    return this._taxon(p.taxon_id)?.family || null;
+    return this._taxon(p.taxon_id)?.family || this._crop(p.species)?.family || null;
   }
 
   /** Earlier crops of the same family (or species) in the zone during the last years, as a tip. */
@@ -4044,7 +4111,7 @@ class HomesteadPanel extends HTMLElement {
     const zone = this._zone(zone_id);
     if (!zone || !species?.trim()) return null;
     if (!["vegetable_garden", "greenhouse"].includes(zone.kind) && plant_type !== "vegetable") return null;
-    const family = this._taxon(taxon_id)?.family;
+    const family = this._taxon(taxon_id)?.family || this._crop(species)?.family;
     const name = species.trim().toLowerCase();
     const year = new Date().getFullYear();
     const same = this._data.plantings.filter((p) => {

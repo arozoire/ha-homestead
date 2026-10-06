@@ -360,6 +360,9 @@ class CropProfile(_Record):
     harvest: list[int] = field(default_factory=list)
     spacing_cm: int | None = None
     heat_max_c: float | None = None  # cool-season crops suffer above it
+    pruning: list[int] = field(default_factory=list)
+    fertilizing: list[int] = field(default_factory=list)
+    end: list[int] = field(default_factory=list)  # end of the crop (annuals)
     notes: str | None = None
 
 

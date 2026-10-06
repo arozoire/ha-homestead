@@ -31,7 +31,10 @@
     9,
     10
    ],
-   "spacing_cm": 50
+   "spacing_cm": 50,
+   "end": [
+    10
+   ]
   },
   "Capsicum annuum": {
    "exposure": [
@@ -57,7 +60,11 @@
     9,
     10
    ],
-   "spacing_cm": 40
+   "spacing_cm": 40,
+   "end": [
+    10,
+    11
+   ]
   },
   "Solanum melongena": {
    "exposure": [
@@ -82,7 +89,10 @@
     8,
     9
    ],
-   "spacing_cm": 50
+   "spacing_cm": 50,
+   "end": [
+    10
+   ]
   },
   "Solanum tuberosum": {
    "exposure": [
@@ -103,7 +113,11 @@
     8,
     9
    ],
-   "spacing_cm": 35
+   "spacing_cm": 35,
+   "end": [
+    9,
+    10
+   ]
   },
   "Cucurbita pepo": {
    "exposure": [
@@ -133,7 +147,11 @@
     8,
     9
    ],
-   "spacing_cm": 100
+   "spacing_cm": 100,
+   "end": [
+    9,
+    10
+   ]
   },
   "Cucurbita maxima": {
    "exposure": [
@@ -213,7 +231,10 @@
     8,
     9
    ],
-   "spacing_cm": 50
+   "spacing_cm": 50,
+   "end": [
+    9
+   ]
   },
   "Cucumis melo": {
    "exposure": [
@@ -238,7 +259,10 @@
     7,
     8
    ],
-   "spacing_cm": 100
+   "spacing_cm": 100,
+   "end": [
+    9
+   ]
   },
   "Citrullus lanatus": {
    "exposure": [
@@ -262,7 +286,10 @@
     7,
     8
    ],
-   "spacing_cm": 150
+   "spacing_cm": 150,
+   "end": [
+    9
+   ]
   },
   "Phaseolus vulgaris": {
    "exposure": [
@@ -286,7 +313,11 @@
     8,
     9
    ],
-   "spacing_cm": 15
+   "spacing_cm": 15,
+   "end": [
+    9,
+    10
+   ]
   },
   "Phaseolus coccineus": {
    "exposure": [
@@ -329,7 +360,11 @@
     6
    ],
    "spacing_cm": 5,
-   "heat_max_c": 30
+   "heat_max_c": 30,
+   "end": [
+    6,
+    7
+   ]
   },
   "Vicia faba": {
    "exposure": [
@@ -351,7 +386,11 @@
     6
    ],
    "spacing_cm": 20,
-   "heat_max_c": 30
+   "heat_max_c": 30,
+   "end": [
+    6,
+    7
+   ]
   },
   "Cicer arietinum": {
    "exposure": [
@@ -789,7 +828,11 @@
     8,
     9
    ],
-   "spacing_cm": 30
+   "spacing_cm": 30,
+   "end": [
+    9,
+    10
+   ]
   },
   "Asparagus officinalis": {
    "exposure": [
@@ -804,7 +847,11 @@
     4,
     5
    ],
-   "spacing_cm": 40
+   "spacing_cm": 40,
+   "fertilizing": [
+    3,
+    10
+   ]
   },
   "Cynara cardunculus": {
    "exposure": [
@@ -843,7 +890,11 @@
     5,
     6
    ],
-   "spacing_cm": 30
+   "spacing_cm": 30,
+   "fertilizing": [
+    3,
+    9
+   ]
   },
   "Ocimum basilicum": {
    "exposure": [
@@ -872,7 +923,10 @@
     8,
     9
    ],
-   "spacing_cm": 25
+   "spacing_cm": 25,
+   "end": [
+    10
+   ]
   },
   "Petroselinum crispum": {
    "exposure": [
@@ -917,7 +971,11 @@
     9,
     10
    ],
-   "spacing_cm": 80
+   "spacing_cm": 80,
+   "pruning": [
+    5,
+    6
+   ]
   },
   "Salvia officinalis": {
    "exposure": [
@@ -934,7 +992,11 @@
     5,
     6
    ],
-   "spacing_cm": 50
+   "spacing_cm": 50,
+   "pruning": [
+    3,
+    4
+   ]
   },
   "Thymus vulgaris": {
    "exposure": [
@@ -950,7 +1012,11 @@
     6,
     7
    ],
-   "spacing_cm": 30
+   "spacing_cm": 30,
+   "pruning": [
+    6,
+    7
+   ]
   },
   "Origanum vulgare": {
    "exposure": [
@@ -985,7 +1051,11 @@
     7,
     8
    ],
-   "spacing_cm": 60
+   "spacing_cm": 60,
+   "pruning": [
+    8,
+    9
+   ]
   },
   "Mentha spicata": {
    "exposure": [
@@ -1027,7 +1097,11 @@
     3,
     4
    ],
-   "spacing_cm": 150
+   "spacing_cm": 150,
+   "pruning": [
+    3,
+    4
+   ]
   },
   "Malus domestica": {
    "exposure": [
@@ -1050,7 +1124,17 @@
     9,
     10
    ],
-   "spacing_cm": 400
+   "spacing_cm": 400,
+   "pruning": [
+    1,
+    2,
+    3
+   ],
+   "fertilizing": [
+    2,
+    3,
+    10
+   ]
   },
   "Pyrus communis": {
    "exposure": [
@@ -1074,7 +1158,17 @@
     9,
     10
    ],
-   "spacing_cm": 400
+   "spacing_cm": 400,
+   "pruning": [
+    1,
+    2,
+    3
+   ],
+   "fertilizing": [
+    2,
+    3,
+    10
+   ]
   },
   "Prunus persica": {
    "exposure": [
@@ -1097,7 +1191,16 @@
     8,
     9
    ],
-   "spacing_cm": 400
+   "spacing_cm": 400,
+   "pruning": [
+    2,
+    3
+   ],
+   "fertilizing": [
+    2,
+    3,
+    10
+   ]
   },
   "Prunus avium": {
    "exposure": [
@@ -1119,7 +1222,16 @@
     5,
     6
    ],
-   "spacing_cm": 500
+   "spacing_cm": 500,
+   "pruning": [
+    7,
+    8
+   ],
+   "fertilizing": [
+    2,
+    3,
+    10
+   ]
   },
   "Prunus cerasus": {
    "exposure": [
@@ -1141,7 +1253,16 @@
     6,
     7
    ],
-   "spacing_cm": 400
+   "spacing_cm": 400,
+   "pruning": [
+    7,
+    8
+   ],
+   "fertilizing": [
+    2,
+    3,
+    10
+   ]
   },
   "Prunus domestica": {
    "exposure": [
@@ -1164,7 +1285,16 @@
     8,
     9
    ],
-   "spacing_cm": 400
+   "spacing_cm": 400,
+   "pruning": [
+    7,
+    8
+   ],
+   "fertilizing": [
+    2,
+    3,
+    10
+   ]
   },
   "Prunus armeniaca": {
    "exposure": [
@@ -1186,7 +1316,16 @@
     6,
     7
    ],
-   "spacing_cm": 400
+   "spacing_cm": 400,
+   "pruning": [
+    7,
+    8
+   ],
+   "fertilizing": [
+    2,
+    3,
+    10
+   ]
   },
   "Prunus dulcis": {
    "exposure": [
@@ -1208,7 +1347,16 @@
     8,
     9
    ],
-   "spacing_cm": 500
+   "spacing_cm": 500,
+   "pruning": [
+    2,
+    3
+   ],
+   "fertilizing": [
+    2,
+    3,
+    10
+   ]
   },
   "Cydonia oblonga": {
    "exposure": [
@@ -1230,7 +1378,16 @@
     9,
     10
    ],
-   "spacing_cm": 400
+   "spacing_cm": 400,
+   "pruning": [
+    1,
+    2
+   ],
+   "fertilizing": [
+    2,
+    3,
+    10
+   ]
   },
   "Ficus carica": {
    "exposure": [
@@ -1249,7 +1406,16 @@
     8,
     9
    ],
-   "spacing_cm": 400
+   "spacing_cm": 400,
+   "pruning": [
+    2,
+    3
+   ],
+   "fertilizing": [
+    2,
+    3,
+    10
+   ]
   },
   "Olea europaea": {
    "exposure": [
@@ -1270,7 +1436,16 @@
     11,
     12
    ],
-   "spacing_cm": 500
+   "spacing_cm": 500,
+   "pruning": [
+    3,
+    4
+   ],
+   "fertilizing": [
+    2,
+    3,
+    10
+   ]
   },
   "Vitis vinifera": {
    "exposure": [
@@ -1293,7 +1468,16 @@
     9,
     10
    ],
-   "spacing_cm": 150
+   "spacing_cm": 150,
+   "pruning": [
+    1,
+    2
+   ],
+   "fertilizing": [
+    2,
+    3,
+    10
+   ]
   },
   "Citrus × limon": {
    "exposure": [
@@ -1324,7 +1508,16 @@
     11,
     12
    ],
-   "spacing_cm": 300
+   "spacing_cm": 300,
+   "pruning": [
+    3,
+    4
+   ],
+   "fertilizing": [
+    3,
+    5,
+    7
+   ]
   },
   "Juglans regia": {
    "exposure": [
@@ -1346,7 +1539,16 @@
     9,
     10
    ],
-   "spacing_cm": 1000
+   "spacing_cm": 1000,
+   "pruning": [
+    8,
+    9
+   ],
+   "fertilizing": [
+    2,
+    3,
+    10
+   ]
   },
   "Corylus avellana": {
    "exposure": [
@@ -1370,7 +1572,16 @@
     8,
     9
    ],
-   "spacing_cm": 400
+   "spacing_cm": 400,
+   "pruning": [
+    1,
+    2
+   ],
+   "fertilizing": [
+    2,
+    3,
+    10
+   ]
   },
   "Castanea sativa": {
    "exposure": [
@@ -1394,7 +1605,16 @@
     10,
     11
    ],
-   "spacing_cm": 1000
+   "spacing_cm": 1000,
+   "pruning": [
+    1,
+    2
+   ],
+   "fertilizing": [
+    2,
+    3,
+    10
+   ]
   },
   "Actinidia deliciosa": {
    "exposure": [
@@ -1416,7 +1636,17 @@
     10,
     11
    ],
-   "spacing_cm": 400
+   "spacing_cm": 400,
+   "pruning": [
+    1,
+    2,
+    7
+   ],
+   "fertilizing": [
+    2,
+    3,
+    10
+   ]
   },
   "Diospyros kaki": {
    "exposure": [
@@ -1439,7 +1669,16 @@
     11,
     12
    ],
-   "spacing_cm": 500
+   "spacing_cm": 500,
+   "pruning": [
+    1,
+    2
+   ],
+   "fertilizing": [
+    2,
+    3,
+    10
+   ]
   },
   "Punica granatum": {
    "exposure": [
@@ -1460,7 +1699,16 @@
     9,
     10
    ],
-   "spacing_cm": 300
+   "spacing_cm": 300,
+   "pruning": [
+    2,
+    3
+   ],
+   "fertilizing": [
+    2,
+    3,
+    10
+   ]
   },
   "Rubus idaeus": {
    "exposure": [
@@ -1485,7 +1733,14 @@
     8,
     9
    ],
-   "spacing_cm": 50
+   "spacing_cm": 50,
+   "pruning": [
+    2,
+    8
+   ],
+   "fertilizing": [
+    3
+   ]
   },
   "Rubus fruticosus": {
    "exposure": [
@@ -1510,7 +1765,11 @@
     8,
     9
    ],
-   "spacing_cm": 150
+   "spacing_cm": 150,
+   "pruning": [
+    2,
+    9
+   ]
   },
   "Ribes rubrum": {
    "exposure": [
@@ -1531,7 +1790,14 @@
     6,
     7
    ],
-   "spacing_cm": 120
+   "spacing_cm": 120,
+   "pruning": [
+    1,
+    2
+   ],
+   "fertilizing": [
+    3
+   ]
   },
   "Vaccinium corymbosum": {
    "exposure": [
@@ -1554,7 +1820,15 @@
     7,
     8
    ],
-   "spacing_cm": 150
+   "spacing_cm": 150,
+   "pruning": [
+    2,
+    3
+   ],
+   "fertilizing": [
+    3,
+    5
+   ]
   },
   "Quercus robur": {
    "exposure": [
@@ -1742,7 +2016,15 @@
     9,
     10
    ],
-   "spacing_cm": 80
+   "spacing_cm": 80,
+   "pruning": [
+    2,
+    3
+   ],
+   "fertilizing": [
+    3,
+    6
+   ]
   },
   "Hydrangea": {
    "exposure": [
@@ -1761,7 +2043,10 @@
     8,
     9
    ],
-   "spacing_cm": 120
+   "spacing_cm": 120,
+   "pruning": [
+    3
+   ]
   },
   "Tulipa": {
    "exposure": [

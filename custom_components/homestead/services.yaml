@@ -1060,6 +1060,24 @@ set_crop_profile:
           multiple: true
           translation_key: month
           options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+    pruning:
+      selector:
+        select:
+          multiple: true
+          translation_key: month
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+    fertilizing:
+      selector:
+        select:
+          multiple: true
+          translation_key: month
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+    end:
+      selector:
+        select:
+          multiple: true
+          translation_key: month
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
     spacing_cm:
       selector:
         number:
