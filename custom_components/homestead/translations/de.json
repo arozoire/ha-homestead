@@ -1,0 +1,1352 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "HA Homestead",
+        "description": "Verwalte Gemüsegarten, Obstgarten und Garten. Standort und Währung kommen aus den Einstellungen von Home Assistant."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "HA Homestead ist bereits eingerichtet."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Wetter für das Tagebuch",
+        "description": "Jeder Tagebucheintrag speichert das Wetter der Woche davor (und der 3 Tage danach bei Behandlungen und Aussaaten). Wähle deine Sensoren; was fehlt, kommt von Open-Meteo (kostenlos, ohne Konto). Erinnerungen: die für heute geplanten Aufgaben werden zur gewählten Uhrzeit an die gewählten Telefone gesendet; ein Tipp darauf öffnet das ausgefüllte Tagebuchformular. Warnungen: Frost unter der Winterhärte jeder Pflanze, Hitzewelle (heiße Tage und warme Nächte mehrere Tage hintereinander, wenn sich die Pflanzen nachts nicht mehr erholen), extreme Hitze. Die Vorhersage kommt von der gewählten Wetter-Entität, sonst von Open-Meteo.",
+        "data": {
+          "temperature_sensor": "Außentemperatur",
+          "humidity_sensor": "Außenluftfeuchte",
+          "rain_sensor": "Regen (Summe, mm)",
+          "soil_moisture_sensor": "Bodenfeuchte",
+          "open_meteo": "Open-Meteo für fehlende Daten nutzen",
+          "notify_services": "Erinnerungen senden an",
+          "notify_time": "Uhrzeit der Erinnerungen",
+          "weather_entity": "Wettervorhersage (Wetter-Entität von HA)",
+          "alert_notify": "Frost- und Hitzewarnungen auf den Telefonen",
+          "heat_max": "Hitzewelle: Höchstwert ab",
+          "heat_night": "Hitzewelle: nächtliches Minimum ab",
+          "heat_days": "Hitzewelle: Tage hintereinander",
+          "heat_extreme": "Extreme Hitze: Höchstwert ab (auch nur ein Tag)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "plantings": {
+        "name": "Pflanzen"
+      },
+      "expenses_year": {
+        "name": "Ausgaben des Jahres"
+      },
+      "tools_needing_service": {
+        "name": "Geräte mit fälliger Wartung"
+      },
+      "weather_alerts": {
+        "name": "Wetterwarnungen"
+      }
+    },
+    "todo": {
+      "tasks": {
+        "name": "Gartenaufgaben"
+      }
+    },
+    "calendar": {
+      "garden": {
+        "name": "Garten"
+      }
+    }
+  },
+  "exceptions": {
+    "not_loaded": {
+      "message": "HA Homestead ist nicht geladen."
+    },
+    "unknown_reference": {
+      "message": "Unbekannt ({field}): {value}."
+    },
+    "zone_cycle": {
+      "message": "Ein Bereich kann nicht in sich selbst oder in einem seiner Unterbereiche liegen."
+    },
+    "incomplete_position": {
+      "message": "Breiten- und Längengrad müssen zusammen angegeben werden."
+    },
+    "species_required": {
+      "message": "Gib eine Art an oder verknüpfe eine importierte Art."
+    },
+    "sources_unavailable": {
+      "message": "GBIF und Wikidata antworten nicht: später erneut versuchen."
+    }
+  },
+  "selector": {
+    "planting_kind": {
+      "options": {
+        "single": "Einzelpflanze",
+        "group": "Gruppe (Reihe, Beet)"
+      }
+    },
+    "plant_type": {
+      "options": {
+        "tree": "Baum",
+        "fruit_tree": "Obstbaum",
+        "shrub": "Strauch",
+        "vine": "Kletterpflanze, Rebe",
+        "vegetable": "Gemüse",
+        "herb": "Kräuter",
+        "flower": "Blume",
+        "houseplant": "Zimmerpflanze",
+        "other": "Sonstiges"
+      }
+    },
+    "initial_form": {
+      "options": {
+        "seed": "Samen",
+        "cutting": "Steckling",
+        "bulb": "Zwiebel",
+        "bare_root": "Wurzelnackt",
+        "potted": "Im Topf",
+        "one_year": "Einjährige Veredlung",
+        "two_years": "Zweijähriger Baum",
+        "other": "Sonstiges"
+      }
+    },
+    "expense_category": {
+      "options": {
+        "plants": "Pflanzen",
+        "seeds": "Saatgut",
+        "tools": "Geräte",
+        "fertilizers": "Dünger",
+        "treatments": "Pflanzenschutz",
+        "water": "Wasser",
+        "services": "Dienstleistungen und Arbeit",
+        "sales": "Verkäufe",
+        "animals": "Tiere (Futter, Pflege)",
+        "other": "Sonstiges"
+      }
+    },
+    "tool_power": {
+      "options": {
+        "manual": "Hand",
+        "battery": "Akku",
+        "petrol": "Benzin",
+        "electric": "Elektrisch"
+      }
+    },
+    "tool_status": {
+      "options": {
+        "ok": "OK",
+        "needs_service": "Wartung nötig",
+        "broken": "Defekt"
+      }
+    },
+    "planting_status": {
+      "options": {
+        "active": "Aktiv",
+        "dead": "Eingegangen",
+        "removed": "Entfernt"
+      }
+    },
+    "zone_kind": {
+      "options": {
+        "vegetable_garden": "Gemüsegarten",
+        "orchard": "Obstgarten",
+        "flower_bed": "Blumenbeet",
+        "greenhouse": "Gewächshaus",
+        "pots": "Töpfe",
+        "lawn": "Rasen",
+        "woodland": "Wald",
+        "compost": "Komposter",
+        "coop": "Hühnerstall",
+        "nursery": "Anzucht",
+        "indoor": "Drinnen (ein Raum)",
+        "other": "Sonstiges"
+      }
+    },
+    "planting_origin": {
+      "options": {
+        "existing": "Schon da",
+        "planted": "Von mir gepflanzt",
+        "sown": "Von mir gesät"
+      }
+    },
+    "event_kind": {
+      "options": {
+        "pruning": "Schnitt",
+        "fertilizing": "Düngung",
+        "watering": "Gießen",
+        "treatment": "Behandlung",
+        "sowing": "Aussaat",
+        "harvest": "Ernte",
+        "grafting": "Veredelung",
+        "problem": "Problem",
+        "note": "Notiz",
+        "removal": "Ende der Pflanze",
+        "review": "Saisonbilanz",
+        "tillage": "Bodenbearbeitung (Hacken, Umgraben)",
+        "weeding": "Jäten",
+        "mulching": "Mulchen",
+        "mowing": "Mähen",
+        "clearing": "Waldpflege",
+        "wood_cutting": "Holzeinschlag",
+        "brushwood": "Äste, Reisig",
+        "foraging": "Wildsammlung (Pilze, Kastanien…)",
+        "compost_turn": "Kompost umsetzen",
+        "compost_harvest": "Kompost ernten",
+        "eggs": "Eier",
+        "flock_in": "Hühner dazu",
+        "flock_out": "Hühner weg",
+        "animal_care": "Futter und Pflege",
+        "coop_cleaning": "Stallreinigung",
+        "repotting": "Umtopfen",
+        "wood_burned": "Verheiztes Holz (Winter)"
+      }
+    },
+    "harvest_unit": {
+      "options": {
+        "kg": "kg",
+        "pieces": "Stück",
+        "l": "Liter",
+        "q": "Doppelzentner (100 kg)",
+        "stere": "Ster",
+        "m3": "Kubikmeter"
+      }
+    },
+    "abundance": {
+      "options": {
+        "poor": "Gering",
+        "normal": "Normal",
+        "abundant": "Reichlich"
+      }
+    },
+    "event_reason": {
+      "options": {
+        "finished": "Beendet (Saison vorbei)",
+        "died": "Eingegangen",
+        "removed": "Entfernt (umgesetzt, verschenkt…)",
+        "predator": "Raubtier (Fuchs…)",
+        "illness": "Krankheit",
+        "age": "Alter",
+        "sold": "Verkauft oder verschenkt",
+        "slaughtered": "Geschlachtet",
+        "other": "Sonstiges"
+      }
+    },
+    "death_cause": {
+      "options": {
+        "frost": "Frost",
+        "drought": "Trockenheit",
+        "disease": "Krankheit",
+        "pests": "Schädlinge",
+        "animals": "Tiere",
+        "unknown": "Unbekannt"
+      }
+    },
+    "month": {
+      "options": {
+        "1": "Januar",
+        "2": "Februar",
+        "3": "März",
+        "4": "April",
+        "5": "Mai",
+        "6": "Juni",
+        "7": "Juli",
+        "8": "August",
+        "9": "September",
+        "10": "Oktober",
+        "11": "November",
+        "12": "Dezember"
+      }
+    },
+    "exposure": {
+      "options": {
+        "sun": "Volle Sonne",
+        "partial": "Halbschatten",
+        "shade": "Schatten"
+      }
+    },
+    "alert_notify": {
+      "options": {
+        "off": "Aus (nur im Panel)",
+        "tasks": "Nur mit einer geplanten Aufgabe an diesen Tagen",
+        "always": "Immer"
+      }
+    }
+  },
+  "services": {
+    "add_zone": {
+      "name": "Bereich hinzufügen",
+      "description": "Fügt einen Gartenbereich hinzu (Beet, Obstgarten, Gewächshaus). Bereiche sind intern und legen nie Home-Assistant-Bereiche an.",
+      "fields": {
+        "name": {
+          "name": "Name",
+          "description": "Name des Bereichs."
+        },
+        "parent_id": {
+          "name": "Übergeordneter Bereich",
+          "description": "ID des übergeordneten Bereichs."
+        },
+        "kind": {
+          "name": "Art",
+          "description": "Art des Bereichs."
+        },
+        "area_id": {
+          "name": "Home-Assistant-Bereich",
+          "description": "Optionale Verknüpfung mit einem bestehenden Bereich."
+        },
+        "geometry": {
+          "name": "Geometrie",
+          "description": "GeoJSON-Polygon (Koordinaten Länge, Breite). Die Fläche wird berechnet."
+        },
+        "species": {
+          "name": "Hauptbaumarten",
+          "description": "Hauptarten des Bereichs (z. B. eines Waldes): Namen oder Objekte mit name und taxon_id."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        }
+      }
+    },
+    "update_zone": {
+      "name": "Bereich ändern",
+      "description": "Ändert die angegebenen Felder eines Bereichs (auch das Polygon).",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID des Bereichs."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Name des Bereichs."
+        },
+        "parent_id": {
+          "name": "Übergeordneter Bereich",
+          "description": "ID des übergeordneten Bereichs."
+        },
+        "kind": {
+          "name": "Art",
+          "description": "Art des Bereichs."
+        },
+        "area_id": {
+          "name": "Home-Assistant-Bereich",
+          "description": "Optionale Verknüpfung mit einem bestehenden Bereich."
+        },
+        "geometry": {
+          "name": "Geometrie",
+          "description": "GeoJSON-Polygon (Koordinaten Länge, Breite). Die Fläche wird berechnet."
+        },
+        "species": {
+          "name": "Hauptbaumarten",
+          "description": "Hauptarten des Bereichs (z. B. eines Waldes): Namen oder Objekte mit name und taxon_id."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        }
+      }
+    },
+    "delete_zone": {
+      "name": "Bereich löschen",
+      "description": "Löscht einen Bereich; Unterbereiche und Pflanzen wandern in den übergeordneten.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID des Bereichs."
+        }
+      }
+    },
+    "add_planting": {
+      "name": "Pflanze hinzufügen",
+      "description": "Fügt einen Baum, eine Pflanze oder eine Pflanzengruppe hinzu.",
+      "fields": {
+        "name": {
+          "name": "Name",
+          "description": "Dein Name für diese Pflanze."
+        },
+        "species": {
+          "name": "Art",
+          "description": "Wissenschaftlicher oder deutscher Name; optional, wenn eine importierte Art verknüpft ist."
+        },
+        "taxon_id": {
+          "name": "Importierte Art",
+          "description": "ID einer importierten Art (Dienst import_taxon); ohne Artname wird ihr wissenschaftlicher Name verwendet."
+        },
+        "variety": {
+          "name": "Sorte",
+          "description": "Sorte."
+        },
+        "plant_type": {
+          "name": "Pflanzentyp",
+          "description": "Baum, Strauch, Gemüse… (Symbol auf der Karte)."
+        },
+        "kind": {
+          "name": "Art",
+          "description": "Einzelpflanze oder Gruppe."
+        },
+        "quantity": {
+          "name": "Menge",
+          "description": "Anzahl Pflanzen (nur Gruppen)."
+        },
+        "origin": {
+          "name": "Herkunft",
+          "description": "Schon da, von dir gepflanzt oder gesät."
+        },
+        "sown_on": {
+          "name": "Gesät am",
+          "description": "Aussaatdatum; die Mondphase wird gespeichert."
+        },
+        "planted_on": {
+          "name": "Gepflanzt am",
+          "description": "Datum der Pflanzung oder des Umpflanzens."
+        },
+        "birth_year": {
+          "name": "Geschätztes Geburtsjahr",
+          "description": "Geschätztes Jahr der Aussaat oder Veredelung, für das Alter."
+        },
+        "initial_form": {
+          "name": "Pflanzform",
+          "description": "Was gepflanzt wurde."
+        },
+        "initial_height_cm": {
+          "name": "Anfangshöhe",
+          "description": "Geschätzte Höhe bei der Pflanzung."
+        },
+        "rootstock": {
+          "name": "Unterlage",
+          "description": "Für veredelte Obstbäume."
+        },
+        "supplier": {
+          "name": "Lieferant",
+          "description": "Wo gekauft."
+        },
+        "zone_id": {
+          "name": "Bereich",
+          "description": "ID des Bereichs."
+        },
+        "latitude": {
+          "name": "Breitengrad",
+          "description": "Position auf der Karte."
+        },
+        "longitude": {
+          "name": "Längengrad",
+          "description": "Position auf der Karte."
+        },
+        "price": {
+          "name": "Preis",
+          "description": "Kaufpreis; wird als Ausgabe erfasst."
+        },
+        "seed_lot_id": {
+          "name": "Saatgutposten",
+          "description": "Verwendetes Saatgut (ID eines Postens)."
+        },
+        "sown_count": {
+          "name": "Gesäte Samen",
+          "description": "Gesäte Samen oder Zellen."
+        },
+        "germinated_on": {
+          "name": "Gekeimt am",
+          "description": "Tag, an dem die ersten Keimlinge erschienen."
+        },
+        "germinated_count": {
+          "name": "Keimlinge",
+          "description": "Wie viele gekeimt sind."
+        },
+        "water_days": {
+          "name": "Gießen alle (Tage)",
+          "description": "Zimmerpflanzen: Tage zwischen zwei Gießgängen (im Winter die Hälfte länger)."
+        },
+        "fertilize_weeks": {
+          "name": "Düngen alle (Wochen)",
+          "description": "Zimmerpflanzen: von März bis September."
+        },
+        "moisture_entity": {
+          "name": "Bodenfeuchtesensor",
+          "description": "Optional: gießen, wenn der Wert unter die Schwelle fällt."
+        },
+        "moisture_min": {
+          "name": "Gießen unter (%)",
+          "description": "Standard 20 %."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        }
+      }
+    },
+    "update_planting": {
+      "name": "Pflanze ändern",
+      "description": "Ändert die angegebenen Felder einer Pflanze (auch die Position).",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID der Pflanze."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Dein Name für diese Pflanze."
+        },
+        "species": {
+          "name": "Art",
+          "description": "Wissenschaftlicher oder deutscher Name; optional, wenn eine importierte Art verknüpft ist."
+        },
+        "taxon_id": {
+          "name": "Importierte Art",
+          "description": "ID einer importierten Art (Dienst import_taxon); ohne Artname wird ihr wissenschaftlicher Name verwendet."
+        },
+        "variety": {
+          "name": "Sorte",
+          "description": "Sorte."
+        },
+        "plant_type": {
+          "name": "Pflanzentyp",
+          "description": "Baum, Strauch, Gemüse… (Symbol auf der Karte)."
+        },
+        "kind": {
+          "name": "Art",
+          "description": "Einzelpflanze oder Gruppe."
+        },
+        "quantity": {
+          "name": "Menge",
+          "description": "Anzahl Pflanzen (nur Gruppen)."
+        },
+        "origin": {
+          "name": "Herkunft",
+          "description": "Schon da, von dir gepflanzt oder gesät."
+        },
+        "sown_on": {
+          "name": "Gesät am",
+          "description": "Aussaatdatum; die Mondphase wird gespeichert."
+        },
+        "planted_on": {
+          "name": "Gepflanzt am",
+          "description": "Datum der Pflanzung oder des Umpflanzens."
+        },
+        "birth_year": {
+          "name": "Geschätztes Geburtsjahr",
+          "description": "Geschätztes Jahr der Aussaat oder Veredelung, für das Alter."
+        },
+        "initial_form": {
+          "name": "Pflanzform",
+          "description": "Was gepflanzt wurde."
+        },
+        "initial_height_cm": {
+          "name": "Anfangshöhe",
+          "description": "Geschätzte Höhe bei der Pflanzung."
+        },
+        "rootstock": {
+          "name": "Unterlage",
+          "description": "Für veredelte Obstbäume."
+        },
+        "supplier": {
+          "name": "Lieferant",
+          "description": "Wo gekauft."
+        },
+        "zone_id": {
+          "name": "Bereich",
+          "description": "ID des Bereichs."
+        },
+        "latitude": {
+          "name": "Breitengrad",
+          "description": "Position auf der Karte."
+        },
+        "longitude": {
+          "name": "Längengrad",
+          "description": "Position auf der Karte."
+        },
+        "status": {
+          "name": "Status",
+          "description": "Aktiv, eingegangen oder entfernt."
+        },
+        "seed_lot_id": {
+          "name": "Saatgutposten",
+          "description": "Verwendetes Saatgut (ID eines Postens)."
+        },
+        "sown_count": {
+          "name": "Gesäte Samen",
+          "description": "Gesäte Samen oder Zellen."
+        },
+        "germinated_on": {
+          "name": "Gekeimt am",
+          "description": "Tag, an dem die ersten Keimlinge erschienen."
+        },
+        "germinated_count": {
+          "name": "Keimlinge",
+          "description": "Wie viele gekeimt sind."
+        },
+        "water_days": {
+          "name": "Gießen alle (Tage)",
+          "description": "Zimmerpflanzen: Tage zwischen zwei Gießgängen (im Winter die Hälfte länger)."
+        },
+        "fertilize_weeks": {
+          "name": "Düngen alle (Wochen)",
+          "description": "Zimmerpflanzen: von März bis September."
+        },
+        "moisture_entity": {
+          "name": "Bodenfeuchtesensor",
+          "description": "Optional: gießen, wenn der Wert unter die Schwelle fällt."
+        },
+        "moisture_min": {
+          "name": "Gießen unter (%)",
+          "description": "Standard 20 %."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        }
+      }
+    },
+    "delete_planting": {
+      "name": "Pflanze löschen",
+      "description": "Löscht eine versehentlich angelegte Pflanze. Verknüpfte Ausgaben bleiben. Für eine eingegangene Pflanze besser den Status verwenden.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID der Pflanze."
+        }
+      }
+    },
+    "import_taxon": {
+      "name": "Art importieren",
+      "description": "Importiert eine Art aus GBIF/Wikidata (Trivialnamen, Familie, Gattung) und speichert sie lokal. Gibt ihre ID zurück; eine vorhandene wird aktualisiert.",
+      "fields": {
+        "gbif_key": {
+          "name": "GBIF-Schlüssel",
+          "description": "Nummer der Art auf gbif.org."
+        },
+        "wikidata_id": {
+          "name": "Wikidata-ID",
+          "description": "Z. B. Q18674606."
+        }
+      }
+    },
+    "add_expense": {
+      "name": "Ausgabe hinzufügen",
+      "description": "Erfasst eine Ausgabe.",
+      "fields": {
+        "amount": {
+          "name": "Betrag",
+          "description": "Ausgegebener Betrag."
+        },
+        "category": {
+          "name": "Kategorie",
+          "description": "Ausgabenkategorie."
+        },
+        "spent_on": {
+          "name": "Datum",
+          "description": "Standard: heute."
+        },
+        "supplier": {
+          "name": "Lieferant",
+          "description": "Wo gekauft."
+        },
+        "planting_id": {
+          "name": "Pflanze",
+          "description": "ID der verknüpften Pflanze."
+        },
+        "tool_id": {
+          "name": "Gerät",
+          "description": "ID des verknüpften Geräts."
+        },
+        "event_id": {
+          "name": "Tagebucheintrag",
+          "description": "ID des verknüpften Eintrags."
+        },
+        "income": {
+          "name": "Einnahme",
+          "description": "Eine Einnahme (z. B. ein Verkauf) statt einer Ausgabe."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        }
+      }
+    },
+    "add_tool": {
+      "name": "Gerät hinzufügen",
+      "description": "Fügt ein Gerät zum Bestand hinzu.",
+      "fields": {
+        "name": {
+          "name": "Name",
+          "description": "Name des Geräts."
+        },
+        "category": {
+          "name": "Kategorie",
+          "description": "Schnitt, Graben, Bewässerung…"
+        },
+        "brand": {
+          "name": "Marke",
+          "description": "Marke."
+        },
+        "model": {
+          "name": "Modell",
+          "description": "Modell."
+        },
+        "purchased_on": {
+          "name": "Gekauft am",
+          "description": "Kaufdatum."
+        },
+        "power": {
+          "name": "Antrieb",
+          "description": "Antriebsart."
+        },
+        "status": {
+          "name": "Status",
+          "description": "Aktueller Zustand."
+        },
+        "next_service_on": {
+          "name": "Nächste Wartung",
+          "description": "Nächstes Schärfen oder nächste Wartung."
+        },
+        "service_months": {
+          "name": "Wartung alle (Monate)",
+          "description": "Grober Wartungsplan für Motoren: nach einer Wartung folgt die nächste so viele Monate später."
+        },
+        "price": {
+          "name": "Preis",
+          "description": "Kaufpreis; wird als Ausgabe erfasst."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        }
+      }
+    },
+    "update_expense": {
+      "name": "Ausgabe ändern",
+      "description": "Ändert die angegebenen Felder einer Ausgabe.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID der Ausgabe."
+        },
+        "amount": {
+          "name": "Betrag",
+          "description": "Ausgegebener Betrag."
+        },
+        "category": {
+          "name": "Kategorie",
+          "description": "Ausgabenkategorie."
+        },
+        "spent_on": {
+          "name": "Datum",
+          "description": "Standard: heute."
+        },
+        "supplier": {
+          "name": "Lieferant",
+          "description": "Wo gekauft."
+        },
+        "planting_id": {
+          "name": "Pflanze",
+          "description": "ID der verknüpften Pflanze."
+        },
+        "tool_id": {
+          "name": "Gerät",
+          "description": "ID des verknüpften Geräts."
+        },
+        "event_id": {
+          "name": "Tagebucheintrag",
+          "description": "ID des verknüpften Eintrags."
+        },
+        "income": {
+          "name": "Einnahme",
+          "description": "Eine Einnahme (z. B. ein Verkauf) statt einer Ausgabe."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        }
+      }
+    },
+    "delete_expense": {
+      "name": "Ausgabe löschen",
+      "description": "Löscht eine Ausgabe.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID der Ausgabe."
+        }
+      }
+    },
+    "update_tool": {
+      "name": "Gerät ändern",
+      "description": "Ändert die angegebenen Felder eines Geräts.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID des Geräts."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Name des Geräts."
+        },
+        "category": {
+          "name": "Kategorie",
+          "description": "Schnitt, Graben, Bewässerung…"
+        },
+        "brand": {
+          "name": "Marke",
+          "description": "Marke."
+        },
+        "model": {
+          "name": "Modell",
+          "description": "Modell."
+        },
+        "purchased_on": {
+          "name": "Gekauft am",
+          "description": "Kaufdatum."
+        },
+        "power": {
+          "name": "Antrieb",
+          "description": "Antriebsart."
+        },
+        "status": {
+          "name": "Status",
+          "description": "Aktueller Zustand."
+        },
+        "next_service_on": {
+          "name": "Nächste Wartung",
+          "description": "Nächstes Schärfen oder nächste Wartung."
+        },
+        "service_months": {
+          "name": "Wartung alle (Monate)",
+          "description": "Grober Wartungsplan für Motoren: nach einer Wartung folgt die nächste so viele Monate später."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        }
+      }
+    },
+    "delete_tool": {
+      "name": "Gerät löschen",
+      "description": "Löscht ein Gerät; verknüpfte Ausgaben bleiben.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID des Geräts."
+        }
+      }
+    },
+    "delete_photo": {
+      "name": "Foto löschen",
+      "description": "Löscht ein Foto und seine Datei.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID des Fotos."
+        }
+      }
+    },
+    "add_event": {
+      "name": "Tagebucheintrag hinzufügen",
+      "description": "Erfasst, was an einer Pflanze oder einem Bereich gemacht wurde (Schnitt, Behandlung, Ernte…).",
+      "fields": {
+        "kind": {
+          "name": "Art",
+          "description": "Art des Eintrags."
+        },
+        "done_on": {
+          "name": "Datum",
+          "description": "Standard: heute; die Mondphase wird gespeichert."
+        },
+        "planting_id": {
+          "name": "Pflanze",
+          "description": "ID der Pflanze (oder einen Bereich angeben)."
+        },
+        "zone_id": {
+          "name": "Bereich",
+          "description": "ID des Bereichs: der Eintrag gilt für alle seine Pflanzen."
+        },
+        "product": {
+          "name": "Produkt",
+          "description": "Dünger oder Pflanzenschutzmittel."
+        },
+        "dose": {
+          "name": "Dosis",
+          "description": "Z. B. 30 g / 10 L."
+        },
+        "quantity": {
+          "name": "Menge",
+          "description": "Geerntete Menge."
+        },
+        "unit": {
+          "name": "Einheit",
+          "description": "kg, Stück oder Liter."
+        },
+        "rating": {
+          "name": "Bewertung",
+          "description": "1 bis 5 Sterne."
+        },
+        "abundance": {
+          "name": "Ernte",
+          "description": "Gering, normal oder reichlich (wenn nicht gewogen)."
+        },
+        "keep": {
+          "name": "Wiederholen",
+          "description": "Was funktioniert hat."
+        },
+        "avoid": {
+          "name": "Vermeiden",
+          "description": "Was schiefgegangen ist."
+        },
+        "reason": {
+          "name": "Grund",
+          "description": "Ende der Pflanze: beendet, eingegangen oder entfernt. Hühner weg: warum."
+        },
+        "cause": {
+          "name": "Ursache",
+          "description": "Eine eingegangene Pflanze: woran sie gestorben ist."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        },
+        "task_id": {
+          "name": "Geplante Aufgabe",
+          "description": "ID der geplanten Aufgabe, die dieser Eintrag abschließt."
+        },
+        "cost": {
+          "name": "Kosten",
+          "description": "Wird als mit dem Eintrag verknüpfte Ausgabe erfasst."
+        },
+        "revenue": {
+          "name": "Einnahme",
+          "description": "Wird als mit dem Eintrag verknüpfte Einnahme erfasst."
+        }
+      }
+    },
+    "update_event": {
+      "name": "Tagebucheintrag ändern",
+      "description": "Ändert die angegebenen Felder eines Eintrags.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID des Eintrags."
+        },
+        "kind": {
+          "name": "Art",
+          "description": "Art des Eintrags."
+        },
+        "done_on": {
+          "name": "Datum",
+          "description": "Standard: heute; die Mondphase wird gespeichert."
+        },
+        "planting_id": {
+          "name": "Pflanze",
+          "description": "ID der Pflanze (oder einen Bereich angeben)."
+        },
+        "zone_id": {
+          "name": "Bereich",
+          "description": "ID des Bereichs: der Eintrag gilt für alle seine Pflanzen."
+        },
+        "product": {
+          "name": "Produkt",
+          "description": "Dünger oder Pflanzenschutzmittel."
+        },
+        "dose": {
+          "name": "Dosis",
+          "description": "Z. B. 30 g / 10 L."
+        },
+        "quantity": {
+          "name": "Menge",
+          "description": "Geerntete Menge."
+        },
+        "unit": {
+          "name": "Einheit",
+          "description": "kg, Stück oder Liter."
+        },
+        "rating": {
+          "name": "Bewertung",
+          "description": "1 bis 5 Sterne."
+        },
+        "abundance": {
+          "name": "Ernte",
+          "description": "Gering, normal oder reichlich (wenn nicht gewogen)."
+        },
+        "keep": {
+          "name": "Wiederholen",
+          "description": "Was funktioniert hat."
+        },
+        "avoid": {
+          "name": "Vermeiden",
+          "description": "Was schiefgegangen ist."
+        },
+        "reason": {
+          "name": "Grund",
+          "description": "Ende der Pflanze: beendet, eingegangen oder entfernt. Hühner weg: warum."
+        },
+        "cause": {
+          "name": "Ursache",
+          "description": "Eine eingegangene Pflanze: woran sie gestorben ist."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        }
+      }
+    },
+    "delete_event": {
+      "name": "Tagebucheintrag löschen",
+      "description": "Löscht einen Eintrag und seine Fotos; die Ausgaben bleiben.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID des Eintrags."
+        }
+      }
+    },
+    "refresh_weather": {
+      "name": "Wetter aktualisieren",
+      "description": "Berechnet das Wetter eines Eintrags oder aller Einträge neu (z. B. nach der Wahl neuer Sensoren).",
+      "fields": {
+        "id": {
+          "name": "Eintrag",
+          "description": "ID des Eintrags; leer = alle."
+        }
+      }
+    },
+    "repeat_planting": {
+      "name": "Nächstes Jahr wiederholen",
+      "description": "Legt dieselbe Kultur für eine neue Saison an (Art, Sorte, Bereich, Position; ohne Daten).",
+      "fields": {
+        "id": {
+          "name": "Pflanze",
+          "description": "Zu wiederholende Pflanze."
+        },
+        "year": {
+          "name": "Jahr",
+          "description": "Standard: nächstes Jahr."
+        }
+      }
+    },
+    "transplant": {
+      "name": "Auspflanzen",
+      "description": "Holt Jungpflanzen aus der Anzucht; ein Teil wird eine neue Pflanze, der Rest bleibt.",
+      "fields": {
+        "id": {
+          "name": "Pflanze",
+          "description": "Jungpflanzen in der Anzucht."
+        },
+        "quantity": {
+          "name": "Wie viele",
+          "description": "Standard: alle."
+        },
+        "zone_id": {
+          "name": "Bereich",
+          "description": "Wohin sie kommen."
+        },
+        "done_on": {
+          "name": "Datum",
+          "description": "Standard: heute."
+        },
+        "latitude": {
+          "name": "Breitengrad",
+          "description": "Position (optional)."
+        },
+        "longitude": {
+          "name": "Längengrad",
+          "description": "Position (optional)."
+        }
+      }
+    },
+    "add_task": {
+      "name": "Geplante Aufgabe hinzufügen",
+      "description": "Plant eine Aufgabe: sie erscheint in der To-do-Liste und im Kalender.",
+      "fields": {
+        "kind": {
+          "name": "Art",
+          "description": "Art der Aufgabe (wie im Tagebuch)."
+        },
+        "due_on": {
+          "name": "Fällig am",
+          "description": "Geplantes Datum."
+        },
+        "title": {
+          "name": "Titel",
+          "description": "Optional; Standard: Art und Pflanze."
+        },
+        "planting_id": {
+          "name": "Pflanze",
+          "description": "ID der Pflanze."
+        },
+        "zone_id": {
+          "name": "Bereich",
+          "description": "ID des Bereichs."
+        },
+        "yearly": {
+          "name": "Jedes Jahr",
+          "description": "Nach dem Erledigen wird dieselbe Aufgabe ein Jahr später neu geplant."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        }
+      }
+    },
+    "update_task": {
+      "name": "Geplante Aufgabe ändern",
+      "description": "Ändert die angegebenen Felder.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID der Aufgabe."
+        },
+        "kind": {
+          "name": "Art",
+          "description": "Art der Aufgabe (wie im Tagebuch)."
+        },
+        "due_on": {
+          "name": "Fällig am",
+          "description": "Geplantes Datum."
+        },
+        "title": {
+          "name": "Titel",
+          "description": "Optional; Standard: Art und Pflanze."
+        },
+        "planting_id": {
+          "name": "Pflanze",
+          "description": "ID der Pflanze."
+        },
+        "zone_id": {
+          "name": "Bereich",
+          "description": "ID des Bereichs."
+        },
+        "yearly": {
+          "name": "Jedes Jahr",
+          "description": "Nach dem Erledigen wird dieselbe Aufgabe ein Jahr später neu geplant."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        }
+      }
+    },
+    "delete_task": {
+      "name": "Geplante Aufgabe löschen",
+      "description": "Löscht sie (das Tagebuch bleibt unverändert).",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID der Aufgabe."
+        }
+      }
+    },
+    "complete_task": {
+      "name": "Geplante Aufgabe erledigen",
+      "description": "Markiert sie als erledigt und trägt sie ins Tagebuch ein.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID der Aufgabe."
+        },
+        "done_on": {
+          "name": "Erledigt am",
+          "description": "Standard: heute."
+        }
+      }
+    },
+    "export": {
+      "name": "Daten exportieren",
+      "description": "Gibt alle Daten von HA Homestead zurück."
+    },
+    "add_seed_lot": {
+      "name": "Saatgutposten hinzufügen",
+      "description": "Fügt Saatgut zum Bestand hinzu (Tüte, Glas, eigenes Saatgut).",
+      "fields": {
+        "species": {
+          "name": "Art",
+          "description": "Wissenschaftlicher oder deutscher Name; optional mit verknüpfter Art."
+        },
+        "taxon_id": {
+          "name": "Importierte Art",
+          "description": "Importierte Art (ID)."
+        },
+        "variety": {
+          "name": "Sorte",
+          "description": "Sorte."
+        },
+        "year": {
+          "name": "Jahr",
+          "description": "Jahr der Abpackung oder Ernte: die Keimfähigkeit sinkt mit dem Alter."
+        },
+        "supplier": {
+          "name": "Lieferant",
+          "description": "Laden, Saatguttausch, eigenes Saatgut…"
+        },
+        "quantity": {
+          "name": "Menge",
+          "description": "Freitext: 1 Tüte, 20 g…"
+        },
+        "viability_years": {
+          "name": "Haltbarkeit (Jahre)",
+          "description": "Wie viele Jahre dieses Saatgut gut keimt; leer = typischer Wert der Familie."
+        },
+        "finished": {
+          "name": "Aufgebraucht",
+          "description": "Kein Saatgut mehr."
+        },
+        "price": {
+          "name": "Preis",
+          "description": "Kaufpreis; wird als Saatgutausgabe erfasst."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        }
+      }
+    },
+    "update_seed_lot": {
+      "name": "Saatgutposten ändern",
+      "description": "Ändert die angegebenen Felder eines Saatgutpostens.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID des Saatgutpostens."
+        },
+        "species": {
+          "name": "Art",
+          "description": "Wissenschaftlicher oder deutscher Name; optional mit verknüpfter Art."
+        },
+        "taxon_id": {
+          "name": "Importierte Art",
+          "description": "Importierte Art (ID)."
+        },
+        "variety": {
+          "name": "Sorte",
+          "description": "Sorte."
+        },
+        "year": {
+          "name": "Jahr",
+          "description": "Jahr der Abpackung oder Ernte: die Keimfähigkeit sinkt mit dem Alter."
+        },
+        "supplier": {
+          "name": "Lieferant",
+          "description": "Laden, Saatguttausch, eigenes Saatgut…"
+        },
+        "quantity": {
+          "name": "Menge",
+          "description": "Freitext: 1 Tüte, 20 g…"
+        },
+        "viability_years": {
+          "name": "Haltbarkeit (Jahre)",
+          "description": "Wie viele Jahre dieses Saatgut gut keimt; leer = typischer Wert der Familie."
+        },
+        "finished": {
+          "name": "Aufgebraucht",
+          "description": "Kein Saatgut mehr."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        }
+      }
+    },
+    "delete_seed_lot": {
+      "name": "Saatgutposten löschen",
+      "description": "Löscht einen Saatgutposten; die Pflanzen behalten ihre Daten.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID des Saatgutpostens."
+        }
+      }
+    },
+    "set_crop_profile": {
+      "name": "Kulturdaten festlegen",
+      "description": "Speichert deine Werte für eine Art (Lage, Winterhärte, Monate für Aussaat, Pflanzung, Blüte und Ernte); sie ersetzen die Standardwerte.",
+      "fields": {
+        "species": {
+          "name": "Art",
+          "description": "Wissenschaftlicher Name."
+        },
+        "exposure": {
+          "name": "Lage",
+          "description": "Sonne, Halbschatten, Schatten."
+        },
+        "hardiness_c": {
+          "name": "Winterhärte",
+          "description": "Tiefste vertragene Temperatur."
+        },
+        "sow_indoor": {
+          "name": "Vorkultur",
+          "description": "Monate für die Vorkultur."
+        },
+        "sow_outdoor": {
+          "name": "Direktsaat",
+          "description": "Monate für die Direktsaat."
+        },
+        "plant_out": {
+          "name": "Auspflanzen",
+          "description": "Monate für Pflanzung oder Auspflanzen."
+        },
+        "flowering": {
+          "name": "Blüte",
+          "description": "Blütemonate."
+        },
+        "harvest": {
+          "name": "Ernte",
+          "description": "Erntemonate."
+        },
+        "pruning": {
+          "name": "Schnitt",
+          "description": "Schnittmonate."
+        },
+        "fertilizing": {
+          "name": "Düngung",
+          "description": "Düngemonate."
+        },
+        "end": {
+          "name": "Kulturende",
+          "description": "Monate, in denen die Kultur meist endet (Einjährige)."
+        },
+        "spacing_cm": {
+          "name": "Abstand",
+          "description": "Abstand zwischen den Pflanzen."
+        },
+        "heat_max_c": {
+          "name": "Hitzegrenze",
+          "description": "Über diesem Höchstwert leidet die Kultur nach einigen Tagen (Kulturen der kühlen Jahreszeit: Salat, Spinat, Erbsen…)."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        }
+      }
+    },
+    "delete_crop_profile": {
+      "name": "Kulturdaten zurücksetzen",
+      "description": "Löscht deine Werte für eine Art: es gelten wieder die Standardwerte.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID der Kulturdaten."
+        }
+      }
+    }
+  },
+  "common": {
+    "notification_title": "🌱 Garten",
+    "notification_done": "✔ Erledigt",
+    "notification_late": "{count} überfällige Aufgaben",
+    "alert_frost": "❄️ Frost {when}: {value} °C — {plants}",
+    "alert_cold": "🥶 Kälte {when}: {value} °C für {plants}",
+    "alert_heatwave": "🔥 Hitzewelle {when}: bis {value} °C",
+    "alert_heat_extreme": "🔥 Extreme Hitze {when}: {value} °C",
+    "alert_heat_stress": "🥵 Zu heiß für {plants}: {when}, bis {value} °C",
+    "issue_rain_48h": "Regen in den nächsten 48 h",
+    "issue_wind": "Wind",
+    "issue_hot": "zu heiß",
+    "issue_frost_next": "Frost in den nächsten Tagen",
+    "issue_rain_today": "Regen an dem Tag",
+    "issue_cold_nights": "kalte Nächte diese Woche",
+    "issue_heavy_rain": "Starkregen",
+    "issue_rain_coming": "Regen im Anmarsch",
+    "issue_frozen": "gefrorener Boden",
+    "issue_gusts": "starke Böen",
+    "better_on": "besser am {date}",
+    "notification_compost": "♻️ {zone}: Kompost umsetzen ({days} Tage seit dem letzten Mal)",
+    "notification_tool": "🔧 {tool}: Wartung fällig",
+    "notification_water": "🪴 Zu gießen: {plants}"
+  }
+}

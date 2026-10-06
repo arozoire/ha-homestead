@@ -14,6 +14,7 @@ from .const import DOMAIN
 PANEL_URL_PATH = DOMAIN
 STATIC_URL = f"/{DOMAIN}_static"
 _STATIC_REGISTERED = f"{DOMAIN}_static_registered"
+SIDEBAR_TITLES = {"it": "Giardino", "fr": "Jardin", "de": "Garten", "es": "Huerto", "nl": "Tuin"}
 
 
 async def async_register_panel(hass: HomeAssistant) -> None:
@@ -26,7 +27,7 @@ async def async_register_panel(hass: HomeAssistant) -> None:
         hass,
         frontend_url_path=PANEL_URL_PATH,
         webcomponent_name="homestead-panel",
-        sidebar_title="Giardino" if hass.config.language == "it" else "Garden",
+        sidebar_title=SIDEBAR_TITLES.get(hass.config.language.split("-")[0], "Garden"),
         sidebar_icon="mdi:sprout",
         module_url=f"{STATIC_URL}/homestead-panel.js?v={version}",
         require_admin=False,

@@ -1,0 +1,1352 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "HA Homestead",
+        "description": "Gestiona tu huerto, frutal y jardín. La ubicación y la moneda se toman de los ajustes de Home Assistant."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "HA Homestead ya está configurado."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Tiempo para el diario",
+        "description": "Cada evento del diario guarda el tiempo de la semana anterior (y de los 3 días siguientes para tratamientos y siembras). Elige tus sensores; lo que falte llega de Open-Meteo (gratis, sin cuenta). Recordatorios: las actividades previstas para hoy se envían a los teléfonos elegidos a la hora elegida; al tocar una se abre el formulario del diario ya rellenado. Alertas: helada por debajo de la rusticidad de cada planta, ola de calor (días calurosos y noches cálidas varios días seguidos, cuando las plantas ya no se recuperan de noche), calor extremo. La previsión viene de la entidad del tiempo elegida, si no de Open-Meteo.",
+        "data": {
+          "temperature_sensor": "Temperatura exterior",
+          "humidity_sensor": "Humedad exterior",
+          "rain_sensor": "Lluvia (total, mm)",
+          "soil_moisture_sensor": "Humedad del suelo",
+          "open_meteo": "Usar Open-Meteo para los datos que faltan",
+          "notify_services": "Enviar recordatorios a",
+          "notify_time": "Hora de los recordatorios",
+          "weather_entity": "Previsión del tiempo (entidad del tiempo de HA)",
+          "alert_notify": "Alertas de helada y calor en los teléfonos",
+          "heat_max": "Ola de calor: máxima desde",
+          "heat_night": "Ola de calor: mínima nocturna desde",
+          "heat_days": "Ola de calor: días seguidos",
+          "heat_extreme": "Calor extremo: máxima desde (aunque sea un solo día)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "plantings": {
+        "name": "Plantas"
+      },
+      "expenses_year": {
+        "name": "Gastos del año"
+      },
+      "tools_needing_service": {
+        "name": "Herramientas por mantener"
+      },
+      "weather_alerts": {
+        "name": "Alertas meteorológicas"
+      }
+    },
+    "todo": {
+      "tasks": {
+        "name": "Tareas del huerto"
+      }
+    },
+    "calendar": {
+      "garden": {
+        "name": "Huerto"
+      }
+    }
+  },
+  "exceptions": {
+    "not_loaded": {
+      "message": "HA Homestead no está cargado."
+    },
+    "unknown_reference": {
+      "message": "{field} desconocido: {value}."
+    },
+    "zone_cycle": {
+      "message": "Una zona no puede estar dentro de sí misma ni de una de sus subzonas."
+    },
+    "incomplete_position": {
+      "message": "La latitud y la longitud deben indicarse juntas."
+    },
+    "species_required": {
+      "message": "Indica una especie o vincula una especie importada."
+    },
+    "sources_unavailable": {
+      "message": "GBIF y Wikidata no responden: inténtalo más tarde."
+    }
+  },
+  "selector": {
+    "planting_kind": {
+      "options": {
+        "single": "Planta individual",
+        "group": "Grupo (fila, bancal)"
+      }
+    },
+    "plant_type": {
+      "options": {
+        "tree": "Árbol",
+        "fruit_tree": "Árbol frutal",
+        "shrub": "Arbusto",
+        "vine": "Trepadora, vid",
+        "vegetable": "Hortaliza",
+        "herb": "Aromática",
+        "flower": "Flor",
+        "houseplant": "Planta de interior",
+        "other": "Otro"
+      }
+    },
+    "initial_form": {
+      "options": {
+        "seed": "Semilla",
+        "cutting": "Esqueje",
+        "bulb": "Bulbo",
+        "bare_root": "Raíz desnuda",
+        "potted": "En maceta",
+        "one_year": "Plantón de un año",
+        "two_years": "Árbol de dos años",
+        "other": "Otro"
+      }
+    },
+    "expense_category": {
+      "options": {
+        "plants": "Plantas",
+        "seeds": "Semillas",
+        "tools": "Herramientas",
+        "fertilizers": "Abonos",
+        "treatments": "Tratamientos",
+        "water": "Agua",
+        "services": "Servicios y mano de obra",
+        "sales": "Ventas",
+        "animals": "Animales (pienso, cuidados)",
+        "other": "Otro"
+      }
+    },
+    "tool_power": {
+      "options": {
+        "manual": "Manual",
+        "battery": "Batería",
+        "petrol": "Gasolina",
+        "electric": "Eléctrico"
+      }
+    },
+    "tool_status": {
+      "options": {
+        "ok": "OK",
+        "needs_service": "Necesita mantenimiento",
+        "broken": "Averiado"
+      }
+    },
+    "planting_status": {
+      "options": {
+        "active": "Activa",
+        "dead": "Muerta",
+        "removed": "Quitada"
+      }
+    },
+    "zone_kind": {
+      "options": {
+        "vegetable_garden": "Huerto",
+        "orchard": "Frutal",
+        "flower_bed": "Parterre de flores",
+        "greenhouse": "Invernadero",
+        "pots": "Macetas",
+        "lawn": "Césped",
+        "woodland": "Bosque",
+        "compost": "Compostador",
+        "coop": "Gallinero",
+        "nursery": "Semillero",
+        "indoor": "Interior (una habitación)",
+        "other": "Otro"
+      }
+    },
+    "planting_origin": {
+      "options": {
+        "existing": "Ya estaba",
+        "planted": "Plantada por mí",
+        "sown": "Sembrada por mí"
+      }
+    },
+    "event_kind": {
+      "options": {
+        "pruning": "Poda",
+        "fertilizing": "Abonado",
+        "watering": "Riego",
+        "treatment": "Tratamiento",
+        "sowing": "Siembra",
+        "harvest": "Cosecha",
+        "grafting": "Injerto",
+        "problem": "Problema",
+        "note": "Nota",
+        "removal": "Fin de la planta",
+        "review": "Balance de la temporada",
+        "tillage": "Labranza (azada, cava)",
+        "weeding": "Escarda",
+        "mulching": "Acolchado",
+        "mowing": "Siega",
+        "clearing": "Limpieza del bosque",
+        "wood_cutting": "Corta de leña",
+        "brushwood": "Ramas, haces de leña",
+        "foraging": "Recolección silvestre (setas, castañas…)",
+        "compost_turn": "Voltear el compost",
+        "compost_harvest": "Recogida de compost",
+        "eggs": "Huevos",
+        "flock_in": "Llegada de gallinas",
+        "flock_out": "Salida de gallinas",
+        "animal_care": "Pienso y cuidados",
+        "coop_cleaning": "Limpieza del gallinero",
+        "repotting": "Trasplante a maceta",
+        "wood_burned": "Leña quemada (invierno)"
+      }
+    },
+    "harvest_unit": {
+      "options": {
+        "kg": "kg",
+        "pieces": "Piezas",
+        "l": "Litros",
+        "q": "Quintales (100 kg)",
+        "stere": "Estéreos",
+        "m3": "Metros cúbicos"
+      }
+    },
+    "abundance": {
+      "options": {
+        "poor": "Escasa",
+        "normal": "Normal",
+        "abundant": "Abundante"
+      }
+    },
+    "event_reason": {
+      "options": {
+        "finished": "Terminada (temporada acabada)",
+        "died": "Muerta",
+        "removed": "Quitada (trasladada, regalada…)",
+        "predator": "Depredador (zorro…)",
+        "illness": "Enfermedad",
+        "age": "Vejez",
+        "sold": "Vendida o regalada",
+        "slaughtered": "Sacrificada",
+        "other": "Otro"
+      }
+    },
+    "death_cause": {
+      "options": {
+        "frost": "Helada",
+        "drought": "Sequía",
+        "disease": "Enfermedad",
+        "pests": "Plagas",
+        "animals": "Animales",
+        "unknown": "Desconocida"
+      }
+    },
+    "month": {
+      "options": {
+        "1": "Enero",
+        "2": "Febrero",
+        "3": "Marzo",
+        "4": "Abril",
+        "5": "Mayo",
+        "6": "Junio",
+        "7": "Julio",
+        "8": "Agosto",
+        "9": "Septiembre",
+        "10": "Octubre",
+        "11": "Noviembre",
+        "12": "Diciembre"
+      }
+    },
+    "exposure": {
+      "options": {
+        "sun": "Pleno sol",
+        "partial": "Semisombra",
+        "shade": "Sombra"
+      }
+    },
+    "alert_notify": {
+      "options": {
+        "off": "Desactivadas (solo en el panel)",
+        "tasks": "Solo con una actividad prevista esos días",
+        "always": "Siempre"
+      }
+    }
+  },
+  "services": {
+    "add_zone": {
+      "name": "Añadir zona",
+      "description": "Añade una zona del huerto (bancal, frutal, invernadero). Las zonas son internas y nunca crean áreas de Home Assistant.",
+      "fields": {
+        "name": {
+          "name": "Nombre",
+          "description": "Nombre de la zona."
+        },
+        "parent_id": {
+          "name": "Zona superior",
+          "description": "ID de la zona superior."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Tipo de zona."
+        },
+        "area_id": {
+          "name": "Área de Home Assistant",
+          "description": "Vínculo opcional con un área existente."
+        },
+        "geometry": {
+          "name": "Geometría",
+          "description": "Polígono GeoJSON (coordenadas longitud, latitud). La superficie se calcula."
+        },
+        "species": {
+          "name": "Especies principales",
+          "description": "Especies principales de la zona (p. ej. de un bosque): nombres, u objetos con name y taxon_id."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        }
+      }
+    },
+    "update_zone": {
+      "name": "Modificar zona",
+      "description": "Cambia los campos indicados de una zona (incluido su polígono).",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID de la zona."
+        },
+        "name": {
+          "name": "Nombre",
+          "description": "Nombre de la zona."
+        },
+        "parent_id": {
+          "name": "Zona superior",
+          "description": "ID de la zona superior."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Tipo de zona."
+        },
+        "area_id": {
+          "name": "Área de Home Assistant",
+          "description": "Vínculo opcional con un área existente."
+        },
+        "geometry": {
+          "name": "Geometría",
+          "description": "Polígono GeoJSON (coordenadas longitud, latitud). La superficie se calcula."
+        },
+        "species": {
+          "name": "Especies principales",
+          "description": "Especies principales de la zona (p. ej. de un bosque): nombres, u objetos con name y taxon_id."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        }
+      }
+    },
+    "delete_zone": {
+      "name": "Eliminar zona",
+      "description": "Elimina una zona; sus subzonas y plantas pasan a la zona superior.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID de la zona."
+        }
+      }
+    },
+    "add_planting": {
+      "name": "Añadir planta",
+      "description": "Añade un árbol, una planta o un grupo de plantas.",
+      "fields": {
+        "name": {
+          "name": "Nombre",
+          "description": "Tu nombre para esta planta."
+        },
+        "species": {
+          "name": "Especie",
+          "description": "Nombre científico o común; opcional si se vincula una especie importada."
+        },
+        "taxon_id": {
+          "name": "Especie importada",
+          "description": "ID de una especie importada (servicio import_taxon); sin nombre de especie, se usa su nombre científico."
+        },
+        "variety": {
+          "name": "Variedad",
+          "description": "Cultivar o variedad."
+        },
+        "plant_type": {
+          "name": "Tipo de planta",
+          "description": "Árbol, arbusto, hortaliza… (icono en el mapa)."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Planta individual o grupo."
+        },
+        "quantity": {
+          "name": "Cantidad",
+          "description": "Número de plantas (solo grupos)."
+        },
+        "origin": {
+          "name": "Origen",
+          "description": "Ya estaba, plantada o sembrada por ti."
+        },
+        "sown_on": {
+          "name": "Sembrada el",
+          "description": "Fecha de siembra; se registra la fase lunar."
+        },
+        "planted_on": {
+          "name": "Plantada el",
+          "description": "Fecha de plantación o trasplante."
+        },
+        "birth_year": {
+          "name": "Año de nacimiento estimado",
+          "description": "Año estimado de siembra o injerto, para calcular la edad."
+        },
+        "initial_form": {
+          "name": "Forma al plantar",
+          "description": "Qué se plantó."
+        },
+        "initial_height_cm": {
+          "name": "Altura inicial",
+          "description": "Altura estimada al plantar."
+        },
+        "rootstock": {
+          "name": "Portainjerto",
+          "description": "Para árboles frutales injertados."
+        },
+        "supplier": {
+          "name": "Proveedor",
+          "description": "Dónde se compró."
+        },
+        "zone_id": {
+          "name": "Zona",
+          "description": "ID de la zona."
+        },
+        "latitude": {
+          "name": "Latitud",
+          "description": "Posición en el mapa."
+        },
+        "longitude": {
+          "name": "Longitud",
+          "description": "Posición en el mapa."
+        },
+        "price": {
+          "name": "Precio",
+          "description": "Precio de compra; se registra como gasto."
+        },
+        "seed_lot_id": {
+          "name": "Lote de semillas",
+          "description": "Semillas usadas (id de un lote)."
+        },
+        "sown_count": {
+          "name": "Semillas sembradas",
+          "description": "Semillas o alvéolos sembrados."
+        },
+        "germinated_on": {
+          "name": "Nacidas el",
+          "description": "Día en que aparecieron las primeras plántulas."
+        },
+        "germinated_count": {
+          "name": "Plántulas",
+          "description": "Cuántas han nacido."
+        },
+        "water_days": {
+          "name": "Regar cada (días)",
+          "description": "Plantas de interior: días entre riegos (la mitad más en invierno)."
+        },
+        "fertilize_weeks": {
+          "name": "Abonar cada (semanas)",
+          "description": "Plantas de interior: de marzo a septiembre."
+        },
+        "moisture_entity": {
+          "name": "Sensor de humedad del sustrato",
+          "description": "Opcional: regar cuando baje del umbral."
+        },
+        "moisture_min": {
+          "name": "Regar por debajo de (%)",
+          "description": "Por defecto 20 %."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        }
+      }
+    },
+    "update_planting": {
+      "name": "Modificar planta",
+      "description": "Cambia los campos indicados de una planta (incluida su posición).",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID de la planta."
+        },
+        "name": {
+          "name": "Nombre",
+          "description": "Tu nombre para esta planta."
+        },
+        "species": {
+          "name": "Especie",
+          "description": "Nombre científico o común; opcional si se vincula una especie importada."
+        },
+        "taxon_id": {
+          "name": "Especie importada",
+          "description": "ID de una especie importada (servicio import_taxon); sin nombre de especie, se usa su nombre científico."
+        },
+        "variety": {
+          "name": "Variedad",
+          "description": "Cultivar o variedad."
+        },
+        "plant_type": {
+          "name": "Tipo de planta",
+          "description": "Árbol, arbusto, hortaliza… (icono en el mapa)."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Planta individual o grupo."
+        },
+        "quantity": {
+          "name": "Cantidad",
+          "description": "Número de plantas (solo grupos)."
+        },
+        "origin": {
+          "name": "Origen",
+          "description": "Ya estaba, plantada o sembrada por ti."
+        },
+        "sown_on": {
+          "name": "Sembrada el",
+          "description": "Fecha de siembra; se registra la fase lunar."
+        },
+        "planted_on": {
+          "name": "Plantada el",
+          "description": "Fecha de plantación o trasplante."
+        },
+        "birth_year": {
+          "name": "Año de nacimiento estimado",
+          "description": "Año estimado de siembra o injerto, para calcular la edad."
+        },
+        "initial_form": {
+          "name": "Forma al plantar",
+          "description": "Qué se plantó."
+        },
+        "initial_height_cm": {
+          "name": "Altura inicial",
+          "description": "Altura estimada al plantar."
+        },
+        "rootstock": {
+          "name": "Portainjerto",
+          "description": "Para árboles frutales injertados."
+        },
+        "supplier": {
+          "name": "Proveedor",
+          "description": "Dónde se compró."
+        },
+        "zone_id": {
+          "name": "Zona",
+          "description": "ID de la zona."
+        },
+        "latitude": {
+          "name": "Latitud",
+          "description": "Posición en el mapa."
+        },
+        "longitude": {
+          "name": "Longitud",
+          "description": "Posición en el mapa."
+        },
+        "status": {
+          "name": "Estado",
+          "description": "Activa, muerta o quitada."
+        },
+        "seed_lot_id": {
+          "name": "Lote de semillas",
+          "description": "Semillas usadas (id de un lote)."
+        },
+        "sown_count": {
+          "name": "Semillas sembradas",
+          "description": "Semillas o alvéolos sembrados."
+        },
+        "germinated_on": {
+          "name": "Nacidas el",
+          "description": "Día en que aparecieron las primeras plántulas."
+        },
+        "germinated_count": {
+          "name": "Plántulas",
+          "description": "Cuántas han nacido."
+        },
+        "water_days": {
+          "name": "Regar cada (días)",
+          "description": "Plantas de interior: días entre riegos (la mitad más en invierno)."
+        },
+        "fertilize_weeks": {
+          "name": "Abonar cada (semanas)",
+          "description": "Plantas de interior: de marzo a septiembre."
+        },
+        "moisture_entity": {
+          "name": "Sensor de humedad del sustrato",
+          "description": "Opcional: regar cuando baje del umbral."
+        },
+        "moisture_min": {
+          "name": "Regar por debajo de (%)",
+          "description": "Por defecto 20 %."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        }
+      }
+    },
+    "delete_planting": {
+      "name": "Eliminar planta",
+      "description": "Elimina una planta introducida por error. Los gastos vinculados se conservan. Para una planta muerta usa mejor el estado.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID de la planta."
+        }
+      }
+    },
+    "import_taxon": {
+      "name": "Importar especie",
+      "description": "Importa una especie de GBIF/Wikidata (nombres comunes, familia, género) y la guarda en local. Devuelve su id; si ya existe, la actualiza.",
+      "fields": {
+        "gbif_key": {
+          "name": "Clave GBIF",
+          "description": "Número de la especie en gbif.org."
+        },
+        "wikidata_id": {
+          "name": "ID de Wikidata",
+          "description": "P. ej. Q18674606."
+        }
+      }
+    },
+    "add_expense": {
+      "name": "Añadir gasto",
+      "description": "Registra un gasto.",
+      "fields": {
+        "amount": {
+          "name": "Importe",
+          "description": "Importe gastado."
+        },
+        "category": {
+          "name": "Categoría",
+          "description": "Categoría de gasto."
+        },
+        "spent_on": {
+          "name": "Fecha",
+          "description": "Por defecto hoy."
+        },
+        "supplier": {
+          "name": "Proveedor",
+          "description": "Dónde se compró."
+        },
+        "planting_id": {
+          "name": "Planta",
+          "description": "ID de la planta vinculada."
+        },
+        "tool_id": {
+          "name": "Herramienta",
+          "description": "ID de la herramienta vinculada."
+        },
+        "event_id": {
+          "name": "Evento del diario",
+          "description": "ID del evento vinculado."
+        },
+        "income": {
+          "name": "Ingreso",
+          "description": "Un ingreso (p. ej. una venta) en lugar de un gasto."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        }
+      }
+    },
+    "add_tool": {
+      "name": "Añadir herramienta",
+      "description": "Añade una herramienta al inventario.",
+      "fields": {
+        "name": {
+          "name": "Nombre",
+          "description": "Nombre de la herramienta."
+        },
+        "category": {
+          "name": "Categoría",
+          "description": "Poda, cava, riego…"
+        },
+        "brand": {
+          "name": "Marca",
+          "description": "Marca."
+        },
+        "model": {
+          "name": "Modelo",
+          "description": "Modelo."
+        },
+        "purchased_on": {
+          "name": "Comprado el",
+          "description": "Fecha de compra."
+        },
+        "power": {
+          "name": "Alimentación",
+          "description": "Fuente de energía."
+        },
+        "status": {
+          "name": "Estado",
+          "description": "Estado actual."
+        },
+        "next_service_on": {
+          "name": "Próximo mantenimiento",
+          "description": "Próximo afilado o mantenimiento."
+        },
+        "service_months": {
+          "name": "Mantenimiento cada (meses)",
+          "description": "Plan de mantenimiento aproximado para motores: tras un mantenimiento, el siguiente llega estos meses después."
+        },
+        "price": {
+          "name": "Precio",
+          "description": "Precio de compra; se registra como gasto."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        }
+      }
+    },
+    "update_expense": {
+      "name": "Modificar gasto",
+      "description": "Cambia los campos indicados de un gasto.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID del gasto."
+        },
+        "amount": {
+          "name": "Importe",
+          "description": "Importe gastado."
+        },
+        "category": {
+          "name": "Categoría",
+          "description": "Categoría de gasto."
+        },
+        "spent_on": {
+          "name": "Fecha",
+          "description": "Por defecto hoy."
+        },
+        "supplier": {
+          "name": "Proveedor",
+          "description": "Dónde se compró."
+        },
+        "planting_id": {
+          "name": "Planta",
+          "description": "ID de la planta vinculada."
+        },
+        "tool_id": {
+          "name": "Herramienta",
+          "description": "ID de la herramienta vinculada."
+        },
+        "event_id": {
+          "name": "Evento del diario",
+          "description": "ID del evento vinculado."
+        },
+        "income": {
+          "name": "Ingreso",
+          "description": "Un ingreso (p. ej. una venta) en lugar de un gasto."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        }
+      }
+    },
+    "delete_expense": {
+      "name": "Eliminar gasto",
+      "description": "Elimina un gasto.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID del gasto."
+        }
+      }
+    },
+    "update_tool": {
+      "name": "Modificar herramienta",
+      "description": "Cambia los campos indicados de una herramienta.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID de la herramienta."
+        },
+        "name": {
+          "name": "Nombre",
+          "description": "Nombre de la herramienta."
+        },
+        "category": {
+          "name": "Categoría",
+          "description": "Poda, cava, riego…"
+        },
+        "brand": {
+          "name": "Marca",
+          "description": "Marca."
+        },
+        "model": {
+          "name": "Modelo",
+          "description": "Modelo."
+        },
+        "purchased_on": {
+          "name": "Comprado el",
+          "description": "Fecha de compra."
+        },
+        "power": {
+          "name": "Alimentación",
+          "description": "Fuente de energía."
+        },
+        "status": {
+          "name": "Estado",
+          "description": "Estado actual."
+        },
+        "next_service_on": {
+          "name": "Próximo mantenimiento",
+          "description": "Próximo afilado o mantenimiento."
+        },
+        "service_months": {
+          "name": "Mantenimiento cada (meses)",
+          "description": "Plan de mantenimiento aproximado para motores: tras un mantenimiento, el siguiente llega estos meses después."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        }
+      }
+    },
+    "delete_tool": {
+      "name": "Eliminar herramienta",
+      "description": "Elimina una herramienta; los gastos vinculados se conservan.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID de la herramienta."
+        }
+      }
+    },
+    "delete_photo": {
+      "name": "Eliminar foto",
+      "description": "Elimina una foto y su archivo.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID de la foto."
+        }
+      }
+    },
+    "add_event": {
+      "name": "Añadir evento al diario",
+      "description": "Registra lo que se hizo en una planta o una zona (poda, tratamiento, cosecha…).",
+      "fields": {
+        "kind": {
+          "name": "Tipo",
+          "description": "Tipo de evento."
+        },
+        "done_on": {
+          "name": "Fecha",
+          "description": "Por defecto hoy; se registra la fase lunar."
+        },
+        "planting_id": {
+          "name": "Planta",
+          "description": "ID de la planta (o indica una zona)."
+        },
+        "zone_id": {
+          "name": "Zona",
+          "description": "ID de la zona: el evento vale para todas sus plantas."
+        },
+        "product": {
+          "name": "Producto",
+          "description": "Abono o producto de tratamiento."
+        },
+        "dose": {
+          "name": "Dosis",
+          "description": "P. ej. 30 g / 10 L."
+        },
+        "quantity": {
+          "name": "Cantidad",
+          "description": "Cantidad cosechada."
+        },
+        "unit": {
+          "name": "Unidad",
+          "description": "kg, piezas o litros."
+        },
+        "rating": {
+          "name": "Nota",
+          "description": "De 1 a 5 estrellas."
+        },
+        "abundance": {
+          "name": "Cosecha",
+          "description": "Escasa, normal o abundante (si no se pesó)."
+        },
+        "keep": {
+          "name": "Para repetir",
+          "description": "Lo que funcionó."
+        },
+        "avoid": {
+          "name": "Para evitar",
+          "description": "Lo que salió mal."
+        },
+        "reason": {
+          "name": "Motivo",
+          "description": "Fin de la planta: terminada, muerta o quitada. Salida de gallinas: por qué."
+        },
+        "cause": {
+          "name": "Causa",
+          "description": "Una planta muerta: qué la mató."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        },
+        "task_id": {
+          "name": "Actividad planificada",
+          "description": "ID de la actividad planificada que este evento completa."
+        },
+        "cost": {
+          "name": "Coste",
+          "description": "Se registra como gasto vinculado al evento."
+        },
+        "revenue": {
+          "name": "Ingreso",
+          "description": "Se registra como ingreso vinculado al evento."
+        }
+      }
+    },
+    "update_event": {
+      "name": "Modificar evento",
+      "description": "Cambia los campos indicados de un evento.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID del evento."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Tipo de evento."
+        },
+        "done_on": {
+          "name": "Fecha",
+          "description": "Por defecto hoy; se registra la fase lunar."
+        },
+        "planting_id": {
+          "name": "Planta",
+          "description": "ID de la planta (o indica una zona)."
+        },
+        "zone_id": {
+          "name": "Zona",
+          "description": "ID de la zona: el evento vale para todas sus plantas."
+        },
+        "product": {
+          "name": "Producto",
+          "description": "Abono o producto de tratamiento."
+        },
+        "dose": {
+          "name": "Dosis",
+          "description": "P. ej. 30 g / 10 L."
+        },
+        "quantity": {
+          "name": "Cantidad",
+          "description": "Cantidad cosechada."
+        },
+        "unit": {
+          "name": "Unidad",
+          "description": "kg, piezas o litros."
+        },
+        "rating": {
+          "name": "Nota",
+          "description": "De 1 a 5 estrellas."
+        },
+        "abundance": {
+          "name": "Cosecha",
+          "description": "Escasa, normal o abundante (si no se pesó)."
+        },
+        "keep": {
+          "name": "Para repetir",
+          "description": "Lo que funcionó."
+        },
+        "avoid": {
+          "name": "Para evitar",
+          "description": "Lo que salió mal."
+        },
+        "reason": {
+          "name": "Motivo",
+          "description": "Fin de la planta: terminada, muerta o quitada. Salida de gallinas: por qué."
+        },
+        "cause": {
+          "name": "Causa",
+          "description": "Una planta muerta: qué la mató."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        }
+      }
+    },
+    "delete_event": {
+      "name": "Eliminar evento",
+      "description": "Elimina un evento y sus fotos; sus gastos se conservan.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID del evento."
+        }
+      }
+    },
+    "refresh_weather": {
+      "name": "Actualizar el tiempo",
+      "description": "Recalcula el tiempo de un evento o de todos (p. ej. tras elegir sensores nuevos).",
+      "fields": {
+        "id": {
+          "name": "Evento",
+          "description": "ID del evento; vacío = todos."
+        }
+      }
+    },
+    "repeat_planting": {
+      "name": "Repetir el año que viene",
+      "description": "Crea el mismo cultivo para una nueva temporada (especie, variedad, zona, posición; sin fechas).",
+      "fields": {
+        "id": {
+          "name": "Planta",
+          "description": "Planta para repetir."
+        },
+        "year": {
+          "name": "Año",
+          "description": "Por defecto: el año que viene."
+        }
+      }
+    },
+    "transplant": {
+      "name": "Trasplantar",
+      "description": "Saca plántulas del semillero; una parte se convierte en una planta nueva, el resto se queda.",
+      "fields": {
+        "id": {
+          "name": "Planta",
+          "description": "Plántulas en el semillero."
+        },
+        "quantity": {
+          "name": "Cuántas",
+          "description": "Por defecto: todas."
+        },
+        "zone_id": {
+          "name": "Zona",
+          "description": "Adónde van."
+        },
+        "done_on": {
+          "name": "Fecha",
+          "description": "Por defecto: hoy."
+        },
+        "latitude": {
+          "name": "Latitud",
+          "description": "Posición (opcional)."
+        },
+        "longitude": {
+          "name": "Longitud",
+          "description": "Posición (opcional)."
+        }
+      }
+    },
+    "add_task": {
+      "name": "Añadir actividad planificada",
+      "description": "Planifica una actividad: aparece en la lista de tareas y en el calendario.",
+      "fields": {
+        "kind": {
+          "name": "Tipo",
+          "description": "Tipo de actividad (como en el diario)."
+        },
+        "due_on": {
+          "name": "Prevista el",
+          "description": "Fecha prevista."
+        },
+        "title": {
+          "name": "Título",
+          "description": "Opcional; por defecto: tipo y planta."
+        },
+        "planting_id": {
+          "name": "Planta",
+          "description": "ID de la planta."
+        },
+        "zone_id": {
+          "name": "Zona",
+          "description": "ID de la zona."
+        },
+        "yearly": {
+          "name": "Cada año",
+          "description": "Una vez hecha, la misma tarea se planifica un año después."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        }
+      }
+    },
+    "update_task": {
+      "name": "Modificar actividad planificada",
+      "description": "Cambia los campos indicados.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID de la tarea."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Tipo de actividad (como en el diario)."
+        },
+        "due_on": {
+          "name": "Prevista el",
+          "description": "Fecha prevista."
+        },
+        "title": {
+          "name": "Título",
+          "description": "Opcional; por defecto: tipo y planta."
+        },
+        "planting_id": {
+          "name": "Planta",
+          "description": "ID de la planta."
+        },
+        "zone_id": {
+          "name": "Zona",
+          "description": "ID de la zona."
+        },
+        "yearly": {
+          "name": "Cada año",
+          "description": "Una vez hecha, la misma tarea se planifica un año después."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        }
+      }
+    },
+    "delete_task": {
+      "name": "Eliminar actividad planificada",
+      "description": "La elimina (el diario no se toca).",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID de la tarea."
+        }
+      }
+    },
+    "complete_task": {
+      "name": "Completar actividad planificada",
+      "description": "La marca como hecha y la registra en el diario.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID de la tarea."
+        },
+        "done_on": {
+          "name": "Hecha el",
+          "description": "Por defecto: hoy."
+        }
+      }
+    },
+    "export": {
+      "name": "Exportar datos",
+      "description": "Devuelve todos los datos de HA Homestead."
+    },
+    "add_seed_lot": {
+      "name": "Añadir lote de semillas",
+      "description": "Añade semillas al inventario (sobre, tarro, semillas propias).",
+      "fields": {
+        "species": {
+          "name": "Especie",
+          "description": "Nombre científico o común; opcional con una especie vinculada."
+        },
+        "taxon_id": {
+          "name": "Especie importada",
+          "description": "Especie importada (id)."
+        },
+        "variety": {
+          "name": "Variedad",
+          "description": "Variedad."
+        },
+        "year": {
+          "name": "Año",
+          "description": "Año de envasado o cosecha: la germinación baja con la edad."
+        },
+        "supplier": {
+          "name": "Proveedor",
+          "description": "Tienda, intercambio de semillas, semillas propias…"
+        },
+        "quantity": {
+          "name": "Cantidad",
+          "description": "Texto libre: 1 sobre, 20 g…"
+        },
+        "viability_years": {
+          "name": "Duración (años)",
+          "description": "Cuántos años germinan bien estas semillas; vacío = valor típico de la familia."
+        },
+        "finished": {
+          "name": "Agotadas",
+          "description": "Semillas agotadas."
+        },
+        "price": {
+          "name": "Precio",
+          "description": "Precio de compra; se registra como gasto de semillas."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        }
+      }
+    },
+    "update_seed_lot": {
+      "name": "Modificar lote de semillas",
+      "description": "Cambia los campos indicados de un lote de semillas.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id del lote de semillas."
+        },
+        "species": {
+          "name": "Especie",
+          "description": "Nombre científico o común; opcional con una especie vinculada."
+        },
+        "taxon_id": {
+          "name": "Especie importada",
+          "description": "Especie importada (id)."
+        },
+        "variety": {
+          "name": "Variedad",
+          "description": "Variedad."
+        },
+        "year": {
+          "name": "Año",
+          "description": "Año de envasado o cosecha: la germinación baja con la edad."
+        },
+        "supplier": {
+          "name": "Proveedor",
+          "description": "Tienda, intercambio de semillas, semillas propias…"
+        },
+        "quantity": {
+          "name": "Cantidad",
+          "description": "Texto libre: 1 sobre, 20 g…"
+        },
+        "viability_years": {
+          "name": "Duración (años)",
+          "description": "Cuántos años germinan bien estas semillas; vacío = valor típico de la familia."
+        },
+        "finished": {
+          "name": "Agotadas",
+          "description": "Semillas agotadas."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        }
+      }
+    },
+    "delete_seed_lot": {
+      "name": "Eliminar lote de semillas",
+      "description": "Elimina un lote de semillas; las plantas conservan sus datos.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id del lote de semillas."
+        }
+      }
+    },
+    "set_crop_profile": {
+      "name": "Fijar datos de cultivo",
+      "description": "Guarda tus valores para una especie (exposición, rusticidad, meses de siembra, plantación, floración y cosecha); sustituyen a los de base.",
+      "fields": {
+        "species": {
+          "name": "Especie",
+          "description": "Nombre científico."
+        },
+        "exposure": {
+          "name": "Exposición",
+          "description": "Sol, semisombra, sombra."
+        },
+        "hardiness_c": {
+          "name": "Rusticidad",
+          "description": "Temperatura más baja soportada."
+        },
+        "sow_indoor": {
+          "name": "Siembra en semillero",
+          "description": "Meses de siembra en semillero."
+        },
+        "sow_outdoor": {
+          "name": "Siembra directa",
+          "description": "Meses de siembra directa."
+        },
+        "plant_out": {
+          "name": "Plantación",
+          "description": "Meses de plantación o trasplante."
+        },
+        "flowering": {
+          "name": "Floración",
+          "description": "Meses de floración."
+        },
+        "harvest": {
+          "name": "Cosecha",
+          "description": "Meses de cosecha."
+        },
+        "pruning": {
+          "name": "Poda",
+          "description": "Meses de poda."
+        },
+        "fertilizing": {
+          "name": "Abonado",
+          "description": "Meses de abonado."
+        },
+        "end": {
+          "name": "Fin del cultivo",
+          "description": "Meses en que el cultivo suele terminar (anuales)."
+        },
+        "spacing_cm": {
+          "name": "Distancia",
+          "description": "Distancia entre plantas."
+        },
+        "heat_max_c": {
+          "name": "Límite de calor",
+          "description": "Por encima de esta máxima durante unos días el cultivo sufre (cultivos de temporada fresca: lechuga, espinaca, guisantes…)."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        }
+      }
+    },
+    "delete_crop_profile": {
+      "name": "Restablecer datos de cultivo",
+      "description": "Elimina tus valores para una especie: vuelven a aplicarse los de base.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id de los datos de cultivo."
+        }
+      }
+    }
+  },
+  "common": {
+    "notification_title": "🌱 Huerto",
+    "notification_done": "✔ Hecho",
+    "notification_late": "{count} actividades con retraso",
+    "alert_frost": "❄️ Helada {when}: {value} °C — {plants}",
+    "alert_cold": "🥶 Frío {when}: {value} °C para {plants}",
+    "alert_heatwave": "🔥 Ola de calor {when}: hasta {value} °C",
+    "alert_heat_extreme": "🔥 Calor extremo {when}: {value} °C",
+    "alert_heat_stress": "🥵 Demasiado calor para {plants}: {when}, hasta {value} °C",
+    "issue_rain_48h": "lluvia en 48 h",
+    "issue_wind": "viento",
+    "issue_hot": "demasiado calor",
+    "issue_frost_next": "helada en los próximos días",
+    "issue_rain_today": "lluvia ese día",
+    "issue_cold_nights": "noches frías esta semana",
+    "issue_heavy_rain": "lluvia intensa",
+    "issue_rain_coming": "lluvia en camino",
+    "issue_frozen": "suelo helado",
+    "issue_gusts": "rachas fuertes",
+    "better_on": "mejor el {date}",
+    "notification_compost": "♻️ {zone}: voltear el compost ({days} días desde la última vez)",
+    "notification_tool": "🔧 {tool}: mantenimiento pendiente",
+    "notification_water": "🪴 Por regar: {plants}"
+  }
+}

@@ -1,0 +1,1352 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "HA Homestead",
+        "description": "Beheer je moestuin, boomgaard en tuin. Locatie en valuta komen uit de instellingen van Home Assistant."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "HA Homestead is al ingesteld."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Weer voor het logboek",
+        "description": "Elke logboekgebeurtenis bewaart het weer van de week ervoor (en van de 3 dagen erna bij behandelingen en zaaien). Kies je sensoren; wat ontbreekt komt van Open-Meteo (gratis, zonder account). Herinneringen: de activiteiten voor vandaag worden op het gekozen tijdstip naar de gekozen telefoons gestuurd; tikken opent het logboekformulier al ingevuld. Waarschuwingen: vorst onder de winterhardheid van elke plant, hittegolf (hete dagen en warme nachten meerdere dagen achter elkaar, als planten 's nachts niet meer herstellen), extreme hitte. De verwachting komt van de gekozen weerentiteit, anders van Open-Meteo.",
+        "data": {
+          "temperature_sensor": "Buitentemperatuur",
+          "humidity_sensor": "Luchtvochtigheid buiten",
+          "rain_sensor": "Regen (totaal, mm)",
+          "soil_moisture_sensor": "Bodemvochtigheid",
+          "open_meteo": "Open-Meteo gebruiken voor ontbrekende gegevens",
+          "notify_services": "Herinneringen sturen naar",
+          "notify_time": "Tijd van de herinneringen",
+          "weather_entity": "Weersverwachting (weerentiteit van HA)",
+          "alert_notify": "Vorst- en hittewaarschuwingen op de telefoons",
+          "heat_max": "Hittegolf: maximum vanaf",
+          "heat_night": "Hittegolf: nachtminimum vanaf",
+          "heat_days": "Hittegolf: dagen achter elkaar",
+          "heat_extreme": "Extreme hitte: maximum vanaf (ook één dag)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "plantings": {
+        "name": "Planten"
+      },
+      "expenses_year": {
+        "name": "Uitgaven van het jaar"
+      },
+      "tools_needing_service": {
+        "name": "Gereedschap dat onderhoud nodig heeft"
+      },
+      "weather_alerts": {
+        "name": "Weerwaarschuwingen"
+      }
+    },
+    "todo": {
+      "tasks": {
+        "name": "Tuintaken"
+      }
+    },
+    "calendar": {
+      "garden": {
+        "name": "Tuin"
+      }
+    }
+  },
+  "exceptions": {
+    "not_loaded": {
+      "message": "HA Homestead is niet geladen."
+    },
+    "unknown_reference": {
+      "message": "Onbekend {field}: {value}."
+    },
+    "zone_cycle": {
+      "message": "Een zone kan niet in zichzelf of in een van haar subzones liggen."
+    },
+    "incomplete_position": {
+      "message": "Breedte- en lengtegraad moeten samen worden opgegeven."
+    },
+    "species_required": {
+      "message": "Geef een soort op of koppel een geïmporteerde soort."
+    },
+    "sources_unavailable": {
+      "message": "GBIF en Wikidata antwoorden niet: probeer het later opnieuw."
+    }
+  },
+  "selector": {
+    "planting_kind": {
+      "options": {
+        "single": "Losse plant",
+        "group": "Groep (rij, bed)"
+      }
+    },
+    "plant_type": {
+      "options": {
+        "tree": "Boom",
+        "fruit_tree": "Fruitboom",
+        "shrub": "Struik",
+        "vine": "Klimplant, wijnstok",
+        "vegetable": "Groente",
+        "herb": "Kruid",
+        "flower": "Bloem",
+        "houseplant": "Kamerplant",
+        "other": "Overig"
+      }
+    },
+    "initial_form": {
+      "options": {
+        "seed": "Zaad",
+        "cutting": "Stek",
+        "bulb": "Bol",
+        "bare_root": "Blote wortel",
+        "potted": "In pot",
+        "one_year": "Eenjarige spil",
+        "two_years": "Tweejarige boom",
+        "other": "Overig"
+      }
+    },
+    "expense_category": {
+      "options": {
+        "plants": "Planten",
+        "seeds": "Zaden",
+        "tools": "Gereedschap",
+        "fertilizers": "Meststoffen",
+        "treatments": "Bestrijdingsmiddelen",
+        "water": "Water",
+        "services": "Diensten en arbeid",
+        "sales": "Verkoop",
+        "animals": "Dieren (voer, verzorging)",
+        "other": "Overig"
+      }
+    },
+    "tool_power": {
+      "options": {
+        "manual": "Handmatig",
+        "battery": "Accu",
+        "petrol": "Benzine",
+        "electric": "Elektrisch"
+      }
+    },
+    "tool_status": {
+      "options": {
+        "ok": "OK",
+        "needs_service": "Onderhoud nodig",
+        "broken": "Kapot"
+      }
+    },
+    "planting_status": {
+      "options": {
+        "active": "Actief",
+        "dead": "Dood",
+        "removed": "Verwijderd"
+      }
+    },
+    "zone_kind": {
+      "options": {
+        "vegetable_garden": "Moestuin",
+        "orchard": "Boomgaard",
+        "flower_bed": "Bloembed",
+        "greenhouse": "Kas",
+        "pots": "Potten",
+        "lawn": "Gazon",
+        "woodland": "Bos",
+        "compost": "Composthoop",
+        "coop": "Kippenhok",
+        "nursery": "Kweekbak",
+        "indoor": "Binnen (een kamer)",
+        "other": "Overig"
+      }
+    },
+    "planting_origin": {
+      "options": {
+        "existing": "Was er al",
+        "planted": "Door mij geplant",
+        "sown": "Door mij gezaaid"
+      }
+    },
+    "event_kind": {
+      "options": {
+        "pruning": "Snoeien",
+        "fertilizing": "Bemesting",
+        "watering": "Water geven",
+        "treatment": "Behandeling",
+        "sowing": "Zaaien",
+        "harvest": "Oogst",
+        "grafting": "Enten",
+        "problem": "Probleem",
+        "note": "Notitie",
+        "removal": "Einde van de plant",
+        "review": "Seizoensoverzicht",
+        "tillage": "Grondbewerking (schoffelen, spitten)",
+        "weeding": "Wieden",
+        "mulching": "Mulchen",
+        "mowing": "Maaien",
+        "clearing": "Bos opruimen",
+        "wood_cutting": "Hout kappen",
+        "brushwood": "Takken, takkenbossen",
+        "foraging": "Wildpluk (paddenstoelen, kastanjes…)",
+        "compost_turn": "Compost omzetten",
+        "compost_harvest": "Compost oogsten",
+        "eggs": "Eieren",
+        "flock_in": "Kippen erbij",
+        "flock_out": "Kippen weg",
+        "animal_care": "Voer en verzorging",
+        "coop_cleaning": "Kippenhok schoonmaken",
+        "repotting": "Verpotten",
+        "wood_burned": "Gestookt hout (winter)"
+      }
+    },
+    "harvest_unit": {
+      "options": {
+        "kg": "kg",
+        "pieces": "Stuks",
+        "l": "Liter",
+        "q": "Kwintalen (100 kg)",
+        "stere": "Stère",
+        "m3": "Kubieke meter"
+      }
+    },
+    "abundance": {
+      "options": {
+        "poor": "Mager",
+        "normal": "Normaal",
+        "abundant": "Overvloedig"
+      }
+    },
+    "event_reason": {
+      "options": {
+        "finished": "Klaar (seizoen voorbij)",
+        "died": "Dood",
+        "removed": "Verwijderd (verplaatst, weggegeven…)",
+        "predator": "Roofdier (vos…)",
+        "illness": "Ziekte",
+        "age": "Ouderdom",
+        "sold": "Verkocht of weggegeven",
+        "slaughtered": "Geslacht",
+        "other": "Overig"
+      }
+    },
+    "death_cause": {
+      "options": {
+        "frost": "Vorst",
+        "drought": "Droogte",
+        "disease": "Ziekte",
+        "pests": "Plagen",
+        "animals": "Dieren",
+        "unknown": "Onbekend"
+      }
+    },
+    "month": {
+      "options": {
+        "1": "Januari",
+        "2": "Februari",
+        "3": "Maart",
+        "4": "April",
+        "5": "Mei",
+        "6": "Juni",
+        "7": "Juli",
+        "8": "Augustus",
+        "9": "September",
+        "10": "Oktober",
+        "11": "November",
+        "12": "December"
+      }
+    },
+    "exposure": {
+      "options": {
+        "sun": "Volle zon",
+        "partial": "Halfschaduw",
+        "shade": "Schaduw"
+      }
+    },
+    "alert_notify": {
+      "options": {
+        "off": "Uit (alleen in het paneel)",
+        "tasks": "Alleen met een geplande activiteit op die dagen",
+        "always": "Altijd"
+      }
+    }
+  },
+  "services": {
+    "add_zone": {
+      "name": "Zone toevoegen",
+      "description": "Voegt een tuinzone toe (bed, boomgaard, kas). Zones zijn intern en maken nooit Home Assistant-ruimtes aan.",
+      "fields": {
+        "name": {
+          "name": "Naam",
+          "description": "Naam van de zone."
+        },
+        "parent_id": {
+          "name": "Bovenliggende zone",
+          "description": "ID van de bovenliggende zone."
+        },
+        "kind": {
+          "name": "Soort",
+          "description": "Soort zone."
+        },
+        "area_id": {
+          "name": "Home Assistant-ruimte",
+          "description": "Optionele koppeling met een bestaande ruimte."
+        },
+        "geometry": {
+          "name": "Geometrie",
+          "description": "GeoJSON-polygoon (coördinaten lengte, breedte). De oppervlakte wordt berekend."
+        },
+        "species": {
+          "name": "Belangrijkste boomsoorten",
+          "description": "Belangrijkste soorten van de zone (bijv. van een bos): namen, of objecten met name en taxon_id."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        }
+      }
+    },
+    "update_zone": {
+      "name": "Zone wijzigen",
+      "description": "Wijzigt de opgegeven velden van een zone (ook de polygoon).",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID van de zone."
+        },
+        "name": {
+          "name": "Naam",
+          "description": "Naam van de zone."
+        },
+        "parent_id": {
+          "name": "Bovenliggende zone",
+          "description": "ID van de bovenliggende zone."
+        },
+        "kind": {
+          "name": "Soort",
+          "description": "Soort zone."
+        },
+        "area_id": {
+          "name": "Home Assistant-ruimte",
+          "description": "Optionele koppeling met een bestaande ruimte."
+        },
+        "geometry": {
+          "name": "Geometrie",
+          "description": "GeoJSON-polygoon (coördinaten lengte, breedte). De oppervlakte wordt berekend."
+        },
+        "species": {
+          "name": "Belangrijkste boomsoorten",
+          "description": "Belangrijkste soorten van de zone (bijv. van een bos): namen, of objecten met name en taxon_id."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        }
+      }
+    },
+    "delete_zone": {
+      "name": "Zone verwijderen",
+      "description": "Verwijdert een zone; subzones en planten gaan naar de bovenliggende zone.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID van de zone."
+        }
+      }
+    },
+    "add_planting": {
+      "name": "Plant toevoegen",
+      "description": "Voegt een boom, een plant of een groep planten toe.",
+      "fields": {
+        "name": {
+          "name": "Naam",
+          "description": "Jouw naam voor deze plant."
+        },
+        "species": {
+          "name": "Soort",
+          "description": "Wetenschappelijke of gewone naam; optioneel als een geïmporteerde soort gekoppeld is."
+        },
+        "taxon_id": {
+          "name": "Geïmporteerde soort",
+          "description": "ID van een geïmporteerde soort (dienst import_taxon); zonder soortnaam wordt de wetenschappelijke naam gebruikt."
+        },
+        "variety": {
+          "name": "Ras",
+          "description": "Cultivar of ras."
+        },
+        "plant_type": {
+          "name": "Planttype",
+          "description": "Boom, struik, groente… (icoon op de kaart)."
+        },
+        "kind": {
+          "name": "Soort",
+          "description": "Losse plant of groep."
+        },
+        "quantity": {
+          "name": "Hoeveelheid",
+          "description": "Aantal planten (alleen groepen)."
+        },
+        "origin": {
+          "name": "Herkomst",
+          "description": "Was er al, door jou geplant of gezaaid."
+        },
+        "sown_on": {
+          "name": "Gezaaid op",
+          "description": "Zaaidatum; de maanfase wordt vastgelegd."
+        },
+        "planted_on": {
+          "name": "Geplant op",
+          "description": "Datum van uitplanten of verplanten."
+        },
+        "birth_year": {
+          "name": "Geschat geboortejaar",
+          "description": "Geschat jaar van zaaien of enten, voor de leeftijd."
+        },
+        "initial_form": {
+          "name": "Plantvorm",
+          "description": "Wat er geplant is."
+        },
+        "initial_height_cm": {
+          "name": "Beginhoogte",
+          "description": "Geschatte hoogte bij het planten."
+        },
+        "rootstock": {
+          "name": "Onderstam",
+          "description": "Voor geënte fruitbomen."
+        },
+        "supplier": {
+          "name": "Leverancier",
+          "description": "Waar gekocht."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "ID van de zone."
+        },
+        "latitude": {
+          "name": "Breedtegraad",
+          "description": "Positie op de kaart."
+        },
+        "longitude": {
+          "name": "Lengtegraad",
+          "description": "Positie op de kaart."
+        },
+        "price": {
+          "name": "Prijs",
+          "description": "Aankoopprijs; wordt als uitgave geregistreerd."
+        },
+        "seed_lot_id": {
+          "name": "Zaadpartij",
+          "description": "Gebruikte zaden (id van een partij)."
+        },
+        "sown_count": {
+          "name": "Gezaaide zaden",
+          "description": "Gezaaide zaden of cellen."
+        },
+        "germinated_on": {
+          "name": "Opgekomen op",
+          "description": "Dag waarop de eerste zaailingen opkwamen."
+        },
+        "germinated_count": {
+          "name": "Zaailingen",
+          "description": "Hoeveel er opgekomen zijn."
+        },
+        "water_days": {
+          "name": "Water geven elke (dagen)",
+          "description": "Kamerplanten: dagen tussen twee gietbeurten (in de winter de helft langer)."
+        },
+        "fertilize_weeks": {
+          "name": "Bemesten elke (weken)",
+          "description": "Kamerplanten: van maart tot september."
+        },
+        "moisture_entity": {
+          "name": "Vochtsensor potgrond",
+          "description": "Optioneel: water geven als de waarde onder de drempel komt."
+        },
+        "moisture_min": {
+          "name": "Water geven onder (%)",
+          "description": "Standaard 20%."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        }
+      }
+    },
+    "update_planting": {
+      "name": "Plant wijzigen",
+      "description": "Wijzigt de opgegeven velden van een plant (ook de positie).",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID van de plant."
+        },
+        "name": {
+          "name": "Naam",
+          "description": "Jouw naam voor deze plant."
+        },
+        "species": {
+          "name": "Soort",
+          "description": "Wetenschappelijke of gewone naam; optioneel als een geïmporteerde soort gekoppeld is."
+        },
+        "taxon_id": {
+          "name": "Geïmporteerde soort",
+          "description": "ID van een geïmporteerde soort (dienst import_taxon); zonder soortnaam wordt de wetenschappelijke naam gebruikt."
+        },
+        "variety": {
+          "name": "Ras",
+          "description": "Cultivar of ras."
+        },
+        "plant_type": {
+          "name": "Planttype",
+          "description": "Boom, struik, groente… (icoon op de kaart)."
+        },
+        "kind": {
+          "name": "Soort",
+          "description": "Losse plant of groep."
+        },
+        "quantity": {
+          "name": "Hoeveelheid",
+          "description": "Aantal planten (alleen groepen)."
+        },
+        "origin": {
+          "name": "Herkomst",
+          "description": "Was er al, door jou geplant of gezaaid."
+        },
+        "sown_on": {
+          "name": "Gezaaid op",
+          "description": "Zaaidatum; de maanfase wordt vastgelegd."
+        },
+        "planted_on": {
+          "name": "Geplant op",
+          "description": "Datum van uitplanten of verplanten."
+        },
+        "birth_year": {
+          "name": "Geschat geboortejaar",
+          "description": "Geschat jaar van zaaien of enten, voor de leeftijd."
+        },
+        "initial_form": {
+          "name": "Plantvorm",
+          "description": "Wat er geplant is."
+        },
+        "initial_height_cm": {
+          "name": "Beginhoogte",
+          "description": "Geschatte hoogte bij het planten."
+        },
+        "rootstock": {
+          "name": "Onderstam",
+          "description": "Voor geënte fruitbomen."
+        },
+        "supplier": {
+          "name": "Leverancier",
+          "description": "Waar gekocht."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "ID van de zone."
+        },
+        "latitude": {
+          "name": "Breedtegraad",
+          "description": "Positie op de kaart."
+        },
+        "longitude": {
+          "name": "Lengtegraad",
+          "description": "Positie op de kaart."
+        },
+        "status": {
+          "name": "Status",
+          "description": "Actief, dood of verwijderd."
+        },
+        "seed_lot_id": {
+          "name": "Zaadpartij",
+          "description": "Gebruikte zaden (id van een partij)."
+        },
+        "sown_count": {
+          "name": "Gezaaide zaden",
+          "description": "Gezaaide zaden of cellen."
+        },
+        "germinated_on": {
+          "name": "Opgekomen op",
+          "description": "Dag waarop de eerste zaailingen opkwamen."
+        },
+        "germinated_count": {
+          "name": "Zaailingen",
+          "description": "Hoeveel er opgekomen zijn."
+        },
+        "water_days": {
+          "name": "Water geven elke (dagen)",
+          "description": "Kamerplanten: dagen tussen twee gietbeurten (in de winter de helft langer)."
+        },
+        "fertilize_weeks": {
+          "name": "Bemesten elke (weken)",
+          "description": "Kamerplanten: van maart tot september."
+        },
+        "moisture_entity": {
+          "name": "Vochtsensor potgrond",
+          "description": "Optioneel: water geven als de waarde onder de drempel komt."
+        },
+        "moisture_min": {
+          "name": "Water geven onder (%)",
+          "description": "Standaard 20%."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        }
+      }
+    },
+    "delete_planting": {
+      "name": "Plant verwijderen",
+      "description": "Verwijdert een per vergissing ingevoerde plant. Gekoppelde uitgaven blijven. Gebruik voor een dode plant liever de status.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID van de plant."
+        }
+      }
+    },
+    "import_taxon": {
+      "name": "Soort importeren",
+      "description": "Importeert een soort uit GBIF/Wikidata (gewone namen, familie, geslacht) en slaat die lokaal op. Geeft de id terug; een bestaande wordt bijgewerkt.",
+      "fields": {
+        "gbif_key": {
+          "name": "GBIF-sleutel",
+          "description": "Nummer van de soort op gbif.org."
+        },
+        "wikidata_id": {
+          "name": "Wikidata-ID",
+          "description": "Bijv. Q18674606."
+        }
+      }
+    },
+    "add_expense": {
+      "name": "Uitgave toevoegen",
+      "description": "Registreert een uitgave.",
+      "fields": {
+        "amount": {
+          "name": "Bedrag",
+          "description": "Uitgegeven bedrag."
+        },
+        "category": {
+          "name": "Categorie",
+          "description": "Uitgavencategorie."
+        },
+        "spent_on": {
+          "name": "Datum",
+          "description": "Standaard vandaag."
+        },
+        "supplier": {
+          "name": "Leverancier",
+          "description": "Waar gekocht."
+        },
+        "planting_id": {
+          "name": "Plant",
+          "description": "ID van de gekoppelde plant."
+        },
+        "tool_id": {
+          "name": "Gereedschap",
+          "description": "ID van het gekoppelde gereedschap."
+        },
+        "event_id": {
+          "name": "Logboekgebeurtenis",
+          "description": "ID van de gekoppelde gebeurtenis."
+        },
+        "income": {
+          "name": "Inkomst",
+          "description": "Een inkomst (bijv. een verkoop) in plaats van een uitgave."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        }
+      }
+    },
+    "add_tool": {
+      "name": "Gereedschap toevoegen",
+      "description": "Voegt gereedschap toe aan de inventaris.",
+      "fields": {
+        "name": {
+          "name": "Naam",
+          "description": "Naam van het gereedschap."
+        },
+        "category": {
+          "name": "Categorie",
+          "description": "Snoeien, spitten, irrigatie…"
+        },
+        "brand": {
+          "name": "Merk",
+          "description": "Merk."
+        },
+        "model": {
+          "name": "Model",
+          "description": "Model."
+        },
+        "purchased_on": {
+          "name": "Gekocht op",
+          "description": "Aankoopdatum."
+        },
+        "power": {
+          "name": "Aandrijving",
+          "description": "Energiebron."
+        },
+        "status": {
+          "name": "Status",
+          "description": "Huidige toestand."
+        },
+        "next_service_on": {
+          "name": "Volgend onderhoud",
+          "description": "Volgende slijpbeurt of onderhoud."
+        },
+        "service_months": {
+          "name": "Onderhoud elke (maanden)",
+          "description": "Ruw onderhoudsplan voor motoren: na een beurt komt de volgende zoveel maanden later."
+        },
+        "price": {
+          "name": "Prijs",
+          "description": "Aankoopprijs; wordt als uitgave geregistreerd."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        }
+      }
+    },
+    "update_expense": {
+      "name": "Uitgave wijzigen",
+      "description": "Wijzigt de opgegeven velden van een uitgave.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID van de uitgave."
+        },
+        "amount": {
+          "name": "Bedrag",
+          "description": "Uitgegeven bedrag."
+        },
+        "category": {
+          "name": "Categorie",
+          "description": "Uitgavencategorie."
+        },
+        "spent_on": {
+          "name": "Datum",
+          "description": "Standaard vandaag."
+        },
+        "supplier": {
+          "name": "Leverancier",
+          "description": "Waar gekocht."
+        },
+        "planting_id": {
+          "name": "Plant",
+          "description": "ID van de gekoppelde plant."
+        },
+        "tool_id": {
+          "name": "Gereedschap",
+          "description": "ID van het gekoppelde gereedschap."
+        },
+        "event_id": {
+          "name": "Logboekgebeurtenis",
+          "description": "ID van de gekoppelde gebeurtenis."
+        },
+        "income": {
+          "name": "Inkomst",
+          "description": "Een inkomst (bijv. een verkoop) in plaats van een uitgave."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        }
+      }
+    },
+    "delete_expense": {
+      "name": "Uitgave verwijderen",
+      "description": "Verwijdert een uitgave.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID van de uitgave."
+        }
+      }
+    },
+    "update_tool": {
+      "name": "Gereedschap wijzigen",
+      "description": "Wijzigt de opgegeven velden van gereedschap.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID van het gereedschap."
+        },
+        "name": {
+          "name": "Naam",
+          "description": "Naam van het gereedschap."
+        },
+        "category": {
+          "name": "Categorie",
+          "description": "Snoeien, spitten, irrigatie…"
+        },
+        "brand": {
+          "name": "Merk",
+          "description": "Merk."
+        },
+        "model": {
+          "name": "Model",
+          "description": "Model."
+        },
+        "purchased_on": {
+          "name": "Gekocht op",
+          "description": "Aankoopdatum."
+        },
+        "power": {
+          "name": "Aandrijving",
+          "description": "Energiebron."
+        },
+        "status": {
+          "name": "Status",
+          "description": "Huidige toestand."
+        },
+        "next_service_on": {
+          "name": "Volgend onderhoud",
+          "description": "Volgende slijpbeurt of onderhoud."
+        },
+        "service_months": {
+          "name": "Onderhoud elke (maanden)",
+          "description": "Ruw onderhoudsplan voor motoren: na een beurt komt de volgende zoveel maanden later."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        }
+      }
+    },
+    "delete_tool": {
+      "name": "Gereedschap verwijderen",
+      "description": "Verwijdert gereedschap; gekoppelde uitgaven blijven.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID van het gereedschap."
+        }
+      }
+    },
+    "delete_photo": {
+      "name": "Foto verwijderen",
+      "description": "Verwijdert een foto en het bestand.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID van de foto."
+        }
+      }
+    },
+    "add_event": {
+      "name": "Gebeurtenis aan logboek toevoegen",
+      "description": "Legt vast wat er aan een plant of zone gedaan is (snoeien, behandeling, oogst…).",
+      "fields": {
+        "kind": {
+          "name": "Soort",
+          "description": "Soort gebeurtenis."
+        },
+        "done_on": {
+          "name": "Datum",
+          "description": "Standaard vandaag; de maanfase wordt vastgelegd."
+        },
+        "planting_id": {
+          "name": "Plant",
+          "description": "ID van de plant (of geef een zone op)."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "ID van de zone: de gebeurtenis geldt voor al haar planten."
+        },
+        "product": {
+          "name": "Product",
+          "description": "Meststof of bestrijdingsmiddel."
+        },
+        "dose": {
+          "name": "Dosis",
+          "description": "Bijv. 30 g / 10 L."
+        },
+        "quantity": {
+          "name": "Hoeveelheid",
+          "description": "Geoogste hoeveelheid."
+        },
+        "unit": {
+          "name": "Eenheid",
+          "description": "kg, stuks of liters."
+        },
+        "rating": {
+          "name": "Beoordeling",
+          "description": "1 tot 5 sterren."
+        },
+        "abundance": {
+          "name": "Oogst",
+          "description": "Mager, normaal of overvloedig (als niet gewogen)."
+        },
+        "keep": {
+          "name": "Herhalen",
+          "description": "Wat goed ging."
+        },
+        "avoid": {
+          "name": "Vermijden",
+          "description": "Wat misging."
+        },
+        "reason": {
+          "name": "Reden",
+          "description": "Einde van de plant: klaar, dood of verwijderd. Kippen weg: waarom."
+        },
+        "cause": {
+          "name": "Oorzaak",
+          "description": "Een dode plant: waaraan ze is doodgegaan."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        },
+        "task_id": {
+          "name": "Geplande activiteit",
+          "description": "ID van de geplande activiteit die deze gebeurtenis afrondt."
+        },
+        "cost": {
+          "name": "Kosten",
+          "description": "Wordt geregistreerd als uitgave gekoppeld aan de gebeurtenis."
+        },
+        "revenue": {
+          "name": "Opbrengst",
+          "description": "Wordt geregistreerd als inkomst gekoppeld aan de gebeurtenis."
+        }
+      }
+    },
+    "update_event": {
+      "name": "Gebeurtenis wijzigen",
+      "description": "Wijzigt de opgegeven velden van een gebeurtenis.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID van de gebeurtenis."
+        },
+        "kind": {
+          "name": "Soort",
+          "description": "Soort gebeurtenis."
+        },
+        "done_on": {
+          "name": "Datum",
+          "description": "Standaard vandaag; de maanfase wordt vastgelegd."
+        },
+        "planting_id": {
+          "name": "Plant",
+          "description": "ID van de plant (of geef een zone op)."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "ID van de zone: de gebeurtenis geldt voor al haar planten."
+        },
+        "product": {
+          "name": "Product",
+          "description": "Meststof of bestrijdingsmiddel."
+        },
+        "dose": {
+          "name": "Dosis",
+          "description": "Bijv. 30 g / 10 L."
+        },
+        "quantity": {
+          "name": "Hoeveelheid",
+          "description": "Geoogste hoeveelheid."
+        },
+        "unit": {
+          "name": "Eenheid",
+          "description": "kg, stuks of liters."
+        },
+        "rating": {
+          "name": "Beoordeling",
+          "description": "1 tot 5 sterren."
+        },
+        "abundance": {
+          "name": "Oogst",
+          "description": "Mager, normaal of overvloedig (als niet gewogen)."
+        },
+        "keep": {
+          "name": "Herhalen",
+          "description": "Wat goed ging."
+        },
+        "avoid": {
+          "name": "Vermijden",
+          "description": "Wat misging."
+        },
+        "reason": {
+          "name": "Reden",
+          "description": "Einde van de plant: klaar, dood of verwijderd. Kippen weg: waarom."
+        },
+        "cause": {
+          "name": "Oorzaak",
+          "description": "Een dode plant: waaraan ze is doodgegaan."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        }
+      }
+    },
+    "delete_event": {
+      "name": "Gebeurtenis verwijderen",
+      "description": "Verwijdert een gebeurtenis en de foto's; de uitgaven blijven.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID van de gebeurtenis."
+        }
+      }
+    },
+    "refresh_weather": {
+      "name": "Weer bijwerken",
+      "description": "Berekent het weer van één of alle gebeurtenissen opnieuw (bijv. na het kiezen van nieuwe sensoren).",
+      "fields": {
+        "id": {
+          "name": "Gebeurtenis",
+          "description": "ID van de gebeurtenis; leeg = alle."
+        }
+      }
+    },
+    "repeat_planting": {
+      "name": "Volgend jaar herhalen",
+      "description": "Maakt hetzelfde gewas voor een nieuw seizoen (soort, ras, zone, positie; zonder data).",
+      "fields": {
+        "id": {
+          "name": "Plant",
+          "description": "Te herhalen plant."
+        },
+        "year": {
+          "name": "Jaar",
+          "description": "Standaard: volgend jaar."
+        }
+      }
+    },
+    "transplant": {
+      "name": "Uitplanten",
+      "description": "Haalt zaailingen uit de kweekbak; een deel wordt een nieuwe plant, de rest blijft.",
+      "fields": {
+        "id": {
+          "name": "Plant",
+          "description": "Zaailingen in de kweekbak."
+        },
+        "quantity": {
+          "name": "Hoeveel",
+          "description": "Standaard: alle."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "Waar ze naartoe gaan."
+        },
+        "done_on": {
+          "name": "Datum",
+          "description": "Standaard: vandaag."
+        },
+        "latitude": {
+          "name": "Breedtegraad",
+          "description": "Positie (optioneel)."
+        },
+        "longitude": {
+          "name": "Lengtegraad",
+          "description": "Positie (optioneel)."
+        }
+      }
+    },
+    "add_task": {
+      "name": "Geplande activiteit toevoegen",
+      "description": "Plant een activiteit: die verschijnt in de takenlijst en de kalender.",
+      "fields": {
+        "kind": {
+          "name": "Soort",
+          "description": "Soort activiteit (zoals in het logboek)."
+        },
+        "due_on": {
+          "name": "Gepland op",
+          "description": "Geplande datum."
+        },
+        "title": {
+          "name": "Titel",
+          "description": "Optioneel; standaard: soort en plant."
+        },
+        "planting_id": {
+          "name": "Plant",
+          "description": "ID van de plant."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "ID van de zone."
+        },
+        "yearly": {
+          "name": "Elk jaar",
+          "description": "Na afronden wordt dezelfde taak een jaar later opnieuw gepland."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        }
+      }
+    },
+    "update_task": {
+      "name": "Geplande activiteit wijzigen",
+      "description": "Wijzigt de opgegeven velden.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID van de taak."
+        },
+        "kind": {
+          "name": "Soort",
+          "description": "Soort activiteit (zoals in het logboek)."
+        },
+        "due_on": {
+          "name": "Gepland op",
+          "description": "Geplande datum."
+        },
+        "title": {
+          "name": "Titel",
+          "description": "Optioneel; standaard: soort en plant."
+        },
+        "planting_id": {
+          "name": "Plant",
+          "description": "ID van de plant."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "ID van de zone."
+        },
+        "yearly": {
+          "name": "Elk jaar",
+          "description": "Na afronden wordt dezelfde taak een jaar later opnieuw gepland."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        }
+      }
+    },
+    "delete_task": {
+      "name": "Geplande activiteit verwijderen",
+      "description": "Verwijdert ze (het logboek blijft ongemoeid).",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID van de taak."
+        }
+      }
+    },
+    "complete_task": {
+      "name": "Geplande activiteit afronden",
+      "description": "Markeert ze als gedaan en zet ze in het logboek.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID van de taak."
+        },
+        "done_on": {
+          "name": "Gedaan op",
+          "description": "Standaard: vandaag."
+        }
+      }
+    },
+    "export": {
+      "name": "Gegevens exporteren",
+      "description": "Geeft alle gegevens van HA Homestead terug."
+    },
+    "add_seed_lot": {
+      "name": "Zaadpartij toevoegen",
+      "description": "Voegt zaden toe aan de inventaris (zakje, pot, eigen zaad).",
+      "fields": {
+        "species": {
+          "name": "Soort",
+          "description": "Wetenschappelijke of gewone naam; optioneel met een gekoppelde soort."
+        },
+        "taxon_id": {
+          "name": "Geïmporteerde soort",
+          "description": "Geïmporteerde soort (id)."
+        },
+        "variety": {
+          "name": "Ras",
+          "description": "Ras."
+        },
+        "year": {
+          "name": "Jaar",
+          "description": "Jaar van verpakken of oogsten: de kiemkracht daalt met de leeftijd."
+        },
+        "supplier": {
+          "name": "Leverancier",
+          "description": "Winkel, zadenruil, eigen zaad…"
+        },
+        "quantity": {
+          "name": "Hoeveelheid",
+          "description": "Vrije tekst: 1 zakje, 20 g…"
+        },
+        "viability_years": {
+          "name": "Houdbaarheid (jaren)",
+          "description": "Hoeveel jaar deze zaden goed kiemen; leeg = gangbare waarde van de familie."
+        },
+        "finished": {
+          "name": "Op",
+          "description": "Zaden op."
+        },
+        "price": {
+          "name": "Prijs",
+          "description": "Aankoopprijs; wordt een uitgave voor zaden."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        }
+      }
+    },
+    "update_seed_lot": {
+      "name": "Zaadpartij wijzigen",
+      "description": "Wijzigt de opgegeven velden van een zaadpartij.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id van de zaadpartij."
+        },
+        "species": {
+          "name": "Soort",
+          "description": "Wetenschappelijke of gewone naam; optioneel met een gekoppelde soort."
+        },
+        "taxon_id": {
+          "name": "Geïmporteerde soort",
+          "description": "Geïmporteerde soort (id)."
+        },
+        "variety": {
+          "name": "Ras",
+          "description": "Ras."
+        },
+        "year": {
+          "name": "Jaar",
+          "description": "Jaar van verpakken of oogsten: de kiemkracht daalt met de leeftijd."
+        },
+        "supplier": {
+          "name": "Leverancier",
+          "description": "Winkel, zadenruil, eigen zaad…"
+        },
+        "quantity": {
+          "name": "Hoeveelheid",
+          "description": "Vrije tekst: 1 zakje, 20 g…"
+        },
+        "viability_years": {
+          "name": "Houdbaarheid (jaren)",
+          "description": "Hoeveel jaar deze zaden goed kiemen; leeg = gangbare waarde van de familie."
+        },
+        "finished": {
+          "name": "Op",
+          "description": "Zaden op."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        }
+      }
+    },
+    "delete_seed_lot": {
+      "name": "Zaadpartij verwijderen",
+      "description": "Verwijdert een zaadpartij; de planten behouden hun gegevens.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id van de zaadpartij."
+        }
+      }
+    },
+    "set_crop_profile": {
+      "name": "Teeltgegevens instellen",
+      "description": "Slaat jouw waarden voor een soort op (standplaats, winterhardheid, maanden voor zaaien, planten, bloei en oogst); ze vervangen de standaardwaarden.",
+      "fields": {
+        "species": {
+          "name": "Soort",
+          "description": "Wetenschappelijke naam."
+        },
+        "exposure": {
+          "name": "Standplaats",
+          "description": "Zon, halfschaduw, schaduw."
+        },
+        "hardiness_c": {
+          "name": "Winterhardheid",
+          "description": "Laagste temperatuur die verdragen wordt."
+        },
+        "sow_indoor": {
+          "name": "Binnen zaaien",
+          "description": "Maanden om binnen te zaaien."
+        },
+        "sow_outdoor": {
+          "name": "Buiten zaaien",
+          "description": "Maanden om buiten te zaaien."
+        },
+        "plant_out": {
+          "name": "Uitplanten",
+          "description": "Maanden om te planten of uit te planten."
+        },
+        "flowering": {
+          "name": "Bloei",
+          "description": "Bloeimaanden."
+        },
+        "harvest": {
+          "name": "Oogst",
+          "description": "Oogstmaanden."
+        },
+        "pruning": {
+          "name": "Snoeien",
+          "description": "Snoeimaanden."
+        },
+        "fertilizing": {
+          "name": "Bemesting",
+          "description": "Bemestingsmaanden."
+        },
+        "end": {
+          "name": "Einde teelt",
+          "description": "Maanden waarin de teelt meestal eindigt (eenjarigen)."
+        },
+        "spacing_cm": {
+          "name": "Plantafstand",
+          "description": "Afstand tussen de planten."
+        },
+        "heat_max_c": {
+          "name": "Hittegrens",
+          "description": "Boven dit maximum lijdt het gewas na enkele dagen (koele-seizoensgewassen: sla, spinazie, erwten…)."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        }
+      }
+    },
+    "delete_crop_profile": {
+      "name": "Teeltgegevens herstellen",
+      "description": "Wist jouw waarden voor een soort: de standaardwaarden gelden weer.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id van de teeltgegevens."
+        }
+      }
+    }
+  },
+  "common": {
+    "notification_title": "🌱 Tuin",
+    "notification_done": "✔ Gedaan",
+    "notification_late": "{count} activiteiten te laat",
+    "alert_frost": "❄️ Vorst {when}: {value} °C — {plants}",
+    "alert_cold": "🥶 Kou {when}: {value} °C voor {plants}",
+    "alert_heatwave": "🔥 Hittegolf {when}: tot {value} °C",
+    "alert_heat_extreme": "🔥 Extreme hitte {when}: {value} °C",
+    "alert_heat_stress": "🥵 Te warm voor {plants}: {when}, tot {value} °C",
+    "issue_rain_48h": "regen binnen 48 u",
+    "issue_wind": "wind",
+    "issue_hot": "te warm",
+    "issue_frost_next": "vorst in de komende dagen",
+    "issue_rain_today": "regen die dag",
+    "issue_cold_nights": "koude nachten deze week",
+    "issue_heavy_rain": "zware regen",
+    "issue_rain_coming": "regen op komst",
+    "issue_frozen": "bevroren grond",
+    "issue_gusts": "harde windstoten",
+    "better_on": "beter op {date}",
+    "notification_compost": "♻️ {zone}: compost omzetten ({days} dagen sinds de vorige keer)",
+    "notification_tool": "🔧 {tool}: onderhoud nodig",
+    "notification_water": "🪴 Water geven: {plants}"
+  }
+}

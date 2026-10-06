@@ -339,7 +339,7 @@ def _check_position(planting: Planting) -> None:
 
 def _taxon_languages(hass: HomeAssistant) -> list[str]:
     """Common names kept for the HA language plus the ones the UI is translated to."""
-    return list(dict.fromkeys([hass.config.language.split("-")[0], "it", "en", "fr"]))
+    return list(dict.fromkeys([hass.config.language.split("-")[0], "en", "it", "fr", "de", "es", "nl"]))
 
 
 def _apply_taxon(store: HomesteadStore, args: dict[str, Any]) -> None:
