@@ -1832,7 +1832,7 @@ class HomesteadPanel extends HTMLElement {
       if (!taxon) return;
       const common = taxon.common_names?.[this._lang()];
       linked.append(
-        taxon.image ? h("img", { src: commonsThumb(taxon.image, 80), alt: "", referrerPolicy: "no-referrer", onerror: (ev) => ev.target.remove() }) : "",
+        taxon.image ? this._speciesImage(taxon.image, taxon.scientific_name) : "",
         h("span", {}, `✓ ${this.t("linked")}: ${[common, taxon.scientific_name, taxon.family].filter(Boolean).join(" · ")}`),
         h("button", { type: "button", onclick: () => ((hidden.value = ""), showLinked()) }, this.t("unlink")),
       );
@@ -1860,6 +1860,11 @@ class HomesteadPanel extends HTMLElement {
     const choose = async (item) => {
       list.hidden = true;
       let id = item.taxon_id;
+      // Species imported before pictures existed: import again in the background to fetch one.
+      if (id && !item.image && (item.gbif_key || item.wikidata_id)) {
+        const ids = Object.fromEntries(Object.entries({ gbif_key: item.gbif_key, wikidata_id: item.wikidata_id }).filter(([, v]) => v));
+        this._hass.callWS({ type: "call_service", domain: "homestead", service: "import_taxon", service_data: ids, return_response: true }).catch(() => {});
+      }
       if (!id) {
         message(this.t("importingTaxon"));
         list.hidden = false;
@@ -1899,7 +1904,7 @@ class HomesteadPanel extends HTMLElement {
         h(
           "button",
           { type: "button", onmousedown: (ev) => ev.preventDefault(), onclick: () => choose(item) },
-          item.image ? h("img", { src: commonsThumb(item.image, 80), alt: "", loading: "lazy", referrerPolicy: "no-referrer", onerror: (ev) => ev.target.remove() }) : null,
+          item.image ? this._speciesImage(item.image, item.scientific_name) : null,
           h(
             "div",
             {},
@@ -1929,6 +1934,50 @@ class HomesteadPanel extends HTMLElement {
     input.addEventListener("blur", () => setTimeout(() => (list.hidden = true), 150));
     input.addEventListener("keydown", (ev) => ev.key === "Escape" && (list.hidden = true));
     return list;
+  }
+
+  /** Small picture of a species; a tap shows it large, with a link to its page on Wikimedia Commons. */
+  _speciesImage(file, name) {
+    return h("img", {
+      src: commonsThumb(file, 80),
+      alt: name,
+      title: name,
+      loading: "lazy",
+      referrerPolicy: "no-referrer",
+      style: "cursor:zoom-in",
+      onerror: (ev) => ev.target.remove(),
+      onmousedown: (ev) => ev.preventDefault(),
+      onclick: (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        this._showSpeciesImage(file, name);
+      },
+    });
+  }
+
+  _showSpeciesImage(file, name) {
+    const overlay = h(
+      "div",
+      { className: "lightbox", onclick: (ev) => ev.target === overlay && overlay.remove() },
+      h("img", { src: commonsThumb(file, 1200), alt: name, referrerPolicy: "no-referrer" }),
+      h(
+        "div",
+        { className: "row" },
+        h("span", {}, name),
+        h(
+          "a",
+          {
+            href: `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(file.replace(/ /g, "_"))}`,
+            target: "_blank",
+            rel: "noopener noreferrer",
+            style: "color:inherit",
+          },
+          "Wikimedia Commons ↗",
+        ),
+        h("button", { type: "button", onclick: () => overlay.remove() }, this.t("close")),
+      ),
+    );
+    this.shadowRoot.append(overlay);
   }
 
   /** Main species of a zone (a woodland): chips, plus a search box; Enter adds the typed name as it is. */
