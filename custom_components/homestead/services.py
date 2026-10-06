@@ -156,6 +156,7 @@ ADD_TOOL_SCHEMA = vol.Schema(
         vol.Optional("power", default=ToolPower.MANUAL): vol.In([p.value for p in ToolPower]),
         vol.Optional("status", default=ToolStatus.OK): vol.In([s.value for s in ToolStatus]),
         vol.Optional("next_service_on"): _opt_date,
+        vol.Optional("service_months"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=120))),
         vol.Optional("price"): vol.Any(None, _positive),
         vol.Optional("notes"): _opt_str,
     }

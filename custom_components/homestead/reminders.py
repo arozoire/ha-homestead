@@ -57,7 +57,11 @@ async def async_send_reminders(hass: HomeAssistant, store: HomesteadStore, servi
         for zone, days in compost_due(store.data, now)
         if zone.id not in planned and (days - COMPOST_TURN_DAYS) % 7 == 0
     ]
-    if not services or not (due or late or compost):
+    tools = sorted(
+        (t for t in store.data.tools.values() if t.next_service_on == today and t.status != "broken"),
+        key=lambda t: t.name,
+    )
+    if not services or not (due or late or compost or tools):
         return 0
     kinds = await async_kind_names(hass)
     texts = await _texts(hass)
@@ -92,6 +96,16 @@ async def async_send_reminders(hass: HomeAssistant, store: HomesteadStore, servi
                 .replace("{zone}", zone.name)
                 .replace("{days}", str(days)),
                 "data": {"url": url, "clickAction": url, "tag": f"{DOMAIN}-compost-{zone.id}"},
+            }
+        )
+    for tool in tools:
+        messages.append(
+            {
+                "title": title,
+                "message": texts.get("notification_tool", "🔧 {tool}: service due").replace(
+                    "{tool}", tool.name
+                ),
+                "data": {"url": PANEL_URL, "clickAction": PANEL_URL, "tag": f"{DOMAIN}-tool-{tool.id}"},
             }
         )
     if late:

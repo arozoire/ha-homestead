@@ -8,7 +8,7 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 
 **Non sporcare Home Assistant**: nessuna area creata, poche entità aggregate, rimozione pulita (disinstallando l'integrazione i dati vengono cancellati).
 
-## Cosa fa oggi (v0.10)
+## Cosa fa oggi (v0.11)
 
 | Funzione | Come |
 |---|---|
@@ -31,7 +31,11 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 | Attrezzi | Scheda *Attrezzi* (stato a colori, 🔧 manutenzione scaduta) o servizi `add_tool`/`update_tool`/`delete_tool` |
 | Foto | Nella scheda pianta: *📷 Aggiungi foto* (fotocamera o galleria del telefono), ridotte a 1600 px e salvate in `/media/homestead/`; visibili solo agli utenti HA |
 | Sfondo "Nessuna mappa" | Dal selettore dei livelli: zoom fino al livello 23 per lavorare dentro un'aiuola |
-| Menu | Schede (Piante, Zone, Diario, Semi, Spese, Analisi, Attrezzi) in una barra sotto l'intestazione |
+| Menu | 📓 Diario (si apre per primo), 📅 Calendario, 🗺️ Mappa (Piante / Zone), 📈 Analisi, ⋯ Altro (Semi, Spese, Attrezzi, Impostazioni, Backup, Azzera tutto); in basso sul telefono, in alto sul computer; la mappa solo nella scheda Mappa e nelle schede pianta/zona |
+| 📓 Diario veloce | Meteo dei 14 giorni con allerte e attività, Da fare della settimana, pulsanti 🍅 Raccolta, 🥚 Uova, 💧 Irrigazione, 📝 Nota; piante *In raccolta adesso* e *Aggiornate di recente* con **+ Raccolta** in un tocco (quantità dell'ultima volta, − / +, ✔), ricerca; sotto il diario completo con filtri |
+| 🔁 Ripeti l'orto | Scheda Mappa: le colture annuali dell'anno scorso da spuntare (voto e "da evitare" accanto) diventano nuove piante con stessa zona e varietà |
+| 🔧 Manutenzione attrezzi | *Manutenzione ogni (mesi)* + prossima data; ✔ Manutenzione fatta sposta la prossima; nel Calendario (gruppo Attrezzi e schede delle 2 settimane) e promemoria sul telefono il giorno stesso |
+| 🗑️ Azzera tutto | In *Altro*, solo amministratori, scrivendo RESET: cancella dati e foto, restano impostazioni e storico meteo |
 | 📅 Calendario | Pulsante 📅 in alto: al posto della mappa, *Da fare nelle prossime 2 settimane* (schede grandi con verdetto meteo, in ritardo in rosso, ✔), allerte, meteo; l'**anno come linea continua** con la riga *oggi* al giorno giusto, piante raggruppate per zona (gruppi che si aprono e chiudono), attività previste come pastiglie alla data, lavori del bosco; *📜 Storico*: per anno, gli eventi fatti alla data sotto il meteo estremo (gelo, ondate di calore, grandine, piogge forti) |
 | 📈 Analisi | Scheda a tutta larghezza: riquadro per anno (indice dell'annata, kg, saldo, meteo estremo); raccolti per coltura e zona negli ultimi 5 anni, **Totale o Per pianta** (10 pomodori un anno, 15 l'altro), colore = resa per pianta rispetto agli anni precedenti + voto della stagione, costo per kg; raccolto e meteo della coltura scelta; mese di potatura o messa a dimora a confronto; fase lunare alla semina vs voto (con avviso se i dati sono pochi); lezioni (da rifare / da evitare); uova per anno |
 | ♻️ Compost | Zona di tipo *Compostiera*: solo eventi *rivoltare* e *raccolta* (qualità ★1–5 e note, niente kg); dopo 4 settimane senza rivoltare: suggerimento nel Diario e nel Calendario, notifica sul telefono (poi una volta a settimana) |
