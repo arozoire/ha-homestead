@@ -624,6 +624,10 @@
           "name": "Next service",
           "description": "Next sharpening or maintenance."
         },
+        "service_months": {
+          "name": "Service every (months)",
+          "description": "Rough maintenance plan for engines: after a service the next one is this many months later."
+        },
         "price": {
           "name": "Price",
           "description": "Purchase price; recorded as an expense."
@@ -729,6 +733,10 @@
         "next_service_on": {
           "name": "Next service",
           "description": "Next sharpening or maintenance."
+        },
+        "service_months": {
+          "name": "Service every (months)",
+          "description": "Rough maintenance plan for engines: after a service the next one is this many months later."
         },
         "notes": {
           "name": "Notes",
@@ -1225,6 +1233,7 @@
     "issue_frozen": "frozen soil",
     "issue_gusts": "strong gusts",
     "better_on": "better on {date}",
-    "notification_compost": "♻️ {zone}: turn the compost ({days} days since last time)"
+    "notification_compost": "♻️ {zone}: turn the compost ({days} days since last time)",
+    "notification_tool": "🔧 {tool}: service due"
   }
 }

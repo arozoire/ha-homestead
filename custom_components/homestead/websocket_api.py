@@ -19,8 +19,8 @@ from homeassistant.util import dt as dt_util
 from .backup import BackupError, make_backup, read_backup, summary
 from .const import DOMAIN, SIGNAL_DATA_UPDATED, SIGNAL_OUTLOOK_UPDATED
 from .forecast import async_crop_defaults, get_outlook
-from .models import Photo
-from .photos import MAX_PHOTO_BYTES, image_type, photo_dir, write_photo
+from .models import HomesteadData, Photo
+from .photos import MAX_PHOTO_BYTES, delete_all, image_type, photo_dir, write_photo
 from .species import SourcesUnavailable, combine, search_local, search_remote
 from .store import get_store
 
@@ -34,6 +34,7 @@ def async_register_websocket(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, ws_subscribe)
     websocket_api.async_register_command(hass, ws_backup_export)
     websocket_api.async_register_command(hass, ws_backup_import)
+    websocket_api.async_register_command(hass, ws_reset)
     websocket_api.async_register_command(hass, ws_photo_upload)
     websocket_api.async_register_command(hass, ws_search_species)
     websocket_api.async_register_command(hass, ws_crop_defaults)
@@ -176,6 +177,22 @@ async def ws_backup_import(
     store.data = data
     await store.async_save()
     connection.send_result(msg["id"], summary(data))
+
+
+@websocket_api.require_admin
+@websocket_api.websocket_command({vol.Required("type"): "homestead/reset", vol.Required("confirm"): "RESET"})
+@websocket_api.async_response
+async def ws_reset(
+    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]
+) -> None:
+    """Delete all the garden data and photos (admin only); settings and the weather history stay."""
+    if (store := get_store(hass)) is None:
+        connection.send_error(msg["id"], "not_loaded", "HA Homestead is not loaded")
+        return
+    await hass.async_add_executor_job(delete_all, photo_dir(hass))
+    store.data = HomesteadData()
+    await store.async_save()
+    connection.send_result(msg["id"], summary(store.data))
 
 
 @websocket_api.websocket_command(

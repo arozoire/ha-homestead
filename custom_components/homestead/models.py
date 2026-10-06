@@ -357,6 +357,7 @@ class Tool(_Record):
     power: str = ToolPower.MANUAL
     status: str = ToolStatus.OK
     next_service_on: str | None = None
+    service_months: int | None = None  # rough plan: next service this many months after the last one
     notes: str | None = None
 
 

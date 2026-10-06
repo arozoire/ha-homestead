@@ -65,6 +65,46 @@ const TEXT = {
     what: "What (porcini, chestnuts…)",
     essence: "Species",
     woodBox: "🪵 Wood and woodland harvests",
+    tabCalendar: "Calendar",
+    tabMap: "Map",
+    tabMore: "More",
+    settingsHint: "Sensors, phones, alerts",
+    settingsTitle: "Settings",
+    moreSeeds: "{count} seed lots",
+    moreTools: "{count} tools",
+    moreToolsDue: "{count} services due",
+    resetTitle: "Reset everything",
+    resetHint: "Deletes zones, plantings, diary, activities, seeds, expenses, tools and photos. Settings and the weather history stay. Download a backup first. Administrators only.",
+    resetType: "Type RESET to confirm",
+    resetDo: "Reset everything",
+    resetDone: "Everything deleted ({summary})",
+    todoLater: "+{count} later in the calendar",
+    quickOther: "Event…",
+    quickEvent: "Event",
+    quickSearch: "Search plant or zone",
+    quickNow: "Harvesting now",
+    quickRecent: "Recently updated",
+    quickFound: "Found",
+    quickNone: "Nothing found",
+    quickAll: "Show all ({count})",
+    agoToday: "today",
+    agoYesterday: "yesterday",
+    agoDays: "{count} days ago",
+    calPlantOne: "1 plant",
+    calPlantMany: "{count} plants",
+    calTaskOne: "1 planned",
+    calTaskMany: "{count} planned",
+    toolService: "Service",
+    toolServiceDone: "Serviced",
+    service_months: "Service every (months)",
+    everyMonths: "every {count} months",
+    nextService: "next {date}",
+    repeatTitle: "Repeat last year's garden",
+    repeatHint: "Crops of {from} to grow again in {to}: {count}. Same zone and variety",
+    repeatNote: "Tick the crops to grow again. ⭐ = season rating, ❌ = marked “to avoid” (unticked).",
+    repeatCreateOne: "Create 1 planting",
+    repeatCreateMany: "Create {count} plantings",
+    repeatDone: "{count} plantings created for {year}",
     compost: "Compost bin",
     coop: "Hen house",
     ev_compost_turn: "Compost turning",
@@ -515,6 +555,46 @@ const TEXT = {
     what: "Cosa (porcini, castagne…)",
     essence: "Essenza",
     woodBox: "🪵 Legna e raccolti del bosco",
+    tabCalendar: "Calendario",
+    tabMap: "Mappa",
+    tabMore: "Altro",
+    settingsHint: "Sensori, telefoni, allerte",
+    settingsTitle: "Impostazioni",
+    moreSeeds: "{count} lotti di semi",
+    moreTools: "{count} attrezzi",
+    moreToolsDue: "{count} manutenzioni da fare",
+    resetTitle: "Azzera tutto",
+    resetHint: "Cancella zone, piante, diario, attività, semi, spese, attrezzi e foto. Restano le impostazioni e lo storico meteo. Prima scarica un backup. Solo amministratori.",
+    resetType: "Scrivi RESET per confermare",
+    resetDo: "Azzera tutto",
+    resetDone: "Tutto cancellato ({summary})",
+    todoLater: "+{count} più avanti nel calendario",
+    quickOther: "Evento…",
+    quickEvent: "Evento",
+    quickSearch: "Cerca pianta o zona",
+    quickNow: "In raccolta adesso",
+    quickRecent: "Aggiornate di recente",
+    quickFound: "Trovate",
+    quickNone: "Nessun risultato",
+    quickAll: "Mostra tutte ({count})",
+    agoToday: "oggi",
+    agoYesterday: "ieri",
+    agoDays: "{count} giorni fa",
+    calPlantOne: "1 pianta",
+    calPlantMany: "{count} piante",
+    calTaskOne: "1 prevista",
+    calTaskMany: "{count} previste",
+    toolService: "Manutenzione",
+    toolServiceDone: "Manutenzione fatta",
+    service_months: "Manutenzione ogni (mesi)",
+    everyMonths: "ogni {count} mesi",
+    nextService: "prossima il {date}",
+    repeatTitle: "Ripeti l'orto dell'anno scorso",
+    repeatHint: "Colture del {from} da rifare nel {to}: {count}. Stessa zona e varietà",
+    repeatNote: "Spunta le colture da rifare. ⭐ = voto della stagione, ❌ = segnata “da evitare” (senza spunta).",
+    repeatCreateOne: "Crea 1 pianta",
+    repeatCreateMany: "Crea {count} piante",
+    repeatDone: "{count} piante create per il {year}",
     compost: "Compostiera",
     coop: "Pollaio",
     ev_compost_turn: "Rivoltare il compost",
@@ -975,7 +1055,7 @@ const SEED_VIABILITY = {
   Malvaceae: 3,
 };
 const ROTATION_YEARS = 3;
-const ZONE_ICONS = { vegetable_garden: "🥕", orchard: "🍎", flower_bed: "🌸", greenhouse: "🏠", pots: "🪴", lawn: "🌾", woodland: "🌲", compost: "♻️", coop: "🐔", other: "▭" };
+const ZONE_ICONS = { vegetable_garden: "🥕", orchard: "🍎", flower_bed: "🌸", greenhouse: "🏠", pots: "🪴", lawn: "🌾", woodland: "🌲", compost: "♻️", coop: "🐔", other: "📍" };
 // Typical work of a whole zone, shown on the calendar when the zone itself has no plantings.
 const ZONE_SEASONS = { woodland: [["wood", [11, 12, 1, 2, 3]], ["foraging", [9, 10, 11]]] };
 const CAL_COLOR = { wood: "#6d4c41", foraging: "#8e7cc3" };
@@ -1038,10 +1118,8 @@ const STYLE = `
   .narrow .body { flex-direction: column; }
   .narrow .map { flex: 0 0 33%; min-height: 0; }
   .narrow aside { width: auto; max-width: none; height: auto; flex: 1; border-left: none; border-top: 1px solid var(--divider-color); }
-  .no-map .map { display: none; }
-  .wide-tab .map, .wide-tab .calendar { display: none !important; }
+  .wide-tab .map { display: none !important; }
   .wide-tab aside { width: auto; max-width: none; flex: 1; border: none; padding: 12px max(12px, calc((100% - 1100px) / 2)); }
-  .no-map aside { width: auto; max-width: none; flex: 1; border: none; }
   .map-toggle { background: none; border: none; color: inherit; font-size: 20px; padding: 4px 8px; }
   .event.start { opacity: .85; }
   .banner { position: absolute; z-index: 1000; top: 10px; left: 50%; transform: translateX(-50%);
@@ -1059,6 +1137,36 @@ const STYLE = `
   .tabs-bar button { border: none; border-bottom: 3px solid transparent; border-radius: 0; background: none; flex: none;
     padding: 11px 14px 8px; font-size: 15px; color: var(--secondary-text-color); }
   .tabs-bar button.active { border-bottom-color: var(--homestead-accent, #3a7d44); color: var(--homestead-accent, #3a7d44); font-weight: 700; }
+  .tab-icon { margin-right: 6px; }
+  /* Phone: the menu at the bottom, icons over labels, clear of the gesture bar. */
+  .narrow .tabs-bar { order: 3; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; padding: 0 0 env(safe-area-inset-bottom);
+    border-bottom: none; border-top: 1px solid var(--divider-color); overflow: hidden; }
+  .narrow .tabs-bar button { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 0 7px; font-size: 12px;
+    border-bottom: none; border-top: 3px solid transparent; min-height: 56px; justify-content: center; }
+  .narrow .tabs-bar button.active { border-top-color: var(--homestead-accent, #3a7d44); }
+  .narrow .tab-icon { margin: 0; font-size: 20px; line-height: 1.1; }
+  .narrow.typing .tabs-bar { display: none; }
+  .back { border: none; background: none; color: var(--primary-color); padding: 4px 0; margin-bottom: 6px; font-size: 15px; }
+  .map-switch { margin-bottom: 10px; }
+  .repeat-card { display: grid; gap: 2px; width: 100%; text-align: left; border: 2px solid #26a69a; background: rgba(38, 166, 154, .08);
+    border-radius: 12px; padding: 10px 12px; margin: 8px 0; }
+  .repeat-card .sub { white-space: normal; }
+  .repeat-box { border: 2px solid #26a69a; border-radius: 12px; padding: 10px 12px; margin: 8px 0; display: grid; gap: 6px; }
+  .repeat-row { display: flex; align-items: center; gap: 10px; min-height: 44px; border-bottom: 1px solid var(--divider-color); }
+  .repeat-row input { width: 22px; height: 22px; flex: none; }
+  .repeat-name { flex: 1; display: grid; }
+  .more-list { display: grid; border: 1px solid var(--divider-color); border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
+  .more-item { display: flex; align-items: center; gap: 12px; text-align: left; border: none; border-bottom: 1px solid var(--divider-color);
+    border-radius: 0; background: var(--card-background-color); min-height: 60px; padding: 6px 14px; font-size: 18px; color: var(--secondary-text-color); }
+  .more-item:last-child { border-bottom: none; }
+  .more-icon { font-size: 24px; width: 32px; text-align: center; }
+  .more-text { flex: 1; display: grid; font-size: 15px; color: var(--primary-text-color); }
+  .more-text .sub { white-space: normal; }
+  .sub.warn { color: var(--error-color, #db4437); }
+  .reset-box { margin-top: 16px; border: 1px solid #e3b5ab; background: rgba(179, 38, 30, .06); border-radius: 12px; padding: 10px 12px; display: grid; gap: 8px; }
+  .reset-box h3 { margin: 0; color: #8f2b17; }
+  .reset-box label { display: grid; gap: 4px; }
+  .danger-fill { background: #a02a14; color: #fff; border-color: transparent; font-weight: 700; }
   .tabs { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 1px solid var(--divider-color); }
   .tabs { overflow-x: auto; scrollbar-width: none; }
   .tabs button { border: none; border-bottom: 2px solid transparent; border-radius: 0; background: none; flex: 1 0 auto;
@@ -1180,11 +1288,7 @@ const STYLE = `
   .csv-row.off { opacity: .5; }
   .csv-row .err { font-size: 12px; color: var(--warning-color, #ffa600); }
   .csv-list { display: grid; gap: 8px; margin: 12px 0; }
-  .calendar { flex: 1; min-width: 0; overflow: auto; padding: 10px; box-sizing: border-box; display: none;
-    background: var(--primary-background-color); }
-  .calendar-on .calendar { display: block; }
-  .calendar-on .map { display: none; }
-  .narrow.calendar-on .calendar { flex: 0 0 60%; }
+  .calendar { display: grid; gap: 10px; }
   .cal-box { background: var(--card-background-color); border: 1px solid var(--divider-color); border-radius: 10px;
     padding: 10px 12px; margin-bottom: 10px; display: grid; gap: 8px; }
   .cal-head { display: flex; align-items: center; gap: 8px; }
@@ -1234,6 +1338,44 @@ const STYLE = `
   .an-cmp i.good { background: #4f9a57; }
   .an-lessons .keep, .an-lessons .avoid { display: flex; flex-direction: column; gap: 2px; }
   .alert-line { font-size: 13px; background: #fff4e0; color: #6b3e00; border-radius: 8px; padding: 6px 10px; }
+  .days { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(52px, 1fr); gap: 4px; text-align: center; font-size: 13px;
+    overflow-x: auto; margin-bottom: 8px; padding-bottom: 2px; }
+  .day-col { display: grid; gap: 1px; align-content: start; padding: 5px 2px; border-radius: 8px; background: var(--card-background-color);
+    border: 2px solid var(--divider-color); }
+  .day-col.today { border-color: var(--homestead-accent, #3a7d44); }
+  .day-col.alert { border-color: #7fa7d9; }
+  .day-col .day-name { font-weight: 700; font-size: 12px; }
+  .day-col .wx { font-size: 22px; }
+  .day-col .t-max { font-weight: 700; font-size: 15px; }
+  .day-col .sub { white-space: normal; }
+  .day-col .rain { color: #1e64c8; min-height: 15px; }
+  .day-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 1px; min-height: 18px; }
+  .alert-chip { font-size: 14px; }
+  .task-chip { padding: 0 1px; border: none; background: none; font-size: 15px; border-radius: 4px; }
+  .task-chip.good { box-shadow: inset 0 -3px 0 #43a047; }
+  .task-chip.warn { box-shadow: inset 0 -3px 0 #ffa600; }
+  .task-chip.better { font-weight: 700; color: #2f7d32; }
+  .quick-buttons { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px; margin: 12px 0; }
+  .quick-button { display: grid; justify-items: center; gap: 2px; min-height: 64px; border-radius: 12px; font-size: 12px; font-weight: 600; padding: 6px 2px;
+    overflow: hidden; text-overflow: ellipsis; }
+  .quick-button span { font-size: 24px; line-height: 1.1; }
+  .quick-box { border: 1px solid var(--divider-color); border-radius: 12px; padding: 8px 12px; margin-bottom: 12px; }
+  .quick-box .search { display: flex; align-items: center; gap: 8px; border: 1px solid var(--divider-color); border-radius: 10px; padding: 0 10px; }
+  .quick-box .search input { flex: 1; border: none; outline: none; height: 42px; background: transparent; font: inherit; color: inherit; }
+  .quick-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: var(--secondary-text-color); padding: 12px 0 2px; }
+  .quick-row { border-bottom: 1px solid var(--divider-color); padding: 6px 0; display: grid; gap: 6px; }
+  .quick-line { display: flex; align-items: center; gap: 8px; }
+  .quick-icon { font-size: 22px; width: 30px; text-align: center; flex: none; }
+  .quick-name { flex: 1; min-width: 0; display: grid; text-align: left; border: none; background: none; padding: 2px 0; }
+  .quick-name strong, .quick-name .sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .quick-saved { font-size: 13px; font-weight: 700; color: #1f5e24; white-space: nowrap; }
+  .quick-action { flex: none; border-radius: 20px; min-height: 40px; font-weight: 700; white-space: nowrap; }
+  .quick-stepper { display: flex; align-items: center; gap: 8px; background: rgba(58, 125, 68, .08); border-radius: 10px; padding: 6px; }
+  .quick-stepper button:not(.primary) { width: 44px; height: 44px; border-radius: 22px; font-size: 22px; padding: 0; flex: none; }
+  .quick-stepper .primary { height: 44px; font-weight: 700; flex: none; }
+  .quick-value { flex: 1; text-align: center; font-size: 20px; }
+  .quick-more { padding: 10px 0; }
+  .todo-later { margin: -6px 0 8px; }
   .wx-strip { display: flex; gap: 4px; overflow-x: auto; }
   .wx-day { flex: 1 0 42px; display: grid; justify-items: center; font-size: 12px; padding: 4px 2px; border-radius: 6px;
     background: var(--secondary-background-color); }
@@ -1251,6 +1393,10 @@ const STYLE = `
   .tl-group { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; width: 100%; text-align: left; margin-top: 8px;
     border: none; border-radius: 6px; padding: 6px 8px; background: var(--secondary-background-color); font-size: 14px; }
   .tl-arrow { width: 14px; }
+  .tl-group-row { grid-column: 1 / -1; display: flex; align-items: center; gap: 4px; }
+  .tl-group-row .tl-group { flex: 1; }
+  .tl-add { flex: none; width: 36px; height: 34px; margin-top: 8px; padding: 0; font-size: 20px; font-weight: 700; border: none;
+    background: var(--secondary-background-color); color: var(--homestead-accent, #3a7d44); border-radius: 6px; }
   .tl-band { position: absolute; height: 5px; border-radius: 3px; }
   .tl-pill { position: absolute; transform: translateX(-50%); z-index: 2; white-space: nowrap; font-size: 11px;
     font-weight: 700; color: #fff; background: #c0522f; border: 2px solid var(--card-background-color); border-radius: 11px;
@@ -1283,7 +1429,7 @@ class HomesteadPanel extends HTMLElement {
     this._taxaPending = new Map();
     this._markers = new Map();
     this._polygons = new Map();
-    this._tab = "plantings";
+    this._tab = "diary";
     this._selected = null;
     this._placing = null;
     this._drawing = null;
@@ -1304,6 +1450,11 @@ class HomesteadPanel extends HTMLElement {
     if (this._menu) this._menu.narrow = narrow;
     this._layout?.classList.toggle("narrow", !!narrow);
     this._map?.invalidateSize();
+  }
+
+  /** "1 plant" / "3 plants": key + "One" for one, key + "Many" otherwise. */
+  _plural(key, count) {
+    return this.t(count === 1 ? `${key}One` : `${key}Many`, { count });
   }
 
   t(key, vars = {}) {
@@ -1338,8 +1489,6 @@ class HomesteadPanel extends HTMLElement {
         {},
         this._menu,
         h("h1", {}, this.t("panelTitle")),
-        h("button", { className: "map-toggle", title: this.t("calendar"), onclick: () => this._toggleCalendar() }, "📅"),
-        h("button", { className: "map-toggle", title: this.t("toggleMap"), onclick: () => this._toggleMap() }, "🗺️"),
         h(
           "button",
           {
@@ -1354,33 +1503,20 @@ class HomesteadPanel extends HTMLElement {
         ),
       ),
       (this._tabsEl = h("nav", { className: "tabs-bar" })),
-      h("div", { className: "body" }, this._mapWrap, (this._calWrap = h("div", { className: "calendar" })), this._aside),
+      h("div", { className: "body" }, this._mapWrap, this._aside),
     );
     root.append(
       h("link", { rel: "stylesheet", href: `${BASE}vendor/leaflet.css` }),
       h("style", {}, STYLE),
       this._layout,
     );
+    this._calWrap = h("div", { className: "calendar" });
+    // On a phone the menu sits at the bottom: hide it while typing, so the keyboard does not push it up.
+    this._aside.addEventListener("focusin", (ev) => ev.target.matches("input, textarea, select") && this._layout.classList.add("typing"));
+    this._aside.addEventListener("focusout", () => this._layout.classList.remove("typing"));
     this._createMap();
-    try {
-      if (localStorage.getItem("homestead-map-hidden")) this._toggleMap(true);
-      if (localStorage.getItem("homestead-calendar")) this._toggleCalendar(true);
-    } catch {
-      // storage unavailable: the map stays visible
-    }
     this._render();
     if (this.isConnected) this._subscribe();
-  }
-
-  _toggleMap(hidden = !this._layout.classList.contains("no-map")) {
-    this._layout.classList.toggle("no-map", hidden);
-    if (hidden && this._calendarOn) this._toggleCalendar(false);
-    try {
-      localStorage.setItem("homestead-map-hidden", hidden ? "1" : "");
-    } catch {
-      // private mode: the choice is just not remembered
-    }
-    if (!hidden) setTimeout(() => this._map.invalidateSize(), 0);
   }
 
   _createMap() {
@@ -1461,7 +1597,7 @@ class HomesteadPanel extends HTMLElement {
         this._loaded = !!data.plantings;
         this._syncMap();
         this._renderCalendar();
-        if (first) this._fitAll();
+        if (first) this._needsFit = true;
         first = false;
         if (/[?&](task|zone)=/.test(window.location.search)) {
           this._openTaskFromUrl();
@@ -1657,8 +1793,10 @@ class HomesteadPanel extends HTMLElement {
 
   _setTab(tab) {
     if (tab === "expenses" && this._tab !== "expenses") this._expenseYear = undefined;
+    if (tab === "plantings" || tab === "zones") this._mapTab = tab;
     this._tab = tab;
     this._close();
+    this._aside.scrollTop = 0;
   }
 
   _select(id, fallback = null) {
@@ -1957,7 +2095,6 @@ class HomesteadPanel extends HTMLElement {
     this._renderBanner();
     this._showMessage(this._message.text, this._message.error);
     let content;
-    let wide = false;
     if (this._form && !this._placing) content = this._renderForm();
     else if (this._zoneForm && !this._drawing) content = this._renderZoneForm();
     else if (this._expenseForm) content = this._renderExpenseForm();
@@ -1968,38 +2105,136 @@ class HomesteadPanel extends HTMLElement {
     else if (this._eventForm) content = this._renderEventForm();
     else if (this._taskForm) content = this._renderTaskForm();
     else {
+      const back = h("button", { type: "button", className: "back", onclick: () => this._setTab("more") }, `‹ ${this.t("tabMore")}`);
       const lists = {
-        plantings: () => this._renderList(),
-        zones: () => this._renderZoneList(),
+        plantings: () => [this._mapSwitch(), ...this._renderList()],
+        zones: () => [this._mapSwitch(), ...this._renderZoneList()],
         diary: () => this._renderDiary(),
-        seeds: () => this._renderSeedList(),
-        expenses: () => this._renderExpenseList(),
+        calendar: () => [this._calWrap],
+        seeds: () => [back, ...this._renderSeedList()],
+        expenses: () => [back, ...this._renderExpenseList()],
         analysis: () => this._renderAnalysis(),
-        tools: () => this._renderToolList(),
+        tools: () => [back, ...this._renderToolList()],
+        more: () => this._renderMore(),
       };
-      content = [...lists[this._tab](), this._renderBackup()];
-      wide = this._tab === "analysis";
+      content = (lists[this._tab] || lists.diary)();
     }
+    // The map only where it is used: plantings and zones, and their cards.
+    const wide = !(["plantings", "zones"].includes(this._tab) || this._form || this._zoneForm);
+    this._calendarOn = this._tab === "calendar" && content[0] === this._calWrap;
     this._content.replaceChildren(...content.filter(Boolean));
+    if (this._calendarOn) this._renderCalendar();
     if (this._layout.classList.contains("wide-tab") !== wide) {
       this._layout.classList.toggle("wide-tab", wide);
-      if (!wide) setTimeout(() => this._map.invalidateSize(), 0);
+      if (!wide)
+        setTimeout(() => {
+          this._map.invalidateSize();
+          if (this._needsFit) {
+            this._needsFit = false;
+            this._fitAll();
+          }
+        }, 0);
     }
   }
 
+  /** Main menu section of a page. */
+  _section(tab = this._tab) {
+    return { plantings: "map", zones: "map", seeds: "more", expenses: "more", tools: "more" }[tab] || tab;
+  }
+
+  _mapSwitch() {
+    const button = (tab, label) =>
+      h("button", { type: "button", className: this._tab === tab ? "active" : "", onclick: () => this._setTab(tab) }, label);
+    return h("div", { className: "segmented map-switch" }, button("plantings", `🌱 ${this.t("tabPlantings")}`), button("zones", `▦ ${this.t("tabZones")}`));
+  }
+
+  _renderMore() {
+    const now = today();
+    const year = now.slice(0, 4);
+    const ofYear = this._data.expenses.filter((x) => x.spent_on.startsWith(year));
+    const spent = ofYear.filter((x) => !x.income).reduce((sum, x) => sum + x.amount, 0);
+    const earned = ofYear.filter((x) => x.income).reduce((sum, x) => sum + x.amount, 0);
+    const toolsDue = this._data.tools.filter((t) => t.next_service_on && t.next_service_on <= now).length;
+    const seedsLeft = this._data.seeds.filter((x) => !x.finished).length;
+    const item = (tab, icon, label, sub, warn = false) =>
+      h(
+        "button",
+        { type: "button", className: "more-item", onclick: () => this._setTab(tab) },
+        h("span", { className: "more-icon" }, icon),
+        h("span", { className: "more-text" }, h("strong", {}, label), h("span", { className: `sub${warn ? " warn" : ""}` }, sub)),
+        "›",
+      );
+    return [
+      h(
+        "div",
+        { className: "more-list" },
+        item("seeds", "🌱", this.t("tabSeeds"), this.t("moreSeeds", { count: seedsLeft })),
+        item("expenses", "💶", this.t("tabExpenses"), `${year}: −${this._money(spent)} · +${this._money(earned)}`),
+        item("tools", "🔧", this.t("tabTools"), toolsDue ? this.t("moreToolsDue", { count: toolsDue }) : this.t("moreTools", { count: this._data.tools.length }), !!toolsDue),
+        h(
+          "button",
+          {
+            type: "button",
+            className: "more-item",
+            onclick: () => {
+              history.pushState(null, "", "/config/integrations/integration/homestead");
+              window.dispatchEvent(new CustomEvent("location-changed"));
+            },
+          },
+          h("span", { className: "more-icon" }, "⚙️"),
+          h("span", { className: "more-text" }, h("strong", {}, this.t("settingsTitle")), h("span", { className: "sub" }, this.t("settingsHint"))),
+          "›",
+        ),
+      ),
+      this._renderBackup(),
+      this._hass.user?.is_admin === false ? null : this._resetBox(),
+    ];
+  }
+
+  _resetBox() {
+    const input = h("input", { type: "text", placeholder: "RESET", autocomplete: "off", "aria-label": this.t("resetType") });
+    const button = h("button", { type: "button", className: "danger-fill", disabled: true }, this.t("resetDo"));
+    input.addEventListener("input", () => (button.disabled = input.value.trim() !== "RESET"));
+    button.addEventListener("click", async () => {
+      if (input.value.trim() !== "RESET") return;
+      try {
+        const result = await this._hass.callWS({ type: "homestead/reset", confirm: "RESET" });
+        this._setTab("diary");
+        this._showMessage(`✓ ${this.t("resetDone", { summary: this._summary(result) })}`);
+      } catch (err) {
+        this._showMessage(err.message || String(err), true);
+      }
+    });
+    return h(
+      "div",
+      { className: "reset-box" },
+      h("h3", {}, `🗑️ ${this.t("resetTitle")}`),
+      h("p", { className: "hint" }, this.t("resetHint")),
+      h("label", {}, this.t("resetType"), input),
+      h("div", { className: "row" }, h("button", { type: "button", onclick: () => this._exportBackup() }, `💾 ${this.t("exportBackup")}`), button),
+    );
+  }
+
   _renderTabs() {
-    const tab = (name, label) =>
-      h("button", { className: this._tab === name ? "active" : "", onclick: () => this._setTab(name) }, label);
+    const section = this._section();
+    const tab = (name, icon, label) =>
+      h(
+        "button",
+        {
+          className: section === name ? "active" : "",
+          onclick: () => this._setTab(name === "map" ? this._mapTab || "plantings" : name),
+        },
+        h("span", { className: "tab-icon" }, icon),
+        h("span", { className: "tab-label" }, label),
+      );
     return h(
       "div",
       { style: "display:contents" },
-      tab("plantings", this.t("tabPlantings")),
-      tab("zones", this.t("tabZones")),
-      tab("diary", this.t("tabDiary")),
-      tab("seeds", this.t("tabSeeds")),
-      tab("expenses", this.t("tabExpenses")),
-      tab("analysis", this.t("tabAnalysis")),
-      tab("tools", this.t("tabTools")),
+      tab("diary", "📓", this.t("tabDiary")),
+      tab("calendar", "📅", this.t("tabCalendar")),
+      tab("map", "🗺️", this.t("tabMap")),
+      tab("analysis", "📈", this.t("tabAnalysis")),
+      tab("more", "⋯", this.t("tabMore")),
     );
   }
 
@@ -2053,6 +2288,7 @@ class HomesteadPanel extends HTMLElement {
         h("button", { onclick: () => this._csvPick("plantings") }, this.t("csvImport")),
         h("button", { onclick: () => this._csvTemplate("plantings") }, this.t("csvTemplate")),
       ),
+      this._repeatBox(),
       this._loaded === false ? h("p", { className: "error" }, this.t("notLoaded")) : null,
       plantings.length
         ? h(
@@ -3337,16 +3573,17 @@ class HomesteadPanel extends HTMLElement {
         },
         options.map(([v, text]) => h("option", { value: v, selected: v === f[name] }, text)),
       );
+    const week = addDays(today(), 7);
+    const soon = this._data.tasks.filter((t) => !t.done_on && t.due_on <= week);
+    const later = this._data.tasks.filter((t) => !t.done_on && t.due_on > week).length;
     return [
-      h(
-        "div",
-        { className: "actions" },
-        h("button", { className: "primary", onclick: () => this._newEvent() }, this.t("addEvent")),
-        h("button", { onclick: () => this._openTask({ kind: "note", due_on: today() }) }, this.t("addTask")),
-      ),
+      this._weatherStrip(),
       this._alertsBox(),
-      this._todoBox(this._data.tasks),
+      this._todoBox(soon, null, h("button", { type: "button", onclick: () => this._openTask({ kind: "note", due_on: today() }) }, this.t("addTask"))),
+      later ? h("button", { type: "button", className: "link todo-later", onclick: () => this._setTab("calendar") }, this.t("todoLater", { count: later })) : null,
       this._compostBoxes(),
+      this._quickButtons(),
+      this._quickPlants(),
       this._monthBox(),
       this._lastYearsBox(this._data.events),
       h(
@@ -3358,6 +3595,263 @@ class HomesteadPanel extends HTMLElement {
       ),
       events.length ? this._renderTimeline(events) : h("p", { className: "hint" }, this.t("emptyDiary")),
     ];
+  }
+
+  // ----- daily use: one tap to log the usual things -----
+
+  _quickButtons() {
+    const coops = this._data.zones.filter((z) => z.kind === "coop");
+    const open = (kind, extra = {}) => this._openEvent({ kind, done_on: today(), ...extra });
+    const button = (icon, label, onclick) => h("button", { type: "button", className: "quick-button", onclick }, h("span", {}, icon), label);
+    return h(
+      "div",
+      { className: "quick-buttons" },
+      button("🍅", this.t("ev_harvest"), () => open("harvest")),
+      coops.length ? button("🥚", this.t("ev_eggs"), () => open("eggs", coops.length === 1 ? { zone_id: coops[0].id } : {})) : null,
+      button("💧", this.t("ev_watering"), () => open("watering")),
+      button("📝", this.t("ev_note"), () => open("note")),
+      button("＋", this.t("quickOther"), () => this._newEvent()),
+    );
+  }
+
+  /** "today", "yesterday", "3 days ago", or the date. */
+  _ago(iso) {
+    const days = daysBetween(iso, today());
+    if (days === 0) return this.t("agoToday");
+    if (days === 1) return this.t("agoYesterday");
+    if (days > 1 && days < 7) return this.t("agoDays", { count: days });
+    return this._date(iso, iso.slice(0, 4) !== today().slice(0, 4));
+  }
+
+  _quickPlants() {
+    const search = h("input", {
+      type: "search",
+      placeholder: this.t("quickSearch"),
+      value: this._quickQuery || "",
+      oninput: (ev) => {
+        this._quickQuery = ev.target.value;
+        this._fillQuick();
+      },
+    });
+    this._quickEl = h("div", { className: "quick-list" });
+    this._fillQuick();
+    return h("div", { className: "quick-box" }, h("label", { className: "search" }, "🔎", search), this._quickEl);
+  }
+
+  /** Active plantings and hen houses: the ones in harvest first, then the most recently updated. */
+  _quickRows() {
+    const now = today();
+    const month = Number(now.slice(5, 7));
+    const last = new Map();
+    const lastHarvest = new Map();
+    for (const e of this._data.events) {
+      const key = e.planting_id ? `p:${e.planting_id}` : e.zone_id ? `z:${e.zone_id}` : null;
+      if (!key) continue;
+      if (!last.has(key) || e.done_on > last.get(key).done_on) last.set(key, e);
+      if ((e.kind === "harvest" || e.kind === "eggs") && e.quantity && (!lastHarvest.has(key) || e.done_on > lastHarvest.get(key).done_on)) lastHarvest.set(key, e);
+    }
+    const rows = this._data.plantings
+      .filter((p) => p.status === "active")
+      .map((p) => {
+        const key = `p:${p.id}`;
+        const harvest = lastHarvest.get(key);
+        const crop = this._crop(p.species);
+        return {
+          key,
+          planting: p,
+          icon: PLANT_ICONS[p.plant_type] || "🌱",
+          name: `${p.name}${p.kind === "group" && p.quantity > 1 ? ` (${p.quantity})` : ""}`,
+          where: p.zone_id ? this._zone(p.zone_id)?.name : "",
+          search: [p.name, p.species, p.variety, p.zone_id && this._zone(p.zone_id)?.name].filter(Boolean).join(" ").toLowerCase(),
+          last: last.get(key),
+          harvest,
+          now: !!(crop?.harvest?.includes(month) || (harvest && daysBetween(harvest.done_on, now) <= 30)),
+          harvests: !!(harvest || crop?.harvest?.length),
+        };
+      });
+    for (const zone of this._data.zones.filter((z) => z.kind === "coop")) {
+      const key = `z:${zone.id}`;
+      const zones = new Set([zone.id, ...this._zoneDescendants(zone.id)]);
+      rows.push({
+        key,
+        zone,
+        coop: true,
+        icon: "🐔",
+        name: zone.name,
+        where: this._hensText(this._hensAt(zones, now)),
+        search: zone.name.toLowerCase(),
+        last: last.get(key),
+        harvest: lastHarvest.get(key),
+        now: true,
+        harvests: true,
+      });
+    }
+    const recent = (a, b) => (b.last?.done_on || "").localeCompare(a.last?.done_on || "") || a.name.localeCompare(b.name);
+    return rows.sort(recent);
+  }
+
+  _fillQuick() {
+    if (!this._quickEl) return;
+    const query = (this._quickQuery || "").trim().toLowerCase();
+    const rows = this._quickRows();
+    const sections = [];
+    if (query) sections.push([this.t("quickFound"), rows.filter((r) => r.search.includes(query))]);
+    else {
+      const others = rows.filter((r) => !r.now);
+      sections.push([this.t("quickNow"), rows.filter((r) => r.now)]);
+      sections.push([this.t("quickRecent"), this._quickAll ? others : others.slice(0, 8), others.length > 8 && !this._quickAll]);
+    }
+    this._quickEl.replaceChildren(
+      ...sections
+        .filter(([, list]) => list.length)
+        .flatMap(([title, list, more]) => [
+          h("div", { className: "quick-title" }, title),
+          ...list.map((row) => this._quickRow(row)),
+          more
+            ? h("button", { type: "button", className: "link quick-more", onclick: () => ((this._quickAll = true), this._fillQuick()) }, this.t("quickAll", { count: rows.length }))
+            : null,
+        ])
+        .filter(Boolean),
+    );
+    if (!this._quickEl.children.length) this._quickEl.append(h("p", { className: "hint" }, query ? this.t("quickNone") : this.t("empty")));
+  }
+
+  _quickRow(row) {
+    const open = this._quickOpen === row.key;
+    const lastText = row.last ? `${this._ago(row.last.done_on)} ${EVENT_ICONS[row.last.kind] || ""}${row.last.quantity ? ` ${this._eventQuantity(row.last)}` : ""}` : "";
+    const select = () => (row.coop ? this._selectZone(row.zone.id) : this._select(row.planting.id));
+    const action = row.coop ? this.t("eggsAdd") : row.harvests ? `+ ${this.t("ev_harvest")}` : `+ ${this.t("quickEvent")}`;
+    const onAction = () => {
+      if (!row.harvests) return this._newEvent({ planting_id: row.planting.id }, { planting_id: row.planting.id });
+      this._quickOpen = open ? null : row.key;
+      this._quickValue = row.harvest?.quantity ?? (row.coop ? 1 : 1);
+      this._fillQuick();
+    };
+    return h(
+      "div",
+      { className: `quick-row${open ? " open" : ""}` },
+      h(
+        "div",
+        { className: "quick-line" },
+        h("span", { className: "quick-icon" }, row.icon),
+        h(
+          "button",
+          { type: "button", className: "quick-name", onclick: select },
+          h("strong", {}, row.name),
+          h("span", { className: "sub" }, [row.where, lastText].filter(Boolean).join(" · ")),
+        ),
+        this._quickSaved?.[row.key] ? h("span", { className: "quick-saved" }, `✓ ${this._quickSaved[row.key]}`) : null,
+        h("button", { type: "button", className: `quick-action${open ? "" : " primary"}`, onclick: onAction }, open ? this.t("close") : action),
+      ),
+      open ? this._quickStepper(row) : null,
+    );
+  }
+
+  _quickStepper(row) {
+    const unit = row.coop ? "eggs" : row.harvest?.unit || "kg";
+    const counted = unit === "eggs" || unit === "pieces";
+    const step = (value) => (counted ? 1 : value < 2 ? 0.1 : value < 20 ? 0.5 : 1);
+    const label = h("strong", { className: "quick-value" });
+    const show = () => {
+      const number = new Intl.NumberFormat(this._lang(), { maximumFractionDigits: 1 }).format(this._quickValue);
+      label.textContent = unit === "eggs" ? `${number} 🥚` : `${number} ${this.t(`u_${unit}`)}`;
+    };
+    const change = (sign) => {
+      const value = this._quickValue + sign * step(sign < 0 ? this._quickValue - 1e-9 : this._quickValue);
+      this._quickValue = Math.max(counted ? 1 : 0.1, Math.round(value * 10) / 10);
+      show();
+    };
+    show();
+    const save = async () => {
+      const quantity = this._quickValue;
+      const data = row.coop
+        ? { kind: "eggs", zone_id: row.zone.id, quantity, done_on: today() }
+        : { kind: "harvest", planting_id: row.planting.id, quantity, unit, done_on: today() };
+      const result = await this._call("add_event", data);
+      if (!result) return;
+      this._quickOpen = null;
+      this._quickSaved = { ...(this._quickSaved || {}), [row.key]: label.textContent };
+      this._fillQuick();
+    };
+    return h(
+      "div",
+      { className: "quick-stepper" },
+      h("button", { type: "button", "aria-label": "−", onclick: () => change(-1) }, "−"),
+      label,
+      h("button", { type: "button", "aria-label": "+", onclick: () => change(1) }, "+"),
+      h("button", { type: "button", className: "primary", onclick: save }, `✔ ${this.t("save")}`),
+    );
+  }
+
+  /** Last year's annual crops that have no copy for the coming season yet. */
+  _repeatCandidates() {
+    const now = new Date();
+    const target = now.getMonth() >= 8 ? now.getFullYear() + 1 : now.getFullYear();
+    const annual = (p) => {
+      // Herbs and flowers can be perennial: only the ones whose season ended.
+      if (p.plant_type) return p.plant_type === "vegetable" || (["herb", "flower"].includes(p.plant_type) && p.status !== "active");
+      return ["vegetable_garden", "greenhouse", "pots"].includes(this._zone(p.zone_id)?.kind);
+    };
+    const sameCrop = (a, b) => (a.taxon_id && a.taxon_id === b.taxon_id) || this._cropKey(a.species) === this._cropKey(b.species);
+    const list = this._data.plantings
+      .filter((p) => annual(p) && this._plantingYear(p) === target - 1)
+      .filter((p) => !this._data.plantings.some((o) => o !== p && o.zone_id === p.zone_id && sameCrop(o, p) && (this._plantingYear(o) === target || o.name.includes(String(target)))))
+      .map((p) => {
+        const review = this._data.events.find((e) => e.kind === "review" && e.planting_id === p.id);
+        return { planting: p, rating: review?.rating, avoid: review?.avoid };
+      })
+      .sort((a, b) => a.planting.name.localeCompare(b.planting.name));
+    return { target, list };
+  }
+
+  _repeatBox() {
+    const { target, list } = this._repeatCandidates();
+    if (!list.length) return null;
+    if (!this._repeatOpen)
+      return h(
+        "button",
+        { type: "button", className: "repeat-card", onclick: () => ((this._repeatOpen = true), this._render()) },
+        h("strong", {}, `🔁 ${this.t("repeatTitle")}`),
+        h("span", { className: "sub" }, this.t("repeatHint", { count: list.length, from: target - 1, to: target })),
+      );
+    this._repeatOff ||= new Set(list.filter((c) => c.avoid || (c.rating && c.rating <= 2)).map((c) => c.planting.id));
+    const button = h("button", { type: "button", className: "primary" });
+    const count = () => (button.textContent = this._plural("repeatCreate", list.length - list.filter((c) => this._repeatOff.has(c.planting.id)).length));
+    count();
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      let made = 0;
+      for (const c of list.filter((c) => !this._repeatOff.has(c.planting.id))) {
+        if (await this._call("repeat_planting", { id: c.planting.id, year: target })) made++;
+      }
+      this._repeatOpen = false;
+      this._repeatOff = null;
+      this._render();
+      this._showMessage(`✓ ${this.t("repeatDone", { count: made, year: target })}`);
+    });
+    return h(
+      "div",
+      { className: "repeat-box" },
+      h("div", { className: "cal-head" }, h("h3", {}, `🔁 ${this.t("repeatTitle")} ${target - 1} → ${target}`), h("button", { type: "button", onclick: () => ((this._repeatOpen = false), this._render()) }, "✕")),
+      h("p", { className: "hint" }, this.t("repeatNote")),
+      list.map((c) => {
+        const box = h("input", { type: "checkbox", checked: !this._repeatOff.has(c.planting.id) });
+        box.addEventListener("change", () => {
+          if (box.checked) this._repeatOff.delete(c.planting.id);
+          else this._repeatOff.add(c.planting.id);
+          count();
+        });
+        const zone = c.planting.zone_id && this._zone(c.planting.zone_id)?.name;
+        return h(
+          "label",
+          { className: "repeat-row" },
+          box,
+          h("span", { className: "repeat-name" }, h("strong", {}, c.planting.name), h("span", { className: "sub" }, [c.planting.variety, zone].filter(Boolean).join(" · "))),
+          h("span", { className: "sub" }, [c.rating ? `⭐ ${c.rating}` : null, c.avoid ? `❌ ${c.avoid}` : null].filter(Boolean).join(" ")),
+        );
+      }),
+      button,
+    );
   }
 
   /** Planting or zone picker; value "p:<id>" / "z:<id>" ("" = none, allowed only for tasks). */
@@ -3689,13 +4183,13 @@ class HomesteadPanel extends HTMLElement {
   }
 
   /** Open tasks, oldest due first; ✔ opens the diary form already filled in. */
-  _todoBox(tasks, back = null) {
+  _todoBox(tasks, back = null, headExtra = null) {
     const open = tasks.filter((t) => !t.done_on).sort((a, b) => a.due_on.localeCompare(b.due_on));
     const now = today();
     return h(
       "div",
       { className: "todo" },
-      h("h3", {}, this.t("tabTodo")),
+      headExtra ? h("div", { className: "cal-head" }, h("h3", {}, this.t("tabTodo")), headExtra) : h("h3", {}, this.t("tabTodo")),
       open.length
         ? open.map((t) =>
             h(
@@ -4713,19 +5207,6 @@ class HomesteadPanel extends HTMLElement {
 
   // ---------- calendar view (instead of the map) ----------
 
-  _toggleCalendar(on = !this._calendarOn) {
-    this._calendarOn = on;
-    this._layout.classList.toggle("calendar-on", on);
-    this._layout.classList.remove("no-map");
-    try {
-      localStorage.setItem("homestead-calendar", on ? "1" : "");
-    } catch {
-      // private mode: the choice is just not remembered
-    }
-    if (on) this._renderCalendar();
-    else setTimeout(() => this._map.invalidateSize(), 0);
-  }
-
   _renderCalendar() {
     if (!this._calendarOn || !this._calWrap) return;
     const mode = this._calendarMode || "plan";
@@ -4805,18 +5286,37 @@ class HomesteadPanel extends HTMLElement {
         h("button", { type: "button", className: "tick", title: this.t("done"), onclick: () => this._openEvent({ kind: "compost_turn", done_on: today(), zone_id: zone.id }) }, "✔"),
       ),
     );
+    const services = this._data.tools
+      .filter((t) => t.next_service_on && t.next_service_on <= end && t.status !== "broken")
+      .sort((a, b) => a.next_service_on.localeCompare(b.next_service_on))
+      .map((t) =>
+        h(
+          "div",
+          { className: `action-card${t.next_service_on < now ? " late" : ""}` },
+          h(
+            "button",
+            { type: "button", className: "action-main", onclick: () => this._openTool(t) },
+            h("span", { className: "action-date" }, `${weekday.format(new Date(`${t.next_service_on}T12:00:00`))} ${this._date(t.next_service_on, false)}`),
+            h("span", { className: "action-title" }, `🔧 ${this.t("toolService")}`),
+            h("span", { className: "sub" }, t.name),
+            t.next_service_on < now ? h("span", { className: "action-verdict" }, this.t("overdue")) : null,
+          ),
+          h("button", { type: "button", className: "tick", title: this.t("done"), onclick: () => this._toolServiced(t) }, "✔"),
+        ),
+      );
     const alerts = this._outlook?.alerts || [];
     const when = (a) => (a.start === a.end ? this._date(a.start, false) : `${this._date(a.start, false)}–${this._date(a.end, false)}`);
     return h(
       "div",
       { className: "cal-box" },
+      this._weatherStrip(),
       h(
         "div",
         { className: "cal-head" },
         h("h3", {}, this.t("calNext")),
         h("button", { type: "button", onclick: () => this._openTask({ kind: "note", due_on: today() }) }, this.t("addTask")),
       ),
-      cards.length || turns.length ? h("div", { className: "action-cards" }, cards, turns) : h("p", { className: "hint" }, this.t("nothingToDo")),
+      cards.length || turns.length || services.length ? h("div", { className: "action-cards" }, cards, turns, services) : h("p", { className: "hint" }, this.t("nothingToDo")),
       tasks.length > cards.length ? h("div", { className: "sub" }, this.t("calMore", { count: tasks.length - cards.length })) : null,
       alerts.map((a) => {
         const names = a.plantings.map((id) => this._planting(id)?.name).filter(Boolean);
@@ -4827,7 +5327,6 @@ class HomesteadPanel extends HTMLElement {
           `${this.t(`al_${a.kind}`, { when: when(a), value: a.value })}${names.length && !everyone ? ` — ${names.slice(0, 5).join(", ")}` : ""}`,
         );
       }),
-      this._weatherStrip(),
     );
   }
 
@@ -4860,25 +5359,44 @@ class HomesteadPanel extends HTMLElement {
     return byCondition[day.condition] || ((day.rain_mm || 0) >= 1 ? "🌧️" : "☀️");
   }
 
+  /** Next 14 days: weather, alerts and the planned activities (green/orange by the weather verdict, ↪ on a better day). */
   _weatherStrip() {
     const days = (this._outlook?.forecast || []).slice(0, 14);
     if (!days.length) return h("p", { className: "hint" }, this.t("calNoForecast"));
     const alerts = this._outlook?.alerts || [];
-    const weekday = new Intl.DateTimeFormat(this._lang(), { weekday: "narrow" });
-    return h(
-      "div",
-      { className: "wx-strip" },
-      days.map((day) =>
+    const advice = this._outlook?.advice || {};
+    const tasks = this._data.tasks.filter((t) => !t.done_on);
+    const weekday = new Intl.DateTimeFormat(this._lang(), { weekday: "short" });
+    const alertIcon = { frost: "❄️", cold: "🥶", heatwave: "🔥", heat_extreme: "🔥", heat_stress: "🥵" };
+    const now = today();
+    const columns = days.map((day) => {
+      const dayAlerts = alerts.filter((a) => a.start <= day.date && day.date <= a.end);
+      const due = tasks.filter((t) => t.due_on === day.date);
+      const better = tasks.filter((t) => advice[t.id]?.best === day.date);
+      return h(
+        "div",
+        { className: `day-col${dayAlerts.length ? " alert" : ""}${day.date === now ? " today" : ""}` },
+        h("div", { className: "day-name" }, `${weekday.format(new Date(`${day.date}T12:00:00`)).replace(".", "")} ${Number(day.date.slice(8))}`),
+        h("div", { className: "wx" }, this._weatherIcon(day)),
+        h("div", { className: "t-max" }, `${day.t_max != null ? Math.round(day.t_max) : "–"}°`),
+        h("div", { className: "sub" }, `${day.t_min != null ? Math.round(day.t_min) : "–"}°`),
+        h("div", { className: "sub rain" }, day.rain_mm ? `${Math.round(day.rain_mm)} mm` : ""),
         h(
           "div",
-          { className: `wx-day${alerts.some((a) => a.start <= day.date && day.date <= a.end) ? " alert" : ""}`, title: `${this._date(day.date)}${day.rain_mm ? ` · ${day.rain_mm} mm` : ""}` },
-          h("span", { className: "sub" }, `${weekday.format(new Date(`${day.date}T12:00:00`))} ${day.date.slice(8)}`),
-          h("span", {}, this._weatherIcon(day)),
-          h("span", {}, `${day.t_max != null ? Math.round(day.t_max) : "–"}°`),
-          h("span", { className: "sub" }, `${day.t_min != null ? Math.round(day.t_min) : "–"}°`),
+          { className: "day-chips" },
+          dayAlerts.map((a) =>
+            h("span", { className: `alert-chip ${a.kind}`, title: this.t(`al_${a.kind}`, { when: this._date(a.start, false), value: a.value }) }, alertIcon[a.kind]),
+          ),
+          due.map((t) => {
+            const verdict = advice[t.id];
+            const state = !verdict ? "" : verdict.issues.length ? " warn" : " good";
+            return h("button", { type: "button", className: `task-chip${state}`, title: this._taskLabel(t), onclick: () => this._openTask(t) }, EVENT_ICONS[t.kind] || "📝");
+          }),
+          better.map((t) => h("button", { type: "button", className: "task-chip better", title: `↪ ${this._taskLabel(t)}`, onclick: () => this._openTask(t) }, "↪")),
         ),
-      ),
-    );
+      );
+    });
+    return h("div", { className: "days" }, columns);
   }
 
   // ----- the year as one continuous line, grouped by zone -----
@@ -4946,7 +5464,7 @@ class HomesteadPanel extends HTMLElement {
   }
 
   _timelineHeader() {
-    const letters = new Intl.DateTimeFormat(this._lang(), { month: "short" });
+    const letters = new Intl.DateTimeFormat(this._lang(), { month: this._narrow ? "narrow" : "short" });
     return h(
       "div",
       { className: "tl-row tl-months" },
@@ -4965,14 +5483,19 @@ class HomesteadPanel extends HTMLElement {
     return h("div", { className: "tl-today", style: `--x:${this._yearFraction(today())}` }, h("span", {}, this.t("calToday")));
   }
 
-  _groupHeader(group, summary) {
+  _groupHeader(group, summary, addTask = null) {
     const open = !this._calClosed().has(group.id);
     return h(
-      "button",
-      { type: "button", className: "tl-group", onclick: () => this._toggleGroup(group.id), "aria-expanded": open ? "true" : "false" },
-      h("span", { className: "tl-arrow" }, open ? "▾" : "▸"),
-      h("strong", {}, group.zone ? `${ZONE_ICONS[group.zone.kind] || "▭"} ${group.name}` : group.name),
-      h("span", { className: "sub" }, summary),
+      "div",
+      { className: "tl-group-row" },
+      h(
+        "button",
+        { type: "button", className: "tl-group", onclick: () => this._toggleGroup(group.id), "aria-expanded": open ? "true" : "false" },
+        h("span", { className: "tl-arrow" }, open ? "▾" : "▸"),
+        h("strong", {}, group.zone ? `${ZONE_ICONS[group.zone.kind] || "📍"} ${group.name}` : group.name),
+        h("span", { className: "sub" }, summary),
+      ),
+      addTask ? h("button", { type: "button", className: "tl-add", title: this.t("addTask"), "aria-label": this.t("addTask"), onclick: addTask }, "+") : null,
     );
   }
 
@@ -5042,7 +5565,13 @@ class HomesteadPanel extends HTMLElement {
       const zoneBands = group.zone ? ZONE_SEASONS[group.zone.kind] || [] : [];
       if (!plantings.length && !zoneTasks.length && !zoneBands.length) continue;
       const count = zoneTasks.length + plantTasks.length;
-      rows.push(this._groupHeader(group, [plantings.length ? this.t("calPlants", { count: plantings.length }) : null, count ? this.t("calTasks", { count }) : null].filter(Boolean).join(" · ")));
+      rows.push(
+        this._groupHeader(
+          group,
+          [plantings.length ? this._plural("calPlant", plantings.length) : null, count ? this._plural("calTask", count) : null].filter(Boolean).join(" · "),
+          () => this._openTask({ kind: "note", due_on: today(), ...(group.zone ? { zone_id: group.zone.id } : {}) }),
+        ),
+      );
       if (this._calClosed().has(group.id)) continue;
       if (zoneBands.length || zoneTasks.length) {
         const bands = zoneBands.map(([key, months]) => {
@@ -5051,7 +5580,7 @@ class HomesteadPanel extends HTMLElement {
         });
         rows.push(
           this._bandRow(
-            group.zone ? `▭ ${this.t("calWholeZone")}` : this.t("calGeneral"),
+            group.zone ? `🗺️ ${this.t("calWholeZone")}` : this.t("calGeneral"),
             () => group.zone && this._selectZone(group.zone.id),
             bands.flat(),
             this._taskPills(zoneTasks, year),
@@ -5067,6 +5596,22 @@ class HomesteadPanel extends HTMLElement {
         const label = `${PLANT_ICONS[p.plant_type] || "🌱"} ${p.name}${p.kind === "group" && p.quantity > 1 ? ` (${p.quantity})` : ""}`;
         rows.push(this._bandRow(label, () => this._select(p.id), bands, this._taskPills(openTasks.filter((t) => t.planting_id === p.id), year)));
       }
+    }
+    const tools = this._data.tools.filter((t) => t.next_service_on && t.status !== "broken" && t.next_service_on.slice(0, 4) <= year);
+    if (tools.length) {
+      const group = { id: "_tools", name: `🔧 ${this.t("tabTools")}` };
+      rows.push(this._groupHeader(group, this._plural("calTask", tools.length)));
+      if (!this._calClosed().has(group.id))
+        for (const t of tools.sort((a, b) => a.name.localeCompare(b.name))) {
+          const late = t.next_service_on < today();
+          const x = this._yearFraction(late ? today() : t.next_service_on);
+          const pill = h(
+            "button",
+            { type: "button", className: `tl-pill${late ? " late" : ""}`, "data-row": 0, style: `left:${x * 100}%;top:4px`, title: `${this._date(t.next_service_on)} · ${t.name}`, onclick: () => this._openTool(t) },
+            `🔧 ${this.t("toolService")}`,
+          );
+          rows.push(this._bandRow(t.name, () => this._openTool(t), [], [pill]));
+        }
     }
     const legend = h(
       "div",
@@ -5140,7 +5685,7 @@ class HomesteadPanel extends HTMLElement {
       any = true;
       rows.push(this._groupHeader(group, this.t("calEvents", { count: zoneEvents.length + plantRows.reduce((n, r) => n + r.list.length, 0) })));
       if (this._calClosed().has(group.id)) continue;
-      if (zoneEvents.length) rows.push(this._bandRow(`▭ ${this.t("calWholeZone")}`, () => this._selectZone(group.zone.id), [], marks(zoneEvents)));
+      if (zoneEvents.length) rows.push(this._bandRow(`🗺️ ${this.t("calWholeZone")}`, () => this._selectZone(group.zone.id), [], marks(zoneEvents)));
       for (const { p, list } of plantRows) rows.push(this._bandRow(`${PLANT_ICONS[p.plant_type] || "🌱"} ${p.name}`, () => this._select(p.id), [], marks(list)));
     }
     return h(
@@ -5476,8 +6021,10 @@ class HomesteadPanel extends HTMLElement {
 
   // ---------- rotation ----------
 
+  /** Season of a planting: its sowing or planting date, a year in its name, else its first diary entry. */
   _plantingYear(p) {
-    const date = p.sown_on || p.planted_on || this._data.events.filter((e) => e.planting_id === p.id).map((e) => e.done_on).sort()[0];
+    const named = p.name.match(/\b(19|20)\d\d\b/);
+    const date = p.sown_on || p.planted_on || (named ? `${named[0]}` : null) || this._data.events.filter((e) => e.planting_id === p.id).map((e) => e.done_on).sort()[0];
     return date ? Number(date.slice(0, 4)) : null;
   }
 
@@ -5572,7 +6119,21 @@ class HomesteadPanel extends HTMLElement {
                       .join(" · "),
                   ),
                   due ? h("div", { className: "sub warn" }, `🔧 ${this.t("serviceDue", { date: this._date(t.next_service_on) })}`) : null,
+                  !due && t.next_service_on ? h("div", { className: "sub" }, `🔧 ${this._date(t.next_service_on)}${t.service_months ? ` · ${this.t("everyMonths", { count: t.service_months })}` : ""}`) : null,
                 ),
+                due
+                  ? h(
+                      "button",
+                      {
+                        type: "button",
+                        onclick: (ev) => {
+                          ev.stopPropagation();
+                          this._toolServiced(t);
+                        },
+                      },
+                      `✔ ${this.t("toolServiceDone")}`,
+                    )
+                  : null,
               );
             }),
           )
@@ -5601,7 +6162,9 @@ class HomesteadPanel extends HTMLElement {
           { className: "row" },
           this._field(f, "purchased_on", { type: "date" }),
           this._field(f, "next_service_on", { type: "date" }),
+          this._field(f, "service_months", { type: "number", min: 1, max: 120, step: 1, inputMode: "numeric" }),
         ),
+        f.id && f.next_service_on ? h("button", { type: "button", onclick: () => this._toolServiced(f) }, `✔ ${this.t("toolServiceDone")}`) : null,
         f.id ? null : this._field(f, "price", { type: "number", min: 0, step: "0.01", inputMode: "decimal" }),
         this._notes(f),
         this._formButtons(f.id, () => this._deleteTool()),
@@ -5621,11 +6184,22 @@ class HomesteadPanel extends HTMLElement {
       status: v.status,
       purchased_on: v.purchased_on || null,
       next_service_on: v.next_service_on || null,
+      service_months: v.service_months ? Number(v.service_months) : null,
       notes: v.notes?.trim() || null,
     };
     const id = this._toolForm.id;
     if (!id && v.price) data.price = Number(v.price);
     if (await this._call(id ? "update_tool" : "add_tool", id ? { id, ...data } : data)) this._saved(data.name);
+  }
+
+  /** Service done today: the next one after the tool's interval, or none. */
+  async _toolServiced(tool) {
+    const next = tool.service_months ? addMonths(today(), tool.service_months) : null;
+    if (await this._call("update_tool", { id: tool.id, next_service_on: next, status: "ok" })) {
+      this._toolForm = null;
+      this._render();
+      this._showMessage(`✓ ${tool.name}${next ? ` · ${this.t("nextService", { date: this._date(next) })}` : ""}`);
+    }
   }
 
   async _deleteTool() {
@@ -5799,6 +6373,15 @@ function addDays(iso, days) {
   const d = new Date(`${iso}T12:00:00`);
   d.setDate(d.getDate() + days);
   return d.toISOString().slice(0, 10);
+}
+
+function addMonths(iso, months) {
+  const [y, m, d] = iso.split("-").map(Number);
+  const total = m - 1 + months;
+  const year = y + Math.floor(total / 12);
+  const month = (total % 12) + 1;
+  const last = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  return `${year}-${String(month).padStart(2, "0")}-${String(Math.min(d, last)).padStart(2, "0")}`;
 }
 
 function daysBetween(from, to) {

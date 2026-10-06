@@ -624,6 +624,10 @@
           "name": "Prossima manutenzione",
           "description": "Prossima affilatura o tagliando."
         },
+        "service_months": {
+          "name": "Manutenzione ogni (mesi)",
+          "description": "Pianificazione alla buona per i motori: fatta la manutenzione, la prossima è dopo questi mesi."
+        },
         "price": {
           "name": "Prezzo",
           "description": "Prezzo d'acquisto; registrato come spesa."
@@ -729,6 +733,10 @@
         "next_service_on": {
           "name": "Prossima manutenzione",
           "description": "Prossima affilatura o tagliando."
+        },
+        "service_months": {
+          "name": "Manutenzione ogni (mesi)",
+          "description": "Pianificazione alla buona per i motori: fatta la manutenzione, la prossima è dopo questi mesi."
         },
         "notes": {
           "name": "Note",
@@ -1225,6 +1233,7 @@
     "issue_frozen": "terreno gelato",
     "issue_gusts": "raffiche forti",
     "better_on": "meglio il {date}",
-    "notification_compost": "♻️ {zone}: rivoltare il compost ({days} giorni dall'ultima volta)"
+    "notification_compost": "♻️ {zone}: rivoltare il compost ({days} giorni dall'ultima volta)",
+    "notification_tool": "🔧 {tool}: manutenzione da fare"
   }
 }

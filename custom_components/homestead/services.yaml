@@ -446,6 +446,12 @@ add_tool:
     next_service_on:
       selector:
         date:
+    service_months:
+      selector:
+        number:
+          min: 1
+          max: 120
+          unit_of_measurement: months
     price:
       selector:
         number:
@@ -556,6 +562,12 @@ update_tool:
     next_service_on:
       selector:
         date:
+    service_months:
+      selector:
+        number:
+          min: 1
+          max: 120
+          unit_of_measurement: months
     notes:
       selector:
         text:
