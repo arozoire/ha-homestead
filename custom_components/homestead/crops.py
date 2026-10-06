@@ -21,6 +21,7 @@ TRAITS = (
     "flowering",
     "harvest",
     "spacing_cm",
+    "heat_max_c",
 )
 
 
@@ -34,6 +35,17 @@ def normalize(name: str | None) -> str:
     """'Citrus x limon', 'Citrus × limon' → 'citrus limon'; only genus and species count."""
     words = re.sub(r"\s[x×]\s|×", " ", (name or "").lower()).split()
     return " ".join(words[:2])
+
+
+def crop_traits(
+    name: str | None, table: dict[str, dict[str, Any]], profiles: list[Any]
+) -> dict[str, Any] | None:
+    """The user's values for the species, else the built-in ones."""
+    key = normalize(name)
+    mine = next((p for p in profiles if normalize(p.species) == key), None) if key else None
+    if mine is not None:
+        return {trait: getattr(mine, trait, None) for trait in TRAITS}
+    return lookup(name, table)
 
 
 def lookup(name: str | None, table: dict[str, dict[str, Any]]) -> dict[str, Any] | None:

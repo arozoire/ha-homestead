@@ -14,7 +14,7 @@
     "step": {
       "init": {
         "title": "Weather for the diary",
-        "description": "Each diary event records the weather of the week before it (and of the 3 days after for treatments and sowings). Choose your sensors; anything missing comes from Open-Meteo (free, no account). Reminders: planned activities due today are sent to the chosen phones at the chosen time; tapping one opens the diary form already filled in.",
+        "description": "Each diary event records the weather of the week before it (and of the 3 days after for treatments and sowings). Choose your sensors; anything missing comes from Open-Meteo (free, no account). Reminders: planned activities due today are sent to the chosen phones at the chosen time; tapping one opens the diary form already filled in. Alerts: frost below each plant's hardiness, heatwave (hot days and warm nights for some days in a row, when plants no longer recover at night), extreme heat. The forecast comes from the chosen weather entity, else from Open-Meteo.",
         "data": {
           "temperature_sensor": "Outdoor temperature",
           "humidity_sensor": "Outdoor humidity",
@@ -22,7 +22,13 @@
           "soil_moisture_sensor": "Soil moisture",
           "open_meteo": "Use Open-Meteo for missing data",
           "notify_services": "Send reminders to",
-          "notify_time": "Reminder time"
+          "notify_time": "Reminder time",
+          "weather_entity": "Weather forecast (HA weather entity)",
+          "alert_notify": "Frost and heat alerts on the phones",
+          "heat_max": "Heatwave: maximum from",
+          "heat_night": "Heatwave: night minimum from",
+          "heat_days": "Heatwave: days in a row",
+          "heat_extreme": "Extreme heat: maximum from (a single day)"
         }
       }
     }
@@ -37,6 +43,9 @@
       },
       "tools_needing_service": {
         "name": "Tools needing service"
+      },
+      "weather_alerts": {
+        "name": "Weather alerts"
       }
     },
     "todo": {
@@ -216,6 +225,13 @@
         "sun": "Full sun",
         "partial": "Partial shade",
         "shade": "Shade"
+      }
+    },
+    "alert_notify": {
+      "options": {
+        "off": "Off (panel only)",
+        "tasks": "Only with a planned activity on those days",
+        "always": "Always"
       }
     }
   },
@@ -1128,6 +1144,10 @@
           "name": "Spacing",
           "description": "Distance between plants."
         },
+        "heat_max_c": {
+          "name": "Heat limit",
+          "description": "Above this maximum for some days the crop suffers (cool-season crops: lettuce, spinach, peas…)."
+        },
         "notes": {
           "name": "Notes",
           "description": "Free notes."
@@ -1148,6 +1168,11 @@
   "common": {
     "notification_title": "🌱 Garden",
     "notification_done": "✔ Done",
-    "notification_late": "{count} overdue activities"
+    "notification_late": "{count} overdue activities",
+    "alert_frost": "❄️ Frost {when}: {value} °C — {plants}",
+    "alert_cold": "🥶 Cold {when}: {value} °C for {plants}",
+    "alert_heatwave": "🔥 Heatwave {when}: up to {value} °C",
+    "alert_heat_extreme": "🔥 Extreme heat {when}: {value} °C",
+    "alert_heat_stress": "🥵 Too hot for {plants}: {when}, up to {value} °C"
   }
 }

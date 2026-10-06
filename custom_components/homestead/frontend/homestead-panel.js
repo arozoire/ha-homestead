@@ -170,6 +170,12 @@ const TEXT = {
     monthSowOutdoor: "🌱 Sow outdoors: {names}",
     monthPlantOut: "🪴 Plant out: {names}",
     monthHarvest: "🍎 Harvest: {names}",
+    alertsTitle: "⚠️ Weather alerts",
+    al_frost: "❄️ Frost {when}: {value} °C",
+    al_cold: "🥶 Cold {when}: {value} °C",
+    al_heatwave: "🔥 Heatwave {when}: up to {value} °C",
+    al_heat_extreme: "🔥 Extreme heat {when}: {value} °C",
+    al_heat_stress: "🥵 Too hot {when}: up to {value} °C",
     tabSeeds: "Seeds",
     addSeed: "New seeds",
     newSeedTitle: "New seeds",
@@ -484,6 +490,12 @@ const TEXT = {
     monthSowOutdoor: "🌱 Semina all'aperto: {names}",
     monthPlantOut: "🪴 Messa a dimora: {names}",
     monthHarvest: "🍎 Raccolta: {names}",
+    alertsTitle: "⚠️ Allerte meteo",
+    al_frost: "❄️ Gelo {when}: {value} °C",
+    al_cold: "🥶 Freddo {when}: {value} °C",
+    al_heatwave: "🔥 Ondata di calore {when}: fino a {value} °C",
+    al_heat_extreme: "🔥 Caldo estremo {when}: {value} °C",
+    al_heat_stress: "🥵 Troppo caldo {when}: fino a {value} °C",
     tabSeeds: "Semi",
     addSeed: "Nuovi semi",
     newSeedTitle: "Nuovi semi",
@@ -1006,10 +1018,21 @@ class HomesteadPanel extends HTMLElement {
   disconnectedCallback() {
     this._unsub?.then((unsub) => unsub()).catch(() => {});
     this._unsub = null;
+    this._outlookUnsub?.then((unsub) => unsub?.()).catch(() => {});
+    this._outlookUnsub = null;
   }
 
   _subscribe() {
     let first = true;
+    this._outlookUnsub = this._hass.connection
+      .subscribeMessage(
+        (outlook) => {
+          this._outlook = outlook;
+          if (this._tab === "diary" && !this._eventForm && !this._taskForm) this._render();
+        },
+        { type: "homestead/outlook/subscribe" },
+      )
+      .catch(() => {});
     this._hass
       .callWS({ type: "homestead/crops/defaults" })
       .then((result) => {
@@ -2579,6 +2602,27 @@ class HomesteadPanel extends HTMLElement {
     );
   }
 
+  /** Coming frost and heat, with the plants they hit. */
+  _alertsBox() {
+    const alerts = this._outlook?.alerts || [];
+    if (!alerts.length) return null;
+    const when = (a) => (a.start === a.end ? this._date(a.start, false) : `${this._date(a.start, false)}–${this._date(a.end, false)}`);
+    return h(
+      "div",
+      { className: "summary", style: "border-left:4px solid var(--warning-color, #ffa600)" },
+      h("strong", {}, this.t("alertsTitle")),
+      alerts.map((a) => {
+        const names = a.plantings.map((id) => this._planting(id)?.name).filter(Boolean);
+        const everyone = ["heatwave", "heat_extreme"].includes(a.kind);
+        return h(
+          "div",
+          { className: "sub", style: "white-space:normal" },
+          `${this.t(`al_${a.kind}`, { when: when(a), value: a.value })}${names.length && !everyone ? ` — ${names.slice(0, 5).join(", ")}${names.length > 5 ? " …" : ""}` : ""}`,
+        );
+      }),
+    );
+  }
+
   /** Events of previous years from a week before to three weeks after today's date: what usually happens now. */
   _lastYearsBox(events, back = null) {
     const now = new Date();
@@ -2656,6 +2700,7 @@ class HomesteadPanel extends HTMLElement {
         h("button", { className: "primary", onclick: () => this._newEvent() }, this.t("addEvent")),
         h("button", { onclick: () => this._openTask({ kind: "note", due_on: today() }) }, this.t("addTask")),
       ),
+      this._alertsBox(),
       this._todoBox(this._data.tasks),
       this._monthBox(),
       this._lastYearsBox(this._data.events),

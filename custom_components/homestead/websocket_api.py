@@ -17,14 +17,13 @@ from homeassistant.loader import async_get_integration
 from homeassistant.util import dt as dt_util
 
 from .backup import BackupError, make_backup, read_backup, summary
-from .const import DOMAIN, SIGNAL_DATA_UPDATED
-from .crops import load_defaults
+from .const import DOMAIN, SIGNAL_DATA_UPDATED, SIGNAL_OUTLOOK_UPDATED
+from .forecast import async_crop_defaults, get_outlook
 from .models import Photo
 from .photos import MAX_PHOTO_BYTES, image_type, photo_dir, write_photo
 from .species import SourcesUnavailable, combine, search_local, search_remote
 from .store import get_store
 
-CROP_DEFAULTS = f"{DOMAIN}_crop_defaults"
 SEARCH_CACHE = f"{DOMAIN}_species_cache"
 SEARCH_CACHE_TTL_S = 24 * 3600
 SEARCH_CACHE_SIZE = 200
@@ -38,6 +37,8 @@ def async_register_websocket(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, ws_photo_upload)
     websocket_api.async_register_command(hass, ws_search_species)
     websocket_api.async_register_command(hass, ws_crop_defaults)
+    websocket_api.async_register_command(hass, ws_outlook_subscribe)
+    websocket_api.async_register_command(hass, ws_outlook_refresh)
 
 
 @websocket_api.websocket_command({vol.Required("type"): "homestead/crops/defaults"})
@@ -46,9 +47,38 @@ async def ws_crop_defaults(
     hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]
 ) -> None:
     """The built-in crop table, keyed by normalized species name."""
-    if CROP_DEFAULTS not in hass.data:
-        hass.data[CROP_DEFAULTS] = await hass.async_add_executor_job(load_defaults)
-    connection.send_result(msg["id"], {"crops": hass.data[CROP_DEFAULTS]})
+    connection.send_result(msg["id"], {"crops": await async_crop_defaults(hass)})
+
+
+@websocket_api.websocket_command({vol.Required("type"): "homestead/outlook/subscribe"})
+@callback
+def ws_outlook_subscribe(
+    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]
+) -> None:
+    """Forecast, alerts and climate now and after every refresh."""
+    msg_id = msg["id"]
+
+    @callback
+    def send() -> None:
+        outlook = get_outlook(hass)
+        connection.send_message(websocket_api.event_message(msg_id, outlook.as_dict() if outlook else {}))
+
+    connection.subscriptions[msg_id] = async_dispatcher_connect(hass, SIGNAL_OUTLOOK_UPDATED, send)
+    connection.send_result(msg_id)
+    send()
+
+
+@websocket_api.websocket_command(
+    {vol.Required("type"): "homestead/outlook/refresh", vol.Optional("history", default=False): bool}
+)
+@websocket_api.async_response
+async def ws_outlook_refresh(
+    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]
+) -> None:
+    """Fetch the forecast again now (and the history with ``history``)."""
+    if outlook := get_outlook(hass):
+        await outlook.async_refresh(history=msg["history"])
+    connection.send_result(msg["id"], outlook.as_dict() if outlook else {})
 
 
 @websocket_api.websocket_command({vol.Required("type"): "homestead/subscribe"})

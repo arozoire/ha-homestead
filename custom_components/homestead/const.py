@@ -18,3 +18,14 @@ CONF_OPEN_METEO = "open_meteo"
 CONF_NOTIFY = "notify_services"
 CONF_NOTIFY_TIME = "notify_time"
 DEFAULT_NOTIFY_TIME = "08:00:00"
+
+# Options: weather outlook and alerts.
+CONF_WEATHER_ENTITY = "weather_entity"
+CONF_ALERT_NOTIFY = "alert_notify"  # off, always, tasks (only with a planned activity those days)
+DEFAULT_ALERT_NOTIFY = "tasks"
+CONF_HEAT_MAX = "heat_max"
+CONF_HEAT_NIGHT = "heat_night"
+CONF_HEAT_DAYS = "heat_days"
+CONF_HEAT_EXTREME = "heat_extreme"
+
+SIGNAL_OUTLOOK_UPDATED = f"{DOMAIN}_outlook_updated"

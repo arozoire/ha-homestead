@@ -198,6 +198,7 @@ SET_CROP_PROFILE_SCHEMA = vol.Schema(
         vol.Optional("flowering"): _months,
         vol.Optional("harvest"): _months,
         vol.Optional("spacing_cm"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=5000))),
+        vol.Optional("heat_max_c"): vol.Any(None, vol.All(vol.Coerce(float), vol.Range(min=10, max=50))),
         vol.Optional("notes"): _opt_str,
     }
 )

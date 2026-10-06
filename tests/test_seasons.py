@@ -175,4 +175,9 @@ async def test_options_flow(hass: HomeAssistant) -> None:
         CONF_RAIN: RAIN,
         "open_meteo": False,
         "notify_time": "08:00:00",
+        "alert_notify": "tasks",
+        "heat_max": 35,
+        "heat_night": 22,
+        "heat_days": 3,
+        "heat_extreme": 40,
     }

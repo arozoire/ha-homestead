@@ -359,6 +359,7 @@ class CropProfile(_Record):
     flowering: list[int] = field(default_factory=list)
     harvest: list[int] = field(default_factory=list)
     spacing_cm: int | None = None
+    heat_max_c: float | None = None  # cool-season crops suffer above it
     notes: str | None = None
 
 

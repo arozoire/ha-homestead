@@ -17,8 +17,9 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util import dt as dt_util
 
 from . import HomesteadConfigEntry
-from .const import SIGNAL_DATA_UPDATED
+from .const import SIGNAL_DATA_UPDATED, SIGNAL_OUTLOOK_UPDATED
 from .entity import device_info
+from .forecast import get_outlook
 from .models import HomesteadData
 
 
@@ -55,7 +56,9 @@ async def async_setup_entry(
     entry: HomesteadConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    async_add_entities(HomesteadSensor(entry, description) for description in SENSORS)
+    async_add_entities(
+        [*(HomesteadSensor(entry, description) for description in SENSORS), WeatherAlertsSensor(entry)]
+    )
 
 
 class HomesteadSensor(SensorEntity):
@@ -84,6 +87,50 @@ class HomesteadSensor(SensorEntity):
 
     async def async_added_to_hass(self) -> None:
         self.async_on_remove(async_dispatcher_connect(self.hass, SIGNAL_DATA_UPDATED, self._handle_update))
+
+    @callback
+    def _handle_update(self) -> None:
+        self.async_write_ha_state()
+
+
+class WeatherAlertsSensor(SensorEntity):
+    """Number of coming frost and heat alerts; the list is in the attributes (for automations)."""
+
+    _attr_has_entity_name = True
+    _attr_should_poll = False
+    _attr_translation_key = "weather_alerts"
+
+    def __init__(self, entry: HomesteadConfigEntry) -> None:
+        self._store = entry.runtime_data
+        self._attr_unique_id = f"{entry.entry_id}_weather_alerts"
+        self._attr_device_info = device_info(entry)
+
+    def _alerts(self) -> list[dict[str, Any]]:
+        outlook = get_outlook(self.hass)
+        return outlook.alerts if outlook else []
+
+    @property
+    def native_value(self) -> int:
+        return len(self._alerts())
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        plantings = self._store.data.plantings
+        return {
+            "alerts": [
+                {
+                    "kind": a["kind"],
+                    "start": a["start"],
+                    "end": a["end"],
+                    "value": a["value"],
+                    "plantings": [plantings[p].name for p in a["plantings"] if p in plantings],
+                }
+                for a in self._alerts()
+            ]
+        }
+
+    async def async_added_to_hass(self) -> None:
+        self.async_on_remove(async_dispatcher_connect(self.hass, SIGNAL_OUTLOOK_UPDATED, self._handle_update))
 
     @callback
     def _handle_update(self) -> None:
