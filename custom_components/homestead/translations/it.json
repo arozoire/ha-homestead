@@ -95,6 +95,7 @@
         "vegetable": "Ortaggio",
         "herb": "Aromatica",
         "flower": "Fiore",
+        "houseplant": "Pianta da interno",
         "other": "Altro"
       }
     },
@@ -158,6 +159,7 @@
         "compost": "Compostiera",
         "coop": "Pollaio",
         "nursery": "Semenzaio",
+        "indoor": "In casa (una stanza)",
         "other": "Altro"
       }
     },
@@ -195,7 +197,9 @@
         "flock_in": "Arrivo galline",
         "flock_out": "Uscita galline",
         "animal_care": "Mangime e cure",
-        "coop_cleaning": "Pulizia pollaio"
+        "coop_cleaning": "Pulizia pollaio",
+        "repotting": "Rinvaso",
+        "wood_burned": "Legna bruciata (inverno)"
       }
     },
     "harvest_unit": {
@@ -448,6 +452,22 @@
           "name": "Piantine nate",
           "description": "Quante sono nate."
         },
+        "water_days": {
+          "name": "Annaffia ogni (giorni)",
+          "description": "Piante da interno: giorni tra un'annaffiatura e l'altra (una volta e mezza d'inverno)."
+        },
+        "fertilize_weeks": {
+          "name": "Concima ogni (settimane)",
+          "description": "Piante da interno: da marzo a settembre."
+        },
+        "moisture_entity": {
+          "name": "Sensore umidità terriccio",
+          "description": "Facoltativo: annaffia quando scende sotto la soglia."
+        },
+        "moisture_min": {
+          "name": "Annaffia sotto (%)",
+          "description": "Predefinito 20%."
+        },
         "notes": {
           "name": "Note",
           "description": "Note libere."
@@ -553,6 +573,22 @@
         "germinated_count": {
           "name": "Piantine nate",
           "description": "Quante sono nate."
+        },
+        "water_days": {
+          "name": "Annaffia ogni (giorni)",
+          "description": "Piante da interno: giorni tra un'annaffiatura e l'altra (una volta e mezza d'inverno)."
+        },
+        "fertilize_weeks": {
+          "name": "Concima ogni (settimane)",
+          "description": "Piante da interno: da marzo a settembre."
+        },
+        "moisture_entity": {
+          "name": "Sensore umidità terriccio",
+          "description": "Facoltativo: annaffia quando scende sotto la soglia."
+        },
+        "moisture_min": {
+          "name": "Annaffia sotto (%)",
+          "description": "Predefinito 20%."
         },
         "notes": {
           "name": "Note",
@@ -1310,6 +1346,7 @@
     "issue_gusts": "raffiche forti",
     "better_on": "meglio il {date}",
     "notification_compost": "♻️ {zone}: rivoltare il compost ({days} giorni dall'ultima volta)",
-    "notification_tool": "🔧 {tool}: manutenzione da fare"
+    "notification_tool": "🔧 {tool}: manutenzione da fare",
+    "notification_water": "🪴 Da annaffiare: {plants}"
   }
 }

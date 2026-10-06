@@ -19,7 +19,7 @@ from homeassistant.util import dt as dt_util
 from .const import CONF_NOTIFY, CONF_NOTIFY_TIME, DEFAULT_NOTIFY_TIME, DOMAIN
 from .forecast import advice_text, get_outlook
 from .labels import async_kind_names, summary
-from .models import COMPOST_TURN_DAYS, compost_due
+from .models import COMPOST_TURN_DAYS, compost_due, watering_due
 from .notify import async_send
 from .store import HomesteadStore
 from .tasks import async_complete_task
@@ -62,7 +62,8 @@ async def async_send_reminders(hass: HomeAssistant, store: HomesteadStore, servi
         (t for t in store.data.tools.values() if t.next_service_on == today and t.status != "broken"),
         key=lambda t: t.name,
     )
-    if not services or not (due or late or compost or tools):
+    thirsty = watering_due(store.data, now, _moisture(hass, store))
+    if not services or not (due or late or compost or tools or thirsty):
         return 0
     kinds = await async_kind_names(hass)
     texts = await _texts(hass)
@@ -99,6 +100,16 @@ async def async_send_reminders(hass: HomeAssistant, store: HomesteadStore, servi
                 "data": {"url": url, "clickAction": url, "tag": f"{DOMAIN}-compost-{zone.id}"},
             }
         )
+    if thirsty:
+        messages.append(
+            {
+                "title": title,
+                "message": texts.get("notification_water", "🪴 To water: {plants}").replace(
+                    "{plants}", ", ".join(p.name for p in thirsty)
+                ),
+                "data": {"url": PANEL_URL, "clickAction": PANEL_URL, "tag": f"{DOMAIN}-water"},
+            }
+        )
     for tool in tools:
         messages.append(
             {
@@ -128,6 +139,18 @@ async def async_send_reminders(hass: HomeAssistant, store: HomesteadStore, servi
         for message in messages:
             sent += await async_send(hass, name, message)
     return sent
+
+
+def _moisture(hass: HomeAssistant, store: HomesteadStore) -> dict[str, float]:
+    """Current readings of the soil moisture sensors linked to plantings."""
+    out = {}
+    for p in store.data.plantings.values():
+        if p.moisture_entity and (state := hass.states.get(p.moisture_entity)):
+            try:
+                out[p.moisture_entity] = float(state.state)
+            except ValueError:
+                continue  # unavailable or unknown: fall back to the interval
+    return out
 
 
 def _parse_time(value: str | None) -> time:

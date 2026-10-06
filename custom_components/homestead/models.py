@@ -35,6 +35,7 @@ class PlantType(StrEnum):
     VEGETABLE = "vegetable"
     HERB = "herb"
     FLOWER = "flower"
+    HOUSEPLANT = "houseplant"
     OTHER = "other"
 
 
@@ -55,6 +56,7 @@ class ZoneKind(StrEnum):
     COMPOST = "compost"  # compost bin: only turning and harvesting events
     COOP = "coop"  # hen house: eggs and flock movements
     NURSERY = "nursery"  # seed trays, cold frame: seedlings until they are planted out
+    INDOOR = "indoor"  # a room of the house: houseplants, no map, no weather
     OTHER = "other"
 
 
@@ -109,6 +111,8 @@ class EventKind(StrEnum):
     FLOCK_OUT = "flock_out"  # hens gone: count in quantity, why in reason
     ANIMAL_CARE = "animal_care"  # feed, vet, bedding: product and cost
     COOP_CLEANING = "coop_cleaning"
+    REPOTTING = "repotting"
+    WOOD_BURNED = "wood_burned"  # firewood burnt over a winter, logged once at its end
 
 
 class EndReason(StrEnum):
@@ -281,6 +285,12 @@ class Planting(_Record):
     germinated_on: str | None = None
     germinated_count: int | None = None
     from_planting_id: str | None = None  # the nursery batch this one was planted out from
+    # Houseplants: water every N days (longer in winter), feed every N weeks in the growing season,
+    # or water when a soil moisture sensor reads below the threshold.
+    water_days: int | None = None
+    fertilize_weeks: int | None = None
+    moisture_entity: str | None = None
+    moisture_min: float | None = None
     notes: str | None = None
 
     def __post_init__(self) -> None:
@@ -543,3 +553,56 @@ def compost_due(data: HomesteadData, today: date) -> list[tuple[Zone, int]]:
         if last and (days := (today - date.fromisoformat(last)).days) >= COMPOST_TURN_DAYS:
             out.append((zone, days))
     return out
+
+
+WINTER_MONTHS = (11, 12, 1, 2)
+WINTER_FACTOR = 1.5
+DEFAULT_MOISTURE_MIN = 20.0
+
+
+def zone_kind(data: HomesteadData, zone_id: str | None) -> str | None:
+    """Kind of a zone or, if it has none, of the closest parent that has one."""
+    seen: set[str] = set()
+    while zone_id and zone_id not in seen and (zone := data.zones.get(zone_id)):
+        if zone.kind:
+            return zone.kind
+        seen.add(zone_id)
+        zone_id = zone.parent_id
+    return None
+
+
+def is_indoor(data: HomesteadData, planting: Planting | None) -> bool:
+    return planting is not None and zone_kind(data, planting.zone_id) == ZoneKind.INDOOR
+
+
+def watering_interval(planting: Planting, today: date) -> int | None:
+    """Days between waterings: the plant's own, half as much again in winter."""
+    if not planting.water_days:
+        return None
+    factor = WINTER_FACTOR if today.month in WINTER_MONTHS else 1
+    return max(round(planting.water_days * factor), 1)
+
+
+def watering_due(
+    data: HomesteadData, today: date, moisture: dict[str, float] | None = None
+) -> list[Planting]:
+    """Houseplants to water today: dry soil by their sensor, else their interval since the last watering."""
+    last: dict[str, str] = {}
+    for e in data.events.values():
+        if e.kind == EventKind.WATERING and e.planting_id and e.done_on > last.get(e.planting_id, ""):
+            last[e.planting_id] = e.done_on
+    due = []
+    for p in data.active_plantings():
+        if not is_indoor(data, p):
+            continue
+        reading = (moisture or {}).get(p.moisture_entity or "")
+        if reading is not None:
+            if reading < (p.moisture_min or DEFAULT_MOISTURE_MIN):
+                due.append(p)
+            continue
+        if (interval := watering_interval(p, today)) is None:
+            continue
+        since = last.get(p.id) or p.planted_on
+        if not since or (today - date.fromisoformat(since)).days >= interval:
+            due.append(p)
+    return sorted(due, key=lambda p: p.name)

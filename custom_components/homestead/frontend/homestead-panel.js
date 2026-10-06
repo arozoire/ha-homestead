@@ -2,7 +2,7 @@ import * as L from "./vendor/leaflet.js";
 
 const BASE = new URL(".", import.meta.url).href;
 
-const ZONE_KINDS = ["vegetable_garden", "orchard", "flower_bed", "greenhouse", "pots", "lawn", "woodland", "compost", "coop", "nursery", "other"];
+const ZONE_KINDS = ["vegetable_garden", "orchard", "flower_bed", "greenhouse", "pots", "lawn", "woodland", "compost", "coop", "nursery", "indoor", "other"];
 
 const TEXT = {
   en: {
@@ -54,6 +54,8 @@ const TEXT = {
     ev_problem: "Problem",
     ev_note: "Note",
     ev_removal: "End of planting",
+    ev_repotting: "Repotting",
+    ev_wood_burned: "Firewood burnt (winter)",
     ev_clearing: "Woodland clearing",
     ev_wood_cutting: "Firewood cutting",
     ev_brushwood: "Branches",
@@ -65,6 +67,36 @@ const TEXT = {
     what: "What (porcini, chestnuts…)",
     essence: "Species",
     woodBox: "🪵 Wood and woodland harvests",
+    indoor: "Indoors (a room)",
+    pt_houseplant: "Houseplant",
+    indoorTitle: "🪴 Houseplants: to water",
+    indoorEmpty: "No houseplant yet: add one, or create a zone of type Indoors for each room.",
+    nothingToWater: "Nothing to water today",
+    nextWater: "next: {name} on {date}",
+    lastWater: "watered",
+    wateredNow: "Watered",
+    wateredDone: "{count} watered",
+    toFeed: "🌿 To feed",
+    fedNow: "Fed",
+    fedDone: "{count} fed",
+    repotHint: "Spring: time to repot {names}",
+    vacationBack: "Away until",
+    vacationTitle: "🏖️ Water before leaving (back on {date})",
+    careTitle: "Care indoors",
+    water_days: "Water every (days)",
+    fertilize_weeks: "Feed every (weeks)",
+    moisture_entity: "Soil moisture sensor",
+    moisture_min: "Water below (%)",
+    careHint: "In winter the interval grows by half. With a sensor, the reminder comes when the soil is dry.",
+    woodStock: "🔥 Firewood",
+    woodStockLine: "Stack: {stock} · seasoned: {seasoned}",
+    woodShort: "⚠️ Winter {winter}: about {need} needed, {ready} seasoned by October: {missing} short",
+    woodEnough: "✅ Winter {winter}: about {need} needed, {ready} seasoned by October",
+    woodCut: "To have the winter after seasoned too, cut about {amount} by {by}",
+    woodCutNow: "For the winter after, cut about {amount} as soon as possible",
+    woodBurnNow: "Firewood burnt this winter",
+    woodAsk: "How much firewood did winter {winter} take?",
+    woodAskHint: "Log it once: the app works out the stack and how much to cut",
     nursery: "Nursery (seed trays)",
     sow: "Sow",
     sowTitle: "🌱 Sow",
@@ -260,7 +292,7 @@ const TEXT = {
     lastYears: "📅 Other years, around now",
     lastTime: "↩️ Last time: {date}",
     monthly: "Month by month",
-    yearly: "Year by year",
+    yearByYear: "Year by year",
     byPlanting: "By planting",
     spentEarned: "{spent} spent · {earned} earned",
     ev_planted: "Planted out",
@@ -611,6 +643,8 @@ const TEXT = {
     ev_problem: "Problema",
     ev_note: "Nota",
     ev_removal: "Fine della pianta",
+    ev_repotting: "Rinvaso",
+    ev_wood_burned: "Legna bruciata (inverno)",
     ev_clearing: "Pulizia bosco",
     ev_wood_cutting: "Taglio legna",
     ev_brushwood: "Raccolta rami",
@@ -622,6 +656,36 @@ const TEXT = {
     what: "Cosa (porcini, castagne…)",
     essence: "Essenza",
     woodBox: "🪵 Legna e raccolti del bosco",
+    indoor: "In casa (una stanza)",
+    pt_houseplant: "Pianta da interno",
+    indoorTitle: "🪴 Piante da interno: da annaffiare",
+    indoorEmpty: "Ancora nessuna pianta da interno: aggiungine una, o crea una zona di tipo In casa per ogni stanza.",
+    nothingToWater: "Niente da annaffiare oggi",
+    nextWater: "prossima: {name} il {date}",
+    lastWater: "annaffiata",
+    wateredNow: "Annaffiate",
+    wateredDone: "{count} annaffiate",
+    toFeed: "🌿 Da concimare",
+    fedNow: "Concimate",
+    fedDone: "{count} concimate",
+    repotHint: "Primavera: è ora di rinvasare {names}",
+    vacationBack: "Via fino al",
+    vacationTitle: "🏖️ Da annaffiare prima di partire (rientro il {date})",
+    careTitle: "Cura in casa",
+    water_days: "Annaffia ogni (giorni)",
+    fertilize_weeks: "Concima ogni (settimane)",
+    moisture_entity: "Sensore umidità terriccio",
+    moisture_min: "Annaffia sotto (%)",
+    careHint: "D'inverno l'intervallo si allunga della metà. Con un sensore, il promemoria arriva quando il terriccio è secco.",
+    woodStock: "🔥 Legna",
+    woodStockLine: "Catasta: {stock} · stagionata: {seasoned}",
+    woodShort: "⚠️ Inverno {winter}: servono circa {need}, stagionata per ottobre {ready}: mancano {missing}",
+    woodEnough: "✅ Inverno {winter}: servono circa {need}, stagionata per ottobre {ready}",
+    woodCut: "Per avere stagionato anche l'inverno dopo, taglia circa {amount} entro il {by}",
+    woodCutNow: "Per l'inverno dopo, taglia circa {amount} appena puoi",
+    woodBurnNow: "Legna bruciata quest'inverno",
+    woodAsk: "Quanta legna hai bruciato nell'inverno {winter}?",
+    woodAskHint: "Basta una volta: l'app calcola la catasta e quanto tagliare",
     nursery: "Semenzaio",
     sow: "Semina",
     sowTitle: "🌱 Semina",
@@ -817,7 +881,7 @@ const TEXT = {
     lastYears: "📅 Negli anni scorsi, in questo periodo",
     lastTime: "↩️ L'ultima volta: {date}",
     monthly: "Mese per mese",
-    yearly: "Anno per anno",
+    yearByYear: "Anno per anno",
     byPlanting: "Per pianta",
     spentEarned: "{spent} di spese · {earned} di ricavi",
     ev_planted: "Messa a dimora",
@@ -1149,8 +1213,14 @@ const EVENT_ICONS = {
   flock_out: "🦊",
   animal_care: "🥣",
   coop_cleaning: "🧹",
+  repotting: "🪴",
+  wood_burned: "🔥",
 };
-const WOOD_KINDS = ["clearing", "wood_cutting", "brushwood", "foraging"];
+const WOOD_KINDS = ["clearing", "wood_cutting", "brushwood", "foraging", "wood_burned"];
+// Kinds that make sense for a houseplant.
+const INDOOR_KINDS = ["watering", "fertilizing", "repotting", "treatment", "pruning", "problem", "note", "removal"];
+// Months firewood needs to dry before burning.
+const WOOD_SEASON_MONTHS = 18;
 // Garden kinds that still make sense in a woodland.
 const WOODLAND_ALSO = ["pruning", "treatment", "problem", "note"];
 const COMPOST_KINDS = ["compost_turn", "compost_harvest"];
@@ -1172,6 +1242,7 @@ const QUANTITY_UNITS = {
   harvest: ["kg", "pieces", "l"],
   foraging: ["kg", "pieces", "l"],
   wood_cutting: ["q", "stere", "m3"],
+  wood_burned: ["q", "stere", "m3"],
   brushwood: ["q", "stere", "m3", "pieces"],
   eggs: ["pieces"],
   flock_in: ["pieces"],
@@ -1179,7 +1250,7 @@ const QUANTITY_UNITS = {
 };
 // Kinds with a "product" field, and its label.
 const PRODUCT_LABEL = { fertilizing: "product", treatment: "product", foraging: "what", wood_cutting: "essence", flock_in: "breed", animal_care: "feedOrCare" };
-const PLANT_ICONS = { tree: "🌳", fruit_tree: "🍎", shrub: "🍃", vine: "🍇", vegetable: "🥕", herb: "🌿", flower: "🌸", other: "🌱" };
+const PLANT_ICONS = { tree: "🌳", fruit_tree: "🍎", shrub: "🍃", vine: "🍇", vegetable: "🥕", herb: "🌿", flower: "🌸", houseplant: "🪴", other: "🌱" };
 // Years seeds usually keep germinating well, by botanical family (default 3).
 const SEED_VIABILITY = {
   Solanaceae: 4,
@@ -1195,7 +1266,7 @@ const SEED_VIABILITY = {
   Malvaceae: 3,
 };
 const ROTATION_YEARS = 3;
-const ZONE_ICONS = { vegetable_garden: "🥕", orchard: "🍎", flower_bed: "🌸", greenhouse: "🏠", pots: "🪴", lawn: "🌾", woodland: "🌲", compost: "♻️", coop: "🐔", nursery: "🌱", other: "📍" };
+const ZONE_ICONS = { vegetable_garden: "🥕", orchard: "🍎", flower_bed: "🌸", greenhouse: "🏠", pots: "🪴", lawn: "🌾", woodland: "🌲", compost: "♻️", coop: "🐔", nursery: "🌱", indoor: "🛋️", other: "📍" };
 // Typical work of a whole zone, shown on the calendar when the zone itself has no plantings.
 const ZONE_SEASONS = { woodland: [["wood", [11, 12, 1, 2, 3]], ["foraging", [9, 10, 11]]] };
 const CAL_COLOR = { wood: "#6d4c41", foraging: "#8e7cc3" };
@@ -1211,7 +1282,7 @@ const CROP_COLOR = {
   end: "#757575",
 };
 // Plant type proposed for a new planting from the kind of its zone.
-const ZONE_PLANT_TYPE = { orchard: "fruit_tree", vegetable_garden: "vegetable", greenhouse: "vegetable", flower_bed: "flower" };
+const ZONE_PLANT_TYPE = { orchard: "fruit_tree", vegetable_garden: "vegetable", greenhouse: "vegetable", flower_bed: "flower", indoor: "houseplant" };
 // Start of a planting, shown in the diary from its own dates (not stored as events).
 const START_ICONS = { sowing: "🌱", germinated: "🌿", planted: "🪴", since: "🌳" };
 const MOON_ICONS = {
@@ -1295,6 +1366,8 @@ const STYLE = `
   .repeat-row { display: flex; align-items: center; gap: 10px; min-height: 44px; border-bottom: 1px solid var(--divider-color); }
   .repeat-row input { width: 22px; height: 22px; flex: none; }
   .repeat-name { flex: 1; display: grid; }
+  .care { border: 1px solid var(--divider-color); border-radius: 10px; padding: 6px 10px; display: grid; gap: 6px; }
+  .care legend { font-weight: 700; padding: 0 4px; }
   .sow-button { flex: none; border-radius: 20px; font-weight: 700; align-self: center; }
   .nursery { display: grid; gap: 8px; margin: 12px 0; }
   .batch { border: 2px solid var(--divider-color); border-radius: 12px; padding: 8px 10px; display: grid; gap: 6px; }
@@ -2111,6 +2184,10 @@ class HomesteadPanel extends HTMLElement {
       quantity: Number(values.quantity) || 1,
       ...datesFromForm(values),
       zone_id: values.zone_id || null,
+      water_days: values.water_days ? Number(values.water_days) : null,
+      fertilize_weeks: values.fertilize_weeks ? Number(values.fertilize_weeks) : null,
+      moisture_entity: values.moisture_entity || null,
+      moisture_min: values.moisture_min ? Number(values.moisture_min) : null,
       notes: values.notes?.trim() || null,
     };
     if (this._form.id) {
@@ -2118,8 +2195,10 @@ class HomesteadPanel extends HTMLElement {
       const id = this._form.id;
       if (await this._call("update_planting", { id, ...data })) this._saved(data.name);
     } else {
-      data.latitude = round(this._form.latitude);
-      data.longitude = round(this._form.longitude);
+      if (hasPosition(this._form)) {
+        data.latitude = round(this._form.latitude);
+        data.longitude = round(this._form.longitude);
+      }
       if (values.price) data.price = Number(values.price);
       if (values.supplier?.trim()) data.supplier = values.supplier.trim();
       const result = await this._call("add_planting", data);
@@ -2671,6 +2750,12 @@ class HomesteadPanel extends HTMLElement {
     kind.addEventListener("change", toggleQuantity);
     toggleQuantity();
     const rotationEl = h("p", { className: "last-time" });
+    let careEl = null;
+    const showCare = (el) => {
+      if (!careEl) return;
+      const zone = el.zone_id.value;
+      careEl.hidden = !(el.plant_type.value === "houseplant" || ["indoor", "pots"].includes(this._zoneFamily({ zone_id: zone }) || this._zone(zone)?.kind));
+    };
     const updateRotation = (form) => {
       const el = form.elements;
       const hint = this._rotationHint({
@@ -2696,6 +2781,7 @@ class HomesteadPanel extends HTMLElement {
             if (guess) el.plant_type.value = guess;
           }
           updateRotation(ev.currentTarget);
+          showCare(el);
         },
       },
         h("h2", {}, f.id ? this.t("editTitle") : this.t("newTitle")),
@@ -2710,6 +2796,7 @@ class HomesteadPanel extends HTMLElement {
         h("div", { className: "row" }, kind, quantity),
         this._datesFields(f),
         this._selectField(f, "zone_id", this._zoneOptions()),
+        (careEl = this._careFields(f)),
         rotationEl,
         f.id ? this._selectField(f, "status", ["active", "dead", "removed"].map((s) => [s, this.t(s)])) : null,
         f.id
@@ -3126,7 +3213,7 @@ class HomesteadPanel extends HTMLElement {
         Object.entries(byCategory)
           .sort((a, b) => b[1] - a[1])
           .map(([cat, value]) => h("div", { className: "sub" }, `${this.t(`cat_${cat}`)}: ${this._money(value)}`)),
-        this._balanceTable(this.t(year ? "monthly" : "yearly"), expenses, (e) => (year ? e.spent_on.slice(0, 7) : e.spent_on.slice(0, 4)), (key) =>
+        this._balanceTable(this.t(year ? "monthly" : "yearByYear"), expenses, (e) => (year ? e.spent_on.slice(0, 7) : e.spent_on.slice(0, 4)), (key) =>
           year ? new Intl.DateTimeFormat(this._lang(), { month: "long" }).format(new Date(`${key}-15T12:00:00`)) : key,
         ),
         this._balanceTable(
@@ -3475,7 +3562,7 @@ class HomesteadPanel extends HTMLElement {
   _zoneFamily(target) {
     const planting = target.planting_id && this._planting(target.planting_id);
     for (let z = this._zone(target.zone_id || planting?.zone_id), guard = 0; z && guard < 20; z = this._zone(z.parent_id), guard++) {
-      if (["woodland", "compost", "coop", "nursery"].includes(z.kind)) return z.kind;
+      if (["woodland", "compost", "coop", "nursery", "indoor"].includes(z.kind)) return z.kind;
     }
     return null;
   }
@@ -3716,6 +3803,13 @@ class HomesteadPanel extends HTMLElement {
 
   /** Per year: firewood, branches and foraging of a zone and its sub-zones, by unit. */
   _woodBox(zone) {
+    const box = this._woodHarvestBox(zone);
+    if (!box) return null;
+    const burn = h("button", { type: "button", onclick: () => this._openEvent({ kind: "wood_burned", done_on: today(), zone_id: zone.id, unit: this._woodUnit() }, { zone_id: zone.id }) }, `🔥 ${this.t("woodBurnNow")}`);
+    return h("div", {}, this._woodStockBox(), box, zone.kind === "woodland" ? burn : null);
+  }
+
+  _woodHarvestBox(zone) {
     const zones = new Set([zone.id, ...this._zoneDescendants(zone.id)]);
     const events = this._data.events.filter((e) => zones.has(e.zone_id) && ["wood_cutting", "brushwood", "foraging"].includes(e.kind));
     if (!events.length && zone.kind !== "woodland") return null;
@@ -3857,7 +3951,9 @@ class HomesteadPanel extends HTMLElement {
       this._todoBox(soon, null, h("button", { type: "button", onclick: () => this._openTask({ kind: "note", due_on: today() }) }, this.t("addTask"))),
       later ? h("button", { type: "button", className: "link todo-later", onclick: () => this._setTab("calendar") }, this.t("todoLater", { count: later })) : null,
       this._nurseryBox(),
+      this._houseplantsBox(),
       this._compostBoxes(),
+      this._woodReminder(),
       this._quickButtons(),
       this._quickPlants(),
       this._monthBox(),
@@ -3939,7 +4035,7 @@ class HomesteadPanel extends HTMLElement {
       if ((e.kind === "harvest" || e.kind === "eggs") && e.quantity && (!lastHarvest.has(key) || e.done_on > lastHarvest.get(key).done_on)) lastHarvest.set(key, e);
     }
     const rows = this._data.plantings
-      .filter((p) => p.status === "active" && !this._inNursery(p))
+      .filter((p) => p.status === "active" && !this._inNursery(p) && !this._isIndoor(p))
       .map((p) => {
         const key = `p:${p.id}`;
         const harvest = lastHarvest.get(key);
@@ -4626,6 +4722,288 @@ class HomesteadPanel extends HTMLElement {
   }
 
 
+  // ----- houseplants -----
+
+  _isIndoor(planting) {
+    return this._zoneFamily({ planting_id: planting.id }) === "indoor";
+  }
+
+  _houseplants() {
+    return this._data.plantings.filter((p) => p.status === "active" && this._isIndoor(p));
+  }
+
+  /** Last date of an event kind on a planting ("" if none). */
+  _lastDone(planting, kind) {
+    return this._data.events.filter((e) => e.planting_id === planting.id && e.kind === kind).reduce((max, e) => (e.done_on > max ? e.done_on : max), "");
+  }
+
+  /** Same rule as models.watering_interval: half as much again from November to February. */
+  _waterInterval(planting, day = today()) {
+    if (!planting.water_days) return null;
+    const winter = [11, 12, 1, 2].includes(Number(day.slice(5, 7)));
+    return Math.max(Math.round(planting.water_days * (winter ? 1.5 : 1)), 1);
+  }
+
+  _moistureOf(planting) {
+    const state = planting.moisture_entity && this._hass.states[planting.moisture_entity];
+    const value = state ? Number(state.state) : NaN;
+    return Number.isFinite(value) ? value : null;
+  }
+
+  /** Next watering day of a houseplant (today or earlier when due), or null without a plan. */
+  _nextWatering(planting) {
+    const moisture = this._moistureOf(planting);
+    if (moisture != null) return moisture < (planting.moisture_min ?? 20) ? today() : null;
+    const interval = this._waterInterval(planting);
+    if (!interval) return null;
+    const since = this._lastDone(planting, "watering") || planting.planted_on;
+    return since ? addDays(since, interval) : today();
+  }
+
+  _nextFeeding(planting) {
+    if (!planting.fertilize_weeks) return null;
+    const month = Number(today().slice(5, 7));
+    if (month < 3 || month > 9) return null;
+    const since = this._lastDone(planting, "fertilizing");
+    return since ? addDays(since, planting.fertilize_weeks * 7) : today();
+  }
+
+  /** Spring (March–May) and at least two years since the last repotting or planting. */
+  _repotDue(planting) {
+    const month = Number(today().slice(5, 7));
+    if (month < 3 || month > 5) return false;
+    const since = this._lastDone(planting, "repotting") || planting.planted_on;
+    return !since || daysBetween(since, today()) >= 730;
+  }
+
+  _newHouseplant() {
+    const room = this._data.zones.find((z) => z.kind === "indoor");
+    this._clearSelection();
+    this._showMessage("");
+    this._tab = "plantings";
+    this._form = { name: "", species: "", kind: "single", quantity: 1, status: "active", origin: "planted", planted_on: today(), zone_id: room?.id || null, plant_type: "houseplant", water_days: 7 };
+    this._render();
+  }
+
+  /** Diary: the houseplants to water (and feed) today, by room, ticked and logged in one go. */
+  _houseplantsBox() {
+    const plants = this._houseplants();
+    if (!plants.length && !this._data.zones.some((z) => z.kind === "indoor")) return null;
+    const now = today();
+    const until = this._vacationUntil;
+    const thirsty = plants.filter((p) => {
+      const next = this._nextWatering(p);
+      return next && next <= (until || now);
+    });
+    const hungry = until ? [] : plants.filter((p) => this._nextFeeding(p) && this._nextFeeding(p) <= now);
+    const repot = until ? [] : plants.filter((p) => this._repotDue(p));
+    const ticked = new Set(thirsty.map((p) => p.id));
+    const roomOf = (p) => this._zone(p.zone_id)?.name || "";
+    const list = (items, set) => {
+      const rooms = new Map();
+      for (const p of items) {
+        if (!rooms.has(roomOf(p))) rooms.set(roomOf(p), []);
+        rooms.get(roomOf(p)).push(p);
+      }
+      return [...rooms.entries()].flatMap(([room, group]) => [
+        h("div", { className: "quick-title" }, room),
+        ...group.map((p) => {
+          const box = h("input", { type: "checkbox", checked: true });
+          box.addEventListener("change", () => (box.checked ? set.add(p.id) : set.delete(p.id)));
+          const moisture = this._moistureOf(p);
+          const last = this._lastDone(p, "watering");
+          const detail = [moisture != null ? `💧 ${Math.round(moisture)}%` : null, last ? `${this.t("lastWater")} ${this._ago(last)}` : null].filter(Boolean).join(" · ");
+          return h("label", { className: "repeat-row" }, box, h("span", { className: "repeat-name" }, h("strong", {}, p.name), h("span", { className: "sub" }, detail)));
+        }),
+      ]);
+    };
+    const log = async (kind, set, done) => {
+      let count = 0;
+      for (const id of set) if (await this._call("add_event", { kind, planting_id: id, done_on: today() })) count++;
+      this._vacationUntil = null;
+      this._showMessage(`✓ ${this.t(done, { count })}`);
+    };
+    const fed = new Set(hungry.map((p) => p.id));
+    const upcoming = plants
+      .map((p) => ({ p, next: this._nextWatering(p) }))
+      .filter((x) => x.next && x.next > now)
+      .sort((a, b) => a.next.localeCompare(b.next))[0];
+    const vacation = h("input", { type: "date", min: addDays(now, 1), value: until || "", "aria-label": this.t("vacationBack") });
+    vacation.addEventListener("change", () => {
+      this._vacationUntil = vacation.value || null;
+      this._render();
+    });
+    return h(
+      "div",
+      { className: "nursery" },
+      h(
+        "div",
+        { className: "cal-head" },
+        h("h3", {}, until ? this.t("vacationTitle", { date: this._date(until, false) }) : this.t("indoorTitle")),
+        h("button", { type: "button", onclick: () => this._newHouseplant() }, `+ ${this.t("pt_houseplant")}`),
+      ),
+      thirsty.length
+        ? [
+            ...list(thirsty, ticked),
+            h("button", { type: "button", className: "primary", onclick: () => log("watering", ticked, "wateredDone") }, `💧 ${this.t("wateredNow")}`),
+          ]
+        : h(
+            "p",
+            { className: "hint" },
+            plants.length ? `${this.t("nothingToWater")}${upcoming ? ` · ${this.t("nextWater", { name: upcoming.p.name, date: this._date(upcoming.next, false) })}` : ""}` : this.t("indoorEmpty"),
+          ),
+      hungry.length
+        ? [
+            h("div", { className: "quick-title" }, this.t("toFeed")),
+            ...list(hungry, fed).filter((el) => !el.classList.contains("quick-title")),
+            h("button", { type: "button", onclick: () => log("fertilizing", fed, "fedDone") }, `🌿 ${this.t("fedNow")}`),
+          ]
+        : null,
+      repot.length ? h("div", { className: "sub", style: "white-space:normal" }, `🪴 ${this.t("repotHint", { names: repot.map((p) => p.name).join(", ") })}`) : null,
+      plants.length ? h("label", { className: "show-gone" }, `🏖️ ${this.t("vacationBack")}`, vacation, until ? h("button", { type: "button", onclick: () => ((this._vacationUntil = null), this._render()) }, "✕") : null) : null,
+    );
+  }
+
+  /** Planting form: watering plan for houseplants (and plants in pots). */
+  _careFields(f) {
+    const sensors = Object.entries(this._hass.states)
+      .filter(([id, st]) => id.startsWith("sensor.") && st.attributes?.device_class === "moisture")
+      .map(([id, st]) => [id, st.attributes.friendly_name || id]);
+    const succulent = ["opuntia", "echeveria", "aloe", "crassula", "haworthia", "sansevieria", "dracaena", "zamioculcas", "kalanchoe", "mammillaria", "euphorbia"];
+    const guess = succulent.includes(this._cropKey(f.species).split(" ")[0]) ? 20 : 7;
+    return h(
+      "fieldset",
+      { className: "care" },
+      h("legend", {}, `🪴 ${this.t("careTitle")}`),
+      h(
+        "div",
+        { className: "row" },
+        this._field(f, "water_days", { type: "number", min: 1, max: 365, step: 1, inputMode: "numeric", placeholder: String(guess) }),
+        this._field(f, "fertilize_weeks", { type: "number", min: 1, max: 52, step: 1, inputMode: "numeric", placeholder: "4" }),
+      ),
+      sensors.length
+        ? h(
+            "div",
+            { className: "row" },
+            this._selectField(f, "moisture_entity", [["", "—"], ...sensors]),
+            this._field(f, "moisture_min", { type: "number", min: 0, max: 100, step: 1, placeholder: "20" }),
+          )
+        : null,
+      h("p", { className: "hint" }, this.t("careHint")),
+    );
+  }
+
+  // ----- firewood: stock, seasoning, winters -----
+
+  /** Winter of a date: "2025/26" for November 2025 or February 2026. */
+  _winterOf(iso) {
+    const year = Number(iso.slice(0, 4));
+    const start = Number(iso.slice(5, 7)) >= 7 ? year : year - 1;
+    return `${start}/${String((start + 1) % 100).padStart(2, "0")}`;
+  }
+
+  /** Firewood per unit: cut, burnt, in stock, seasoned (cut at least WOOD_SEASON_MONTHS before `day`, oldest burnt first). */
+  _woodStock(day = today()) {
+    const cut = this._data.events.filter((e) => e.kind === "wood_cutting" && e.quantity);
+    const burnt = this._data.events.filter((e) => e.kind === "wood_burned" && e.quantity);
+    const units = new Map();
+    const unit = (u) => {
+      if (!units.has(u)) units.set(u, { unit: u, cut: 0, burnt: 0, seasoned: 0, winters: new Map() });
+      return units.get(u);
+    };
+    const ripe = addMonths(day, -WOOD_SEASON_MONTHS);
+    for (const e of cut) {
+      const s = unit(e.unit || "q");
+      s.cut += e.quantity;
+      if (e.done_on <= ripe) s.seasoned += e.quantity;
+    }
+    for (const e of burnt) {
+      const s = unit(e.unit || "q");
+      s.burnt += e.quantity;
+      const winter = this._winterOf(e.done_on);
+      s.winters.set(winter, (s.winters.get(winter) || 0) + e.quantity);
+    }
+    for (const s of units.values()) {
+      s.stock = s.cut - s.burnt;
+      s.seasoned = Math.max(Math.min(s.seasoned - s.burnt, s.stock), 0);
+      const last = [...s.winters.values()].slice(-3);
+      s.need = last.length ? last.reduce((a, b) => a + b, 0) / last.length : null;
+    }
+    return [...units.values()];
+  }
+
+  /** Days of frost of a winter (November–March), from the weather history. */
+  _frostDays(winter) {
+    const start = Number(winter.slice(0, 4));
+    const from = `${start}-11-01`;
+    const to = `${start + 1}-03-31`;
+    return (this._outlook?.climate?.extremes || [])
+      .filter((x) => x.kind === "frost" && x.start >= from && x.start <= to)
+      .reduce((n, x) => n + daysBetween(x.start, x.end) + 1, 0);
+  }
+
+  /** March–May: ask once how much firewood the winter took. */
+  _woodReminder() {
+    const now = today();
+    const month = Number(now.slice(5, 7));
+    const wood = this._data.zones.find((z) => z.kind === "woodland");
+    if (!wood || month < 3 || month > 5) return null;
+    const winter = this._winterOf(now);
+    if (this._data.events.some((e) => e.kind === "wood_burned" && this._winterOf(e.done_on) === winter)) return null;
+    return h(
+      "div",
+      { className: "task" },
+      h(
+        "button",
+        { type: "button", className: "task-main", onclick: () => this._openEvent({ kind: "wood_burned", done_on: now, zone_id: wood.id, unit: this._woodUnit() }, { zone_id: wood.id }) },
+        h("span", {}, `🔥 ${this.t("woodAsk", { winter })}`),
+        h("span", { className: "sub" }, this.t("woodAskHint")),
+      ),
+    );
+  }
+
+  _woodStockBox() {
+    const stock = this._woodStock();
+    if (!stock.length) return null;
+    const now = today();
+    // The winter to plan: from January to September the one starting this October, in autumn the one under way.
+    const nextStart = Number(now.slice(0, 4));
+    const october = `${nextStart}-10-01` > now ? `${nextStart}-10-01` : now;
+    const ready = this._woodStock(october);
+    return h(
+      "div",
+      { className: "seasons" },
+      h("h3", {}, this.t("woodStock")),
+      stock.map((s) => {
+        const atOctober = ready.find((r) => r.unit === s.unit)?.seasoned ?? 0;
+        const lines = [
+          this.t("woodStockLine", { stock: this._quantity(Math.max(s.stock, 0), s.unit), seasoned: this._quantity(s.seasoned, s.unit) }),
+        ];
+        if (s.need) {
+          const short = s.need - atOctober;
+          lines.push(this.t(short > 0 ? "woodShort" : "woodEnough", { winter: `${nextStart}/${String((nextStart + 1) % 100).padStart(2, "0")}`, need: this._quantity(s.need, s.unit), ready: this._quantity(atOctober, s.unit), missing: this._quantity(Math.max(short, 0), s.unit) }));
+          const after = Math.max(s.need * 2 - Math.max(s.stock, 0), 0);
+          const by = addMonths(`${nextStart + 1}-10-01`, -WOOD_SEASON_MONTHS);
+          if (after > 0) lines.push(by > now ? this.t("woodCut", { amount: this._quantity(after, s.unit), by: this._date(by) }) : this.t("woodCutNow", { amount: this._quantity(after, s.unit) }));
+        }
+        const winters = [...s.winters.entries()].sort((a, b) => b[0].localeCompare(a[0])).slice(0, 5);
+        return h(
+          "div",
+          { className: "season" },
+          lines.map((line) => h("div", { className: "sub", style: "white-space:normal" }, line)),
+          winters.length
+            ? h(
+                "div",
+                { className: "sub", style: "white-space:normal" },
+                winters.map(([w, q]) => `🔥 ${w}: ${this._quantity(q, s.unit)}${this._frostDays(w) ? ` · ❄️ ${this._frostDays(w)}` : ""}`).join("  ·  "),
+              )
+            : null,
+        );
+      }),
+    );
+  }
+
+
   /** Planting or zone picker; value "p:<id>" / "z:<id>" ("" = none, allowed only for tasks). */
   _targetSelect(f, required) {
     const target = f.planting_id ? `p:${f.planting_id}` : f.zone_id ? `z:${f.zone_id}` : "";
@@ -4703,7 +5081,7 @@ class HomesteadPanel extends HTMLElement {
     // Woodland, compost and hen house targets get their own kinds; gardens the others. The current kind always stays visible.
     const filterKinds = () => {
       const family = this._zoneFamily(currentTarget());
-      const own = { woodland: [...WOOD_KINDS, ...WOODLAND_ALSO], compost: [...COMPOST_KINDS, ...YARD_ALSO], coop: [...COOP_KINDS, ...YARD_ALSO] }[family];
+      const own = { woodland: [...WOOD_KINDS, ...WOODLAND_ALSO], compost: [...COMPOST_KINDS, ...YARD_ALSO], coop: [...COOP_KINDS, ...YARD_ALSO], indoor: INDOOR_KINDS }[family];
       const special = [...WOOD_KINDS, ...COMPOST_KINDS, ...COOP_KINDS];
       kinds.querySelectorAll("button").forEach((b) => {
         const kind = b.dataset.kind;
@@ -6370,6 +6748,7 @@ class HomesteadPanel extends HTMLElement {
     const rows = [this._timelineHeader()];
     const legendKeys = new Set();
     for (const group of this._calendarGroups()) {
+      if (group.zone && this._zoneFamily({ zone_id: group.zone.id }) === "indoor") continue;
       const plantings = group.plantings.filter((p) => p.status === "active");
       const zoneTasks = group.zone ? openTasks.filter((t) => t.zone_id === group.zone.id) : openTasks.filter((t) => !t.planting_id && !t.zone_id);
       const plantTasks = openTasks.filter((t) => plantings.some((p) => p.id === t.planting_id));
@@ -6683,6 +7062,7 @@ class HomesteadPanel extends HTMLElement {
       this._eggsBox(years),
       this._germinationBox(),
       this._lossesBox(),
+      this._data.events.some((e) => e.kind === "wood_burned") ? h("div", { className: "an-box" }, this._woodStockBox()) : null,
       selected ? this._weatherYieldBox(selected, years, weatherOf, perPlant) : null,
       this._timingBox(rows),
       this._moonBox(),
@@ -7192,7 +7572,7 @@ function addMonths(iso, months) {
   const [y, m, d] = iso.split("-").map(Number);
   const total = m - 1 + months;
   const year = y + Math.floor(total / 12);
-  const month = (total % 12) + 1;
+  const month = (((total % 12) + 12) % 12) + 1;
   const last = new Date(Date.UTC(year, month, 0)).getUTCDate();
   return `${year}-${String(month).padStart(2, "0")}-${String(Math.min(d, last)).padStart(2, "0")}`;
 }

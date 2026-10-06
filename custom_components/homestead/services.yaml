@@ -22,6 +22,7 @@ add_zone:
             - compost
             - coop
             - nursery
+            - indoor
             - other
     area_id:
       selector:
@@ -65,6 +66,7 @@ update_zone:
             - compost
             - coop
             - nursery
+            - indoor
             - other
     area_id:
       selector:
@@ -118,6 +120,7 @@ add_planting:
             - vegetable
             - herb
             - flower
+            - houseplant
             - other
     kind:
       default: single
@@ -207,6 +210,31 @@ add_planting:
     seed_lot_id:
       selector:
         text:
+    water_days:
+      selector:
+        number:
+          min: 1
+          max: 365
+          unit_of_measurement: days
+          mode: box
+    fertilize_weeks:
+      selector:
+        number:
+          min: 1
+          max: 52
+          unit_of_measurement: weeks
+          mode: box
+    moisture_entity:
+      selector:
+        entity:
+          domain: sensor
+    moisture_min:
+      selector:
+        number:
+          min: 0
+          max: 100
+          unit_of_measurement: "%"
+          mode: box
     sown_count:
       selector:
         number:
@@ -258,6 +286,7 @@ update_planting:
             - vegetable
             - herb
             - flower
+            - houseplant
             - other
     kind:
       selector:
@@ -347,6 +376,31 @@ update_planting:
     seed_lot_id:
       selector:
         text:
+    water_days:
+      selector:
+        number:
+          min: 1
+          max: 365
+          unit_of_measurement: days
+          mode: box
+    fertilize_weeks:
+      selector:
+        number:
+          min: 1
+          max: 52
+          unit_of_measurement: weeks
+          mode: box
+    moisture_entity:
+      selector:
+        entity:
+          domain: sensor
+    moisture_min:
+      selector:
+        number:
+          min: 0
+          max: 100
+          unit_of_measurement: "%"
+          mode: box
     sown_count:
       selector:
         number:
@@ -649,6 +703,8 @@ add_event:
             - flock_out
             - animal_care
             - coop_cleaning
+            - repotting
+            - wood_burned
     done_on:
       selector:
         date:
@@ -787,6 +843,8 @@ update_event:
             - flock_out
             - animal_care
             - coop_cleaning
+            - repotting
+            - wood_burned
     done_on:
       selector:
         date:
@@ -966,6 +1024,8 @@ add_task:
             - flock_out
             - animal_care
             - coop_cleaning
+            - repotting
+            - wood_burned
     due_on:
       required: true
       selector:
@@ -1025,6 +1085,8 @@ update_task:
             - flock_out
             - animal_care
             - coop_cleaning
+            - repotting
+            - wood_burned
     due_on:
       selector:
         date:
