@@ -14,6 +14,7 @@ API = "https://www.wikidata.org/w/api.php"
 TAXON_NAME = "P225"
 GBIF_ID = "P846"
 TAXON_RANK = "P105"
+IMAGE = "P18"
 RANKS = {
     "Q7432": "species",
     "Q34740": "genus",
@@ -53,6 +54,7 @@ def parse_entity(entity: dict[str, Any], languages: list[str]) -> TaxonDetails |
         return None
     gbif = _claim(entity, GBIF_ID)
     rank = _claim(entity, TAXON_RANK)
+    image = _claim(entity, IMAGE)
     common = {lang: label for lang in languages if (label := _label(entity, "labels", lang))}
     return TaxonDetails(
         scientific_name=name,
@@ -60,6 +62,7 @@ def parse_entity(entity: dict[str, Any], languages: list[str]) -> TaxonDetails |
         rank=RANKS.get(rank.get("id")) if isinstance(rank, dict) else None,
         gbif_key=int(gbif) if isinstance(gbif, str) and gbif.isdigit() else None,
         wikidata_id=entity.get("id"),
+        image=image if isinstance(image, str) else None,
     )
 
 
@@ -108,6 +111,7 @@ async def search(
                 description=_label(entity, "descriptions", language) or _label(entity, "descriptions", "en"),
                 gbif_key=taxon.gbif_key,
                 wikidata_id=taxon.wikidata_id,
+                image=taxon.image,
             )
         )
     return candidates[:limit]

@@ -8,7 +8,7 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 
 **Non sporcare Home Assistant**: nessuna area creata, poche entità aggregate, rimozione pulita (disinstallando l'integrazione i dati vengono cancellati).
 
-## Cosa fa oggi (v0.8)
+## Cosa fa oggi (v0.8.1)
 
 | Funzione | Come |
 |---|---|
@@ -31,7 +31,10 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 | Attrezzi | Scheda *Attrezzi* (stato a colori, 🔧 manutenzione scaduta) o servizi `add_tool`/`update_tool`/`delete_tool` |
 | Foto | Nella scheda pianta: *📷 Aggiungi foto* (fotocamera o galleria del telefono), ridotte a 1600 px e salvate in `/media/homestead/`; visibili solo agli utenti HA |
 | Sfondo "Nessuna mappa" | Dal selettore dei livelli: zoom fino al livello 23 per lavorare dentro un'aiuola |
-| Tipo di pianta | Albero, arbusto, rampicante, ortaggio, aromatica, fiore: icona sulla mappa e nella lista (proposto dal tipo di zona) |
+| Import CSV | Schede *Piante* e *Semi*: *📄 Modello CSV* scarica il file con le colonne (separatore `;`, apribile con Excel); *📥 Importa CSV* mostra ogni riga prima di importare: valori non capiti (zona, tipo, data gg/mm/aaaa, numeri) si correggono lì, le righe già presenti restano senza spunta |
+| Immagine della specie | Nei suggerimenti della ricerca specie e accanto alla specie collegata: foto da Wikimedia Commons (proprietà P18 di Wikidata) |
+| Prezzo alla creazione | Nuova pianta: *Prezzo* e *Fornitore* diventano subito una spesa |
+| Tipo di pianta | Albero, albero da frutto, arbusto, rampicante, ortaggio, aromatica, fiore: icona sulla mappa e nella lista (proposto dal tipo di zona) |
 | Negli anni scorsi | Riquadro *📅 Negli anni scorsi, in questo periodo* (scheda pianta, zona e Diario); nel form evento *↩️ L'ultima volta* con data, quantità, luna, meteo e voto dell'annata |
 | Lavori di zona | Lavorazione terreno, diserbo, pacciamatura, sfalcio: un evento sulla zona (es. tutto l'orto) |
 | Bilancio | Scheda *Spese*: anno a scelta (o tutti), spese, ricavi, saldo, mese per mese, per pianta |

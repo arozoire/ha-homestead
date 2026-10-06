@@ -29,6 +29,7 @@ class PlantingOrigin(StrEnum):
 
 class PlantType(StrEnum):
     TREE = "tree"
+    FRUIT_TREE = "fruit_tree"
     SHRUB = "shrub"
     VINE = "vine"
     VEGETABLE = "vegetable"
@@ -198,6 +199,7 @@ class Taxon(_Record):
     rank: str | None = None
     gbif_key: int | None = None
     wikidata_id: str | None = None
+    image: str | None = None  # Wikimedia Commons file name (from Wikidata)
     imported_on: str | None = None
 
 

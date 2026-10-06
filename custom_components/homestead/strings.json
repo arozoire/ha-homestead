@@ -80,6 +80,7 @@
     "plant_type": {
       "options": {
         "tree": "Tree",
+        "fruit_tree": "Fruit tree",
         "shrub": "Shrub",
         "vine": "Vine, climber",
         "vegetable": "Vegetable",
