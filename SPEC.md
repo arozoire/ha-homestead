@@ -43,6 +43,12 @@
 | Legna (v0.8) | Unità scelta a ogni registrazione (quintale, stero, m³): ogni paese usa la sua | Francia stero, Italia quintale |
 | Bosco (v0.8) | Per ora solo quantità tagliata e anno; stagionatura più avanti | Decisione dell'autore |
 | Rotazione (v0.8) | Consiglio per famiglia botanica, non un divieto | Decisione dell'autore |
+| Canicola per le piante (v0.9) | Ondata di calore = 3 giorni con massima ≥ 35 °C e minima ≥ 22 °C; caldo estremo ≥ 40 °C; colture fresche dal limite della coltura (30 °C) | Polline del pomodoro sensibile a ~32-35 °C di giorno e 22 °C di notte; Météo-France definisce la canicule su giorno e notte per 3 giorni; soglie modificabili |
+| Notifiche allerte (v0.9) | Mai / solo con un'attività prevista in quei giorni (default) / sempre; una sola volta per allerta | Richiesta dell'autore: non disturbare senza motivo |
+| Storico meteo (v0.9) | Sensori di HA prima, Open-Meteo per il resto; previsioni dall'entità meteo di HA, Open-Meteo in riserva | Richiesta dell'autore: usare i dati che HA ha già |
+| Calendario al posto della mappa (v0.9) | 14 giorni (meteo, allerte, attività) + 12 mesi per pianta; modalità Storico con eventi fatti ed estremi meteo | Idea dell'autore: vedere l'anno intero e cosa fare a colpo d'occhio |
+| CropGraph (v0.9) | Integrato: date ancorate alle gelate locali, consociazioni, famiglie; la tabella italiana e le correzioni dell'utente restano prioritarie | Unica fonte colturale open raggiungibile; licenza dati CC-BY-4.0 |
+| Indice di annata (dopo) | Calcolato, non chiesto: quantità raccolta vs mediana anni precedenti + voto del bilancio annata, 50/50 | Da fare dopo la 0.9 |
 | Import mappa **tolto** (v0.4.1) | Al suo posto **backup JSON** (esporta / ripristina tutto) | Disegnare nel pannello basta; serve invece poter salvare e ripristinare i dati |
 | Specie (v0.4) | Ricerca combinata Wikidata (nomi comuni) + GBIF (tassonomia); la specie scelta è copiata in locale con id GBIF/Wikidata e data di import | Funziona offline dopo l'import, tracciabilità come da §4 |
 | Licenza | MIT | Richiesta da HACS; la più diffusa tra le integrazioni custom |

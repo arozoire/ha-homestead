@@ -17,6 +17,7 @@ from homeassistant.helpers.translation import async_get_translations
 from homeassistant.util import dt as dt_util
 
 from .const import CONF_NOTIFY, CONF_NOTIFY_TIME, DEFAULT_NOTIFY_TIME, DOMAIN
+from .forecast import advice_text, get_outlook
 from .labels import async_kind_names, summary
 from .store import HomesteadStore
 from .tasks import async_complete_task
@@ -48,10 +49,16 @@ async def async_send_reminders(hass: HomeAssistant, store: HomesteadStore, servi
     kinds = await async_kind_names(hass)
     texts = await _texts(hass)
     title = texts.get("notification_title", "Garden")
+    outlook = get_outlook(hass)
+
+    def text(task) -> str:
+        weather = advice_text(outlook.advice.get(task.id) if outlook else None, texts)
+        return summary(store.data, task, kinds) + (f"\n{weather}" if weather else "")
+
     messages = [
         {
             "title": title,
-            "message": summary(store.data, t, kinds),
+            "message": text(t),
             "data": {
                 "url": task_url(t.id),  # iOS
                 "clickAction": task_url(t.id),  # Android

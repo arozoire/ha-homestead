@@ -143,6 +143,27 @@ const TEXT = {
     incomesTotal: "Income",
     balance: "Balance",
     cropBox: "🌿 Crop data",
+    calendar: "Calendar: next two weeks and the year",
+    calPlan: "📅 Year plan",
+    calHistory: "📜 History",
+    calPlanned: "planned",
+    calWeather: "Weather",
+    calNoForecast: "No forecast yet: choose a weather entity in the settings, or allow Open-Meteo.",
+    xt_frost: "frost",
+    xt_heatwave: "heatwave",
+    xt_heat_extreme: "extreme heat",
+    xt_hail: "hail",
+    xt_heavy_rain: "heavy rain",
+    pruning: "Pruning",
+    fertilizing: "Fertilizing",
+    end: "End of crop",
+    family: "Family",
+    goodWith: "🤝 Good with",
+    badWith: "🚫 Keep away from",
+    inGarden: "in your garden",
+    cropGraph: "CropGraph data (CC-BY-4.0), dates set on your frosts: last ~{spring}, first ~{fall}",
+    cropGraphFallback: "CropGraph data (CC-BY-4.0), dates for typical frosts (mid April, end of October) until your history is known",
+    heat_max_c: "Heat limit (°C)",
     cropDefault: "indicative values, temperate climate",
     cropMine: "your values",
     cropMissing: "No crop data for this species.",
@@ -170,6 +191,24 @@ const TEXT = {
     monthSowOutdoor: "🌱 Sow outdoors: {names}",
     monthPlantOut: "🪴 Plant out: {names}",
     monthHarvest: "🍎 Harvest: {names}",
+    goodDay: "✅ good weather",
+    better_on: "better on {date}",
+    issue_rain_48h: "rain within 48 h",
+    issue_wind: "wind",
+    issue_hot: "too hot",
+    issue_frost_next: "frost in the next days",
+    issue_rain_today: "rain that day",
+    issue_cold_nights: "cold nights this week",
+    issue_heavy_rain: "heavy rain",
+    issue_rain_coming: "rain coming",
+    issue_frozen: "frozen soil",
+    issue_gusts: "strong gusts",
+    alertsTitle: "⚠️ Weather alerts",
+    al_frost: "❄️ Frost {when}: {value} °C",
+    al_cold: "🥶 Cold {when}: {value} °C",
+    al_heatwave: "🔥 Heatwave {when}: up to {value} °C",
+    al_heat_extreme: "🔥 Extreme heat {when}: {value} °C",
+    al_heat_stress: "🥵 Too hot {when}: up to {value} °C",
     tabSeeds: "Seeds",
     addSeed: "New seeds",
     newSeedTitle: "New seeds",
@@ -457,6 +496,27 @@ const TEXT = {
     incomesTotal: "Ricavi",
     balance: "Saldo",
     cropBox: "🌿 Scheda colturale",
+    calendar: "Calendario: prossime due settimane e l'anno",
+    calPlan: "📅 Programma",
+    calHistory: "📜 Storico",
+    calPlanned: "previsto",
+    calWeather: "Meteo",
+    calNoForecast: "Ancora nessuna previsione: scegli un'entità meteo nelle impostazioni, oppure lascia attivo Open-Meteo.",
+    xt_frost: "gelo",
+    xt_heatwave: "ondata di calore",
+    xt_heat_extreme: "caldo estremo",
+    xt_hail: "grandine",
+    xt_heavy_rain: "pioggia forte",
+    pruning: "Potatura",
+    fertilizing: "Concimazione",
+    end: "Fine coltura",
+    family: "Famiglia",
+    goodWith: "🤝 Sta bene con",
+    badWith: "🚫 Tenere lontano da",
+    inGarden: "nel tuo giardino",
+    cropGraph: "Dati CropGraph (CC-BY-4.0), date sulle tue gelate: ultima ~{spring}, prima ~{fall}",
+    cropGraphFallback: "Dati CropGraph (CC-BY-4.0), date per gelate tipiche (metà aprile, fine ottobre) finché non c'è il tuo storico",
+    heat_max_c: "Limite di caldo (°C)",
     cropDefault: "valori indicativi, clima temperato",
     cropMine: "valori tuoi",
     cropMissing: "Nessun dato colturale per questa specie.",
@@ -484,6 +544,24 @@ const TEXT = {
     monthSowOutdoor: "🌱 Semina all'aperto: {names}",
     monthPlantOut: "🪴 Messa a dimora: {names}",
     monthHarvest: "🍎 Raccolta: {names}",
+    goodDay: "✅ meteo adatto",
+    better_on: "meglio il {date}",
+    issue_rain_48h: "pioggia entro 48 h",
+    issue_wind: "vento",
+    issue_hot: "troppo caldo",
+    issue_frost_next: "gelo nei prossimi giorni",
+    issue_rain_today: "pioggia quel giorno",
+    issue_cold_nights: "notti fredde in settimana",
+    issue_heavy_rain: "pioggia forte",
+    issue_rain_coming: "pioggia in arrivo",
+    issue_frozen: "terreno gelato",
+    issue_gusts: "raffiche forti",
+    alertsTitle: "⚠️ Allerte meteo",
+    al_frost: "❄️ Gelo {when}: {value} °C",
+    al_cold: "🥶 Freddo {when}: {value} °C",
+    al_heatwave: "🔥 Ondata di calore {when}: fino a {value} °C",
+    al_heat_extreme: "🔥 Caldo estremo {when}: {value} °C",
+    al_heat_stress: "🥵 Troppo caldo {when}: fino a {value} °C",
     tabSeeds: "Semi",
     addSeed: "Nuovi semi",
     newSeedTitle: "Nuovi semi",
@@ -684,8 +762,17 @@ const SEED_VIABILITY = {
   Malvaceae: 3,
 };
 const ROTATION_YEARS = 3;
-const CROP_MONTHS = ["sow_indoor", "sow_outdoor", "plant_out", "flowering", "harvest"];
-const CROP_COLOR = { sow_indoor: "#8d6e63", sow_outdoor: "#7cb342", plant_out: "#26a69a", flowering: "#ec407a", harvest: "#ffa000" };
+const CROP_MONTHS = ["sow_indoor", "sow_outdoor", "plant_out", "flowering", "harvest", "pruning", "fertilizing", "end"];
+const CROP_COLOR = {
+  sow_indoor: "#8d6e63",
+  sow_outdoor: "#7cb342",
+  plant_out: "#26a69a",
+  flowering: "#ec407a",
+  harvest: "#ffa000",
+  pruning: "#5c6bc0",
+  fertilizing: "#9e9d24",
+  end: "#757575",
+};
 // Plant type proposed for a new planting from the kind of its zone.
 const ZONE_PLANT_TYPE = { orchard: "fruit_tree", vegetable_garden: "vegetable", greenhouse: "vegetable", flower_bed: "flower" };
 // Start of a planting, shown in the diary from its own dates (not stored as events).
@@ -857,6 +944,37 @@ const STYLE = `
   .csv-row.off { opacity: .5; }
   .csv-row .err { font-size: 12px; color: var(--warning-color, #ffa600); }
   .csv-list { display: grid; gap: 8px; margin: 12px 0; }
+  .calendar { flex: 1; min-width: 0; overflow: auto; padding: 8px; box-sizing: border-box; display: none;
+    background: var(--primary-background-color); }
+  .calendar-on .calendar { display: block; }
+  .calendar-on .map { display: none; }
+  .narrow.calendar-on .calendar { flex: 0 0 55%; }
+  .days { display: grid; grid-template-columns: repeat(14, minmax(46px, 1fr)); gap: 2px; text-align: center; font-size: 13px;
+    margin-bottom: 8px; overflow-x: auto; }
+  .day-col { display: grid; gap: 1px; align-content: start; padding: 4px 2px; border-radius: 6px; background: var(--card-background-color); }
+  .day-col.alert { box-shadow: inset 0 0 0 2px var(--warning-color, #ffa600); }
+  .day-col .sub { white-space: normal; }
+  .day-col .wx { font-size: 20px; }
+  .day-col .rain { color: #1e88e5; min-height: 14px; }
+  .alert-chip { font-size: 14px; }
+  .task-chip { padding: 0; border: none; background: none; font-size: 16px; border-radius: 4px; }
+  .task-chip.good { box-shadow: inset 0 -3px 0 #43a047; }
+  .task-chip.warn { box-shadow: inset 0 -3px 0 #ffa600; }
+  .task-chip.better { opacity: .7; font-weight: 700; color: #43a047; }
+  .cal-grid { display: grid; grid-template-columns: minmax(100px, 170px) repeat(12, minmax(22px, 1fr)); gap: 2px; font-size: 12px; }
+  .cal-month { text-align: center; color: var(--secondary-text-color); }
+  .cal-month.now { color: var(--primary-color); font-weight: 700; }
+  .cal-name { text-align: left; border: none; background: none; padding: 2px 4px; white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis; font-size: 12px; border-radius: 4px; }
+  .cal-name.static { color: var(--secondary-text-color); }
+  .cal-cell { position: relative; min-height: 24px; display: flex; flex-direction: column; justify-content: center; gap: 1px;
+    background: var(--card-background-color); border: none; padding: 1px; border-radius: 3px; font-size: 12px; }
+  .cal-cell.now { box-shadow: inset 0 0 0 1px var(--primary-color); }
+  .cal-cell.icons { align-items: center; }
+  .cal-band { display: block; height: 4px; border-radius: 2px; }
+  .cal-task { position: absolute; top: -2px; right: -2px; border: none; background: none; padding: 0; font-size: 11px; }
+  .legend { margin-bottom: 6px; }
+  .legend i { display: inline-block; width: 12px; height: 6px; border-radius: 2px; margin-right: 4px; }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .chip { display: inline-flex; gap: 4px; align-items: center; padding: 2px 4px 2px 10px; border-radius: 14px; font-size: 13px;
     background: var(--secondary-background-color); color: var(--primary-text-color); }
@@ -928,6 +1046,7 @@ class HomesteadPanel extends HTMLElement {
         {},
         this._menu,
         h("h1", {}, this.t("panelTitle")),
+        h("button", { className: "map-toggle", title: this.t("calendar"), onclick: () => this._toggleCalendar() }, "📅"),
         h("button", { className: "map-toggle", title: this.t("toggleMap"), onclick: () => this._toggleMap() }, "🗺️"),
         h(
           "button",
@@ -942,7 +1061,7 @@ class HomesteadPanel extends HTMLElement {
           "⚙️",
         ),
       ),
-      h("div", { className: "body" }, this._mapWrap, this._aside),
+      h("div", { className: "body" }, this._mapWrap, (this._calWrap = h("div", { className: "calendar" })), this._aside),
     );
     root.append(
       h("link", { rel: "stylesheet", href: `${BASE}vendor/leaflet.css` }),
@@ -952,6 +1071,7 @@ class HomesteadPanel extends HTMLElement {
     this._createMap();
     try {
       if (localStorage.getItem("homestead-map-hidden")) this._toggleMap(true);
+      if (localStorage.getItem("homestead-calendar")) this._toggleCalendar(true);
     } catch {
       // storage unavailable: the map stays visible
     }
@@ -961,6 +1081,7 @@ class HomesteadPanel extends HTMLElement {
 
   _toggleMap(hidden = !this._layout.classList.contains("no-map")) {
     this._layout.classList.toggle("no-map", hidden);
+    if (hidden && this._calendarOn) this._toggleCalendar(false);
     try {
       localStorage.setItem("homestead-map-hidden", hidden ? "1" : "");
     } catch {
@@ -1006,10 +1127,22 @@ class HomesteadPanel extends HTMLElement {
   disconnectedCallback() {
     this._unsub?.then((unsub) => unsub()).catch(() => {});
     this._unsub = null;
+    this._outlookUnsub?.then((unsub) => unsub?.()).catch(() => {});
+    this._outlookUnsub = null;
   }
 
   _subscribe() {
     let first = true;
+    this._outlookUnsub = this._hass.connection
+      .subscribeMessage(
+        (outlook) => {
+          this._outlook = outlook;
+          this._renderCalendar();
+          if (this._tab === "diary" && !this._eventForm && !this._taskForm) this._render();
+        },
+        { type: "homestead/outlook/subscribe" },
+      )
+      .catch(() => {});
     this._hass
       .callWS({ type: "homestead/crops/defaults" })
       .then((result) => {
@@ -1034,6 +1167,7 @@ class HomesteadPanel extends HTMLElement {
         };
         this._loaded = !!data.plantings;
         this._syncMap();
+        this._renderCalendar();
         if (first) this._fitAll();
         first = false;
         if (window.location.search.includes("task=")) {
@@ -2579,6 +2713,27 @@ class HomesteadPanel extends HTMLElement {
     );
   }
 
+  /** Coming frost and heat, with the plants they hit. */
+  _alertsBox() {
+    const alerts = this._outlook?.alerts || [];
+    if (!alerts.length) return null;
+    const when = (a) => (a.start === a.end ? this._date(a.start, false) : `${this._date(a.start, false)}–${this._date(a.end, false)}`);
+    return h(
+      "div",
+      { className: "summary", style: "border-left:4px solid var(--warning-color, #ffa600)" },
+      h("strong", {}, this.t("alertsTitle")),
+      alerts.map((a) => {
+        const names = a.plantings.map((id) => this._planting(id)?.name).filter(Boolean);
+        const everyone = ["heatwave", "heat_extreme"].includes(a.kind);
+        return h(
+          "div",
+          { className: "sub", style: "white-space:normal" },
+          `${this.t(`al_${a.kind}`, { when: when(a), value: a.value })}${names.length && !everyone ? ` — ${names.slice(0, 5).join(", ")}${names.length > 5 ? " …" : ""}` : ""}`,
+        );
+      }),
+    );
+  }
+
   /** Events of previous years from a week before to three weeks after today's date: what usually happens now. */
   _lastYearsBox(events, back = null) {
     const now = new Date();
@@ -2656,6 +2811,7 @@ class HomesteadPanel extends HTMLElement {
         h("button", { className: "primary", onclick: () => this._newEvent() }, this.t("addEvent")),
         h("button", { onclick: () => this._openTask({ kind: "note", due_on: today() }) }, this.t("addTask")),
       ),
+      this._alertsBox(),
       this._todoBox(this._data.tasks),
       this._monthBox(),
       this._lastYearsBox(this._data.events),
@@ -3013,11 +3169,22 @@ class HomesteadPanel extends HTMLElement {
                   { className: "sub" },
                   `${this._date(t.due_on)}${t.due_on < now ? ` · ${this.t("overdue")}` : ""}${t.yearly ? " · 🔁" : ""}`,
                 ),
+                this._adviceLine(t),
               ),
             ),
           )
         : h("p", { className: "hint" }, this.t("nothingToDo")),
     );
+  }
+
+  /** Weather verdict of a planned activity in the forecast range: good day, or why not and when instead. */
+  _adviceLine(task) {
+    const verdict = this._outlook?.advice?.[task.id];
+    if (!verdict) return null;
+    if (!verdict.issues.length) return h("span", { className: "sub info" }, this.t("goodDay"));
+    const reasons = verdict.issues.map((issue) => this.t(`issue_${issue}`)).join(", ");
+    const better = verdict.best ? ` · ${this.t("better_on", { date: this._date(verdict.best, false) })}` : "";
+    return h("span", { className: "sub warn", style: "white-space:normal" }, `⚠️ ${reasons}${better}`);
   }
 
   /** The diary form filled in from a planned activity (✔, or a tapped phone notification). */
@@ -3427,9 +3594,12 @@ class HomesteadPanel extends HTMLElement {
     const key = this._cropKey(species);
     if (!key) return null;
     const mine = this._data.crops.find((c) => this._cropKey(c.species) === key);
-    if (mine) return { ...mine, source: "user" };
     const builtIn = this._cropDefaults[key] || this._cropDefaults[key.split(" ")[0]];
-    return builtIn ? { ...builtIn, source: "default" } : null;
+    if (mine) {
+      const { family, good, bad, name_en, warm } = builtIn || {};
+      return { family, good, bad, name_en, warm, ...mine, source: "user" };
+    }
+    return builtIn ? { ...builtIn, source: builtIn.source === "cropgraph" ? "cropgraph" : "default" } : null;
   }
 
   _inMonth(crop, keys, month = new Date().getMonth() + 1) {
@@ -3488,11 +3658,44 @@ class HomesteadPanel extends HTMLElement {
         ? [
             facts.length ? h("div", {}, facts.join(" · ")) : null,
             this._cropMonths(crop),
+            crop.family ? h("div", { className: "sub" }, `${this.t("family")}: ${crop.family}`) : null,
+            this._companionsLine("goodWith", crop.good),
+            this._companionsLine("badWith", crop.bad),
             crop.notes ? h("div", { className: "sub" }, crop.notes) : null,
-            h("div", { className: "sub" }, this.t(crop.source === "user" ? "cropMine" : "cropDefault")),
+            h("div", { className: "sub" }, this._cropSource(crop)),
           ]
         : h("p", { className: "hint" }, this.t("cropMissing")),
     );
+  }
+
+  _cropSource(crop) {
+    if (crop.source === "user") return this.t("cropMine");
+    if (crop.source !== "cropgraph") return this.t("cropDefault");
+    const frost = this._outlook?.climate?.frost;
+    if (!frost?.last_spring || !frost?.first_fall) return this.t("cropGraphFallback");
+    const day = (mmdd) => this._date(`2025-${mmdd}`, false);
+    return this.t("cropGraph", { spring: day(frost.last_spring), fall: day(frost.first_fall) });
+  }
+
+  /** Name of a species key in the user's words: their plantings or imported species first. */
+  _speciesLabel(key) {
+    const planting = this._data.plantings.find((p) => this._cropKey(p.species) === key);
+    const taxon = this._data.taxa.find((t) => this._cropKey(t.scientific_name) === key);
+    const common = taxon?.common_names?.[this._lang()];
+    if (common) return common;
+    if (planting) return planting.name;
+    const entry = this._cropDefaults[key];
+    return entry?.name_en ? `${entry.name_en} (${entry.species})` : key;
+  }
+
+  /** Companions: those already in the garden first (✓), then a few others. */
+  _companionsLine(label, keys) {
+    if (!keys?.length) return null;
+    const here = new Set(this._data.plantings.filter((p) => p.status === "active").map((p) => this._cropKey(p.species)));
+    const mine = keys.filter((k) => here.has(k));
+    const others = keys.filter((k) => !here.has(k)).slice(0, Math.max(0, 6 - mine.length));
+    const names = [...mine.map((k) => `✓ ${this._speciesLabel(k)}`), ...others.map((k) => this._speciesLabel(k))];
+    return h("div", { className: "sub", style: "white-space:normal" }, `${this.t(label)}: ${names.join(", ")}${keys.length > names.length ? " …" : ""}`);
   }
 
   _openCrop(species, crop, back) {
@@ -3563,6 +3766,7 @@ class HomesteadPanel extends HTMLElement {
           { className: "row" },
           this._field(f, "hardiness_c", { type: "number", min: -60, max: 30, step: 1 }),
           this._field(f, "spacing_cm", { type: "number", min: 1, max: 5000, step: 1 }),
+          this._field(f, "heat_max_c", { type: "number", min: 10, max: 50, step: 1 }),
         ),
         grid,
         this._notes(f),
@@ -3582,6 +3786,7 @@ class HomesteadPanel extends HTMLElement {
       exposure: ["sun", "partial", "shade"].filter((e) => v[`ex_${e}`] === "on"),
       hardiness_c: v.hardiness_c === "" ? null : Number(v.hardiness_c),
       spacing_cm: v.spacing_cm ? Number(v.spacing_cm) : null,
+      heat_max_c: v.heat_max_c ? Number(v.heat_max_c) : null,
       notes: v.notes?.trim() || null,
       ...Object.fromEntries(CROP_MONTHS.map((key) => [key, [...this._cropMonthsState[key]].sort((a, b) => a - b)])),
     };
@@ -3948,6 +4153,254 @@ class HomesteadPanel extends HTMLElement {
   }
 
 
+  // ---------- calendar view (instead of the map) ----------
+
+  _toggleCalendar(on = !this._calendarOn) {
+    this._calendarOn = on;
+    this._layout.classList.toggle("calendar-on", on);
+    this._layout.classList.remove("no-map");
+    try {
+      localStorage.setItem("homestead-calendar", on ? "1" : "");
+    } catch {
+      // private mode: the choice is just not remembered
+    }
+    if (on) this._renderCalendar();
+    else setTimeout(() => this._map.invalidateSize(), 0);
+  }
+
+  _renderCalendar() {
+    if (!this._calendarOn || !this._calWrap) return;
+    const mode = this._calendarMode || "plan";
+    const tab = (name, label) =>
+      h(
+        "button",
+        {
+          className: mode === name ? "active" : "",
+          onclick: () => {
+            this._calendarMode = name;
+            this._renderCalendar();
+          },
+        },
+        label,
+      );
+    this._calWrap.replaceChildren(
+      this._daysStrip(),
+      h("div", { className: "tabs" }, tab("plan", this.t("calPlan")), tab("history", this.t("calHistory"))),
+      mode === "history" ? this._historyGrid() : this._planGrid(),
+    );
+  }
+
+  _weatherIcon(day) {
+    const code = day.code;
+    if (code != null) {
+      if (code >= 95) return "⛈️";
+      if (code >= 71 && code <= 86 && !(code >= 80 && code <= 82)) return "🌨️";
+      if (code >= 51) return "🌧️";
+      if (code === 45 || code === 48) return "🌫️";
+      if (code === 3) return "☁️";
+      if (code === 2) return "⛅";
+      return "☀️";
+    }
+    const byCondition = {
+      sunny: "☀️",
+      "clear-night": "☀️",
+      partlycloudy: "⛅",
+      cloudy: "☁️",
+      fog: "🌫️",
+      rainy: "🌧️",
+      pouring: "🌧️",
+      snowy: "🌨️",
+      "snowy-rainy": "🌨️",
+      lightning: "⛈️",
+      "lightning-rainy": "⛈️",
+      hail: "⛈️",
+      windy: "💨",
+    };
+    return byCondition[day.condition] || ((day.rain_mm || 0) >= 1 ? "🌧️" : "☀️");
+  }
+
+  /** The next two weeks: weather, alerts and the planned activities with their weather verdict. */
+  _daysStrip() {
+    const days = (this._outlook?.forecast || []).slice(0, 14);
+    if (!days.length) return h("p", { className: "hint" }, this.t("calNoForecast"));
+    const alerts = this._outlook?.alerts || [];
+    const advice = this._outlook?.advice || {};
+    const tasks = this._data.tasks.filter((t) => !t.done_on);
+    const weekday = new Intl.DateTimeFormat(this._lang(), { weekday: "short" });
+    const alertIcon = { frost: "❄️", cold: "🥶", heatwave: "🔥", heat_extreme: "🔥", heat_stress: "🥵" };
+    const columns = days.map((day) => {
+      const dayAlerts = alerts.filter((a) => a.start <= day.date && day.date <= a.end);
+      const due = tasks.filter((t) => t.due_on === day.date);
+      const better = tasks.filter((t) => advice[t.id]?.best === day.date);
+      return h(
+        "div",
+        { className: `day-col${dayAlerts.length ? " alert" : ""}` },
+        h("div", { className: "sub" }, `${weekday.format(new Date(`${day.date}T12:00:00`))} ${this._date(day.date, false)}`),
+        h("div", { className: "wx" }, this._weatherIcon(day)),
+        h("div", {}, `${day.t_max != null ? Math.round(day.t_max) : "–"}°`),
+        h("div", { className: "sub" }, `${day.t_min != null ? Math.round(day.t_min) : "–"}°`),
+        h("div", { className: "sub rain" }, day.rain_mm ? `${Math.round(day.rain_mm)} mm` : ""),
+        dayAlerts.map((a) =>
+          h("div", { className: `alert-chip ${a.kind}`, title: this.t(`al_${a.kind}`, { when: this._date(a.start, false), value: a.value }) }, alertIcon[a.kind]),
+        ),
+        due.map((t) => {
+          const verdict = advice[t.id];
+          const state = !verdict ? "" : verdict.issues.length ? " warn" : " good";
+          return h(
+            "button",
+            { className: `task-chip${state}`, title: this._taskLabel(t), onclick: () => this._openTask(t) },
+            EVENT_ICONS[t.kind] || "📝",
+          );
+        }),
+        better.map((t) => h("button", { className: "task-chip better", title: `↪ ${this._taskLabel(t)}`, onclick: () => this._openTask(t) }, "↪")),
+      );
+    });
+    return h("div", { className: "days" }, columns);
+  }
+
+  _monthHeader(first) {
+    const letters = this._monthLetters();
+    const now = new Date().getMonth();
+    return [first, ...letters.map((m, i) => h("div", { className: `cal-month${i === now ? " now" : ""}` }, m))];
+  }
+
+  _plantRows() {
+    const order = Object.keys(PLANT_ICONS);
+    return this._data.plantings
+      .filter((p) => p.status === "active")
+      .sort((a, b) => {
+        const ta = order.indexOf(a.plant_type);
+        const tb = order.indexOf(b.plant_type);
+        return (ta < 0 ? 99 : ta) - (tb < 0 ? 99 : tb) || a.name.localeCompare(b.name);
+      });
+  }
+
+  /** Every active plant over the 12 months: what its crop data says, plus the planned activities. */
+  _planGrid() {
+    const now = new Date().getMonth() + 1;
+    const year = new Date().getFullYear();
+    const plants = this._plantRows();
+    if (!plants.length) return h("p", { className: "hint" }, this.t("empty"));
+    const legend = h(
+      "div",
+      { className: "chips legend" },
+      CROP_MONTHS.map((key) => h("span", { className: "chip" }, h("i", { style: `background:${CROP_COLOR[key]}` }), this.t(key))),
+      h("span", { className: "chip" }, "📋 ", this.t("calPlanned")),
+    );
+    const cells = [];
+    for (const p of plants) {
+      const crop = this._crop(p.species);
+      const keys = CROP_MONTHS.filter((key) => crop?.[key]?.length);
+      const tasks = this._data.tasks.filter(
+        (t) => !t.done_on && (t.planting_id === p.id || (t.zone_id && this._inZone(p, t.zone_id))) && Number(t.due_on.slice(0, 4)) <= year + 1,
+      );
+      cells.push(
+        h(
+          "button",
+          { className: "cal-name", title: [p.name, p.species].join(" — "), onclick: () => this._select(p.id) },
+          `${PLANT_ICONS[p.plant_type] || "🌱"} ${p.name}`,
+        ),
+      );
+      for (let month = 1; month <= 12; month++) {
+        const planned = tasks.filter((t) => Number(t.due_on.slice(5, 7)) === month);
+        cells.push(
+          h(
+            "div",
+            {
+              className: `cal-cell${month === now ? " now" : ""}`,
+              title: keys.filter((key) => crop[key].includes(month)).map((key) => this.t(key)).join(", "),
+            },
+            keys.map((key) => h("i", { className: "cal-band", style: crop[key].includes(month) ? `background:${CROP_COLOR[key]}` : "" })),
+            planned.length
+              ? h(
+                  "button",
+                  { className: "cal-task", title: planned.map((t) => `${this._date(t.due_on)} ${this._taskLabel(t)}`).join("\n"), onclick: () => this._openTask(planned[0]) },
+                  "📋",
+                )
+              : null,
+          ),
+        );
+      }
+    }
+    return h("div", {}, legend, h("div", { className: "cal-grid" }, this._monthHeader(h("div")), cells));
+  }
+
+  /** A past year: what was really done, month by month, under the weather extremes of that year. */
+  _historyGrid() {
+    const extremes = this._outlook?.climate?.extremes || [];
+    const events = this._data.events;
+    const years = [...new Set([...events.map((e) => e.done_on.slice(0, 4)), ...extremes.map((x) => x.start.slice(0, 4))])].sort().reverse();
+    const year = this._calendarYear && years.includes(this._calendarYear) ? this._calendarYear : years[0] || String(new Date().getFullYear());
+    const yearSelect = h(
+      "select",
+      {
+        style: "flex:none",
+        onchange: (ev) => {
+          this._calendarYear = ev.target.value;
+          this._renderCalendar();
+        },
+      },
+      years.map((y) => h("option", { value: y, selected: y === year }, y)),
+    );
+    const extremeIcon = { frost: "❄️", heatwave: "🔥", heat_extreme: "🔥", hail: "🧊", heavy_rain: "🌧️" };
+    const cells = [h("div", { className: "cal-name static" }, `🌦️ ${this.t("calWeather")}`)];
+    for (let month = 1; month <= 12; month++) {
+      const inMonth = extremes.filter((x) => x.start.slice(0, 4) === year && Number(x.start.slice(5, 7)) === month);
+      const icons = [...new Set(inMonth.map((x) => extremeIcon[x.kind]))].join("");
+      const title = inMonth
+        .map((x) => `${extremeIcon[x.kind]} ${this.t(`xt_${x.kind}`)} ${this._date(x.start, false)}${x.end !== x.start ? `–${this._date(x.end, false)}` : ""}${x.value != null ? ` (${x.value}${x.kind === "heavy_rain" ? " mm" : " °C"})` : ""}`)
+        .join("\n");
+      cells.push(h("div", { className: "cal-cell icons", title }, icons));
+    }
+    const ofYear = events.filter((e) => e.done_on.startsWith(year));
+    const targets = new Map();
+    for (const e of ofYear) {
+      const key = e.planting_id ? `p:${e.planting_id}` : `z:${e.zone_id}`;
+      if (!targets.has(key)) targets.set(key, []);
+      targets.get(key).push(e);
+    }
+    const rows = [...targets.entries()]
+      .map(([key, list]) => {
+        const [type, id] = key.split(":");
+        const item = type === "p" ? this._planting(id) : this._zone(id);
+        return item ? { type, item, list } : null;
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.type.localeCompare(b.type) || a.item.name.localeCompare(b.item.name));
+    for (const { type, item, list } of rows) {
+      const icon = type === "p" ? PLANT_ICONS[item.plant_type] || "🌱" : "▭";
+      cells.push(
+        h(
+          "button",
+          { className: "cal-name", onclick: () => (type === "p" ? this._select(item.id) : this._selectZone(item.id)) },
+          `${icon} ${item.name}`,
+        ),
+      );
+      for (let month = 1; month <= 12; month++) {
+        const done = list.filter((e) => Number(e.done_on.slice(5, 7)) === month).sort((a, b) => a.done_on.localeCompare(b.done_on));
+        const shown = done.slice(0, 2).map((e) => EVENT_ICONS[e.kind] || "📝").join("");
+        cells.push(
+          h(
+            "button",
+            {
+              className: "cal-cell icons",
+              title: done.map((e) => `${this._date(e.done_on)} ${this._eventLabel(e)}${e.quantity ? ` ${this._quantity(e.quantity, e.unit)}` : ""}`).join("\n"),
+              onclick: () => done[0] && this._openEvent(done[0]),
+            },
+            `${shown}${done.length > 2 ? `+${done.length - 2}` : ""}`,
+          ),
+        );
+      }
+    }
+    return h(
+      "div",
+      {},
+      h("div", { className: "row", style: "margin-bottom:6px" }, yearSelect),
+      h("div", { className: "cal-grid" }, this._monthHeader(h("div")), cells),
+      rows.length ? null : h("p", { className: "hint" }, this.t("emptyDiary")),
+    );
+  }
+
   // ---------- rotation ----------
 
   _plantingYear(p) {
@@ -3956,7 +4409,7 @@ class HomesteadPanel extends HTMLElement {
   }
 
   _family(p) {
-    return this._taxon(p.taxon_id)?.family || null;
+    return this._taxon(p.taxon_id)?.family || this._crop(p.species)?.family || null;
   }
 
   /** Earlier crops of the same family (or species) in the zone during the last years, as a tip. */
@@ -3964,7 +4417,7 @@ class HomesteadPanel extends HTMLElement {
     const zone = this._zone(zone_id);
     if (!zone || !species?.trim()) return null;
     if (!["vegetable_garden", "greenhouse"].includes(zone.kind) && plant_type !== "vegetable") return null;
-    const family = this._taxon(taxon_id)?.family;
+    const family = this._taxon(taxon_id)?.family || this._crop(species)?.family;
     const name = species.trim().toLowerCase();
     const year = new Date().getFullYear();
     const same = this._data.plantings.filter((p) => {

@@ -1060,12 +1060,37 @@ set_crop_profile:
           multiple: true
           translation_key: month
           options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+    pruning:
+      selector:
+        select:
+          multiple: true
+          translation_key: month
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+    fertilizing:
+      selector:
+        select:
+          multiple: true
+          translation_key: month
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+    end:
+      selector:
+        select:
+          multiple: true
+          translation_key: month
+          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
     spacing_cm:
       selector:
         number:
           min: 1
           max: 5000
           unit_of_measurement: cm
+          mode: box
+    heat_max_c:
+      selector:
+        number:
+          min: 10
+          max: 50
+          unit_of_measurement: °C
           mode: box
     notes:
       selector:

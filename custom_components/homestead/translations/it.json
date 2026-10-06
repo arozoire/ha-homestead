@@ -14,7 +14,7 @@
     "step": {
       "init": {
         "title": "Meteo per il diario",
-        "description": "Ogni evento del diario registra il meteo della settimana prima (e dei 3 giorni dopo per trattamenti e semine). Scegli i tuoi sensori; quello che manca arriva da Open-Meteo (gratuito, senza account). Promemoria: le attività previste per oggi vengono inviate ai telefoni scelti all'ora scelta; toccandone una si apre il form del diario già compilato.",
+        "description": "Ogni evento del diario registra il meteo della settimana prima (e dei 3 giorni dopo per trattamenti e semine). Scegli i tuoi sensori; quello che manca arriva da Open-Meteo (gratuito, senza account). Promemoria: le attività previste per oggi vengono inviate ai telefoni scelti all'ora scelta; toccandone una si apre il form del diario già compilato. Allerte: gelo sotto la rusticità di ogni pianta, ondata di calore (giorni caldi e notti calde per alcuni giorni di fila: di notte le piante non recuperano), caldo estremo. Le previsioni vengono dall'entità meteo scelta, altrimenti da Open-Meteo.",
         "data": {
           "temperature_sensor": "Temperatura esterna",
           "humidity_sensor": "Umidità esterna",
@@ -22,7 +22,13 @@
           "soil_moisture_sensor": "Umidità del suolo",
           "open_meteo": "Usa Open-Meteo per i dati mancanti",
           "notify_services": "Invia i promemoria a",
-          "notify_time": "Ora dei promemoria"
+          "notify_time": "Ora dei promemoria",
+          "weather_entity": "Previsioni meteo (entità meteo di HA)",
+          "alert_notify": "Allerte gelo e caldo sui telefoni",
+          "heat_max": "Ondata di calore: massima da",
+          "heat_night": "Ondata di calore: minima notturna da",
+          "heat_days": "Ondata di calore: giorni di fila",
+          "heat_extreme": "Caldo estremo: massima da (anche un solo giorno)"
         }
       }
     }
@@ -37,6 +43,9 @@
       },
       "tools_needing_service": {
         "name": "Attrezzi da manutenere"
+      },
+      "weather_alerts": {
+        "name": "Allerte meteo"
       }
     },
     "todo": {
@@ -216,6 +225,13 @@
         "sun": "Pieno sole",
         "partial": "Mezz'ombra",
         "shade": "Ombra"
+      }
+    },
+    "alert_notify": {
+      "options": {
+        "off": "Disattivate (solo nel pannello)",
+        "tasks": "Solo con un'attività prevista in quei giorni",
+        "always": "Sempre"
       }
     }
   },
@@ -1124,9 +1140,25 @@
           "name": "Raccolta",
           "description": "Mesi di raccolta."
         },
+        "pruning": {
+          "name": "Potatura",
+          "description": "Mesi di potatura."
+        },
+        "fertilizing": {
+          "name": "Concimazione",
+          "description": "Mesi di concimazione."
+        },
+        "end": {
+          "name": "Fine coltura",
+          "description": "Mesi in cui di solito la coltura finisce (annuali)."
+        },
         "spacing_cm": {
           "name": "Distanza",
           "description": "Distanza tra le piante."
+        },
+        "heat_max_c": {
+          "name": "Limite di caldo",
+          "description": "Sopra questa massima per alcuni giorni la coltura soffre (colture da clima fresco: lattuga, spinacio, piselli…)."
         },
         "notes": {
           "name": "Note",
@@ -1148,6 +1180,22 @@
   "common": {
     "notification_title": "🌱 Giardino",
     "notification_done": "✔ Fatto",
-    "notification_late": "{count} attività in ritardo"
+    "notification_late": "{count} attività in ritardo",
+    "alert_frost": "❄️ Gelo {when}: {value} °C — {plants}",
+    "alert_cold": "🥶 Freddo {when}: {value} °C per {plants}",
+    "alert_heatwave": "🔥 Ondata di calore {when}: fino a {value} °C",
+    "alert_heat_extreme": "🔥 Caldo estremo {when}: {value} °C",
+    "alert_heat_stress": "🥵 Troppo caldo per {plants}: {when}, fino a {value} °C",
+    "issue_rain_48h": "pioggia entro 48 h",
+    "issue_wind": "vento",
+    "issue_hot": "troppo caldo",
+    "issue_frost_next": "gelo nei prossimi giorni",
+    "issue_rain_today": "pioggia quel giorno",
+    "issue_cold_nights": "notti fredde in settimana",
+    "issue_heavy_rain": "pioggia forte",
+    "issue_rain_coming": "pioggia in arrivo",
+    "issue_frozen": "terreno gelato",
+    "issue_gusts": "raffiche forti",
+    "better_on": "meglio il {date}"
   }
 }
