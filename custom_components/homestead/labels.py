@@ -35,6 +35,8 @@ ICONS = {
     "flock_out": "🦊",
     "animal_care": "🥣",
     "coop_cleaning": "🧹",
+    "repotting": "🪴",
+    "wood_burned": "🔥",
 }
 
 

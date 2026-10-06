@@ -23,7 +23,7 @@ from .const import (
     CONF_SOIL,
     CONF_TEMPERATURE,
 )
-from .models import NO_WEATHER_KINDS
+from .models import NO_WEATHER_KINDS, is_indoor
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -194,10 +194,15 @@ def _entry_options(hass: HomeAssistant) -> dict[str, Any]:
     return dict(entries[0].options) if entries else {}
 
 
+def _indoor(store: Any, event: Any) -> bool:
+    """Houseplants live at room temperature: no weather snapshot for them."""
+    return bool(event.planting_id) and is_indoor(store.data, store.data.plantings.get(event.planting_id))
+
+
 async def async_fill_event(hass: HomeAssistant, store: Any, event_id: str) -> bool:
     """Store the weather snapshot on an event; True when it changed."""
     event = store.data.events.get(event_id)
-    if event is None or event.kind in NO_WEATHER_KINDS:
+    if event is None or event.kind in NO_WEATHER_KINDS or _indoor(store, event):
         return False
     snapshot = await async_snapshot(hass, _entry_options(hass), event.kind, date.fromisoformat(event.done_on))
     event = store.data.events.get(event_id)  # it may have been deleted meanwhile
@@ -214,6 +219,7 @@ async def async_refresh(hass: HomeAssistant, store: Any, force: bool = False, li
         e.id
         for e in sorted(store.data.events.values(), key=lambda e: e.done_on, reverse=True)
         if e.kind not in NO_WEATHER_KINDS
+        and not _indoor(store, e)
         and (force or not e.weather or not e.weather.get("complete"))
         and window(e.kind, date.fromisoformat(e.done_on))[0] <= today
     ]

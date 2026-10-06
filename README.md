@@ -8,7 +8,7 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 
 **Non sporcare Home Assistant**: nessuna area creata, poche entità aggregate, rimozione pulita (disinstallando l'integrazione i dati vengono cancellati).
 
-## Cosa fa oggi (v0.11)
+## Cosa fa oggi (v0.13)
 
 | Funzione | Come |
 |---|---|
@@ -40,6 +40,9 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 | 🌱 Semenzaio | Zona di tipo *Semenzaio*; dalla scheda Semi *🌱 Semina* (quanti semi, dove, cosa aspettarsi dagli anni scorsi e dall'età del lotto); nel Diario *🌱 In semenzaio*: giorni dalla semina, *in ritardo* rispetto agli anni passati, *pronte da trapiantare*; *🌿 Nate* (data e quante → giorni e % di nascita); *↪️ Trapianta* tutte o una parte (la parte diventa una pianta nuova), avviso se arriva una notte fredda; Analisi *Germinazione negli anni* |
 | Tocco su una zona | Sulla mappa: *+ Pianta qui* nel punto toccato, *🌱 Semina qui* sul semenzaio, *Trapianta dal semenzaio*, *+ Evento*, *Scheda zona* |
 | 🏁 Fine della pianta | Motivo: ✅ finita (poi bilancio della stagione), 💀 morta (causa: gelo, siccità, malattia, parassiti, animali), 🗑️ tolta; Analisi *💀 Perdite negli anni* |
+| 🪴 Piante da interno | Zona *In casa* per stanza; per pianta *annaffia ogni N giorni* (più lento d'inverno) o un sensore di umidità del terriccio, *concima ogni N settimane* (marzo–settembre), rinvaso proposto in primavera; nel Diario il giro *da annaffiare* per stanza con un solo **💧 Annaffiate**, *🏖️ via fino al* per sapere cosa annaffiare prima di partire; promemoria del mattino |
+| 🔥 Legna | *Legna bruciata* a fine inverno (q, steri o m³): catasta, legna stagionata (18 mesi), consumo per inverno con i giorni di gelo, quanta ne serve per l'inverno prossimo e quanta tagliare |
+| 🌍 Lingue | Italiano, inglese, francese, tedesco, spagnolo, olandese (pannello, servizi, impostazioni, notifiche) |
 | 🗑️ Azzera tutto | In *Altro*, solo amministratori, scrivendo RESET: cancella dati e foto, restano impostazioni e storico meteo |
 | 📅 Calendario | Pulsante 📅 in alto: al posto della mappa, *Da fare nelle prossime 2 settimane* (schede grandi con verdetto meteo, in ritardo in rosso, ✔), allerte, meteo; l'**anno come linea continua** con la riga *oggi* al giorno giusto, piante raggruppate per zona (gruppi che si aprono e chiudono), attività previste come pastiglie alla data, lavori del bosco; *📜 Storico*: per anno, gli eventi fatti alla data sotto il meteo estremo (gelo, ondate di calore, grandine, piogge forti) |
 | 📈 Analisi | Scheda a tutta larghezza: riquadro per anno (indice dell'annata, kg, saldo, meteo estremo); raccolti per coltura e zona negli ultimi 5 anni, **Totale o Per pianta** (10 pomodori un anno, 15 l'altro), colore = resa per pianta rispetto agli anni precedenti + voto della stagione, costo per kg; raccolto e meteo della coltura scelta; mese di potatura o messa a dimora a confronto; fase lunare alla semina vs voto (con avviso se i dati sono pochi); lezioni (da rifare / da evitare); uova per anno |

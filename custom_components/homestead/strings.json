@@ -95,6 +95,7 @@
         "vegetable": "Vegetable",
         "herb": "Aromatic herb",
         "flower": "Flower",
+        "houseplant": "Houseplant",
         "other": "Other"
       }
     },
@@ -158,6 +159,7 @@
         "compost": "Compost bin",
         "coop": "Hen house",
         "nursery": "Nursery (seed trays)",
+        "indoor": "Indoors (a room)",
         "other": "Other"
       }
     },
@@ -195,7 +197,9 @@
         "flock_in": "Hens arrived",
         "flock_out": "Hens gone",
         "animal_care": "Feed and care",
-        "coop_cleaning": "Coop cleaning"
+        "coop_cleaning": "Coop cleaning",
+        "repotting": "Repotting",
+        "wood_burned": "Firewood burnt (winter)"
       }
     },
     "harvest_unit": {
@@ -448,6 +452,22 @@
           "name": "Seedlings",
           "description": "How many came up."
         },
+        "water_days": {
+          "name": "Water every (days)",
+          "description": "Houseplants: days between waterings (half as much again in winter)."
+        },
+        "fertilize_weeks": {
+          "name": "Feed every (weeks)",
+          "description": "Houseplants: from March to September."
+        },
+        "moisture_entity": {
+          "name": "Soil moisture sensor",
+          "description": "Optional: water when it reads below the threshold."
+        },
+        "moisture_min": {
+          "name": "Water below (%)",
+          "description": "Default 20%."
+        },
         "notes": {
           "name": "Notes",
           "description": "Free notes."
@@ -553,6 +573,22 @@
         "germinated_count": {
           "name": "Seedlings",
           "description": "How many came up."
+        },
+        "water_days": {
+          "name": "Water every (days)",
+          "description": "Houseplants: days between waterings (half as much again in winter)."
+        },
+        "fertilize_weeks": {
+          "name": "Feed every (weeks)",
+          "description": "Houseplants: from March to September."
+        },
+        "moisture_entity": {
+          "name": "Soil moisture sensor",
+          "description": "Optional: water when it reads below the threshold."
+        },
+        "moisture_min": {
+          "name": "Water below (%)",
+          "description": "Default 20%."
         },
         "notes": {
           "name": "Notes",
@@ -1310,6 +1346,7 @@
     "issue_gusts": "strong gusts",
     "better_on": "better on {date}",
     "notification_compost": "♻️ {zone}: turn the compost ({days} days since last time)",
-    "notification_tool": "🔧 {tool}: service due"
+    "notification_tool": "🔧 {tool}: service due",
+    "notification_water": "🪴 To water: {plants}"
   }
 }

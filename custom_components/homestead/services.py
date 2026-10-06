@@ -102,6 +102,10 @@ ADD_PLANTING_SCHEMA = vol.Schema(
         vol.Optional("sown_count"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1))),
         vol.Optional("germinated_on"): _opt_date,
         vol.Optional("germinated_count"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0))),
+        vol.Optional("water_days"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=365))),
+        vol.Optional("fertilize_weeks"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=52))),
+        vol.Optional("moisture_entity"): vol.Any(None, cv.entity_id),
+        vol.Optional("moisture_min"): vol.Any(None, vol.All(vol.Coerce(float), vol.Range(min=0, max=100))),
         vol.Optional("price"): vol.Any(None, _positive),
         vol.Optional("notes"): _opt_str,
     }
@@ -335,7 +339,7 @@ def _check_position(planting: Planting) -> None:
 
 def _taxon_languages(hass: HomeAssistant) -> list[str]:
     """Common names kept for the HA language plus the ones the UI is translated to."""
-    return list(dict.fromkeys([hass.config.language.split("-")[0], "it", "en", "fr"]))
+    return list(dict.fromkeys([hass.config.language.split("-")[0], "en", "it", "fr", "de", "es", "nl"]))
 
 
 def _apply_taxon(store: HomesteadStore, args: dict[str, Any]) -> None:

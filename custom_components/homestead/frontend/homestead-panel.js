@@ -2,1124 +2,24 @@ import * as L from "./vendor/leaflet.js";
 
 const BASE = new URL(".", import.meta.url).href;
 
-const ZONE_KINDS = ["vegetable_garden", "orchard", "flower_bed", "greenhouse", "pots", "lawn", "woodland", "compost", "coop", "nursery", "other"];
+const ZONE_KINDS = ["vegetable_garden", "orchard", "flower_bed", "greenhouse", "pots", "lawn", "woodland", "compost", "coop", "nursery", "indoor", "other"];
 
-const TEXT = {
-  en: {
-    panelTitle: "Garden",
-    satellite: "Satellite",
-    map: "Map",
-    tabPlantings: "Plantings",
-    tabZones: "Zones",
-    tabDiary: "Diary",
-    tabTodo: "📋 To do",
-    addTask: "+ Planned activity",
-    newTaskTitle: "Plan an activity",
-    editTaskTitle: "Planned activity",
-    due_on: "When",
-    title: "Title (optional)",
-    yearly: "Every year",
-    nothingToDo: "Nothing planned.",
-    done: "Done",
-    confirmDeleteTask: "Delete this planned activity?",
-    overdue: "overdue",
-    addEvent: "+ Event",
-    newEventTitle: "New diary event",
-    editEventTitle: "Diary event",
-    emptyDiary: "Nothing recorded yet.",
-    target: "On",
-    plantingsGroup: "Plantings",
-    zonesGroup: "Zones",
-    done_on: "Date",
-    product: "Product",
-    dose: "Dose",
-    quantity_h: "Quantity",
-    unit: "Unit",
-    cost: "💸 Cost",
-    revenue: "💶 Revenue",
-    eventPhoto: "📷 Photo",
-    confirmDeleteEvent: "Delete this event and its photos? Its expenses are kept.",
-    allEvents: "All events →",
-    allKinds: "All kinds",
-    allZones: "All zones",
-    allYears: "All years",
-    zonePlantings: "{count} plantings",
-    ev_pruning: "Pruning",
-    ev_fertilizing: "Fertilizing",
-    ev_watering: "Watering",
-    ev_treatment: "Treatment",
-    ev_sowing: "Sowing",
-    ev_harvest: "Harvest",
-    ev_grafting: "Grafting",
-    ev_problem: "Problem",
-    ev_note: "Note",
-    ev_removal: "End of planting",
-    ev_clearing: "Woodland clearing",
-    ev_wood_cutting: "Firewood cutting",
-    ev_brushwood: "Branches",
-    ev_foraging: "Foraging",
-    woodland: "Woodland",
-    essences: "Main species",
-    essencesHint: "Search a species and choose it, or type a name and press Enter.",
-    removeEssence: "Remove",
-    what: "What (porcini, chestnuts…)",
-    essence: "Species",
-    woodBox: "🪵 Wood and woodland harvests",
-    nursery: "Nursery (seed trays)",
-    sow: "Sow",
-    sowTitle: "🌱 Sow",
-    sowCount: "Seeds or cells",
-    sowWhere: "Where",
-    sowLot: "Seed lot",
-    sowNoLot: "— no lot —",
-    sowExpect: "What to expect",
-    sowHistory: "Previous years: came up in {min}–{max} days, {rate}% came up",
-    sowHistoryOne: "Last time: came up in {days} days, {rate}% came up",
-    sowLotAge: "Seeds of {year}: year {age} of about {life}{old}",
-    sowLotOld: " — old, sow a few more",
-    sowDone: "{name}: {count} sown",
-    nurseryTitle: "🌱 In the nursery",
-    nurseryCount: "{batches} batches · {plants} seedlings",
-    germTitle: "🌿 Came up",
-    germDay: "When the first ones appeared",
-    germCount: "How many came up",
-    germAfter: "{days} days · {rate}% came up",
-    germDone: "{name}: {count} seedlings",
-    germWaiting: "day {days}",
-    germExpected: "usually {min}–{max} days",
-    germLate: "⚠️ day {days} · usually {min}–{max}",
-    germBorn: "{days} days since they came up",
-    germReady: "✅ ready to plant out",
-    germScaleSow: "came up in the past years: {min}–{max} days",
-    germScaleOut: "planting out: {months} · now {days} days old",
-    germ: "🌿 Came up",
-    transplant: "↪️ Plant out",
-    tpTitle: "↪️ Plant out",
-    tpHow: "How many now",
-    tpAll: "all",
-    tpZone: "Into which zone",
-    tpLeft: "Becomes a new planting ({moved}); the other {left} stay in the nursery.",
-    tpAllNote: "All {count} seedlings leave the nursery.",
-    tpCold: "⚠️ Night at {temp} °C on {date}: tender seedlings, better wait",
-    tpDone: "{name}: {count} planted out",
-    tpPlace: "Tap the map to place them, or Cancel to leave them without a position",
-    ev_germinated: "Came up",
-    germText: "Came up: {count}{rate}{days}",
-    endReason: "Why",
-    end_finished: "Finished",
-    end_died: "Died",
-    end_removed: "Removed",
-    cause: "Cause",
-    cause_frost: "Frost",
-    cause_drought: "Drought",
-    cause_disease: "Disease",
-    cause_pests: "Pests",
-    cause_animals: "Animals",
-    cause_unknown: "Unknown",
-    zoneHere: "+ Plant here",
-    zoneSowHere: "🌱 Sow here",
-    zoneFromNursery: "↪️ Plant out from the nursery ({count})",
-    zoneCard: "Zone card",
-    zoneTapSub: "{count} plantings",
-    anGerm: "🌱 Germination over the years",
-    anGermYear: "year",
-    anGermDays: "days to come up",
-    anGermRate: "came up",
-    anGermLot: "seeds of",
-    anGermEmpty: "No sowing with a “came up” date yet.",
-    anLosses: "💀 Losses over the years",
-    anLossesEmpty: "No planting died. 🎉",
-    typesTitle: "Fill in the missing plant types",
-    typesHintOne: "1 planting: the type comes from its species",
-    typesHintMany: "{count} plantings: the type comes from their species",
-    typesApply: "Apply",
-    typesDoneOne: "1 type set",
-    typesDoneMany: "{count} types set",
-    showGone: "Show dead or removed plantings ({count})",
-    tabCalendar: "Calendar",
-    tabMap: "Map",
-    tabMore: "More",
-    settingsHint: "Sensors, phones, alerts",
-    settingsTitle: "Settings",
-    moreSeeds: "{count} seed lots",
-    moreTools: "{count} tools",
-    moreToolsDue: "{count} services due",
-    resetTitle: "Reset everything",
-    resetHint: "Deletes zones, plantings, diary, activities, seeds, expenses, tools and photos. Settings and the weather history stay. Download a backup first. Administrators only.",
-    resetType: "Type RESET to confirm",
-    resetDo: "Reset everything",
-    resetDone: "Everything deleted ({summary})",
-    todoLater: "+{count} later in the calendar",
-    diaryMore: "Show older entries ({count})",
-    quickOther: "Event…",
-    quickEvent: "Event",
-    quickSearch: "Search plant or zone",
-    quickNow: "Harvesting now",
-    quickRecent: "Recently updated",
-    quickFound: "Found",
-    quickNone: "Nothing found",
-    quickAll: "Show all ({count})",
-    agoToday: "today",
-    agoYesterday: "yesterday",
-    agoDays: "{count} days ago",
-    calPlantOne: "1 plant",
-    calPlantMany: "{count} plants",
-    calTaskOne: "1 planned",
-    calTaskMany: "{count} planned",
-    toolService: "Service",
-    toolServiceDone: "Serviced",
-    service_months: "Service every (months)",
-    everyMonths: "every {count} months",
-    nextService: "next {date}",
-    repeatTitle: "Repeat last year's garden",
-    repeatHint: "Crops of {from} to grow again in {to}: {count}. Same zone and variety",
-    repeatNote: "Tick the crops to grow again. ⭐ = season rating, ❌ = marked “to avoid” (unticked).",
-    repeatCreateOne: "Create 1 planting",
-    repeatCreateMany: "Create {count} plantings",
-    repeatDone: "{count} plantings created for {year}",
-    compost: "Compost bin",
-    coop: "Hen house",
-    ev_compost_turn: "Compost turning",
-    ev_compost_harvest: "Compost harvest",
-    ev_eggs: "Eggs",
-    ev_flock_in: "Hens arrived",
-    ev_flock_out: "Hens gone",
-    ev_animal_care: "Feed and care",
-    ev_coop_cleaning: "Coop cleaning",
-    cat_animals: "Animals (feed, care)",
-    reason: "Reason",
-    breed: "Breed",
-    feedOrCare: "Feed, care",
-    eggCount: "Eggs",
-    henCount: "Number of hens",
-    lr_predator: "Predator (fox…)",
-    lr_illness: "Illness",
-    lr_age: "Old age",
-    lr_sold: "Sold or given",
-    lr_slaughtered: "Slaughtered",
-    lr_other: "Other",
-    compostBox: "♻️ Compost",
-    compostTurned: "Last turned {date} ({days} days ago)",
-    compostNever: "Never turned yet",
-    compostHarvested: "Last harvest {date}",
-    compostQuality: "Average quality {avg} ★ (harvests: {count})",
-    compostDue: "♻️ To turn: {days} days since last time",
-    compostDays: "{days} days",
-    compostTurn: "♻️ Turned",
-    compostHarvest: "🪱 Harvested",
-    compostTodo: "♻️ Compost to turn",
-    coopBox: "🐔 Hen house",
-    hensNow: "{count} hens",
-    henOne: "1 hen",
-    eggsAdd: "+ Eggs",
-    eggsSaved: "✓ {count} eggs",
-    eggsWeek: "Last 7 days",
-    eggsMonth: "This month",
-    eggsYear: "This year",
-    eggsPerHen: "Per hen this year",
-    eggsCost: "Cost per egg",
-    eggsRecent: "Latest entries",
-    flockIn: "+ Arrival",
-    flockOut: "− Departure",
-    animalCare: "🥣 Feed, care",
-    flockLog: "Flock",
-    anEggs: "🥚 Eggs over the years",
-    anHens: "avg hens",
-    anPerHen: "per hen",
-    anEggCost: "cost/egg",
-    u_q: "q",
-    u_stere: "steres",
-    u_m3: "m³",
-    ev_tillage: "Tillage",
-    ev_weeding: "Weeding",
-    ev_mulching: "Mulching",
-    ev_mowing: "Mowing",
-    plant_type: "Plant type",
-    pt_tree: "Tree",
-    pt_fruit_tree: "Fruit tree",
-    csvImport: "📥 Import CSV",
-    csvTemplate: "📄 CSV template",
-    csvTitlePlantings: "Import plantings",
-    csvTitleSeeds: "Import seeds",
-    csvSummary: "{count} rows, {issues} to check. Fix the highlighted values or untick a row to skip it.",
-    csvDo: "Import {count}",
-    csvDone: "Imported: {ok}. Errors: {failed}.",
-    csvEmpty: "No rows found: is the first line the header?",
-    csvUnknownZone: "zone “{value}” not found",
-    csvBadDate: "date “{value}” not understood (use dd/mm/yyyy)",
-    csvBadNumber: "number “{value}” not understood",
-    csvBadChoice: "“{value}” not understood",
-    csvMissing: "required",
-    csvDuplicate: "already in your list: stays out unless you tick it",
-    pt_shrub: "Shrub",
-    pt_vine: "Vine, climber",
-    pt_vegetable: "Vegetable",
-    pt_herb: "Aromatic herb",
-    pt_flower: "Flower",
-    pt_other: "Other",
-    lastYears: "📅 Other years, around now",
-    lastTime: "↩️ Last time: {date}",
-    monthly: "Month by month",
-    yearly: "Year by year",
-    byPlanting: "By planting",
-    spentEarned: "{spent} spent · {earned} earned",
-    ev_planted: "Planted out",
-    ev_transplanted: "Transplanted",
-    ev_since: "Here for ~{years} years (since ~{year})",
-    settings: "Settings: weather sensors, reminders",
-    ev_review: "Season review",
-    rating: "Rating",
-    abundance: "Harvest",
-    ab_poor: "poor",
-    ab_normal: "normal",
-    ab_abundant: "abundant",
-    keep: "✅ To repeat",
-    avoid: "❌ To avoid",
-    seasons: "📊 Seasons",
-    noSeasons: "No history yet: record sowing, pruning, harvests and a season review.",
-    reviewMissing: "⭐ How did {year} go?",
-    writeReview: "Season review",
-    quickHarvest: "+ Harvest",
-    repeat: "🔁 Repeat next year",
-    repeated: "Created: {name}",
-    treatments: "{count} treatments",
-    u_kg: "kg",
-    u_pieces: "pieces",
-    u_l: "L",
-    moon_new_moon: "New moon",
-    moon_waxing_crescent: "Waxing crescent",
-    moon_first_quarter: "First quarter",
-    moon_waxing_gibbous: "Waxing gibbous",
-    moon_full_moon: "Full moon",
-    moon_waning_gibbous: "Waning gibbous",
-    moon_last_quarter: "Last quarter",
-    moon_waning_crescent: "Waning crescent",
-    cat_services: "Services and labour",
-    cat_sales: "Sales",
-    movement: "Type",
-    isExpense: "Expense",
-    isIncome: "Income",
-    expensesTotal: "Expenses",
-    incomesTotal: "Income",
-    balance: "Balance",
-    cropBox: "🌿 Crop data",
-    calendar: "Calendar: next two weeks and the year",
-    calPlan: "📅 Year plan",
-    calNext: "📋 To do in the next two weeks",
-    tabAnalysis: "Analysis",
-    anTitle: "📈 Over the years",
-    anEmpty: "No data yet: log harvests and end-of-season reviews to see the comparison over the years.",
-    anHeatDays: "🔥 {count} heatwave days",
-    anFrosts: "❄️ frosts: {count}",
-    anHail: "🧊 hail",
-    anNoExtremes: "no extremes recorded",
-    anIndex: "index",
-    an_good: "good year",
-    an_mid: "average",
-    an_bad: "poor year",
-    anTotal: "Total",
-    anPerPlant: "Per plant",
-    anCost: "Cost",
-    anPlants: "plants",
-    anYields: "Harvests by crop",
-    anNoHarvest: "No harvest with a quantity yet.",
-    anYieldsHint: "Colour = yield per plant compared with the previous years' median, together with the season rating (green good, orange average, red poor). Hover a cell for details.",
-    anWeatherYield: "{name}: harvest and weather",
-    anHeatEffect: "In years with a heatwave the harvest was {pct}% lower than in the other years.",
-    anPickCrop: "Click a crop in the table to see it here.",
-    anTiming: "⏱️ When the work was done",
-    anTimingEmpty: "Not enough cases yet: at least two seasons with pruning or planting in different months.",
-    anPlantShort: "plant",
-    anSeasons: "{a} vs {b} seasons",
-    anTimingHint: "Few seasons: an indication, not a rule.",
-    anMoon: "🌙 Moon phase at sowing/planting",
-    anMoon_new: "New moon",
-    anMoon_waxing: "Waxing",
-    anMoon_full: "Full moon",
-    anMoon_waning: "Waning",
-    anCases: "{count} cases",
-    anMoonEmpty: "No sowing with an end-of-season review yet.",
-    anMoonWeak: "Too few cases or too small a difference: no conclusion possible.",
-    anMoonNote: "Average season rating by phase.",
-    anLessons: "📝 Lessons learnt",
-    calMore: "and {count} more in the Diary",
-    calNoZone: "Without zone",
-    calToday: "today",
-    calEvents: "{count} done",
-    calWholeZone: "whole zone",
-    calGeneral: "General",
-    cal_wood: "woodcutting period",
-    cal_foraging: "foraging",
-    calHistory: "📜 History",
-    calPlanned: "planned",
-    calWeather: "Weather",
-    calNoForecast: "No forecast yet: choose a weather entity in the settings, or allow Open-Meteo.",
-    xt_frost: "frost",
-    xt_heatwave: "heatwave",
-    xt_heat_extreme: "extreme heat",
-    xt_hail: "hail",
-    xt_heavy_rain: "heavy rain",
-    pruning: "Pruning",
-    fertilizing: "Fertilizing",
-    end: "End of crop",
-    family: "Family",
-    goodWith: "🤝 Good with",
-    badWith: "🚫 Keep away from",
-    cropGraph: "CropGraph data (CC-BY-4.0), dates set on your frosts: last ~{spring}, first ~{fall}",
-    cropGraphFallback: "CropGraph data (CC-BY-4.0), dates for typical frosts (mid April, end of October) until your history is known",
-    heat_max_c: "Heat limit (°C)",
-    cropDefault: "indicative values, temperate climate",
-    cropMine: "your values",
-    cropMissing: "No crop data for this species.",
-    cropEdit: "✏️ Correct",
-    cropAdd: "✏️ Add",
-    cropReset: "↩️ Built-in values",
-    cropTitle: "Crop data: {species}",
-    confirmCropReset: "Delete your values and go back to the built-in ones?",
-    exposure: "Exposure",
-    ex_sun: "☀️ sun",
-    ex_partial: "⛅ partial shade",
-    ex_shade: "☁️ shade",
-    hardiness_c: "Hardiness (lowest °C)",
-    hardiness: "❄️ down to {value} °C",
-    spacing_cm: "Spacing (cm)",
-    spacing: "↔️ {value} cm",
-    sow_indoor: "Sow indoors",
-    sow_outdoor: "Sow outdoors",
-    plant_out: "Plant out",
-    flowering: "Flowering",
-    harvest: "Harvest",
-    thisMonth: "📆 This month",
-    sowNow: "🌱 to sow now",
-    monthSowIndoor: "🌱 Sow indoors: {names}",
-    monthSowOutdoor: "🌱 Sow outdoors: {names}",
-    monthPlantOut: "🪴 Plant out: {names}",
-    monthHarvest: "🍎 Harvest: {names}",
-    goodDay: "✅ good weather",
-    better_on: "better on {date}",
-    issue_rain_48h: "rain within 48 h",
-    issue_wind: "wind",
-    issue_hot: "too hot",
-    issue_frost_next: "frost in the next days",
-    issue_rain_today: "rain that day",
-    issue_cold_nights: "cold nights this week",
-    issue_heavy_rain: "heavy rain",
-    issue_rain_coming: "rain coming",
-    issue_frozen: "frozen soil",
-    issue_gusts: "strong gusts",
-    alertsTitle: "⚠️ Weather alerts",
-    al_frost: "❄️ Frost {when}: {value} °C",
-    al_cold: "🥶 Cold {when}: {value} °C",
-    al_heatwave: "🔥 Heatwave {when}: up to {value} °C",
-    al_heat_extreme: "🔥 Extreme heat {when}: {value} °C",
-    al_heat_stress: "🥵 Too hot {when}: up to {value} °C",
-    tabSeeds: "Seeds",
-    addSeed: "New seeds",
-    newSeedTitle: "New seeds",
-    editSeedTitle: "Seeds",
-    emptySeeds: "No seeds yet.",
-    year: "Year (packed or harvested)",
-    quantity_s: "Quantity (1 packet, 20 g…)",
-    viability_years: "Germinate well for (years)",
-    viabilityHint: "Empty: typical value for the family ({years} years).",
-    finished: "Finished",
-    seedsOld: "⚠️ old: germination is dropping (over {years} years)",
-    seedsLastYear: "⏳ last good year",
-    seed_lot_id: "Seeds used",
-    confirmDeleteSeed: "Delete these seeds? Plantings keep their data.",
-    shop: "🛒 Shopping list",
-    shopAdded: "Added to the shopping list: {item}",
-    noShoppingList: "No to-do list for shopping in Home Assistant (add the Shopping list integration).",
-    seedsItem: "Seeds: {name}",
-    rotationHint: "💡 Rotation: {what} already here in {years} ({names}). Better to wait about 3 years before the same family.",
-    rotation: "🔄 Crops in this zone",
-    tabExpenses: "Expenses",
-    tabTools: "Tools",
-    noMap: "No map",
-    addExpense: "New expense",
-    addTool: "New tool",
-    emptyExpenses: "No expenses yet.",
-    emptyTools: "No tools yet.",
-    newExpenseTitle: "New expense",
-    editExpenseTitle: "Edit expense",
-    newToolTitle: "New tool",
-    editToolTitle: "Edit tool",
-    confirmDeleteExpense: "Delete this expense?",
-    confirmDeleteTool: "Delete “{name}”? Its expenses are kept.",
-    spent_on: "Date",
-    amount: "Amount",
-    category: "Category",
-    supplier: "Supplier",
-    planting_id: "Planting",
-    tool_id: "Tool",
-    brand: "Brand",
-    model: "Model",
-    purchased_on: "Purchased on",
-    power: "Power",
-    next_service_on: "Next service",
-    price: "Price (added as an expense)",
-    cat_plants: "Plants",
-    cat_seeds: "Seeds",
-    cat_tools: "Tools",
-    cat_fertilizers: "Fertilizers",
-    cat_treatments: "Treatments",
-    cat_water: "Water",
-    cat_other: "Other",
-    manual: "Manual",
-    battery: "Battery",
-    petrol: "Petrol",
-    electric: "Electric",
-    ok: "OK",
-    needs_service: "Needs service",
-    broken: "Broken",
-    serviceDue: "service due since {date}",
-    expensesOfPlanting: "Expenses: {total}",
-    addExpenseFor: "+ Expense",
-    photos: "Photos",
-    addPhoto: "📷 Add photo",
-    photosAfterSave: "Save the planting first to add photos.",
-    uploading: "Uploading…",
-    confirmDeletePhoto: "Delete this photo?",
-    close: "Close",
-    add: "New planting",
-    addZone: "New zone",
-    empty: "No plantings yet. Press “New planting” and click on the map.",
-    emptyZones: "No zones yet. Press “New zone” and click the corners on the map.",
-    noPosition: "not on the map",
-    notDrawn: "not drawn",
-    placeNew: "Click on the map where the new planting is",
-    placeExisting: "Click on the map to place “{name}”",
-    drawZone: "Click the corners of the zone ({count} points)",
-    undoPoint: "Undo point",
-    finish: "Finish",
-    cancel: "Cancel",
-    save: "Save",
-    delete: "Delete",
-    confirmDelete: "Delete “{name}”? Use the status for a dead plant.",
-    confirmDeleteZone: "Delete zone “{name}”? Its sub-zones and plantings move to the parent zone.",
-    newTitle: "New planting",
-    editTitle: "Edit planting",
-    newZoneTitle: "New zone",
-    editZoneTitle: "Edit zone",
-    dragHint: "Drag the marker to move it.",
-    place: "Place on map",
-    redraw: "Redraw on map",
-    draw: "Draw on map",
-    name: "Name",
-    species: "Species",
-    variety: "Variety",
-    kind: "Kind",
-    single: "Single plant",
-    group: "Group (row, bed)",
-    quantity: "Quantity",
-    planted_on: "Planted on",
-    origin: "Origin",
-    existing: "Already there",
-    planted: "Planted by me",
-    sown: "Sown by me",
-    age_now: "Estimated age (years)",
-    age_at_planting: "Age when planted (years)",
-    sown_on: "Sown on",
-    transplanted_on: "Transplanted on",
-    ageYears: "~{years} y",
-    zone_id: "Zone",
-    parent_id: "Inside zone",
-    noZone: "—",
-    status: "Status",
-    active: "Active",
-    dead: "Dead",
-    removed: "Removed",
-    notes: "Notes",
-    position: "Position",
-    surface: "Surface",
-    plantsCount: "🌱 {count}",
-    required: "Name and species are required.",
-    requiredZone: "The name is required.",
-    notLoaded: "HA Homestead is not loaded.",
-    vegetable_garden: "Vegetable garden",
-    orchard: "Orchard",
-    flower_bed: "Flower bed",
-    greenhouse: "Greenhouse",
-    pots: "Pots",
-    lawn: "Lawn",
-    other: "Other",
-    saved: "Saved: {name}",
-    backup: "Backup",
-    backupHint: "All plantings, zones, species, expenses and tools in a JSON file (photo files stay in the HA media folder). Home Assistant backups include everything.",
-    exportBackup: "Export",
-    importBackup: "Restore",
-    confirmRestore: "Replace ALL current data with this backup ({date})?\n{summary}\nTip: export the current data first.",
-    restored: "Backup restored: {summary}",
-    notBackup: "This file is not an HA Homestead backup.",
-    summary: "{plantings} plantings, {zones} zones, {taxa} species, {expenses} expenses, {tools} tools",
-    deleted: "Deleted: {name}",
-    speciesPlaceholder: "Search: apple, Malus domestica…",
-    searching: "Searching…",
-    noResults: "No species found: the text is kept as it is.",
-    offlineSpecies: "GBIF and Wikidata not reachable: only species already imported.",
-    importingTaxon: "Importing the species…",
-    linked: "Linked to",
-    unlink: "Unlink",
-    local: "imported",
-  },
-  it: {
-    panelTitle: "Giardino",
-    satellite: "Satellite",
-    map: "Mappa",
-    tabPlantings: "Piante",
-    tabZones: "Zone",
-    tabDiary: "Diario",
-    tabTodo: "📋 Da fare",
-    addTask: "+ Attività",
-    newTaskTitle: "Pianifica un'attività",
-    editTaskTitle: "Attività pianificata",
-    due_on: "Quando",
-    title: "Titolo (facoltativo)",
-    yearly: "Ogni anno",
-    nothingToDo: "Niente in programma.",
-    done: "Fatto",
-    confirmDeleteTask: "Eliminare questa attività?",
-    overdue: "in ritardo",
-    addEvent: "+ Evento",
-    newEventTitle: "Nuovo evento",
-    editEventTitle: "Evento del diario",
-    emptyDiary: "Ancora niente nel diario.",
-    target: "Su",
-    plantingsGroup: "Piante",
-    zonesGroup: "Zone",
-    done_on: "Data",
-    product: "Prodotto",
-    dose: "Dose",
-    quantity_h: "Quantità",
-    unit: "Unità",
-    cost: "💸 Costo",
-    revenue: "💶 Ricavo",
-    eventPhoto: "📷 Foto",
-    confirmDeleteEvent: "Eliminare questo evento e le sue foto? Le spese restano.",
-    allEvents: "Tutti gli eventi →",
-    allKinds: "Tutti i tipi",
-    allZones: "Tutte le zone",
-    allYears: "Tutti gli anni",
-    zonePlantings: "{count} piante",
-    ev_pruning: "Potatura",
-    ev_fertilizing: "Concimazione",
-    ev_watering: "Irrigazione",
-    ev_treatment: "Trattamento",
-    ev_sowing: "Semina",
-    ev_harvest: "Raccolta",
-    ev_grafting: "Innesto",
-    ev_problem: "Problema",
-    ev_note: "Nota",
-    ev_removal: "Fine della pianta",
-    ev_clearing: "Pulizia bosco",
-    ev_wood_cutting: "Taglio legna",
-    ev_brushwood: "Raccolta rami",
-    ev_foraging: "Raccolta spontanea",
-    woodland: "Bosco",
-    essences: "Essenze principali",
-    essencesHint: "Cerca una specie e sceglila, oppure scrivi un nome e premi Invio.",
-    removeEssence: "Togli",
-    what: "Cosa (porcini, castagne…)",
-    essence: "Essenza",
-    woodBox: "🪵 Legna e raccolti del bosco",
-    nursery: "Semenzaio",
-    sow: "Semina",
-    sowTitle: "🌱 Semina",
-    sowCount: "Semi o alveoli",
-    sowWhere: "Dove",
-    sowLot: "Lotto di semi",
-    sowNoLot: "— nessun lotto —",
-    sowExpect: "Cosa aspettarsi",
-    sowHistory: "Negli anni scorsi: nati in {min}–{max} giorni, {rate}% di nascita",
-    sowHistoryOne: "L'ultima volta: nati in {days} giorni, {rate}% di nascita",
-    sowLotAge: "Semi del {year}: anno {age} di circa {life}{old}",
-    sowLotOld: " — vecchi, semina qualche seme in più",
-    sowDone: "{name}: {count} seminati",
-    nurseryTitle: "🌱 In semenzaio",
-    nurseryCount: "{batches} covate · {plants} piantine",
-    germTitle: "🌿 Nate",
-    germDay: "Quando sono spuntate le prime",
-    germCount: "Quante sono nate",
-    germAfter: "{days} giorni · {rate}% di nascita",
-    germDone: "{name}: {count} piantine",
-    germWaiting: "giorno {days}",
-    germExpected: "di solito {min}–{max} giorni",
-    germLate: "⚠️ giorno {days} · di solito {min}–{max}",
-    germBorn: "{days} giorni dalla nascita",
-    germReady: "✅ pronte da trapiantare",
-    germScaleSow: "nascita negli anni: {min}–{max} giorni",
-    germScaleOut: "trapianto: {months} · ora {days} giorni",
-    germ: "🌿 Nate",
-    transplant: "↪️ Trapianta",
-    tpTitle: "↪️ Trapianto",
-    tpHow: "Quante ne trapianti adesso",
-    tpAll: "tutte",
-    tpZone: "In quale zona",
-    tpLeft: "Diventa una pianta nuova ({moved}); le altre {left} restano nel semenzaio.",
-    tpAllNote: "Tutte le {count} piantine lasciano il semenzaio.",
-    tpCold: "⚠️ Notte a {temp} °C il {date}: piantine tenere, meglio aspettare",
-    tpDone: "{name}: {count} trapiantate",
-    tpPlace: "Tocca la mappa per posizionarle, o Annulla per lasciarle senza posto",
-    ev_germinated: "Nate",
-    germText: "Nate: {count}{rate}{days}",
-    endReason: "Perché",
-    end_finished: "Finita",
-    end_died: "Morta",
-    end_removed: "Tolta",
-    cause: "Causa",
-    cause_frost: "Gelo",
-    cause_drought: "Siccità",
-    cause_disease: "Malattia",
-    cause_pests: "Parassiti",
-    cause_animals: "Animali",
-    cause_unknown: "Sconosciuta",
-    zoneHere: "+ Pianta qui",
-    zoneSowHere: "🌱 Semina qui",
-    zoneFromNursery: "↪️ Trapianta dal semenzaio ({count})",
-    zoneCard: "Scheda zona",
-    zoneTapSub: "{count} piante",
-    anGerm: "🌱 Germinazione negli anni",
-    anGermYear: "anno",
-    anGermDays: "giorni per nascere",
-    anGermRate: "nate",
-    anGermLot: "semi del",
-    anGermEmpty: "Ancora nessuna semina con la data di nascita.",
-    anLosses: "💀 Perdite negli anni",
-    anLossesEmpty: "Nessuna pianta morta. 🎉",
-    typesTitle: "Completa i tipi mancanti",
-    typesHintOne: "1 pianta: il tipo si ricava dalla specie",
-    typesHintMany: "{count} piante: il tipo si ricava dalla specie",
-    typesApply: "Applica",
-    typesDoneOne: "1 tipo impostato",
-    typesDoneMany: "{count} tipi impostati",
-    showGone: "Mostra le piante morte o tolte ({count})",
-    tabCalendar: "Calendario",
-    tabMap: "Mappa",
-    tabMore: "Altro",
-    settingsHint: "Sensori, telefoni, allerte",
-    settingsTitle: "Impostazioni",
-    moreSeeds: "{count} lotti di semi",
-    moreTools: "{count} attrezzi",
-    moreToolsDue: "{count} manutenzioni da fare",
-    resetTitle: "Azzera tutto",
-    resetHint: "Cancella zone, piante, diario, attività, semi, spese, attrezzi e foto. Restano le impostazioni e lo storico meteo. Prima scarica un backup. Solo amministratori.",
-    resetType: "Scrivi RESET per confermare",
-    resetDo: "Azzera tutto",
-    resetDone: "Tutto cancellato ({summary})",
-    todoLater: "+{count} più avanti nel calendario",
-    diaryMore: "Mostra i più vecchi ({count})",
-    quickOther: "Evento…",
-    quickEvent: "Evento",
-    quickSearch: "Cerca pianta o zona",
-    quickNow: "In raccolta adesso",
-    quickRecent: "Aggiornate di recente",
-    quickFound: "Trovate",
-    quickNone: "Nessun risultato",
-    quickAll: "Mostra tutte ({count})",
-    agoToday: "oggi",
-    agoYesterday: "ieri",
-    agoDays: "{count} giorni fa",
-    calPlantOne: "1 pianta",
-    calPlantMany: "{count} piante",
-    calTaskOne: "1 prevista",
-    calTaskMany: "{count} previste",
-    toolService: "Manutenzione",
-    toolServiceDone: "Manutenzione fatta",
-    service_months: "Manutenzione ogni (mesi)",
-    everyMonths: "ogni {count} mesi",
-    nextService: "prossima il {date}",
-    repeatTitle: "Ripeti l'orto dell'anno scorso",
-    repeatHint: "Colture del {from} da rifare nel {to}: {count}. Stessa zona e varietà",
-    repeatNote: "Spunta le colture da rifare. ⭐ = voto della stagione, ❌ = segnata “da evitare” (senza spunta).",
-    repeatCreateOne: "Crea 1 pianta",
-    repeatCreateMany: "Crea {count} piante",
-    repeatDone: "{count} piante create per il {year}",
-    compost: "Compostiera",
-    coop: "Pollaio",
-    ev_compost_turn: "Rivoltare il compost",
-    ev_compost_harvest: "Raccolta compost",
-    ev_eggs: "Uova",
-    ev_flock_in: "Arrivo galline",
-    ev_flock_out: "Uscita galline",
-    ev_animal_care: "Mangime e cure",
-    ev_coop_cleaning: "Pulizia pollaio",
-    cat_animals: "Animali (mangime, cure)",
-    reason: "Motivo",
-    breed: "Razza",
-    feedOrCare: "Mangime, cure",
-    eggCount: "Uova",
-    henCount: "Numero di galline",
-    lr_predator: "Predatore (volpe…)",
-    lr_illness: "Malattia",
-    lr_age: "Vecchiaia",
-    lr_sold: "Venduta o regalata",
-    lr_slaughtered: "Macellata",
-    lr_other: "Altro",
-    compostBox: "♻️ Compost",
-    compostTurned: "Rivoltato il {date} ({days} giorni fa)",
-    compostNever: "Mai rivoltato finora",
-    compostHarvested: "Ultima raccolta {date}",
-    compostQuality: "Qualità media {avg} ★ (raccolte: {count})",
-    compostDue: "♻️ Da rivoltare: {days} giorni dall'ultima volta",
-    compostDays: "{days} giorni",
-    compostTurn: "♻️ Rivoltato",
-    compostHarvest: "🪱 Raccolto",
-    compostTodo: "♻️ Compost da rivoltare",
-    coopBox: "🐔 Pollaio",
-    hensNow: "{count} galline",
-    henOne: "1 gallina",
-    eggsAdd: "+ Uova",
-    eggsSaved: "✓ {count} uova",
-    eggsWeek: "Ultimi 7 giorni",
-    eggsMonth: "Questo mese",
-    eggsYear: "Quest'anno",
-    eggsPerHen: "Per gallina quest'anno",
-    eggsCost: "Costo per uovo",
-    eggsRecent: "Ultime registrazioni",
-    flockIn: "+ Arrivo",
-    flockOut: "− Uscita",
-    animalCare: "🥣 Mangime, cure",
-    flockLog: "Gruppo",
-    anEggs: "🥚 Uova negli anni",
-    anHens: "galline in media",
-    anPerHen: "per gallina",
-    anEggCost: "costo/uovo",
-    u_q: "q",
-    u_stere: "steri",
-    u_m3: "m³",
-    ev_tillage: "Lavorazione terreno",
-    ev_weeding: "Diserbo",
-    ev_mulching: "Pacciamatura",
-    ev_mowing: "Sfalcio",
-    plant_type: "Tipo di pianta",
-    pt_tree: "Albero",
-    pt_fruit_tree: "Albero da frutto",
-    csvImport: "📥 Importa CSV",
-    csvTemplate: "📄 Modello CSV",
-    csvTitlePlantings: "Importa piante",
-    csvTitleSeeds: "Importa semi",
-    csvSummary: "{count} righe, {issues} da controllare. Correggi i valori evidenziati o togli la spunta per saltare una riga.",
-    csvDo: "Importa {count}",
-    csvDone: "Importate: {ok}. Errori: {failed}.",
-    csvEmpty: "Nessuna riga trovata: la prima riga è l'intestazione?",
-    csvUnknownZone: "zona “{value}” non trovata",
-    csvBadDate: "data “{value}” non capita (usa gg/mm/aaaa)",
-    csvBadNumber: "numero “{value}” non capito",
-    csvBadChoice: "“{value}” non capito",
-    csvMissing: "obbligatorio",
-    csvDuplicate: "è già nell'elenco: non verrà importata due volte se resta senza spunta",
-    pt_shrub: "Arbusto",
-    pt_vine: "Rampicante, vite",
-    pt_vegetable: "Ortaggio",
-    pt_herb: "Aromatica",
-    pt_flower: "Fiore",
-    pt_other: "Altro",
-    lastYears: "📅 Negli anni scorsi, in questo periodo",
-    lastTime: "↩️ L'ultima volta: {date}",
-    monthly: "Mese per mese",
-    yearly: "Anno per anno",
-    byPlanting: "Per pianta",
-    spentEarned: "{spent} di spese · {earned} di ricavi",
-    ev_planted: "Messa a dimora",
-    ev_transplanted: "Trapianto",
-    ev_since: "Presente da ~{years} anni (dal ~{year})",
-    settings: "Impostazioni: sensori meteo, promemoria",
-    ev_review: "Bilancio annata",
-    rating: "Voto",
-    abundance: "Raccolto",
-    ab_poor: "scarso",
-    ab_normal: "normale",
-    ab_abundant: "abbondante",
-    keep: "✅ Da rifare",
-    avoid: "❌ Da evitare",
-    seasons: "📊 Annate",
-    noSeasons: "Ancora nessuno storico: registra semina, potature, raccolti e un bilancio d'annata.",
-    reviewMissing: "⭐ Com'è andato il {year}?",
-    writeReview: "Bilancio annata",
-    quickHarvest: "+ Raccolta",
-    repeat: "🔁 Ripeti l'anno prossimo",
-    repeated: "Creata: {name}",
-    treatments: "{count} trattamenti",
-    u_kg: "kg",
-    u_pieces: "pezzi",
-    u_l: "L",
-    moon_new_moon: "Luna nuova",
-    moon_waxing_crescent: "Luna crescente",
-    moon_first_quarter: "Primo quarto",
-    moon_waxing_gibbous: "Gibbosa crescente",
-    moon_full_moon: "Luna piena",
-    moon_waning_gibbous: "Gibbosa calante",
-    moon_last_quarter: "Ultimo quarto",
-    moon_waning_crescent: "Luna calante",
-    cat_services: "Servizi e manodopera",
-    cat_sales: "Vendite",
-    movement: "Tipo",
-    isExpense: "Spesa",
-    isIncome: "Ricavo",
-    expensesTotal: "Spese",
-    incomesTotal: "Ricavi",
-    balance: "Saldo",
-    cropBox: "🌿 Scheda colturale",
-    calendar: "Calendario: prossime due settimane e l'anno",
-    calPlan: "📅 Programma",
-    calNext: "📋 Da fare nelle prossime 2 settimane",
-    tabAnalysis: "Analisi",
-    anTitle: "📈 Negli anni",
-    anEmpty: "Ancora nessun dato: registra raccolte e bilanci di fine stagione per vedere il confronto negli anni.",
-    anHeatDays: "🔥 {count} giorni di canicola",
-    anFrosts: "❄️ gelate: {count}",
-    anHail: "🧊 grandine",
-    anNoExtremes: "nessun estremo registrato",
-    anIndex: "indice",
-    an_good: "buona annata",
-    an_mid: "nella media",
-    an_bad: "annata scarsa",
-    anTotal: "Totale",
-    anPerPlant: "Per pianta",
-    anCost: "Costo",
-    anPlants: "piante",
-    anYields: "Raccolti per coltura",
-    anNoHarvest: "Ancora nessuna raccolta con quantità.",
-    anYieldsHint: "Colore = resa per pianta rispetto alla mediana degli anni precedenti, insieme al voto della stagione (verde buona, arancio media, rosso scarsa). Passa sopra una cella per i dettagli.",
-    anWeatherYield: "{name}: raccolto e meteo",
-    anHeatEffect: "Negli anni con canicola il raccolto è stato del {pct}% più basso rispetto agli altri anni.",
-    anPickCrop: "Clicca una coltura nella tabella per vederla qui.",
-    anTiming: "⏱️ Quando è stato fatto il lavoro",
-    anTimingEmpty: "Ancora pochi casi: servono almeno due stagioni con potatura o messa a dimora in mesi diversi.",
-    anPlantShort: "pianta",
-    anSeasons: "{a} contro {b} stagioni",
-    anTimingHint: "Poche stagioni: un'indicazione, non una regola.",
-    anMoon: "🌙 Fase lunare alla semina/messa a dimora",
-    anMoon_new: "Luna nuova",
-    anMoon_waxing: "Crescente",
-    anMoon_full: "Luna piena",
-    anMoon_waning: "Calante",
-    anCases: "{count} casi",
-    anMoonEmpty: "Ancora nessuna semina con bilancio di fine stagione.",
-    anMoonWeak: "Troppi pochi casi o differenza troppo piccola: nessuna conclusione possibile.",
-    anMoonNote: "Voto medio della stagione per fase.",
-    anLessons: "📝 Lezioni imparate",
-    calMore: "e altre {count} nel Diario",
-    calNoZone: "Senza zona",
-    calToday: "oggi",
-    calEvents: "{count} fatte",
-    calWholeZone: "tutta la zona",
-    calGeneral: "Generale",
-    cal_wood: "periodo di taglio",
-    cal_foraging: "raccolta spontanea",
-    calHistory: "📜 Storico",
-    calPlanned: "previsto",
-    calWeather: "Meteo",
-    calNoForecast: "Ancora nessuna previsione: scegli un'entità meteo nelle impostazioni, oppure lascia attivo Open-Meteo.",
-    xt_frost: "gelo",
-    xt_heatwave: "ondata di calore",
-    xt_heat_extreme: "caldo estremo",
-    xt_hail: "grandine",
-    xt_heavy_rain: "pioggia forte",
-    pruning: "Potatura",
-    fertilizing: "Concimazione",
-    end: "Fine coltura",
-    family: "Famiglia",
-    goodWith: "🤝 Sta bene con",
-    badWith: "🚫 Tenere lontano da",
-    cropGraph: "Dati CropGraph (CC-BY-4.0), date sulle tue gelate: ultima ~{spring}, prima ~{fall}",
-    cropGraphFallback: "Dati CropGraph (CC-BY-4.0), date per gelate tipiche (metà aprile, fine ottobre) finché non c'è il tuo storico",
-    heat_max_c: "Limite di caldo (°C)",
-    cropDefault: "valori indicativi, clima temperato",
-    cropMine: "valori tuoi",
-    cropMissing: "Nessun dato colturale per questa specie.",
-    cropEdit: "✏️ Correggi",
-    cropAdd: "✏️ Aggiungi",
-    cropReset: "↩️ Valori di base",
-    cropTitle: "Dati colturali: {species}",
-    confirmCropReset: "Eliminare i tuoi valori e tornare a quelli di base?",
-    exposure: "Esposizione",
-    ex_sun: "☀️ sole",
-    ex_partial: "⛅ mezz'ombra",
-    ex_shade: "☁️ ombra",
-    hardiness_c: "Rusticità (minima °C)",
-    hardiness: "❄️ fino a {value} °C",
-    spacing_cm: "Distanza (cm)",
-    spacing: "↔️ {value} cm",
-    sow_indoor: "Semina in semenzaio",
-    sow_outdoor: "Semina all'aperto",
-    plant_out: "Messa a dimora",
-    flowering: "Fioritura",
-    harvest: "Raccolta",
-    thisMonth: "📆 Questo mese",
-    sowNow: "🌱 da seminare ora",
-    monthSowIndoor: "🌱 Semina in semenzaio: {names}",
-    monthSowOutdoor: "🌱 Semina all'aperto: {names}",
-    monthPlantOut: "🪴 Messa a dimora: {names}",
-    monthHarvest: "🍎 Raccolta: {names}",
-    goodDay: "✅ meteo adatto",
-    better_on: "meglio il {date}",
-    issue_rain_48h: "pioggia entro 48 h",
-    issue_wind: "vento",
-    issue_hot: "troppo caldo",
-    issue_frost_next: "gelo nei prossimi giorni",
-    issue_rain_today: "pioggia quel giorno",
-    issue_cold_nights: "notti fredde in settimana",
-    issue_heavy_rain: "pioggia forte",
-    issue_rain_coming: "pioggia in arrivo",
-    issue_frozen: "terreno gelato",
-    issue_gusts: "raffiche forti",
-    alertsTitle: "⚠️ Allerte meteo",
-    al_frost: "❄️ Gelo {when}: {value} °C",
-    al_cold: "🥶 Freddo {when}: {value} °C",
-    al_heatwave: "🔥 Ondata di calore {when}: fino a {value} °C",
-    al_heat_extreme: "🔥 Caldo estremo {when}: {value} °C",
-    al_heat_stress: "🥵 Troppo caldo {when}: fino a {value} °C",
-    tabSeeds: "Semi",
-    addSeed: "Nuovi semi",
-    newSeedTitle: "Nuovi semi",
-    editSeedTitle: "Semi",
-    emptySeeds: "Nessun seme in inventario.",
-    year: "Anno (confezione o raccolta)",
-    quantity_s: "Quantità (1 bustina, 20 g…)",
-    viability_years: "Germinano bene per (anni)",
-    viabilityHint: "Vuoto: valore tipico della famiglia ({years} anni).",
-    finished: "Finiti",
-    seedsOld: "⚠️ vecchi: germinabilità in calo (oltre {years} anni)",
-    seedsLastYear: "⏳ ultimo anno buono",
-    seed_lot_id: "Semi usati",
-    confirmDeleteSeed: "Eliminare questi semi? Le piante restano.",
-    shop: "🛒 Lista spesa",
-    shopAdded: "Aggiunto alla lista della spesa: {item}",
-    noShoppingList: "Nessuna lista della spesa in Home Assistant (aggiungi l'integrazione Lista della spesa).",
-    seedsItem: "Semi: {name}",
-    rotationHint: "💡 Rotazione: {what} già qui nel {years} ({names}). Meglio aspettare circa 3 anni prima della stessa famiglia.",
-    rotation: "🔄 Colture in questa zona",
-    tabExpenses: "Spese",
-    tabTools: "Attrezzi",
-    noMap: "Nessuna mappa",
-    addExpense: "Nuova spesa",
-    addTool: "Nuovo attrezzo",
-    emptyExpenses: "Nessuna spesa.",
-    emptyTools: "Nessun attrezzo.",
-    newExpenseTitle: "Nuova spesa",
-    editExpenseTitle: "Modifica spesa",
-    newToolTitle: "Nuovo attrezzo",
-    editToolTitle: "Modifica attrezzo",
-    confirmDeleteExpense: "Eliminare questa spesa?",
-    confirmDeleteTool: "Eliminare “{name}”? Le sue spese restano.",
-    spent_on: "Data",
-    amount: "Importo",
-    category: "Categoria",
-    supplier: "Fornitore",
-    planting_id: "Pianta",
-    tool_id: "Attrezzo",
-    brand: "Marca",
-    model: "Modello",
-    purchased_on: "Acquistato il",
-    power: "Alimentazione",
-    next_service_on: "Prossima manutenzione",
-    price: "Prezzo (diventa una spesa)",
-    cat_plants: "Piante",
-    cat_seeds: "Semi",
-    cat_tools: "Attrezzi",
-    cat_fertilizers: "Concimi",
-    cat_treatments: "Trattamenti",
-    cat_water: "Acqua",
-    cat_other: "Altro",
-    manual: "Manuale",
-    battery: "Batteria",
-    petrol: "Benzina",
-    electric: "Elettrico",
-    ok: "OK",
-    needs_service: "Da manutenere",
-    broken: "Rotto",
-    serviceDue: "manutenzione dal {date}",
-    expensesOfPlanting: "Spese: {total}",
-    addExpenseFor: "+ Spesa",
-    photos: "Foto",
-    addPhoto: "📷 Aggiungi foto",
-    photosAfterSave: "Salva prima la pianta per aggiungere foto.",
-    uploading: "Carico…",
-    confirmDeletePhoto: "Eliminare questa foto?",
-    close: "Chiudi",
-    add: "Nuova pianta",
-    addZone: "Nuova zona",
-    empty: "Nessuna pianta. Premi “Nuova pianta” e clicca sulla mappa.",
-    emptyZones: "Nessuna zona. Premi “Nuova zona” e clicca gli angoli sulla mappa.",
-    noPosition: "non sulla mappa",
-    notDrawn: "non disegnata",
-    placeNew: "Clicca sulla mappa dove si trova la nuova pianta",
-    placeExisting: "Clicca sulla mappa per posizionare “{name}”",
-    drawZone: "Clicca gli angoli della zona ({count} punti)",
-    undoPoint: "Togli punto",
-    finish: "Fine",
-    cancel: "Annulla",
-    save: "Salva",
-    delete: "Elimina",
-    confirmDelete: "Eliminare “{name}”? Per una pianta morta usa lo stato.",
-    confirmDeleteZone: "Eliminare la zona “{name}”? Sottozone e piante passano alla zona padre.",
-    newTitle: "Nuova pianta",
-    editTitle: "Modifica pianta",
-    newZoneTitle: "Nuova zona",
-    editZoneTitle: "Modifica zona",
-    dragHint: "Trascina il segnaposto per spostarlo.",
-    place: "Posiziona sulla mappa",
-    redraw: "Ridisegna sulla mappa",
-    draw: "Disegna sulla mappa",
-    name: "Nome",
-    species: "Specie",
-    variety: "Varietà",
-    kind: "Tipo",
-    single: "Pianta singola",
-    group: "Gruppo (fila, aiuola)",
-    quantity: "Quantità",
-    planted_on: "Messa a dimora",
-    origin: "Origine",
-    existing: "Già presente",
-    planted: "Piantata da me",
-    sown: "Seminata da me",
-    age_now: "Età stimata (anni)",
-    age_at_planting: "Età all'impianto (anni)",
-    sown_on: "Semina",
-    transplanted_on: "Trapianto",
-    ageYears: "~{years} anni",
-    zone_id: "Zona",
-    parent_id: "Dentro la zona",
-    noZone: "—",
-    status: "Stato",
-    active: "Attiva",
-    dead: "Morta",
-    removed: "Rimossa",
-    notes: "Note",
-    position: "Posizione",
-    surface: "Superficie",
-    plantsCount: "🌱 {count}",
-    required: "Nome e specie sono obbligatori.",
-    requiredZone: "Il nome è obbligatorio.",
-    notLoaded: "HA Homestead non è caricato.",
-    vegetable_garden: "Orto",
-    orchard: "Frutteto",
-    flower_bed: "Aiuola fiori",
-    greenhouse: "Serra",
-    pots: "Vasi",
-    lawn: "Prato",
-    other: "Altro",
-    saved: "Salvato: {name}",
-    backup: "Backup",
-    backupHint: "Tutte le piante, zone, specie, spese e attrezzi in un file JSON (i file delle foto restano nella cartella media di HA). I backup di Home Assistant includono tutto.",
-    exportBackup: "Esporta",
-    importBackup: "Ripristina",
-    confirmRestore: "Sostituire TUTTI i dati attuali con questo backup ({date})?\n{summary}\nConsiglio: esporta prima i dati attuali.",
-    restored: "Backup ripristinato: {summary}",
-    notBackup: "Questo file non è un backup di HA Homestead.",
-    summary: "{plantings} piante, {zones} zone, {taxa} specie, {expenses} spese, {tools} attrezzi",
-    deleted: "Eliminato: {name}",
-    speciesPlaceholder: "Cerca: melo, Malus domestica…",
-    searching: "Cerco…",
-    noResults: "Nessuna specie trovata: il testo resta così com'è.",
-    offlineSpecies: "GBIF e Wikidata non raggiungibili: solo specie già importate.",
-    importingTaxon: "Importo la specie…",
-    linked: "Collegata a",
-    unlink: "Scollega",
-    local: "importata",
-  },
-};
+const TEXT = {};
+// Panel texts, one file per language in i18n/ (English as fallback), loaded before the first render.
+const VERSION = new URL(import.meta.url).search;
+async function loadTexts(lang) {
+  const load = async (code) => {
+    if (TEXT[code]) return;
+    try {
+      const response = await fetch(`${BASE}i18n/${code}.json${VERSION}`);
+      if (response.ok) TEXT[code] = await response.json();
+    } catch {
+      // missing language: English is used
+    }
+  };
+  await Promise.all([load("en"), lang === "en" ? null : load(lang)]);
+  TEXT.en ||= {};
+}
 
 const EXPENSE_CATEGORIES = ["plants", "seeds", "tools", "fertilizers", "treatments", "water", "services", "sales", "animals", "other"];
 const EVENT_ICONS = {
@@ -1149,8 +49,14 @@ const EVENT_ICONS = {
   flock_out: "🦊",
   animal_care: "🥣",
   coop_cleaning: "🧹",
+  repotting: "🪴",
+  wood_burned: "🔥",
 };
-const WOOD_KINDS = ["clearing", "wood_cutting", "brushwood", "foraging"];
+const WOOD_KINDS = ["clearing", "wood_cutting", "brushwood", "foraging", "wood_burned"];
+// Kinds that make sense for a houseplant.
+const INDOOR_KINDS = ["watering", "fertilizing", "repotting", "treatment", "pruning", "problem", "note", "removal"];
+// Months firewood needs to dry before burning.
+const WOOD_SEASON_MONTHS = 18;
 // Garden kinds that still make sense in a woodland.
 const WOODLAND_ALSO = ["pruning", "treatment", "problem", "note"];
 const COMPOST_KINDS = ["compost_turn", "compost_harvest"];
@@ -1172,6 +78,7 @@ const QUANTITY_UNITS = {
   harvest: ["kg", "pieces", "l"],
   foraging: ["kg", "pieces", "l"],
   wood_cutting: ["q", "stere", "m3"],
+  wood_burned: ["q", "stere", "m3"],
   brushwood: ["q", "stere", "m3", "pieces"],
   eggs: ["pieces"],
   flock_in: ["pieces"],
@@ -1179,7 +86,7 @@ const QUANTITY_UNITS = {
 };
 // Kinds with a "product" field, and its label.
 const PRODUCT_LABEL = { fertilizing: "product", treatment: "product", foraging: "what", wood_cutting: "essence", flock_in: "breed", animal_care: "feedOrCare" };
-const PLANT_ICONS = { tree: "🌳", fruit_tree: "🍎", shrub: "🍃", vine: "🍇", vegetable: "🥕", herb: "🌿", flower: "🌸", other: "🌱" };
+const PLANT_ICONS = { tree: "🌳", fruit_tree: "🍎", shrub: "🍃", vine: "🍇", vegetable: "🥕", herb: "🌿", flower: "🌸", houseplant: "🪴", other: "🌱" };
 // Years seeds usually keep germinating well, by botanical family (default 3).
 const SEED_VIABILITY = {
   Solanaceae: 4,
@@ -1195,7 +102,7 @@ const SEED_VIABILITY = {
   Malvaceae: 3,
 };
 const ROTATION_YEARS = 3;
-const ZONE_ICONS = { vegetable_garden: "🥕", orchard: "🍎", flower_bed: "🌸", greenhouse: "🏠", pots: "🪴", lawn: "🌾", woodland: "🌲", compost: "♻️", coop: "🐔", nursery: "🌱", other: "📍" };
+const ZONE_ICONS = { vegetable_garden: "🥕", orchard: "🍎", flower_bed: "🌸", greenhouse: "🏠", pots: "🪴", lawn: "🌾", woodland: "🌲", compost: "♻️", coop: "🐔", nursery: "🌱", indoor: "🛋️", other: "📍" };
 // Typical work of a whole zone, shown on the calendar when the zone itself has no plantings.
 const ZONE_SEASONS = { woodland: [["wood", [11, 12, 1, 2, 3]], ["foraging", [9, 10, 11]]] };
 const CAL_COLOR = { wood: "#6d4c41", foraging: "#8e7cc3" };
@@ -1211,7 +118,7 @@ const CROP_COLOR = {
   end: "#757575",
 };
 // Plant type proposed for a new planting from the kind of its zone.
-const ZONE_PLANT_TYPE = { orchard: "fruit_tree", vegetable_garden: "vegetable", greenhouse: "vegetable", flower_bed: "flower" };
+const ZONE_PLANT_TYPE = { orchard: "fruit_tree", vegetable_garden: "vegetable", greenhouse: "vegetable", flower_bed: "flower", indoor: "houseplant" };
 // Start of a planting, shown in the diary from its own dates (not stored as events).
 const START_ICONS = { sowing: "🌱", germinated: "🌿", planted: "🪴", since: "🌳" };
 const MOON_ICONS = {
@@ -1295,6 +202,8 @@ const STYLE = `
   .repeat-row { display: flex; align-items: center; gap: 10px; min-height: 44px; border-bottom: 1px solid var(--divider-color); }
   .repeat-row input { width: 22px; height: 22px; flex: none; }
   .repeat-name { flex: 1; display: grid; }
+  .care { border: 1px solid var(--divider-color); border-radius: 10px; padding: 6px 10px; display: grid; gap: 6px; }
+  .care legend { font-weight: 700; padding: 0 4px; }
   .sow-button { flex: none; border-radius: 20px; font-weight: 700; align-self: center; }
   .nursery { display: grid; gap: 8px; margin: 12px 0; }
   .batch { border: 2px solid var(--divider-color); border-radius: 12px; padding: 8px 10px; display: grid; gap: 6px; }
@@ -1599,7 +508,7 @@ class HomesteadPanel extends HTMLElement {
   set hass(hass) {
     const first = !this._hass;
     this._hass = hass;
-    if (first) this._init();
+    if (first) loadTexts(this._lang()).then(() => this._init());
     if (this._menu) this._menu.hass = hass;
   }
 
@@ -2111,6 +1020,10 @@ class HomesteadPanel extends HTMLElement {
       quantity: Number(values.quantity) || 1,
       ...datesFromForm(values),
       zone_id: values.zone_id || null,
+      water_days: values.water_days ? Number(values.water_days) : null,
+      fertilize_weeks: values.fertilize_weeks ? Number(values.fertilize_weeks) : null,
+      moisture_entity: values.moisture_entity || null,
+      moisture_min: values.moisture_min ? Number(values.moisture_min) : null,
       notes: values.notes?.trim() || null,
     };
     if (this._form.id) {
@@ -2118,8 +1031,10 @@ class HomesteadPanel extends HTMLElement {
       const id = this._form.id;
       if (await this._call("update_planting", { id, ...data })) this._saved(data.name);
     } else {
-      data.latitude = round(this._form.latitude);
-      data.longitude = round(this._form.longitude);
+      if (hasPosition(this._form)) {
+        data.latitude = round(this._form.latitude);
+        data.longitude = round(this._form.longitude);
+      }
       if (values.price) data.price = Number(values.price);
       if (values.supplier?.trim()) data.supplier = values.supplier.trim();
       const result = await this._call("add_planting", data);
@@ -2671,6 +1586,12 @@ class HomesteadPanel extends HTMLElement {
     kind.addEventListener("change", toggleQuantity);
     toggleQuantity();
     const rotationEl = h("p", { className: "last-time" });
+    let careEl = null;
+    const showCare = (el) => {
+      if (!careEl) return;
+      const zone = el.zone_id.value;
+      careEl.hidden = !(el.plant_type.value === "houseplant" || ["indoor", "pots"].includes(this._zoneFamily({ zone_id: zone }) || this._zone(zone)?.kind));
+    };
     const updateRotation = (form) => {
       const el = form.elements;
       const hint = this._rotationHint({
@@ -2696,6 +1617,7 @@ class HomesteadPanel extends HTMLElement {
             if (guess) el.plant_type.value = guess;
           }
           updateRotation(ev.currentTarget);
+          showCare(el);
         },
       },
         h("h2", {}, f.id ? this.t("editTitle") : this.t("newTitle")),
@@ -2710,6 +1632,7 @@ class HomesteadPanel extends HTMLElement {
         h("div", { className: "row" }, kind, quantity),
         this._datesFields(f),
         this._selectField(f, "zone_id", this._zoneOptions()),
+        (careEl = this._careFields(f)),
         rotationEl,
         f.id ? this._selectField(f, "status", ["active", "dead", "removed"].map((s) => [s, this.t(s)])) : null,
         f.id
@@ -3126,7 +2049,7 @@ class HomesteadPanel extends HTMLElement {
         Object.entries(byCategory)
           .sort((a, b) => b[1] - a[1])
           .map(([cat, value]) => h("div", { className: "sub" }, `${this.t(`cat_${cat}`)}: ${this._money(value)}`)),
-        this._balanceTable(this.t(year ? "monthly" : "yearly"), expenses, (e) => (year ? e.spent_on.slice(0, 7) : e.spent_on.slice(0, 4)), (key) =>
+        this._balanceTable(this.t(year ? "monthly" : "yearByYear"), expenses, (e) => (year ? e.spent_on.slice(0, 7) : e.spent_on.slice(0, 4)), (key) =>
           year ? new Intl.DateTimeFormat(this._lang(), { month: "long" }).format(new Date(`${key}-15T12:00:00`)) : key,
         ),
         this._balanceTable(
@@ -3475,7 +2398,7 @@ class HomesteadPanel extends HTMLElement {
   _zoneFamily(target) {
     const planting = target.planting_id && this._planting(target.planting_id);
     for (let z = this._zone(target.zone_id || planting?.zone_id), guard = 0; z && guard < 20; z = this._zone(z.parent_id), guard++) {
-      if (["woodland", "compost", "coop", "nursery"].includes(z.kind)) return z.kind;
+      if (["woodland", "compost", "coop", "nursery", "indoor"].includes(z.kind)) return z.kind;
     }
     return null;
   }
@@ -3494,7 +2417,7 @@ class HomesteadPanel extends HTMLElement {
     const last = this._data.events
       .filter((e) => (e.kind === "wood_cutting" || e.kind === "brushwood") && ["q", "stere", "m3"].includes(e.unit))
       .sort((a, b) => b.done_on.localeCompare(a.done_on))[0];
-    return last?.unit || { it: "q", fr: "stere" }[this._lang()] || "m3";
+    return last?.unit || { it: "q", es: "q", fr: "stere", de: "stere" }[this._lang()] || "m3";
   }
 
   /** The extra box of a zone card, by zone kind. */
@@ -3716,6 +2639,13 @@ class HomesteadPanel extends HTMLElement {
 
   /** Per year: firewood, branches and foraging of a zone and its sub-zones, by unit. */
   _woodBox(zone) {
+    const box = this._woodHarvestBox(zone);
+    if (!box) return null;
+    const burn = h("button", { type: "button", onclick: () => this._openEvent({ kind: "wood_burned", done_on: today(), zone_id: zone.id, unit: this._woodUnit() }, { zone_id: zone.id }) }, `🔥 ${this.t("woodBurnNow")}`);
+    return h("div", {}, this._woodStockBox(), box, zone.kind === "woodland" ? burn : null);
+  }
+
+  _woodHarvestBox(zone) {
     const zones = new Set([zone.id, ...this._zoneDescendants(zone.id)]);
     const events = this._data.events.filter((e) => zones.has(e.zone_id) && ["wood_cutting", "brushwood", "foraging"].includes(e.kind));
     if (!events.length && zone.kind !== "woodland") return null;
@@ -3857,7 +2787,9 @@ class HomesteadPanel extends HTMLElement {
       this._todoBox(soon, null, h("button", { type: "button", onclick: () => this._openTask({ kind: "note", due_on: today() }) }, this.t("addTask"))),
       later ? h("button", { type: "button", className: "link todo-later", onclick: () => this._setTab("calendar") }, this.t("todoLater", { count: later })) : null,
       this._nurseryBox(),
+      this._houseplantsBox(),
       this._compostBoxes(),
+      this._woodReminder(),
       this._quickButtons(),
       this._quickPlants(),
       this._monthBox(),
@@ -3939,7 +2871,7 @@ class HomesteadPanel extends HTMLElement {
       if ((e.kind === "harvest" || e.kind === "eggs") && e.quantity && (!lastHarvest.has(key) || e.done_on > lastHarvest.get(key).done_on)) lastHarvest.set(key, e);
     }
     const rows = this._data.plantings
-      .filter((p) => p.status === "active" && !this._inNursery(p))
+      .filter((p) => p.status === "active" && !this._inNursery(p) && !this._isIndoor(p))
       .map((p) => {
         const key = `p:${p.id}`;
         const harvest = lastHarvest.get(key);
@@ -4191,7 +3123,7 @@ class HomesteadPanel extends HTMLElement {
   _germText(planting) {
     if (!planting) return this.t("ev_germinated");
     const rate = planting.sown_count && planting.germinated_count != null ? ` / ${planting.sown_count} (${Math.round((planting.germinated_count / planting.sown_count) * 100)}%)` : "";
-    const days = planting.sown_on && planting.germinated_on ? ` · ${daysBetween(planting.sown_on, planting.germinated_on)} gg` : "";
+    const days = planting.sown_on && planting.germinated_on ? ` · ${this.t("daysShort", { count: daysBetween(planting.sown_on, planting.germinated_on) })}` : "";
     return this.t("germText", { count: planting.germinated_count ?? "", rate, days });
   }
 
@@ -4592,7 +3524,7 @@ class HomesteadPanel extends HTMLElement {
               { className: "an-cmp" },
               h("span", {}, `${x.year}${x.lotAge ? ` (${x.lotAge})` : ""}`),
               h("i", { className: x.rate != null && x.rate < 65 ? "" : "good", style: `width:${Math.max((x.days / max) * 100, 6)}%` }),
-              h("span", {}, `${x.days} gg${x.rate != null ? ` · ${x.rate}%` : ""}`),
+              h("span", {}, `${this.t("daysShort", { count: x.days })}${x.rate != null ? ` · ${x.rate}%` : ""}`),
             ),
           ),
         );
@@ -4622,6 +3554,288 @@ class HomesteadPanel extends HTMLElement {
           list.map((e) => `${this._targetName(e)} (${DEATH_CAUSES[e.cause] || "❔"} ${this.t(`cause_${e.cause || "unknown"}`)})`).join(", "),
         ),
       ),
+    );
+  }
+
+
+  // ----- houseplants -----
+
+  _isIndoor(planting) {
+    return this._zoneFamily({ planting_id: planting.id }) === "indoor";
+  }
+
+  _houseplants() {
+    return this._data.plantings.filter((p) => p.status === "active" && this._isIndoor(p));
+  }
+
+  /** Last date of an event kind on a planting ("" if none). */
+  _lastDone(planting, kind) {
+    return this._data.events.filter((e) => e.planting_id === planting.id && e.kind === kind).reduce((max, e) => (e.done_on > max ? e.done_on : max), "");
+  }
+
+  /** Same rule as models.watering_interval: half as much again from November to February. */
+  _waterInterval(planting, day = today()) {
+    if (!planting.water_days) return null;
+    const winter = [11, 12, 1, 2].includes(Number(day.slice(5, 7)));
+    return Math.max(Math.round(planting.water_days * (winter ? 1.5 : 1)), 1);
+  }
+
+  _moistureOf(planting) {
+    const state = planting.moisture_entity && this._hass.states[planting.moisture_entity];
+    const value = state ? Number(state.state) : NaN;
+    return Number.isFinite(value) ? value : null;
+  }
+
+  /** Next watering day of a houseplant (today or earlier when due), or null without a plan. */
+  _nextWatering(planting) {
+    const moisture = this._moistureOf(planting);
+    if (moisture != null) return moisture < (planting.moisture_min ?? 20) ? today() : null;
+    const interval = this._waterInterval(planting);
+    if (!interval) return null;
+    const since = this._lastDone(planting, "watering") || planting.planted_on;
+    return since ? addDays(since, interval) : today();
+  }
+
+  _nextFeeding(planting) {
+    if (!planting.fertilize_weeks) return null;
+    const month = Number(today().slice(5, 7));
+    if (month < 3 || month > 9) return null;
+    const since = this._lastDone(planting, "fertilizing");
+    return since ? addDays(since, planting.fertilize_weeks * 7) : today();
+  }
+
+  /** Spring (March–May) and at least two years since the last repotting or planting. */
+  _repotDue(planting) {
+    const month = Number(today().slice(5, 7));
+    if (month < 3 || month > 5) return false;
+    const since = this._lastDone(planting, "repotting") || planting.planted_on;
+    return !since || daysBetween(since, today()) >= 730;
+  }
+
+  _newHouseplant() {
+    const room = this._data.zones.find((z) => z.kind === "indoor");
+    this._clearSelection();
+    this._showMessage("");
+    this._tab = "plantings";
+    this._form = { name: "", species: "", kind: "single", quantity: 1, status: "active", origin: "planted", planted_on: today(), zone_id: room?.id || null, plant_type: "houseplant", water_days: 7 };
+    this._render();
+  }
+
+  /** Diary: the houseplants to water (and feed) today, by room, ticked and logged in one go. */
+  _houseplantsBox() {
+    const plants = this._houseplants();
+    if (!plants.length && !this._data.zones.some((z) => z.kind === "indoor")) return null;
+    const now = today();
+    const until = this._vacationUntil;
+    const thirsty = plants.filter((p) => {
+      const next = this._nextWatering(p);
+      return next && next <= (until || now);
+    });
+    const hungry = until ? [] : plants.filter((p) => this._nextFeeding(p) && this._nextFeeding(p) <= now);
+    const repot = until ? [] : plants.filter((p) => this._repotDue(p));
+    const ticked = new Set(thirsty.map((p) => p.id));
+    const roomOf = (p) => this._zone(p.zone_id)?.name || "";
+    const list = (items, set) => {
+      const rooms = new Map();
+      for (const p of items) {
+        if (!rooms.has(roomOf(p))) rooms.set(roomOf(p), []);
+        rooms.get(roomOf(p)).push(p);
+      }
+      return [...rooms.entries()].flatMap(([room, group]) => [
+        h("div", { className: "quick-title" }, room),
+        ...group.map((p) => {
+          const box = h("input", { type: "checkbox", checked: true });
+          box.addEventListener("change", () => (box.checked ? set.add(p.id) : set.delete(p.id)));
+          const moisture = this._moistureOf(p);
+          const last = this._lastDone(p, "watering");
+          const detail = [moisture != null ? `💧 ${Math.round(moisture)}%` : null, last ? `${this.t("lastWater")} ${this._ago(last)}` : null].filter(Boolean).join(" · ");
+          return h("label", { className: "repeat-row" }, box, h("span", { className: "repeat-name" }, h("strong", {}, p.name), h("span", { className: "sub" }, detail)));
+        }),
+      ]);
+    };
+    const log = async (kind, set, done) => {
+      let count = 0;
+      for (const id of set) if (await this._call("add_event", { kind, planting_id: id, done_on: today() })) count++;
+      this._vacationUntil = null;
+      this._showMessage(`✓ ${this.t(done, { count })}`);
+    };
+    const fed = new Set(hungry.map((p) => p.id));
+    const upcoming = plants
+      .map((p) => ({ p, next: this._nextWatering(p) }))
+      .filter((x) => x.next && x.next > now)
+      .sort((a, b) => a.next.localeCompare(b.next))[0];
+    const vacation = h("input", { type: "date", min: addDays(now, 1), value: until || "", "aria-label": this.t("vacationBack") });
+    vacation.addEventListener("change", () => {
+      this._vacationUntil = vacation.value || null;
+      this._render();
+    });
+    return h(
+      "div",
+      { className: "nursery" },
+      h(
+        "div",
+        { className: "cal-head" },
+        h("h3", {}, until ? this.t("vacationTitle", { date: this._date(until, false) }) : this.t("indoorTitle")),
+        h("button", { type: "button", onclick: () => this._newHouseplant() }, `+ ${this.t("pt_houseplant")}`),
+      ),
+      thirsty.length
+        ? [
+            ...list(thirsty, ticked),
+            h("button", { type: "button", className: "primary", onclick: () => log("watering", ticked, "wateredDone") }, `💧 ${this.t("wateredNow")}`),
+          ]
+        : h(
+            "p",
+            { className: "hint" },
+            plants.length ? `${this.t("nothingToWater")}${upcoming ? ` · ${this.t("nextWater", { name: upcoming.p.name, date: this._date(upcoming.next, false) })}` : ""}` : this.t("indoorEmpty"),
+          ),
+      hungry.length
+        ? [
+            h("div", { className: "quick-title" }, this.t("toFeed")),
+            ...list(hungry, fed).filter((el) => !el.classList.contains("quick-title")),
+            h("button", { type: "button", onclick: () => log("fertilizing", fed, "fedDone") }, `🌿 ${this.t("fedNow")}`),
+          ]
+        : null,
+      repot.length ? h("div", { className: "sub", style: "white-space:normal" }, `🪴 ${this.t("repotHint", { names: repot.map((p) => p.name).join(", ") })}`) : null,
+      plants.length ? h("label", { className: "show-gone" }, `🏖️ ${this.t("vacationBack")}`, vacation, until ? h("button", { type: "button", onclick: () => ((this._vacationUntil = null), this._render()) }, "✕") : null) : null,
+    );
+  }
+
+  /** Planting form: watering plan for houseplants (and plants in pots). */
+  _careFields(f) {
+    const sensors = Object.entries(this._hass.states)
+      .filter(([id, st]) => id.startsWith("sensor.") && st.attributes?.device_class === "moisture")
+      .map(([id, st]) => [id, st.attributes.friendly_name || id]);
+    const succulent = ["opuntia", "echeveria", "aloe", "crassula", "haworthia", "sansevieria", "dracaena", "zamioculcas", "kalanchoe", "mammillaria", "euphorbia"];
+    const guess = succulent.includes(this._cropKey(f.species).split(" ")[0]) ? 20 : 7;
+    return h(
+      "fieldset",
+      { className: "care" },
+      h("legend", {}, `🪴 ${this.t("careTitle")}`),
+      h(
+        "div",
+        { className: "row" },
+        this._field(f, "water_days", { type: "number", min: 1, max: 365, step: 1, inputMode: "numeric", placeholder: String(guess) }),
+        this._field(f, "fertilize_weeks", { type: "number", min: 1, max: 52, step: 1, inputMode: "numeric", placeholder: "4" }),
+      ),
+      sensors.length
+        ? h(
+            "div",
+            { className: "row" },
+            this._selectField(f, "moisture_entity", [["", "—"], ...sensors]),
+            this._field(f, "moisture_min", { type: "number", min: 0, max: 100, step: 1, placeholder: "20" }),
+          )
+        : null,
+      h("p", { className: "hint" }, this.t("careHint")),
+    );
+  }
+
+  // ----- firewood: stock, seasoning, winters -----
+
+  /** Winter of a date: "2025/26" for November 2025 or February 2026. */
+  _winterOf(iso) {
+    const year = Number(iso.slice(0, 4));
+    const start = Number(iso.slice(5, 7)) >= 7 ? year : year - 1;
+    return `${start}/${String((start + 1) % 100).padStart(2, "0")}`;
+  }
+
+  /** Firewood per unit: cut, burnt, in stock, seasoned (cut at least WOOD_SEASON_MONTHS before `day`, oldest burnt first). */
+  _woodStock(day = today()) {
+    const cut = this._data.events.filter((e) => e.kind === "wood_cutting" && e.quantity);
+    const burnt = this._data.events.filter((e) => e.kind === "wood_burned" && e.quantity);
+    const units = new Map();
+    const unit = (u) => {
+      if (!units.has(u)) units.set(u, { unit: u, cut: 0, burnt: 0, seasoned: 0, winters: new Map() });
+      return units.get(u);
+    };
+    const ripe = addMonths(day, -WOOD_SEASON_MONTHS);
+    for (const e of cut) {
+      const s = unit(e.unit || "q");
+      s.cut += e.quantity;
+      if (e.done_on <= ripe) s.seasoned += e.quantity;
+    }
+    for (const e of burnt) {
+      const s = unit(e.unit || "q");
+      s.burnt += e.quantity;
+      const winter = this._winterOf(e.done_on);
+      s.winters.set(winter, (s.winters.get(winter) || 0) + e.quantity);
+    }
+    for (const s of units.values()) {
+      s.stock = s.cut - s.burnt;
+      s.seasoned = Math.max(Math.min(s.seasoned - s.burnt, s.stock), 0);
+      const last = [...s.winters.values()].slice(-3);
+      s.need = last.length ? last.reduce((a, b) => a + b, 0) / last.length : null;
+    }
+    return [...units.values()];
+  }
+
+  /** Days of frost of a winter (November–March), from the weather history. */
+  _frostDays(winter) {
+    const start = Number(winter.slice(0, 4));
+    const from = `${start}-11-01`;
+    const to = `${start + 1}-03-31`;
+    return (this._outlook?.climate?.extremes || [])
+      .filter((x) => x.kind === "frost" && x.start >= from && x.start <= to)
+      .reduce((n, x) => n + daysBetween(x.start, x.end) + 1, 0);
+  }
+
+  /** March–May: ask once how much firewood the winter took. */
+  _woodReminder() {
+    const now = today();
+    const month = Number(now.slice(5, 7));
+    const wood = this._data.zones.find((z) => z.kind === "woodland");
+    if (!wood || month < 3 || month > 5) return null;
+    const winter = this._winterOf(now);
+    if (this._data.events.some((e) => e.kind === "wood_burned" && this._winterOf(e.done_on) === winter)) return null;
+    return h(
+      "div",
+      { className: "task" },
+      h(
+        "button",
+        { type: "button", className: "task-main", onclick: () => this._openEvent({ kind: "wood_burned", done_on: now, zone_id: wood.id, unit: this._woodUnit() }, { zone_id: wood.id }) },
+        h("span", {}, `🔥 ${this.t("woodAsk", { winter })}`),
+        h("span", { className: "sub" }, this.t("woodAskHint")),
+      ),
+    );
+  }
+
+  _woodStockBox() {
+    const stock = this._woodStock();
+    if (!stock.length) return null;
+    const now = today();
+    // The winter to plan: from January to September the one starting this October, in autumn the one under way.
+    const nextStart = Number(now.slice(0, 4));
+    const october = `${nextStart}-10-01` > now ? `${nextStart}-10-01` : now;
+    const ready = this._woodStock(october);
+    return h(
+      "div",
+      { className: "seasons" },
+      h("h3", {}, this.t("woodStock")),
+      stock.map((s) => {
+        const atOctober = ready.find((r) => r.unit === s.unit)?.seasoned ?? 0;
+        const lines = [
+          this.t("woodStockLine", { stock: this._quantity(Math.max(s.stock, 0), s.unit), seasoned: this._quantity(s.seasoned, s.unit) }),
+        ];
+        if (s.need) {
+          const short = s.need - atOctober;
+          lines.push(this.t(short > 0 ? "woodShort" : "woodEnough", { winter: `${nextStart}/${String((nextStart + 1) % 100).padStart(2, "0")}`, need: this._quantity(s.need, s.unit), ready: this._quantity(atOctober, s.unit), missing: this._quantity(Math.max(short, 0), s.unit) }));
+          const after = Math.max(s.need * 2 - Math.max(s.stock, 0), 0);
+          const by = addMonths(`${nextStart + 1}-10-01`, -WOOD_SEASON_MONTHS);
+          if (after > 0) lines.push(by > now ? this.t("woodCut", { amount: this._quantity(after, s.unit), by: this._date(by) }) : this.t("woodCutNow", { amount: this._quantity(after, s.unit) }));
+        }
+        const winters = [...s.winters.entries()].sort((a, b) => b[0].localeCompare(a[0])).slice(0, 5);
+        return h(
+          "div",
+          { className: "season" },
+          lines.map((line) => h("div", { className: "sub", style: "white-space:normal" }, line)),
+          winters.length
+            ? h(
+                "div",
+                { className: "sub", style: "white-space:normal" },
+                winters.map(([w, q]) => `🔥 ${w}: ${this._quantity(q, s.unit)}${this._frostDays(w) ? ` · ❄️ ${this._frostDays(w)}` : ""}`).join("  ·  "),
+              )
+            : null,
+        );
+      }),
     );
   }
 
@@ -4703,7 +3917,7 @@ class HomesteadPanel extends HTMLElement {
     // Woodland, compost and hen house targets get their own kinds; gardens the others. The current kind always stays visible.
     const filterKinds = () => {
       const family = this._zoneFamily(currentTarget());
-      const own = { woodland: [...WOOD_KINDS, ...WOODLAND_ALSO], compost: [...COMPOST_KINDS, ...YARD_ALSO], coop: [...COOP_KINDS, ...YARD_ALSO] }[family];
+      const own = { woodland: [...WOOD_KINDS, ...WOODLAND_ALSO], compost: [...COMPOST_KINDS, ...YARD_ALSO], coop: [...COOP_KINDS, ...YARD_ALSO], indoor: INDOOR_KINDS }[family];
       const special = [...WOOD_KINDS, ...COMPOST_KINDS, ...COOP_KINDS];
       kinds.querySelectorAll("button").forEach((b) => {
         const kind = b.dataset.kind;
@@ -5053,7 +4267,7 @@ class HomesteadPanel extends HTMLElement {
 
   set route(route) {
     this._route = route;
-    if (this._hass) this._openTaskFromUrl();
+    if (this._hass && this._layout) this._openTaskFromUrl();
   }
 
   _plantingTodo(f) {
@@ -5366,7 +4580,7 @@ class HomesteadPanel extends HTMLElement {
           "div",
           { className: "row" },
           this._field(f, "year", { type: "number", min: 1900, max: 2200, step: 1, inputMode: "numeric" }),
-          h("label", {}, this.t("quantity_s"), h("input", { name: "quantity", value: f.quantity ?? "", placeholder: "1 bustina" })),
+          h("label", {}, this.t("quantity_s"), h("input", { name: "quantity", value: f.quantity ?? "" })),
         ),
         this._field(f, "supplier"),
         h(
@@ -6370,6 +5584,7 @@ class HomesteadPanel extends HTMLElement {
     const rows = [this._timelineHeader()];
     const legendKeys = new Set();
     for (const group of this._calendarGroups()) {
+      if (group.zone && this._zoneFamily({ zone_id: group.zone.id }) === "indoor") continue;
       const plantings = group.plantings.filter((p) => p.status === "active");
       const zoneTasks = group.zone ? openTasks.filter((t) => t.zone_id === group.zone.id) : openTasks.filter((t) => !t.planting_id && !t.zone_id);
       const plantTasks = openTasks.filter((t) => plantings.some((p) => p.id === t.planting_id));
@@ -6683,6 +5898,7 @@ class HomesteadPanel extends HTMLElement {
       this._eggsBox(years),
       this._germinationBox(),
       this._lossesBox(),
+      this._data.events.some((e) => e.kind === "wood_burned") ? h("div", { className: "an-box" }, this._woodStockBox()) : null,
       selected ? this._weatherYieldBox(selected, years, weatherOf, perPlant) : null,
       this._timingBox(rows),
       this._moonBox(),
@@ -6962,7 +6178,7 @@ class HomesteadPanel extends HTMLElement {
         { onsubmit: (ev) => this._saveTool(ev) },
         h("h2", {}, f.id ? this.t("editToolTitle") : this.t("newToolTitle")),
         this._field(f, "name", { required: true, maxLength: 100 }),
-        this._field(f, "category", { placeholder: "potatura, scavo, irrigazione…" }),
+        this._field(f, "category", { placeholder: this.t("toolCategoryHint") }),
         h("div", { className: "row" }, this._field(f, "brand"), this._field(f, "model")),
         h(
           "div",
@@ -7192,7 +6408,7 @@ function addMonths(iso, months) {
   const [y, m, d] = iso.split("-").map(Number);
   const total = m - 1 + months;
   const year = y + Math.floor(total / 12);
-  const month = (total % 12) + 1;
+  const month = (((total % 12) + 12) % 12) + 1;
   const last = new Date(Date.UTC(year, month, 0)).getUTCDate();
   return `${year}-${String(month).padStart(2, "0")}-${String(Math.min(d, last)).padStart(2, "0")}`;
 }

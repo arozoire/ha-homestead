@@ -37,6 +37,7 @@ from .const import (
     SIGNAL_OUTLOOK_UPDATED,
 )
 from .crops import crop_traits, full_table, load_cropgraph, load_defaults
+from .models import is_indoor
 from .notify import async_send
 from .outlook import (
     YOUNG_DAYS,
@@ -249,6 +250,8 @@ class Outlook:
         today = dt_util.now().date()
         risks = []
         for planting in self.store.data.active_plantings():
+            if is_indoor(self.store.data, planting):
+                continue  # houseplants: no frost, no heatwave
             traits = crop_traits(planting.species, table, list(self.store.data.crops.values())) or {}
             started = max(filter(None, [planting.sown_on, planting.planted_on]), default=None)
             young = bool(started) and date.fromisoformat(started) + timedelta(days=YOUNG_DAYS) > today
