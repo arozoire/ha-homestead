@@ -8,6 +8,7 @@ from homeassistant.components.todo import TodoItem, TodoItemStatus, TodoListEnti
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+from homeassistant.util import dt as dt_util
 
 from . import HomesteadConfigEntry
 from .const import SIGNAL_DATA_UPDATED
@@ -66,7 +67,7 @@ class HomesteadTodo(TodoListEntity):
         task = Task(
             kind=EventKind.NOTE,
             title=item.summary,
-            due_on=_day(item.due) or date.today().isoformat(),
+            due_on=_day(item.due) or dt_util.now().date().isoformat(),
             notes=item.description,
         )
         self._store.data.tasks[task.id] = task

@@ -37,6 +37,7 @@ from .const import (
     SIGNAL_OUTLOOK_UPDATED,
 )
 from .crops import crop_traits, full_table, load_cropgraph, load_defaults
+from .notify import async_send
 from .outlook import (
     YOUNG_DAYS,
     PlantRisk,
@@ -278,13 +279,24 @@ class Outlook:
     def async_listen(self) -> Callable[[], None]:
         """Re-evaluate when plantings or tasks change; returns the unsubscribe."""
 
+        # A CSV import saves once per row: one evaluation at a time, plus one more if data changed meanwhile.
+        state = {"running": False, "dirty": False}
+
         async def changed() -> None:
-            await self._async_evaluate()
+            try:
+                while state["dirty"]:
+                    state["dirty"] = False
+                    await self._async_evaluate()
+            finally:
+                state["running"] = False
             async_dispatcher_send(self.hass, SIGNAL_OUTLOOK_UPDATED)
 
         @callback
         def on_data() -> None:
-            self.hass.async_create_task(changed(), f"{DOMAIN} outlook re-evaluation")
+            state["dirty"] = True
+            if not state["running"]:
+                state["running"] = True
+                self.hass.async_create_task(changed(), f"{DOMAIN} outlook re-evaluation")
 
         return async_dispatcher_connect(self.hass, SIGNAL_DATA_UPDATED, on_data)
 
@@ -307,7 +319,12 @@ class Outlook:
         for task in data.tasks.values():
             if task.done_on or not alert["start"] <= task.due_on <= alert["end"]:
                 continue
-            if not task.planting_id and not task.zone_id or not hit:
+            if not hit:
+                # Frost or cold that hurts none of the plants: not worth a notification.
+                if alert["kind"] in ("heatwave", "heat_extreme"):
+                    return True
+                continue
+            if not task.planting_id and not task.zone_id:
                 return True
             if task.planting_id in hit:
                 return True
@@ -340,7 +357,7 @@ class Outlook:
             }
             for name in services:
                 if self.hass.services.has_service("notify", name):
-                    await self.hass.services.async_call("notify", name, message, blocking=True)
+                    await async_send(self.hass, name, message)
             self._notified.append(alert["key"])
 
     def as_dict(self) -> dict[str, Any]:

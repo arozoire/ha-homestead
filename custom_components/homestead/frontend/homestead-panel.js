@@ -79,6 +79,7 @@ const TEXT = {
     resetDo: "Reset everything",
     resetDone: "Everything deleted ({summary})",
     todoLater: "+{count} later in the calendar",
+    diaryMore: "Show older entries ({count})",
     quickOther: "Event…",
     quickEvent: "Event",
     quickSearch: "Search plant or zone",
@@ -194,7 +195,6 @@ const TEXT = {
     ev_planted: "Planted out",
     ev_transplanted: "Transplanted",
     ev_since: "Here for ~{years} years (since ~{year})",
-    toggleMap: "Show / hide the map",
     settings: "Settings: weather sensors, reminders",
     ev_review: "Season review",
     rating: "Rating",
@@ -211,7 +211,6 @@ const TEXT = {
     quickHarvest: "+ Harvest",
     repeat: "🔁 Repeat next year",
     repeated: "Created: {name}",
-    weatherSource: "weather: {source}",
     treatments: "{count} treatments",
     u_kg: "kg",
     u_pieces: "pieces",
@@ -275,8 +274,6 @@ const TEXT = {
     calMore: "and {count} more in the Diary",
     calNoZone: "Without zone",
     calToday: "today",
-    calPlants: "{count} plants",
-    calTasks: "{count} planned",
     calEvents: "{count} done",
     calWholeZone: "whole zone",
     calGeneral: "General",
@@ -297,7 +294,6 @@ const TEXT = {
     family: "Family",
     goodWith: "🤝 Good with",
     badWith: "🚫 Keep away from",
-    inGarden: "in your garden",
     cropGraph: "CropGraph data (CC-BY-4.0), dates set on your frosts: last ~{spring}, first ~{fall}",
     cropGraphFallback: "CropGraph data (CC-BY-4.0), dates for typical frosts (mid April, end of October) until your history is known",
     heat_max_c: "Heat limit (°C)",
@@ -569,6 +565,7 @@ const TEXT = {
     resetDo: "Azzera tutto",
     resetDone: "Tutto cancellato ({summary})",
     todoLater: "+{count} più avanti nel calendario",
+    diaryMore: "Mostra i più vecchi ({count})",
     quickOther: "Evento…",
     quickEvent: "Evento",
     quickSearch: "Cerca pianta o zona",
@@ -684,7 +681,6 @@ const TEXT = {
     ev_planted: "Messa a dimora",
     ev_transplanted: "Trapianto",
     ev_since: "Presente da ~{years} anni (dal ~{year})",
-    toggleMap: "Mostra / nascondi la mappa",
     settings: "Impostazioni: sensori meteo, promemoria",
     ev_review: "Bilancio annata",
     rating: "Voto",
@@ -701,7 +697,6 @@ const TEXT = {
     quickHarvest: "+ Raccolta",
     repeat: "🔁 Ripeti l'anno prossimo",
     repeated: "Creata: {name}",
-    weatherSource: "meteo: {source}",
     treatments: "{count} trattamenti",
     u_kg: "kg",
     u_pieces: "pezzi",
@@ -765,8 +760,6 @@ const TEXT = {
     calMore: "e altre {count} nel Diario",
     calNoZone: "Senza zona",
     calToday: "oggi",
-    calPlants: "{count} piante",
-    calTasks: "{count} previste",
     calEvents: "{count} fatte",
     calWholeZone: "tutta la zona",
     calGeneral: "Generale",
@@ -787,7 +780,6 @@ const TEXT = {
     family: "Famiglia",
     goodWith: "🤝 Sta bene con",
     badWith: "🚫 Tenere lontano da",
-    inGarden: "nel tuo giardino",
     cropGraph: "Dati CropGraph (CC-BY-4.0), date sulle tue gelate: ultima ~{spring}, prima ~{fall}",
     cropGraphFallback: "Dati CropGraph (CC-BY-4.0), date per gelate tipiche (metà aprile, fine ottobre) finché non c'è il tuo storico",
     heat_max_c: "Limite di caldo (°C)",
@@ -1024,6 +1016,8 @@ const COOP_KINDS = ["eggs", "flock_in", "flock_out", "animal_care", "coop_cleani
 // Kinds that make sense in a compost bin or a hen house besides their own.
 const YARD_ALSO = ["note", "problem"];
 const COMPOST_TURN_DAYS = 28;
+// Diary entries drawn at once (more on request).
+const DIARY_PAGE = 60;
 const LEAVE_REASONS = ["predator", "illness", "age", "sold", "slaughtered", "other"];
 const LEAVE_ICONS = { predator: "🦊", illness: "🤒", age: "⌛", sold: "🤝", slaughtered: "🔪", other: "❔" };
 // Quantity label when it is not a harvest.
@@ -1192,8 +1186,6 @@ const STYLE = `
   .hint { color: var(--secondary-text-color); }
   .error { color: var(--error-color, #db4437); }
   .info { color: var(--success-color, #43a047); }
-  .import-row { display: grid; gap: 6px; padding: 8px 0; border-bottom: 1px solid var(--divider-color); }
-  .import-row .head { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--secondary-text-color); cursor: pointer; }
   .species { position: relative; }
   .suggest { position: absolute; z-index: 10; left: 0; right: 0; top: 100%; margin-top: 2px; max-height: 260px;
     overflow-y: auto; background: var(--card-background-color); border: 1px solid var(--divider-color);
@@ -1376,10 +1368,6 @@ const STYLE = `
   .quick-value { flex: 1; text-align: center; font-size: 20px; }
   .quick-more { padding: 10px 0; }
   .todo-later { margin: -6px 0 8px; }
-  .wx-strip { display: flex; gap: 4px; overflow-x: auto; }
-  .wx-day { flex: 1 0 42px; display: grid; justify-items: center; font-size: 12px; padding: 4px 2px; border-radius: 6px;
-    background: var(--secondary-background-color); }
-  .wx-day.alert { box-shadow: inset 0 0 0 2px var(--warning-color, #ffa600); }
   .timeline-grid { position: relative; --lab: 208px; }
   .narrow .timeline-grid { --lab: 128px; }
   .tl-row { display: grid; grid-template-columns: calc(var(--lab) - 8px) minmax(0, 1fr); column-gap: 8px; align-items: center; }
@@ -1512,7 +1500,8 @@ class HomesteadPanel extends HTMLElement {
     );
     this._calWrap = h("div", { className: "calendar" });
     // On a phone the menu sits at the bottom: hide it while typing, so the keyboard does not push it up.
-    this._aside.addEventListener("focusin", (ev) => ev.target.matches("input, textarea, select") && this._layout.classList.add("typing"));
+    const keyboard = 'textarea, input:not([type="checkbox"]):not([type="radio"]):not([type="date"]):not([type="file"]):not([type="button"])';
+    this._aside.addEventListener("focusin", (ev) => ev.target.matches(keyboard) && this._layout.classList.add("typing"));
     this._aside.addEventListener("focusout", () => this._layout.classList.remove("typing"));
     this._createMap();
     this._render();
@@ -1597,7 +1586,9 @@ class HomesteadPanel extends HTMLElement {
         this._loaded = !!data.plantings;
         this._syncMap();
         this._renderCalendar();
-        if (first) this._needsFit = true;
+        // A hidden map cannot be fitted: do it when it is first shown.
+        if (first && this._layout.classList.contains("wide-tab")) this._needsFit = true;
+        else if (first) this._fitAll();
         first = false;
         if (/[?&](task|zone)=/.test(window.location.search)) {
           this._openTaskFromUrl();
@@ -3305,24 +3296,31 @@ class HomesteadPanel extends HTMLElement {
     );
   }
 
+  /** Arrivals (+) and departures (−) of hens in the given zones, by date. */
+  _flockMoves(zones) {
+    return this._data.events
+      .filter((e) => zones.has(e.zone_id) && e.quantity && (e.kind === "flock_in" || e.kind === "flock_out"))
+      .map((e) => [e.done_on, e.kind === "flock_in" ? e.quantity : -e.quantity])
+      .sort((a, b) => a[0].localeCompare(b[0]));
+  }
+
   /** Hens in the given zones on a day: arrivals minus departures up to that day. */
   _hensAt(zones, day) {
-    return Math.max(
-      this._data.events
-        .filter((e) => zones.has(e.zone_id) && e.done_on <= day && e.quantity && (e.kind === "flock_in" || e.kind === "flock_out"))
-        .reduce((n, e) => n + (e.kind === "flock_in" ? e.quantity : -e.quantity), 0),
-      0,
-    );
+    return Math.max(this._flockMoves(zones).reduce((n, [date, change]) => (date <= day ? n + change : n), 0), 0);
   }
 
   /** Eggs, average hens, eggs per hen and cost per egg between two days (included). */
   _eggStats(zones, from, to) {
     const events = this._data.events.filter((e) => zones.has(e.zone_id) && e.done_on >= from && e.done_on <= to);
     const eggs = events.filter((e) => e.kind === "eggs").reduce((n, e) => n + (e.quantity || 0), 0);
+    const moves = this._flockMoves(zones);
     let henDays = 0;
     let days = 0;
+    let count = 0;
+    let next = 0;
     for (let day = from; day <= to; day = addDays(day, 1)) {
-      henDays += this._hensAt(zones, day);
+      while (next < moves.length && moves[next][0] <= day) count += moves[next++][1];
+      henDays += Math.max(count, 0);
       days++;
     }
     const hens = days ? henDays / days : 0;
@@ -3568,6 +3566,7 @@ class HomesteadPanel extends HTMLElement {
         {
           onchange: (ev) => {
             this._diaryFilter = { ...this._diaryFilter, [name]: ev.target.value };
+            this._diaryLimit = 0;
             this._render();
           },
         },
@@ -3593,8 +3592,20 @@ class HomesteadPanel extends HTMLElement {
         filter("zone", [["", this.t("allZones")], ...this._zoneOptions().slice(1)]),
         filter("year", [["", this.t("allYears")], ...years.map((y) => [y, y])]),
       ),
-      events.length ? this._renderTimeline(events) : h("p", { className: "hint" }, this.t("emptyDiary")),
+      events.length ? this._renderTimeline(this._diaryPage(events)) : h("p", { className: "hint" }, this.t("emptyDiary")),
+      events.length > (this._diaryLimit || DIARY_PAGE)
+        ? h(
+            "button",
+            { type: "button", className: "link quick-more", onclick: () => ((this._diaryLimit = (this._diaryLimit || DIARY_PAGE) + DIARY_PAGE), this._render()) },
+            this.t("diaryMore", { count: events.length - (this._diaryLimit || DIARY_PAGE) }),
+          )
+        : null,
     ];
+  }
+
+  /** The most recent entries only: years of diary would make every save slow to draw. */
+  _diaryPage(events) {
+    return [...events].sort((a, b) => b.done_on.localeCompare(a.done_on)).slice(0, this._diaryLimit || DIARY_PAGE);
   }
 
   // ----- daily use: one tap to log the usual things -----
@@ -4563,7 +4574,7 @@ class HomesteadPanel extends HTMLElement {
           "div",
           { className: "row" },
           this._field(f, "year", { type: "number", min: 1900, max: 2200, step: 1, inputMode: "numeric" }),
-          this._field(f, "quantity", { placeholder: "1 bustina" }),
+          h("label", {}, this.t("quantity_s"), h("input", { name: "quantity", value: f.quantity ?? "", placeholder: "1 bustina" })),
         ),
         this._field(f, "supplier"),
         h(
