@@ -157,6 +157,7 @@
         "woodland": "Bosco",
         "compost": "Compostiera",
         "coop": "Pollaio",
+        "nursery": "Semenzaio",
         "other": "Altro"
       }
     },
@@ -178,7 +179,7 @@
         "grafting": "Innesto",
         "problem": "Problema",
         "note": "Nota",
-        "removal": "Fine coltura",
+        "removal": "Fine della pianta",
         "review": "Bilancio annata",
         "tillage": "Lavorazione terreno (zappatura, vangatura)",
         "weeding": "Diserbo, sarchiatura",
@@ -214,14 +215,27 @@
         "abundant": "Abbondante"
       }
     },
-    "leave_reason": {
+    "event_reason": {
       "options": {
+        "finished": "Finita (stagione conclusa)",
+        "died": "Morta",
+        "removed": "Tolta (spostata, regalata…)",
         "predator": "Predatore (volpe…)",
         "illness": "Malattia",
         "age": "Vecchiaia",
         "sold": "Venduta o regalata",
         "slaughtered": "Macellata",
         "other": "Altro"
+      }
+    },
+    "death_cause": {
+      "options": {
+        "frost": "Gelo",
+        "drought": "Siccità",
+        "disease": "Malattia",
+        "pests": "Parassiti",
+        "animals": "Animali",
+        "unknown": "Sconosciuta"
       }
     },
     "month": {
@@ -422,6 +436,18 @@
           "name": "Lotto di semi",
           "description": "Semi usati (id del lotto)."
         },
+        "sown_count": {
+          "name": "Semi seminati",
+          "description": "Semi o alveoli seminati."
+        },
+        "germinated_on": {
+          "name": "Nate il",
+          "description": "Giorno in cui sono spuntate le prime."
+        },
+        "germinated_count": {
+          "name": "Piantine nate",
+          "description": "Quante sono nate."
+        },
         "notes": {
           "name": "Note",
           "description": "Note libere."
@@ -515,6 +541,18 @@
         "seed_lot_id": {
           "name": "Lotto di semi",
           "description": "Semi usati (id del lotto)."
+        },
+        "sown_count": {
+          "name": "Semi seminati",
+          "description": "Semi o alveoli seminati."
+        },
+        "germinated_on": {
+          "name": "Nate il",
+          "description": "Giorno in cui sono spuntate le prime."
+        },
+        "germinated_count": {
+          "name": "Piantine nate",
+          "description": "Quante sono nate."
         },
         "notes": {
           "name": "Note",
@@ -818,7 +856,11 @@
         },
         "reason": {
           "name": "Motivo",
-          "description": "Uscita galline: perché."
+          "description": "Fine della pianta: finita, morta o tolta. Uscita galline: perché."
+        },
+        "cause": {
+          "name": "Causa",
+          "description": "Pianta morta: cosa l'ha uccisa."
         },
         "notes": {
           "name": "Note",
@@ -896,7 +938,11 @@
         },
         "reason": {
           "name": "Motivo",
-          "description": "Uscita galline: perché."
+          "description": "Fine della pianta: finita, morta o tolta. Uscita galline: perché."
+        },
+        "cause": {
+          "name": "Causa",
+          "description": "Pianta morta: cosa l'ha uccisa."
         },
         "notes": {
           "name": "Note",
@@ -935,6 +981,36 @@
         "year": {
           "name": "Anno",
           "description": "Di default l'anno prossimo."
+        }
+      }
+    },
+    "transplant": {
+      "name": "Trapianta",
+      "description": "Porta le piantine fuori dal semenzaio; una parte diventa una pianta nuova, le altre restano.",
+      "fields": {
+        "id": {
+          "name": "Pianta",
+          "description": "Piantine nel semenzaio."
+        },
+        "quantity": {
+          "name": "Quante",
+          "description": "Predefinito: tutte."
+        },
+        "zone_id": {
+          "name": "Zona",
+          "description": "Dove vanno."
+        },
+        "done_on": {
+          "name": "Data",
+          "description": "Predefinito: oggi."
+        },
+        "latitude": {
+          "name": "Latitudine",
+          "description": "Posizione (facoltativa)."
+        },
+        "longitude": {
+          "name": "Longitudine",
+          "description": "Posizione (facoltativa)."
         }
       }
     },

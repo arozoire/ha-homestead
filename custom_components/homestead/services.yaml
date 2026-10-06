@@ -21,6 +21,7 @@ add_zone:
             - woodland
             - compost
             - coop
+            - nursery
             - other
     area_id:
       selector:
@@ -63,6 +64,7 @@ update_zone:
             - woodland
             - compost
             - coop
+            - nursery
             - other
     area_id:
       selector:
@@ -205,6 +207,19 @@ add_planting:
     seed_lot_id:
       selector:
         text:
+    sown_count:
+      selector:
+        number:
+          min: 1
+          mode: box
+    germinated_on:
+      selector:
+        date:
+    germinated_count:
+      selector:
+        number:
+          min: 0
+          mode: box
     notes:
       selector:
         text:
@@ -332,6 +347,19 @@ update_planting:
     seed_lot_id:
       selector:
         text:
+    sown_count:
+      selector:
+        number:
+          min: 1
+          mode: box
+    germinated_on:
+      selector:
+        date:
+    germinated_count:
+      selector:
+        number:
+          min: 0
+          mode: box
     notes:
       selector:
         text:
@@ -680,14 +708,28 @@ add_event:
     reason:
       selector:
         select:
-          translation_key: leave_reason
+          translation_key: event_reason
           options:
+            - finished
+            - died
+            - removed
             - predator
             - illness
             - age
             - sold
             - slaughtered
             - other
+    cause:
+      selector:
+        select:
+          translation_key: death_cause
+          options:
+            - frost
+            - drought
+            - disease
+            - pests
+            - animals
+            - unknown
     notes:
       selector:
         text:
@@ -804,14 +846,28 @@ update_event:
     reason:
       selector:
         select:
-          translation_key: leave_reason
+          translation_key: event_reason
           options:
+            - finished
+            - died
+            - removed
             - predator
             - illness
             - age
             - sold
             - slaughtered
             - other
+    cause:
+      selector:
+        select:
+          translation_key: death_cause
+          options:
+            - frost
+            - drought
+            - disease
+            - pests
+            - animals
+            - unknown
     notes:
       selector:
         text:
@@ -841,6 +897,39 @@ repeat_planting:
         number:
           min: 1900
           max: 2200
+          mode: box
+
+transplant:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+    quantity:
+      selector:
+        number:
+          min: 1
+          mode: box
+    zone_id:
+      required: true
+      selector:
+        text:
+    done_on:
+      selector:
+        date:
+    latitude:
+      selector:
+        number:
+          min: -90
+          max: 90
+          step: any
+          mode: box
+    longitude:
+      selector:
+        number:
+          min: -180
+          max: 180
+          step: any
           mode: box
 
 add_task:

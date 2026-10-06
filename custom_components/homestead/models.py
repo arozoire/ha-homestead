@@ -54,6 +54,7 @@ class ZoneKind(StrEnum):
     WOODLAND = "woodland"
     COMPOST = "compost"  # compost bin: only turning and harvesting events
     COOP = "coop"  # hen house: eggs and flock movements
+    NURSERY = "nursery"  # seed trays, cold frame: seedlings until they are planted out
     OTHER = "other"
 
 
@@ -108,6 +109,23 @@ class EventKind(StrEnum):
     FLOCK_OUT = "flock_out"  # hens gone: count in quantity, why in reason
     ANIMAL_CARE = "animal_care"  # feed, vet, bedding: product and cost
     COOP_CLEANING = "coop_cleaning"
+
+
+class EndReason(StrEnum):
+    """Why a planting's life ended (the "removal" event)."""
+
+    FINISHED = "finished"  # season over, harvest done
+    DIED = "died"
+    REMOVED = "removed"  # pulled out for another reason: moved, given away, not needed
+
+
+class DeathCause(StrEnum):
+    FROST = "frost"
+    DROUGHT = "drought"
+    DISEASE = "disease"
+    PESTS = "pests"
+    ANIMALS = "animals"
+    UNKNOWN = "unknown"
 
 
 class LeaveReason(StrEnum):
@@ -258,6 +276,11 @@ class Planting(_Record):
     moon_phase: str | None = None
     sown_moon_phase: str | None = None
     seed_lot_id: str | None = None
+    # Seedlings: how many seeds or cells were sown, when and how many came up.
+    sown_count: int | None = None
+    germinated_on: str | None = None
+    germinated_count: int | None = None
+    from_planting_id: str | None = None  # the nursery batch this one was planted out from
     notes: str | None = None
 
     def __post_init__(self) -> None:
@@ -303,7 +326,8 @@ class Event(_Record):
     abundance: str | None = None
     keep: str | None = None
     avoid: str | None = None
-    reason: str | None = None  # flock_out: why the hens left
+    reason: str | None = None  # flock_out: why the hens left; removal: finished, died, removed
+    cause: str | None = None  # removal of a dead planting: frost, drought…
     moon_phase: str | None = None
     weather: dict[str, Any] | None = None
     notes: str | None = None
