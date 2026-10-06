@@ -20,6 +20,7 @@ from .const import CONF_NOTIFY, CONF_NOTIFY_TIME, DEFAULT_NOTIFY_TIME, DOMAIN
 from .forecast import advice_text, get_outlook
 from .labels import async_kind_names, summary
 from .models import COMPOST_TURN_DAYS, compost_due
+from .notify import async_send
 from .store import HomesteadStore
 from .tasks import async_complete_task
 
@@ -125,8 +126,7 @@ async def async_send_reminders(hass: HomeAssistant, store: HomesteadStore, servi
             _LOGGER.warning("Notify service notify.%s not found", name)
             continue
         for message in messages:
-            await hass.services.async_call("notify", name, message, blocking=True)
-            sent += 1
+            sent += await async_send(hass, name, message)
     return sent
 
 

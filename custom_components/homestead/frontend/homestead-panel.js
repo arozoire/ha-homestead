@@ -65,6 +65,13 @@ const TEXT = {
     what: "What (porcini, chestnuts…)",
     essence: "Species",
     woodBox: "🪵 Wood and woodland harvests",
+    typesTitle: "Fill in the missing plant types",
+    typesHintOne: "1 planting: the type comes from its species",
+    typesHintMany: "{count} plantings: the type comes from their species",
+    typesApply: "Apply",
+    typesDoneOne: "1 type set",
+    typesDoneMany: "{count} types set",
+    showGone: "Show dead or removed plantings ({count})",
     tabCalendar: "Calendar",
     tabMap: "Map",
     tabMore: "More",
@@ -79,6 +86,7 @@ const TEXT = {
     resetDo: "Reset everything",
     resetDone: "Everything deleted ({summary})",
     todoLater: "+{count} later in the calendar",
+    diaryMore: "Show older entries ({count})",
     quickOther: "Event…",
     quickEvent: "Event",
     quickSearch: "Search plant or zone",
@@ -194,7 +202,6 @@ const TEXT = {
     ev_planted: "Planted out",
     ev_transplanted: "Transplanted",
     ev_since: "Here for ~{years} years (since ~{year})",
-    toggleMap: "Show / hide the map",
     settings: "Settings: weather sensors, reminders",
     ev_review: "Season review",
     rating: "Rating",
@@ -211,7 +218,6 @@ const TEXT = {
     quickHarvest: "+ Harvest",
     repeat: "🔁 Repeat next year",
     repeated: "Created: {name}",
-    weatherSource: "weather: {source}",
     treatments: "{count} treatments",
     u_kg: "kg",
     u_pieces: "pieces",
@@ -275,8 +281,6 @@ const TEXT = {
     calMore: "and {count} more in the Diary",
     calNoZone: "Without zone",
     calToday: "today",
-    calPlants: "{count} plants",
-    calTasks: "{count} planned",
     calEvents: "{count} done",
     calWholeZone: "whole zone",
     calGeneral: "General",
@@ -297,7 +301,6 @@ const TEXT = {
     family: "Family",
     goodWith: "🤝 Good with",
     badWith: "🚫 Keep away from",
-    inGarden: "in your garden",
     cropGraph: "CropGraph data (CC-BY-4.0), dates set on your frosts: last ~{spring}, first ~{fall}",
     cropGraphFallback: "CropGraph data (CC-BY-4.0), dates for typical frosts (mid April, end of October) until your history is known",
     heat_max_c: "Heat limit (°C)",
@@ -555,6 +558,13 @@ const TEXT = {
     what: "Cosa (porcini, castagne…)",
     essence: "Essenza",
     woodBox: "🪵 Legna e raccolti del bosco",
+    typesTitle: "Completa i tipi mancanti",
+    typesHintOne: "1 pianta: il tipo si ricava dalla specie",
+    typesHintMany: "{count} piante: il tipo si ricava dalla specie",
+    typesApply: "Applica",
+    typesDoneOne: "1 tipo impostato",
+    typesDoneMany: "{count} tipi impostati",
+    showGone: "Mostra le piante morte o tolte ({count})",
     tabCalendar: "Calendario",
     tabMap: "Mappa",
     tabMore: "Altro",
@@ -569,6 +579,7 @@ const TEXT = {
     resetDo: "Azzera tutto",
     resetDone: "Tutto cancellato ({summary})",
     todoLater: "+{count} più avanti nel calendario",
+    diaryMore: "Mostra i più vecchi ({count})",
     quickOther: "Evento…",
     quickEvent: "Evento",
     quickSearch: "Cerca pianta o zona",
@@ -684,7 +695,6 @@ const TEXT = {
     ev_planted: "Messa a dimora",
     ev_transplanted: "Trapianto",
     ev_since: "Presente da ~{years} anni (dal ~{year})",
-    toggleMap: "Mostra / nascondi la mappa",
     settings: "Impostazioni: sensori meteo, promemoria",
     ev_review: "Bilancio annata",
     rating: "Voto",
@@ -701,7 +711,6 @@ const TEXT = {
     quickHarvest: "+ Raccolta",
     repeat: "🔁 Ripeti l'anno prossimo",
     repeated: "Creata: {name}",
-    weatherSource: "meteo: {source}",
     treatments: "{count} trattamenti",
     u_kg: "kg",
     u_pieces: "pezzi",
@@ -765,8 +774,6 @@ const TEXT = {
     calMore: "e altre {count} nel Diario",
     calNoZone: "Senza zona",
     calToday: "oggi",
-    calPlants: "{count} piante",
-    calTasks: "{count} previste",
     calEvents: "{count} fatte",
     calWholeZone: "tutta la zona",
     calGeneral: "Generale",
@@ -787,7 +794,6 @@ const TEXT = {
     family: "Famiglia",
     goodWith: "🤝 Sta bene con",
     badWith: "🚫 Tenere lontano da",
-    inGarden: "nel tuo giardino",
     cropGraph: "Dati CropGraph (CC-BY-4.0), date sulle tue gelate: ultima ~{spring}, prima ~{fall}",
     cropGraphFallback: "Dati CropGraph (CC-BY-4.0), date per gelate tipiche (metà aprile, fine ottobre) finché non c'è il tuo storico",
     heat_max_c: "Limite di caldo (°C)",
@@ -1024,6 +1030,8 @@ const COOP_KINDS = ["eggs", "flock_in", "flock_out", "animal_care", "coop_cleani
 // Kinds that make sense in a compost bin or a hen house besides their own.
 const YARD_ALSO = ["note", "problem"];
 const COMPOST_TURN_DAYS = 28;
+// Diary entries drawn at once (more on request).
+const DIARY_PAGE = 60;
 const LEAVE_REASONS = ["predator", "illness", "age", "sold", "slaughtered", "other"];
 const LEAVE_ICONS = { predator: "🦊", illness: "🤒", age: "⌛", sold: "🤝", slaughtered: "🔪", other: "❔" };
 // Quantity label when it is not a harvest.
@@ -1155,6 +1163,7 @@ const STYLE = `
   .repeat-row { display: flex; align-items: center; gap: 10px; min-height: 44px; border-bottom: 1px solid var(--divider-color); }
   .repeat-row input { width: 22px; height: 22px; flex: none; }
   .repeat-name { flex: 1; display: grid; }
+  .show-gone { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 14px; color: var(--secondary-text-color); }
   .more-list { display: grid; border: 1px solid var(--divider-color); border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
   .more-item { display: flex; align-items: center; gap: 12px; text-align: left; border: none; border-bottom: 1px solid var(--divider-color);
     border-radius: 0; background: var(--card-background-color); min-height: 60px; padding: 6px 14px; font-size: 18px; color: var(--secondary-text-color); }
@@ -1192,8 +1201,6 @@ const STYLE = `
   .hint { color: var(--secondary-text-color); }
   .error { color: var(--error-color, #db4437); }
   .info { color: var(--success-color, #43a047); }
-  .import-row { display: grid; gap: 6px; padding: 8px 0; border-bottom: 1px solid var(--divider-color); }
-  .import-row .head { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--secondary-text-color); cursor: pointer; }
   .species { position: relative; }
   .suggest { position: absolute; z-index: 10; left: 0; right: 0; top: 100%; margin-top: 2px; max-height: 260px;
     overflow-y: auto; background: var(--card-background-color); border: 1px solid var(--divider-color);
@@ -1376,10 +1383,6 @@ const STYLE = `
   .quick-value { flex: 1; text-align: center; font-size: 20px; }
   .quick-more { padding: 10px 0; }
   .todo-later { margin: -6px 0 8px; }
-  .wx-strip { display: flex; gap: 4px; overflow-x: auto; }
-  .wx-day { flex: 1 0 42px; display: grid; justify-items: center; font-size: 12px; padding: 4px 2px; border-radius: 6px;
-    background: var(--secondary-background-color); }
-  .wx-day.alert { box-shadow: inset 0 0 0 2px var(--warning-color, #ffa600); }
   .timeline-grid { position: relative; --lab: 208px; }
   .narrow .timeline-grid { --lab: 128px; }
   .tl-row { display: grid; grid-template-columns: calc(var(--lab) - 8px) minmax(0, 1fr); column-gap: 8px; align-items: center; }
@@ -1512,7 +1515,8 @@ class HomesteadPanel extends HTMLElement {
     );
     this._calWrap = h("div", { className: "calendar" });
     // On a phone the menu sits at the bottom: hide it while typing, so the keyboard does not push it up.
-    this._aside.addEventListener("focusin", (ev) => ev.target.matches("input, textarea, select") && this._layout.classList.add("typing"));
+    const keyboard = 'textarea, input:not([type="checkbox"]):not([type="radio"]):not([type="date"]):not([type="file"]):not([type="button"])';
+    this._aside.addEventListener("focusin", (ev) => ev.target.matches(keyboard) && this._layout.classList.add("typing"));
     this._aside.addEventListener("focusout", () => this._layout.classList.remove("typing"));
     this._createMap();
     this._render();
@@ -1576,6 +1580,7 @@ class HomesteadPanel extends HTMLElement {
       .callWS({ type: "homestead/crops/defaults" })
       .then((result) => {
         this._cropDefaults = result.crops || {};
+        this._genusTypes = result.genus_types || {};
         if (!this._form && !this._eventForm && !this._taskForm && !this._zoneForm && !this._expenseForm && !this._toolForm && !this._seedForm && !this._cropForm && !this._import) this._render();
         else if (this._cropEl && this._form) this._cropEl.replaceChildren(...[this._cropBox(this._form)].filter(Boolean));
       })
@@ -1597,7 +1602,9 @@ class HomesteadPanel extends HTMLElement {
         this._loaded = !!data.plantings;
         this._syncMap();
         this._renderCalendar();
-        if (first) this._needsFit = true;
+        // A hidden map cannot be fitted: do it when it is first shown.
+        if (first && this._layout.classList.contains("wide-tab")) this._needsFit = true;
+        else if (first) this._fitAll();
         first = false;
         if (/[?&](task|zone)=/.test(window.location.search)) {
           this._openTaskFromUrl();
@@ -1713,7 +1720,7 @@ class HomesteadPanel extends HTMLElement {
   _syncMarkers() {
     const seen = new Set();
     for (const p of this._data.plantings) {
-      if (!hasPosition(p)) continue;
+      if (!hasPosition(p) || (!this._showGone() && p.status !== "active" && p.id !== this._selected)) continue;
       seen.add(p.id);
       const selected = p.id === this._selected || (this._eventForm && p.id === this._eventForm.planting_id);
       const color = STATUS_COLOR[p.status] || STATUS_COLOR.active;
@@ -2278,8 +2285,79 @@ class HomesteadPanel extends HTMLElement {
     return f.id ? `${where} — ${this.t("dragHint")}` : where;
   }
 
+  /** Dead and removed plantings stay in the history, hidden from the map and the list unless asked. */
+  _showGone() {
+    if (this._showGoneValue === undefined) {
+      try {
+        this._showGoneValue = localStorage.getItem("homestead-show-gone") === "1";
+      } catch {
+        this._showGoneValue = false;
+      }
+    }
+    return this._showGoneValue;
+  }
+
+  _setShowGone(on) {
+    this._showGoneValue = on;
+    try {
+      localStorage.setItem("homestead-show-gone", on ? "1" : "");
+    } catch {
+      // private mode: the choice is just not remembered
+    }
+    this._syncMap();
+    this._render();
+  }
+
+  /** Plantings without a type whose species tells it: proposed all at once. */
+  _typesBox() {
+    const missing = this._data.plantings
+      .filter((p) => !p.plant_type)
+      .map((p) => ({ planting: p, type: this._plantTypeFor(p.species) }))
+      .filter((m) => m.type);
+    if (!missing.length) return null;
+    if (!this._typesOpen)
+      return h(
+        "button",
+        { type: "button", className: "repeat-card", onclick: () => ((this._typesOpen = true), this._render()) },
+        h("strong", {}, `🏷️ ${this.t("typesTitle")}`),
+        h("span", { className: "sub" }, this._plural("typesHint", missing.length)),
+      );
+    const off = new Set();
+    const button = h("button", { type: "button", className: "primary" }, this.t("typesApply"));
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      let done = 0;
+      for (const m of missing.filter((m) => !off.has(m.planting.id))) {
+        if (await this._call("update_planting", { id: m.planting.id, plant_type: m.type })) done++;
+      }
+      this._typesOpen = false;
+      this._render();
+      this._showMessage(`✓ ${this._plural("typesDone", done)}`);
+    });
+    return h(
+      "div",
+      { className: "repeat-box" },
+      h("div", { className: "cal-head" }, h("h3", {}, `🏷️ ${this.t("typesTitle")}`), h("button", { type: "button", onclick: () => ((this._typesOpen = false), this._render()) }, "✕")),
+      missing.map((m) => {
+        const box = h("input", { type: "checkbox", checked: true });
+        box.addEventListener("change", () => (box.checked ? off.delete(m.planting.id) : off.add(m.planting.id)));
+        return h(
+          "label",
+          { className: "repeat-row" },
+          box,
+          h("span", { className: "repeat-name" }, h("strong", {}, m.planting.name), h("span", { className: "sub" }, m.planting.species || "")),
+          h("span", {}, `${PLANT_ICONS[m.type]} ${this.t(`pt_${m.type}`)}`),
+        );
+      }),
+      button,
+    );
+  }
+
   _renderList() {
-    const plantings = [...this._data.plantings].sort((a, b) => a.name.localeCompare(b.name));
+    const gone = this._data.plantings.filter((p) => p.status !== "active");
+    const plantings = [...this._data.plantings]
+      .filter((p) => this._showGone() || p.status === "active" || p.id === this._selected)
+      .sort((a, b) => a.name.localeCompare(b.name));
     return [
       h(
         "div",
@@ -2289,6 +2367,15 @@ class HomesteadPanel extends HTMLElement {
         h("button", { onclick: () => this._csvTemplate("plantings") }, this.t("csvTemplate")),
       ),
       this._repeatBox(),
+      this._typesBox(),
+      gone.length
+        ? h(
+            "label",
+            { className: "show-gone" },
+            h("input", { type: "checkbox", checked: this._showGone(), onchange: (ev) => this._setShowGone(ev.target.checked) }),
+            this.t("showGone", { count: gone.length }),
+          )
+        : null,
       this._loaded === false ? h("p", { className: "error" }, this.t("notLoaded")) : null,
       plantings.length
         ? h(
@@ -2433,7 +2520,16 @@ class HomesteadPanel extends HTMLElement {
       "form",
       {
         onsubmit: (ev) => this._save(ev),
-        onchange: (ev) => updateRotation(ev.currentTarget),
+        onchange: (ev) => {
+          const el = ev.currentTarget.elements;
+          if (ev.target.name === "plant_type") el.plant_type.dataset.chosen = "1";
+          // New planting: the species beats the zone's guess; an existing one keeps its type.
+          if (ev.target.name === "species" && !el.plant_type.dataset.chosen && (!f.id || !el.plant_type.value)) {
+            const guess = this._plantTypeFor(el.species.value);
+            if (guess) el.plant_type.value = guess;
+          }
+          updateRotation(ev.currentTarget);
+        },
       },
         h("h2", {}, f.id ? this.t("editTitle") : this.t("newTitle")),
         this._field(f, "name", { required: true, maxLength: 100 }),
@@ -3305,24 +3401,31 @@ class HomesteadPanel extends HTMLElement {
     );
   }
 
+  /** Arrivals (+) and departures (−) of hens in the given zones, by date. */
+  _flockMoves(zones) {
+    return this._data.events
+      .filter((e) => zones.has(e.zone_id) && e.quantity && (e.kind === "flock_in" || e.kind === "flock_out"))
+      .map((e) => [e.done_on, e.kind === "flock_in" ? e.quantity : -e.quantity])
+      .sort((a, b) => a[0].localeCompare(b[0]));
+  }
+
   /** Hens in the given zones on a day: arrivals minus departures up to that day. */
   _hensAt(zones, day) {
-    return Math.max(
-      this._data.events
-        .filter((e) => zones.has(e.zone_id) && e.done_on <= day && e.quantity && (e.kind === "flock_in" || e.kind === "flock_out"))
-        .reduce((n, e) => n + (e.kind === "flock_in" ? e.quantity : -e.quantity), 0),
-      0,
-    );
+    return Math.max(this._flockMoves(zones).reduce((n, [date, change]) => (date <= day ? n + change : n), 0), 0);
   }
 
   /** Eggs, average hens, eggs per hen and cost per egg between two days (included). */
   _eggStats(zones, from, to) {
     const events = this._data.events.filter((e) => zones.has(e.zone_id) && e.done_on >= from && e.done_on <= to);
     const eggs = events.filter((e) => e.kind === "eggs").reduce((n, e) => n + (e.quantity || 0), 0);
+    const moves = this._flockMoves(zones);
     let henDays = 0;
     let days = 0;
+    let count = 0;
+    let next = 0;
     for (let day = from; day <= to; day = addDays(day, 1)) {
-      henDays += this._hensAt(zones, day);
+      while (next < moves.length && moves[next][0] <= day) count += moves[next++][1];
+      henDays += Math.max(count, 0);
       days++;
     }
     const hens = days ? henDays / days : 0;
@@ -3568,6 +3671,7 @@ class HomesteadPanel extends HTMLElement {
         {
           onchange: (ev) => {
             this._diaryFilter = { ...this._diaryFilter, [name]: ev.target.value };
+            this._diaryLimit = 0;
             this._render();
           },
         },
@@ -3593,8 +3697,20 @@ class HomesteadPanel extends HTMLElement {
         filter("zone", [["", this.t("allZones")], ...this._zoneOptions().slice(1)]),
         filter("year", [["", this.t("allYears")], ...years.map((y) => [y, y])]),
       ),
-      events.length ? this._renderTimeline(events) : h("p", { className: "hint" }, this.t("emptyDiary")),
+      events.length ? this._renderTimeline(this._diaryPage(events)) : h("p", { className: "hint" }, this.t("emptyDiary")),
+      events.length > (this._diaryLimit || DIARY_PAGE)
+        ? h(
+            "button",
+            { type: "button", className: "link quick-more", onclick: () => ((this._diaryLimit = (this._diaryLimit || DIARY_PAGE) + DIARY_PAGE), this._render()) },
+            this.t("diaryMore", { count: events.length - (this._diaryLimit || DIARY_PAGE) }),
+          )
+        : null,
     ];
+  }
+
+  /** The most recent entries only: years of diary would make every save slow to draw. */
+  _diaryPage(events) {
+    return [...events].sort((a, b) => b.done_on.localeCompare(a.done_on)).slice(0, this._diaryLimit || DIARY_PAGE);
   }
 
   // ----- daily use: one tap to log the usual things -----
@@ -4563,7 +4679,7 @@ class HomesteadPanel extends HTMLElement {
           "div",
           { className: "row" },
           this._field(f, "year", { type: "number", min: 1900, max: 2200, step: 1, inputMode: "numeric" }),
-          this._field(f, "quantity", { placeholder: "1 bustina" }),
+          h("label", {}, this.t("quantity_s"), h("input", { name: "quantity", value: f.quantity ?? "", placeholder: "1 bustina" })),
         ),
         this._field(f, "supplier"),
         h(
@@ -4652,6 +4768,14 @@ class HomesteadPanel extends HTMLElement {
       return { family, good, bad, name_en, warm, ...mine, source: "user" };
     }
     return builtIn ? { ...builtIn, source: builtIn.source === "cropgraph" ? "cropgraph" : "default" } : null;
+  }
+
+  /** Plant type guessed from the species: woody habit by genus, else the crop table's category. */
+  _plantTypeFor(species) {
+    const key = this._cropKey(species);
+    if (!key) return null;
+    const genus = key.split(" ")[0];
+    return this._genusTypes?.[genus] || (this._cropDefaults[key] || this._cropDefaults[genus])?.plant_type || null;
   }
 
   _inMonth(crop, keys, month = new Date().getMonth() + 1) {
@@ -5054,7 +5178,7 @@ class HomesteadPanel extends HTMLElement {
       v.latitude = number("latitude");
       v.longitude = number("longitude");
       if ((v.latitude == null) !== (v.longitude == null)) issues[v.latitude == null ? "latitude" : "longitude"] = this.t("csvMissing");
-      if (!v.plant_type && !issues.plant_type && v.zone_id) v.plant_type = ZONE_PLANT_TYPE[this._zone(v.zone_id)?.kind] || null;
+      if (!v.plant_type && !issues.plant_type) v.plant_type = this._plantTypeFor(v.species) || ZONE_PLANT_TYPE[this._zone(v.zone_id)?.kind] || null;
       if (this._data.plantings.some((p) => p.name.toLowerCase() === (v.name || "").toLowerCase())) issues.duplicate = this.t("csvDuplicate");
     }
     row.values = v;

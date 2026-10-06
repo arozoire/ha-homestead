@@ -18,6 +18,43 @@ CROPGRAPH_FILE = Path(__file__).parent / "data" / "cropgraph.json"
 FALLBACK_FROST = {"last_spring": "04-10", "first_fall": "10-31"}
 ANNUAL_CATEGORIES = {"vegetable", "herb", "legume", "root", "flower", "grain"}
 COOL_HEAT_MAX = 30
+# Woody habit by genus: CropGraph only says "fruit, perennial" for an apple, a raspberry and a vine.
+GENUS_TYPES: dict[str, str] = {
+    **dict.fromkeys(
+        "malus pyrus prunus cydonia citrus fortunella ficus olea juglans castanea diospyros eriobotrya "
+        "mespilus morus punica persea mangifera carya pistacia ziziphus annona feijoa acca sorbus".split(),
+        "fruit_tree",
+    ),
+    **dict.fromkeys(
+        "corylus rubus ribes vaccinium sambucus aronia hippophae elaeagnus rosa buxus hydrangea viburnum "
+        "forsythia syringa philadelphus spiraea weigela berberis cotoneaster pyracantha photinia ligustrum "
+        "pittosporum camellia rhododendron azalea hibiscus nerium myrtus laurus".split(),
+        "shrub",
+    ),
+    **dict.fromkeys(
+        "vitis actinidia passiflora wisteria hedera clematis jasminum trachelospermum lonicera "
+        "parthenocissus bougainvillea humulus".split(),
+        "vine",
+    ),
+    **dict.fromkeys(
+        "quercus fagus acer pinus abies picea larix betula fraxinus tilia ulmus populus salix carpinus "
+        "platanus cedrus cupressus magnolia robinia alnus aesculus celtis paulownia catalpa liquidambar "
+        "ginkgo sequoia ostrya cercis albizia lagerstroemia".split(),
+        "tree",
+    ),
+    # Herbaceous crops grown in the vegetable garden although CropGraph files them under fruit.
+    **dict.fromkeys("fragaria rheum asparagus cynara cucumis citrullus physalis".split(), "vegetable"),
+}
+CATEGORY_TYPES = {
+    "vegetable": "vegetable",
+    "root": "vegetable",
+    "legume": "vegetable",
+    "grain": "vegetable",
+    "sprout": "vegetable",
+    "herb": "herb",
+    "medicinal": "herb",
+    "flower": "flower",
+}
 TRAITS = (
     "exposure",
     "hardiness_c",
@@ -113,6 +150,12 @@ def cropgraph_traits(entry: dict[str, Any], frost: dict[str, str | None] | None)
     return out
 
 
+def plant_type(name: str | None, category: str | None = None) -> str | None:
+    """Tree, fruit tree, shrub, vine from the genus; vegetable, herb, flower from the CropGraph category."""
+    genus = normalize(name).split(" ")[0] if name else ""
+    return GENUS_TYPES.get(genus) or CATEGORY_TYPES.get(category or "")
+
+
 def _last_month(months: list[int]) -> int | None:
     """End of a season that may cross the new year (e.g. 9-12 then 1-3 → 3)."""
     if not months:
@@ -131,6 +174,8 @@ def full_table(
     table: dict[str, dict[str, Any]] = {key: {**value, "source": "builtin"} for key, value in mine.items()}
     for key, entry in cropgraph.items():
         extra: dict[str, Any] = {"name_en": entry.get("n")}
+        if kind := plant_type(key, entry.get("c")):
+            extra["plant_type"] = kind
         if (family := entry.get("f")) and family != "Various":
             extra["family"] = family
         for field, target in (("g", "good"), ("x", "bad")):
@@ -147,7 +192,9 @@ def full_table(
             **extra,
             "source": "cropgraph",
         }
-    for value in table.values():
+    for key, value in table.items():
+        if "plant_type" not in value and (kind := plant_type(key)):
+            value["plant_type"] = kind
         if "end" not in value and value.get("warm") and (last := _last_month(value.get("harvest") or [])):
             value["end"] = [last % 12 + 1]
     return table
