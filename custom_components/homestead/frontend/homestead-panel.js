@@ -146,6 +146,42 @@ const TEXT = {
     calendar: "Calendar: next two weeks and the year",
     calPlan: "📅 Year plan",
     calNext: "📋 To do in the next two weeks",
+    tabAnalysis: "Analysis",
+    anTitle: "📈 Over the years",
+    anEmpty: "No data yet: log harvests and end-of-season reviews to see the comparison over the years.",
+    anHeatDays: "🔥 {count} heatwave days",
+    anFrosts: "❄️ frosts: {count}",
+    anHail: "🧊 hail",
+    anNoExtremes: "no extremes recorded",
+    anIndex: "index",
+    an_good: "good year",
+    an_mid: "average",
+    an_bad: "poor year",
+    anTotal: "Total",
+    anPerPlant: "Per plant",
+    anCost: "Cost",
+    anPlants: "plants",
+    anYields: "Harvests by crop",
+    anNoHarvest: "No harvest with a quantity yet.",
+    anYieldsHint: "Colour = yield per plant compared with the previous years' median, together with the season rating (green good, orange average, red poor). Hover a cell for details.",
+    anWeatherYield: "{name}: harvest and weather",
+    anHeatEffect: "In years with a heatwave the harvest was {pct}% lower than in the other years.",
+    anPickCrop: "Click a crop in the table to see it here.",
+    anTiming: "⏱️ When the work was done",
+    anTimingEmpty: "Not enough cases yet: at least two seasons with pruning or planting in different months.",
+    anPlantShort: "plant",
+    anSeasons: "{a} vs {b} seasons",
+    anTimingHint: "Few seasons: an indication, not a rule.",
+    anMoon: "🌙 Moon phase at sowing/planting",
+    anMoon_new: "New moon",
+    anMoon_waxing: "Waxing",
+    anMoon_full: "Full moon",
+    anMoon_waning: "Waning",
+    anCases: "{count} cases",
+    anMoonEmpty: "No sowing with an end-of-season review yet.",
+    anMoonWeak: "Too few cases or too small a difference: no conclusion possible.",
+    anMoonNote: "Average season rating by phase.",
+    anLessons: "📝 Lessons learnt",
     calMore: "and {count} more in the Diary",
     calNoZone: "Without zone",
     calToday: "today",
@@ -510,6 +546,42 @@ const TEXT = {
     calendar: "Calendario: prossime due settimane e l'anno",
     calPlan: "📅 Programma",
     calNext: "📋 Da fare nelle prossime 2 settimane",
+    tabAnalysis: "Analisi",
+    anTitle: "📈 Negli anni",
+    anEmpty: "Ancora nessun dato: registra raccolte e bilanci di fine stagione per vedere il confronto negli anni.",
+    anHeatDays: "🔥 {count} giorni di canicola",
+    anFrosts: "❄️ gelate: {count}",
+    anHail: "🧊 grandine",
+    anNoExtremes: "nessun estremo registrato",
+    anIndex: "indice",
+    an_good: "buona annata",
+    an_mid: "nella media",
+    an_bad: "annata scarsa",
+    anTotal: "Totale",
+    anPerPlant: "Per pianta",
+    anCost: "Costo",
+    anPlants: "piante",
+    anYields: "Raccolti per coltura",
+    anNoHarvest: "Ancora nessuna raccolta con quantità.",
+    anYieldsHint: "Colore = resa per pianta rispetto alla mediana degli anni precedenti, insieme al voto della stagione (verde buona, arancio media, rosso scarsa). Passa sopra una cella per i dettagli.",
+    anWeatherYield: "{name}: raccolto e meteo",
+    anHeatEffect: "Negli anni con canicola il raccolto è stato del {pct}% più basso rispetto agli altri anni.",
+    anPickCrop: "Clicca una coltura nella tabella per vederla qui.",
+    anTiming: "⏱️ Quando è stato fatto il lavoro",
+    anTimingEmpty: "Ancora pochi casi: servono almeno due stagioni con potatura o messa a dimora in mesi diversi.",
+    anPlantShort: "pianta",
+    anSeasons: "{a} contro {b} stagioni",
+    anTimingHint: "Poche stagioni: un'indicazione, non una regola.",
+    anMoon: "🌙 Fase lunare alla semina/messa a dimora",
+    anMoon_new: "Luna nuova",
+    anMoon_waxing: "Crescente",
+    anMoon_full: "Luna piena",
+    anMoon_waning: "Calante",
+    anCases: "{count} casi",
+    anMoonEmpty: "Ancora nessuna semina con bilancio di fine stagione.",
+    anMoonWeak: "Troppi pochi casi o differenza troppo piccola: nessuna conclusione possibile.",
+    anMoonNote: "Voto medio della stagione per fase.",
+    anLessons: "📝 Lezioni imparate",
     calMore: "e altre {count} nel Diario",
     calNoZone: "Senza zona",
     calToday: "oggi",
@@ -848,6 +920,8 @@ const STYLE = `
   .narrow .map { flex: 0 0 33%; min-height: 0; }
   .narrow aside { width: auto; max-width: none; height: auto; flex: 1; border-left: none; border-top: 1px solid var(--divider-color); }
   .no-map .map { display: none; }
+  .wide-tab .map, .wide-tab .calendar { display: none !important; }
+  .wide-tab aside { width: auto; max-width: none; flex: 1; border: none; padding: 12px max(12px, calc((100% - 1100px) / 2)); }
   .no-map aside { width: auto; max-width: none; flex: 1; border: none; }
   .map-toggle { background: none; border: none; color: inherit; font-size: 20px; padding: 4px 8px; }
   .event.start { opacity: .85; }
@@ -998,6 +1072,36 @@ const STYLE = `
   .action-card.good .action-verdict { color: #1f5e24; }
   .action-card.late .action-verdict { color: #8c1d15; font-weight: 700; }
   .action-card .tick { border: none; background: none; width: 44px; color: #2f7d32; font-size: 18px; border-radius: 0 8px 8px 0; }
+  .an-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 8px; margin: 8px 0; }
+  .an-tile { background: var(--card-background-color, #fff); border: 1px solid var(--divider-color, #e1e4dc); border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; }
+  .an-tile .sub { white-space: normal; }
+  .an-tile-head { display: flex; align-items: center; gap: 6px; justify-content: space-between; }
+  .an-badge { white-space: nowrap; font-size: 11px; font-weight: 700; border-radius: 10px; padding: 1px 7px; }
+  .an-badge.good, .an-cell.good { background: #e3f2e1; color: #1f5e24; }
+  .an-badge.mid, .an-cell.mid { background: #fff1d6; color: #7a4a00; }
+  .an-badge.bad, .an-cell.bad { background: #fbe1dc; color: #8f2b17; }
+  .segmented { display: inline-flex; border: 1px solid var(--divider-color, #c9cec4); border-radius: 8px; overflow: hidden; }
+  .segmented button { font: inherit; font-size: 13px; border: none; background: transparent; padding: 4px 10px; cursor: pointer; color: inherit; }
+  .segmented button.active { background: var(--homestead-accent, #3a7d44); color: #fff; }
+  .an-box { background: var(--card-background-color, #fff); border: 1px solid var(--divider-color, #e1e4dc); border-radius: 10px; padding: 10px 12px; margin: 8px 0; display: flex; flex-direction: column; gap: 8px; }
+  .an-box h3 { margin: 0; font-size: 16px; }
+  .an-table { display: grid; gap: 3px; font-size: 13px; overflow-x: auto; align-items: center; }
+  .an-th { font-weight: 700; text-align: center; color: var(--secondary-text-color, #5b6560); }
+  .an-zone { grid-column: 1 / -1; font-weight: 700; background: #eef1ea; color: #1d2320; border-radius: 6px; padding: 4px 8px; margin-top: 4px; }
+  .an-name { font: inherit; text-align: left; border: none; background: none; padding: 2px 4px 2px 12px; cursor: pointer; color: inherit; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .an-name:hover { text-decoration: underline; }
+  .an-cell { text-align: center; border-radius: 6px; padding: 4px 2px; white-space: nowrap; }
+  .an-cost { text-align: right; white-space: nowrap; color: var(--secondary-text-color, #5b6560); }
+  .an-bars { display: flex; gap: 10px; align-items: flex-end; overflow-x: auto; }
+  .an-bar { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 70px; flex: 1; }
+  .an-bar .sub { font-size: 11px; min-height: 13px; text-align: center; }
+  .an-bar i { display: block; width: 70%; max-width: 46px; border-radius: 4px 4px 0 0; background: #9bb59e; }
+  .an-bar i.good { background: #4f9a57; } .an-bar i.mid { background: #e0a030; } .an-bar i.bad { background: #c9563c; } .an-bar i.moon { background: #7c86b8; }
+  .an-timing { display: flex; flex-direction: column; gap: 3px; }
+  .an-cmp { display: grid; grid-template-columns: 90px 1fr 90px; gap: 6px; align-items: center; font-size: 13px; }
+  .an-cmp i { display: block; height: 10px; border-radius: 5px; background: #c9cec4; }
+  .an-cmp i.good { background: #4f9a57; }
+  .an-lessons .keep, .an-lessons .avoid { display: flex; flex-direction: column; gap: 2px; }
   .alert-line { font-size: 13px; background: #fff4e0; color: #6b3e00; border-radius: 8px; padding: 6px 10px; }
   .wx-strip { display: flex; gap: 4px; overflow-x: auto; }
   .wx-day { flex: 1 0 42px; display: grid; justify-items: center; font-size: 12px; padding: 4px 2px; border-radius: 6px;
@@ -1722,6 +1826,7 @@ class HomesteadPanel extends HTMLElement {
     this._renderBanner();
     this._showMessage(this._message.text, this._message.error);
     let content;
+    let wide = false;
     if (this._form && !this._placing) content = this._renderForm();
     else if (this._zoneForm && !this._drawing) content = this._renderZoneForm();
     else if (this._expenseForm) content = this._renderExpenseForm();
@@ -1738,11 +1843,17 @@ class HomesteadPanel extends HTMLElement {
         diary: () => this._renderDiary(),
         seeds: () => this._renderSeedList(),
         expenses: () => this._renderExpenseList(),
+        analysis: () => this._renderAnalysis(),
         tools: () => this._renderToolList(),
       };
       content = [...lists[this._tab](), this._renderBackup()];
+      wide = this._tab === "analysis";
     }
     this._content.replaceChildren(...content.filter(Boolean));
+    if (this._layout.classList.contains("wide-tab") !== wide) {
+      this._layout.classList.toggle("wide-tab", wide);
+      if (!wide) setTimeout(() => this._map.invalidateSize(), 0);
+    }
   }
 
   _renderTabs() {
@@ -1756,6 +1867,7 @@ class HomesteadPanel extends HTMLElement {
       tab("diary", this.t("tabDiary")),
       tab("seeds", this.t("tabSeeds")),
       tab("expenses", this.t("tabExpenses")),
+      tab("analysis", this.t("tabAnalysis")),
       tab("tools", this.t("tabTools")),
     );
   }
@@ -4639,6 +4751,327 @@ class HomesteadPanel extends HTMLElement {
     );
   }
 
+  // ---------- analysis over the years ----------
+
+  /** One row per crop and zone: harvests per year (main unit), plants per year, reviews, expenses. */
+  _cropRows() {
+    const rows = new Map();
+    for (const p of this._data.plantings) {
+      const key = `${p.zone_id || ""}|${p.taxon_id ? `t:${p.taxon_id}` : this._cropKey(p.species)}`;
+      if (!rows.has(key)) {
+        const taxon = this._taxon(p.taxon_id);
+        rows.set(key, {
+          key,
+          zone_id: p.zone_id && this._zone(p.zone_id) ? p.zone_id : "",
+          name: capitalize(taxon?.common_names?.[this._lang()]) || p.name.replace(/\s*\b(19|20)\d\d\b/, "").trim() || p.species,
+          plantings: [],
+        });
+      }
+      rows.get(key).plantings.push(p);
+    }
+    const thisYear = new Date().getFullYear();
+    for (const row of rows.values()) {
+      const ids = new Set(row.plantings.map((p) => p.id));
+      const harvests = this._data.events.filter((e) => e.kind === "harvest" && ids.has(e.planting_id) && e.quantity);
+      const units = {};
+      harvests.forEach((e) => (units[e.unit || "kg"] = (units[e.unit || "kg"] || 0) + 1));
+      row.unit = Object.entries(units).sort((a, b) => b[1] - a[1])[0]?.[0] || "kg";
+      row.years = {};
+      for (const e of harvests.filter((e) => (e.unit || "kg") === row.unit)) {
+        const year = e.done_on.slice(0, 4);
+        const y = (row.years[year] ||= { total: 0, plants: new Map(), ratings: [] });
+        y.total += e.quantity;
+        const p = this._planting(e.planting_id);
+        y.plants.set(p.id, p.kind === "group" ? p.quantity || 1 : 1);
+      }
+      for (const e of this._data.events.filter((e) => e.kind === "review" && ids.has(e.planting_id) && e.rating)) {
+        const y = (row.years[e.done_on.slice(0, 4)] ||= { total: 0, plants: new Map(), ratings: [] });
+        y.ratings.push(e.rating);
+      }
+      const young = row.plantings.some((p) => ["tree", "fruit_tree"].includes(p.plant_type) && ageOf(p) != null && ageOf(p) < 5);
+      const sorted = Object.keys(row.years).sort();
+      for (const year of sorted) {
+        const y = row.years[year];
+        const plants = [...y.plants.values()].reduce((a, b) => a + b, 0);
+        y.perPlant = y.total && plants ? y.total / plants : null;
+        y.plantCount = plants;
+        const before = sorted.filter((other) => other < year).map((other) => row.years[other].perPlant).filter((v) => v != null);
+        const ratio = !young && y.perPlant != null && before.length ? y.perPlant / median(before) : null;
+        const rating = y.ratings.length ? y.ratings.reduce((a, b) => a + b, 0) / y.ratings.length : null;
+        const parts = [ratio != null ? Math.min(ratio, 1.5) : null, rating != null ? rating / 3.5 : null].filter((v) => v != null);
+        y.index = parts.length ? parts.reduce((a, b) => a + b, 0) / parts.length : null;
+        y.ratio = ratio;
+        y.rating = rating;
+      }
+      const spent = this._data.expenses.filter((e) => !e.income && ids.has(e.planting_id)).reduce((sum, e) => sum + e.amount, 0);
+      const amount = Object.values(row.years).reduce((sum, y) => sum + y.total, 0);
+      row.costPerUnit = spent && amount ? spent / amount : null;
+      row.current = row.plantings.some((p) => p.status === "active") || sorted.includes(String(thisYear));
+    }
+    return [...rows.values()].filter((row) => Object.keys(row.years).length);
+  }
+
+  _tone(index) {
+    if (index == null) return "";
+    return index >= 0.9 ? "good" : index >= 0.7 ? "mid" : "bad";
+  }
+
+  _renderAnalysis() {
+    const zone = this._analysisZone || "";
+    const perPlant = !!this._analysisPerPlant;
+    const inZone = (zoneId) => !zone || zoneId === zone || this._zoneDescendants(zone).has(zoneId);
+    const rows = this._cropRows().filter((row) => inZone(row.zone_id));
+    const extremes = this._outlook?.climate?.extremes || [];
+    const allYears = new Set([
+      ...rows.flatMap((row) => Object.keys(row.years)),
+      ...this._data.expenses.map((e) => e.spent_on.slice(0, 4)),
+      ...this._data.events.map((e) => e.done_on.slice(0, 4)),
+    ]);
+    const years = [...allYears].sort().slice(-5);
+    if (!years.length) return [h("p", { className: "hint" }, this.t("anEmpty"))];
+    const zoneSelect = h(
+      "select",
+      {
+        onchange: (ev) => {
+          this._analysisZone = ev.target.value;
+          this._render();
+        },
+      },
+      [["", this.t("allZones")], ...this._zoneOptions().slice(1)].map(([v, text]) => h("option", { value: v, selected: v === zone }, text)),
+    );
+    const weatherOf = (year) => {
+      const ofYear = extremes.filter((x) => x.start.startsWith(year));
+      const days = (kind) => ofYear.filter((x) => x.kind === kind).reduce((n, x) => n + (Date.parse(x.end) - Date.parse(x.start)) / 86400000 + 1, 0);
+      return {
+        heat: days("heatwave"),
+        frost: ofYear.filter((x) => x.kind === "frost").length,
+        hail: ofYear.filter((x) => x.kind === "hail").length,
+      };
+    };
+    const weatherText = (w) =>
+      [
+        w.heat ? this.t("anHeatDays", { count: w.heat }) : null,
+        w.frost ? this.t("anFrosts", { count: w.frost }) : null,
+        w.hail ? this.t("anHail") : null,
+      ]
+        .filter(Boolean)
+        .join(" · ") || this.t("anNoExtremes");
+    const tiles = years.map((year) => {
+      const indices = rows.map((row) => row.years[year]?.index).filter((v) => v != null);
+      const index = indices.length ? indices.reduce((a, b) => a + b, 0) / indices.length : null;
+      const kg = rows.filter((row) => row.unit === "kg").reduce((sum, row) => sum + (row.years[year]?.total || 0), 0);
+      const money = this._data.expenses.filter((e) => e.spent_on.startsWith(year));
+      const balance = money.reduce((sum, e) => sum + (e.income ? e.amount : -e.amount), 0);
+      const tone = this._tone(index);
+      return h(
+        "div",
+        { className: "an-tile" },
+        h("div", { className: "an-tile-head" }, h("strong", {}, year), tone ? h("span", { className: `an-badge ${tone}` }, this.t(`an_${tone}`)) : null),
+        h("div", { className: "sub" }, `${index != null ? `${this.t("anIndex")} ${index.toFixed(2).replace(".", ",")}` : ""}${index != null && kg ? " · " : ""}${kg ? this._quantity(kg, "kg") : ""}`),
+        money.length ? h("div", { className: "sub" }, `${this.t("balance")} ${balance >= 0 ? "+" : ""}${this._money(balance)}`) : null,
+        h("div", { className: "sub" }, weatherText(weatherOf(year))),
+      );
+    });
+    const toggle = h(
+      "div",
+      { className: "segmented" },
+      h("button", { type: "button", className: perPlant ? "" : "active", onclick: () => ((this._analysisPerPlant = false), this._render()) }, this.t("anTotal")),
+      h("button", { type: "button", className: perPlant ? "active" : "", onclick: () => ((this._analysisPerPlant = true), this._render()) }, this.t("anPerPlant")),
+    );
+    const groups = new Map();
+    rows.forEach((row) => {
+      if (!groups.has(row.zone_id)) groups.set(row.zone_id, []);
+      groups.get(row.zone_id).push(row);
+    });
+    const table = h(
+      "div",
+      { className: "an-table", style: `grid-template-columns: minmax(110px, 1.4fr) repeat(${years.length}, minmax(52px, 1fr)) minmax(60px, auto)` },
+      h("div"),
+      years.map((y) => h("div", { className: "an-th" }, y)),
+      h("div", { className: "an-th" }, this.t("anCost")),
+      [...groups.entries()].flatMap(([zoneId, list]) => [
+        h("div", { className: "an-zone" }, zoneId ? this._zonePath(zoneId) : this.t("calNoZone")),
+        ...list.flatMap((row) => [
+          h(
+            "button",
+            { type: "button", className: "an-name", onclick: () => ((this._analysisRow = row.key), this._render()) },
+            row.name,
+          ),
+          ...years.map((year) => {
+            const y = row.years[year];
+            const value = y ? (perPlant ? y.perPlant : y.total) : null;
+            const title = y ? [`${y.plantCount} ${this.t("anPlants")}`, y.rating ? `${y.rating.toFixed(1)} ★` : null, y.ratio ? `×${y.ratio.toFixed(2)}` : null].filter(Boolean).join(" · ") : "";
+            return h("div", { className: `an-cell ${this._tone(y?.index)}`, title }, value != null ? this._quantity(value, row.unit) : "—");
+          }),
+          h("div", { className: "an-cost" }, row.costPerUnit ? `${this._money(row.costPerUnit)}/${this.t(`u_${row.unit}`)}` : "—"),
+        ]),
+      ]),
+    );
+    const selected = rows.find((row) => row.key === this._analysisRow) || rows[0];
+    return [
+      h(
+        "div",
+        { className: "row filters", style: "align-items:center" },
+        h("h2", { style: "flex:2" }, this.t("anTitle")),
+        zoneSelect,
+      ),
+      h("div", { className: "an-tiles" }, tiles),
+      h(
+        "div",
+        { className: "an-box" },
+        h("div", { className: "cal-head" }, h("h3", {}, this.t("anYields")), toggle),
+        rows.length ? table : h("p", { className: "hint" }, this.t("anNoHarvest")),
+        h("p", { className: "hint" }, this.t("anYieldsHint")),
+      ),
+      selected ? this._weatherYieldBox(selected, years, weatherOf, perPlant) : null,
+      this._timingBox(rows),
+      this._moonBox(),
+      this._lessonsBox(),
+    ];
+  }
+
+  _weatherYieldBox(row, years, weatherOf, perPlant) {
+    const values = years.map((year) => {
+      const y = row.years[year];
+      return { year, value: y ? (perPlant ? y.perPlant : y.total) : null, index: y?.index, weather: weatherOf(year) };
+    });
+    const max = Math.max(...values.map((v) => v.value || 0), 0.0001);
+    const hot = values.filter((v) => v.value != null && v.weather.heat >= 5);
+    const mild = values.filter((v) => v.value != null && v.weather.heat < 5);
+    const avg = (list) => list.reduce((s, v) => s + v.value, 0) / list.length;
+    const note =
+      hot.length && mild.length
+        ? this.t("anHeatEffect", { pct: Math.round((1 - avg(hot) / avg(mild)) * 100) })
+        : null;
+    return h(
+      "div",
+      { className: "an-box" },
+      h("h3", {}, this.t("anWeatherYield", { name: row.name })),
+      h(
+        "div",
+        { className: "an-bars" },
+        values.map((v) =>
+          h(
+            "div",
+            { className: "an-bar" },
+            h("span", { className: "sub" }, v.value != null ? this._quantity(v.value, row.unit) : "—"),
+            h("i", { className: this._tone(v.index), style: `height:${v.value ? Math.max((v.value / max) * 120, 3) : 0}px` }),
+            h("strong", {}, v.year),
+            h("span", { className: "sub" }, v.weather.heat ? this.t("anHeatDays", { count: v.weather.heat }) : ""),
+            h("span", { className: "sub" }, v.weather.frost ? this.t("anFrosts", { count: v.weather.frost }) : ""),
+            h("span", { className: "sub" }, v.weather.hail ? this.t("anHail") : ""),
+          ),
+        ),
+      ),
+      note ? h("div", { className: "alert-line" }, note) : null,
+      h("p", { className: "hint" }, this.t("anPickCrop")),
+    );
+  }
+
+  /** Yield per plant by the month the work was done (pruning, planting out), when there are at least two cases. */
+  _timingBox(rows) {
+    const lines = [];
+    const monthName = new Intl.DateTimeFormat(this._lang(), { month: "long" });
+    for (const row of rows) {
+      const ids = new Set(row.plantings.map((p) => p.id));
+      for (const kind of ["pruning", "planted"]) {
+        const byMonth = {};
+        for (const [year, y] of Object.entries(row.years)) {
+          if (y.perPlant == null) continue;
+          let dates = [];
+          if (kind === "planted") dates = row.plantings.filter((p) => p.planted_on?.startsWith(year)).map((p) => p.planted_on);
+          else
+            dates = this._data.events
+              .filter((e) => e.kind === kind && ids.has(e.planting_id))
+              .filter((e) => e.done_on.startsWith(year) || e.done_on.startsWith(String(Number(year) - 1)) && Number(e.done_on.slice(5, 7)) >= 9)
+              .map((e) => e.done_on);
+          if (!dates.length) continue;
+          const month = Number(dates.sort()[0].slice(5, 7));
+          (byMonth[month] ||= []).push(y.perPlant);
+        }
+        const groups = Object.entries(byMonth).map(([m, list]) => ({ month: Number(m), avg: list.reduce((a, b) => a + b, 0) / list.length, n: list.length }));
+        if (groups.length < 2 || groups.reduce((n, g) => n + g.n, 0) < 2) continue;
+        groups.sort((a, b) => b.avg - a.avg);
+        const best = groups[0];
+        const worst = groups.at(-1);
+        lines.push({ row, kind, best, worst });
+      }
+    }
+    if (!lines.length) return h("div", { className: "an-box" }, h("h3", {}, this.t("anTiming")), h("p", { className: "hint" }, this.t("anTimingEmpty")));
+    return h(
+      "div",
+      { className: "an-box" },
+      h("h3", {}, this.t("anTiming")),
+      lines.slice(0, 6).map(({ row, kind, best, worst }) =>
+        h(
+          "div",
+          { className: "an-timing" },
+          h("strong", {}, `${kind === "planted" ? this.t("ev_planted") : this.t(`ev_${kind}`)} · ${row.name}`),
+          h("div", { className: "an-cmp" }, h("span", {}, monthName.format(new Date(2025, best.month - 1, 15))), h("i", { className: "good", style: "width:100%" }), h("span", {}, `${this._quantity(best.avg, row.unit)}/${this.t("anPlantShort")}`)),
+          h("div", { className: "an-cmp" }, h("span", {}, monthName.format(new Date(2025, worst.month - 1, 15))), h("i", { style: `width:${Math.max((worst.avg / best.avg) * 100, 4)}%` }), h("span", {}, `${this._quantity(worst.avg, row.unit)}/${this.t("anPlantShort")}`)),
+          h("span", { className: "sub" }, this.t("anSeasons", { a: best.n, b: worst.n })),
+        ),
+      ),
+      h("p", { className: "hint" }, this.t("anTimingHint")),
+    );
+  }
+
+  /** Average season rating by the moon phase at sowing (or planting), with how many cases. */
+  _moonBox() {
+    const group = { new_moon: "new", waxing_crescent: "waxing", first_quarter: "waxing", waxing_gibbous: "waxing", full_moon: "full", waning_gibbous: "waning", last_quarter: "waning", waning_crescent: "waning" };
+    const stats = { new: [], waxing: [], full: [], waning: [] };
+    for (const p of this._data.plantings) {
+      const phase = p.sown_moon_phase || p.moon_phase;
+      const start = p.sown_on || p.planted_on;
+      if (!phase || !start) continue;
+      const review = this._data.events.find((e) => e.kind === "review" && e.planting_id === p.id && e.rating && e.done_on.slice(0, 4) === start.slice(0, 4));
+      if (review) stats[group[phase]].push(review.rating);
+    }
+    const total = Object.values(stats).reduce((n, list) => n + list.length, 0);
+    const avg = (list) => (list.length ? list.reduce((a, b) => a + b, 0) / list.length : null);
+    const values = Object.entries(stats).map(([key, list]) => ({ key, avg: avg(list), n: list.length }));
+    const known = values.filter((v) => v.avg != null).map((v) => v.avg);
+    const spread = known.length > 1 ? Math.max(...known) - Math.min(...known) : 0;
+    return h(
+      "div",
+      { className: "an-box" },
+      h("h3", {}, this.t("anMoon")),
+      total
+        ? h(
+            "div",
+            { className: "an-bars moon" },
+            values.map((v) =>
+              h(
+                "div",
+                { className: "an-bar" },
+                h("span", { className: "sub" }, v.avg != null ? `${v.avg.toFixed(1).replace(".", ",")} ★` : "—"),
+                h("i", { className: "moon", style: `height:${v.avg ? (v.avg / 5) * 90 : 0}px` }),
+                h("strong", {}, this.t(`anMoon_${v.key}`)),
+                h("span", { className: "sub" }, this.t("anCases", { count: v.n })),
+              ),
+            ),
+          )
+        : null,
+      h("p", { className: "hint" }, !total ? this.t("anMoonEmpty") : total < 20 || spread < 0.6 ? this.t("anMoonWeak") : this.t("anMoonNote")),
+    );
+  }
+
+  _lessonsBox() {
+    const reviews = this._data.events
+      .filter((e) => e.kind === "review" && (e.keep || e.avoid))
+      .sort((a, b) => b.done_on.localeCompare(a.done_on))
+      .slice(0, 8);
+    if (!reviews.length) return null;
+    const line = (e, text) => h("div", { className: "sub", style: "white-space:normal" }, `${e.done_on.slice(0, 4)} · ${this._targetName(e)}: ${text}`);
+    return h(
+      "div",
+      { className: "an-box an-lessons" },
+      h("h3", {}, this.t("anLessons")),
+      h("div", { className: "keep" }, h("strong", {}, this.t("keep")), reviews.filter((e) => e.keep).map((e) => line(e, e.keep))),
+      h("div", { className: "avoid" }, h("strong", {}, this.t("avoid")), reviews.filter((e) => e.avoid).map((e) => line(e, e.avoid))),
+    );
+  }
+
   // ---------- rotation ----------
 
   _plantingYear(p) {
@@ -4953,6 +5386,16 @@ class HomesteadPanel extends HTMLElement {
 }
 
 /** Same computation as moon.py, to show the phase while typing the date. */
+function capitalize(text) {
+  return text ? text[0].toUpperCase() + text.slice(1) : "";
+}
+
+function median(values) {
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+}
+
 function moonPhase(iso) {
   const synodic = 29.530588853;
   const days = Math.round((Date.UTC(...iso.split("-").map((v, i) => Number(v) - (i === 1 ? 1 : 0))) - Date.UTC(2000, 0, 6)) / 86400000);
