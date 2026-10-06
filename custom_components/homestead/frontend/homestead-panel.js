@@ -145,6 +145,17 @@ const TEXT = {
     cropBox: "🌿 Crop data",
     calendar: "Calendar: next two weeks and the year",
     calPlan: "📅 Year plan",
+    calNext: "📋 To do in the next two weeks",
+    calMore: "and {count} more in the Diary",
+    calNoZone: "Without zone",
+    calToday: "today",
+    calPlants: "{count} plants",
+    calTasks: "{count} planned",
+    calEvents: "{count} done",
+    calWholeZone: "whole zone",
+    calGeneral: "General",
+    cal_wood: "woodcutting period",
+    cal_foraging: "foraging",
     calHistory: "📜 History",
     calPlanned: "planned",
     calWeather: "Weather",
@@ -498,6 +509,17 @@ const TEXT = {
     cropBox: "🌿 Scheda colturale",
     calendar: "Calendario: prossime due settimane e l'anno",
     calPlan: "📅 Programma",
+    calNext: "📋 Da fare nelle prossime 2 settimane",
+    calMore: "e altre {count} nel Diario",
+    calNoZone: "Senza zona",
+    calToday: "oggi",
+    calPlants: "{count} piante",
+    calTasks: "{count} previste",
+    calEvents: "{count} fatte",
+    calWholeZone: "tutta la zona",
+    calGeneral: "Generale",
+    cal_wood: "periodo di taglio",
+    cal_foraging: "raccolta spontanea",
     calHistory: "📜 Storico",
     calPlanned: "previsto",
     calWeather: "Meteo",
@@ -762,6 +784,10 @@ const SEED_VIABILITY = {
   Malvaceae: 3,
 };
 const ROTATION_YEARS = 3;
+const ZONE_ICONS = { vegetable_garden: "🥕", orchard: "🍎", flower_bed: "🌸", greenhouse: "🏠", pots: "🪴", lawn: "🌾", woodland: "🌲", other: "▭" };
+// Typical work of a whole zone, shown on the calendar when the zone itself has no plantings.
+const ZONE_SEASONS = { woodland: [["wood", [11, 12, 1, 2, 3]], ["foraging", [9, 10, 11]]] };
+const CAL_COLOR = { wood: "#6d4c41", foraging: "#8e7cc3" };
 const CROP_MONTHS = ["sow_indoor", "sow_outdoor", "plant_out", "flowering", "harvest", "pruning", "fertilizing", "end"];
 const CROP_COLOR = {
   sow_indoor: "#8d6e63",
@@ -835,6 +861,11 @@ const STYLE = `
   button.primary { background: var(--primary-color); color: var(--text-primary-color, #fff); border-color: transparent; }
   button.danger { color: var(--error-color, #db4437); }
   .banner button { background: transparent; color: inherit; border-color: currentColor; }
+  .tabs-bar { display: flex; gap: 2px; padding: 0 12px; flex: none; overflow-x: auto; scrollbar-width: none;
+    background: var(--card-background-color); border-bottom: 1px solid var(--divider-color); }
+  .tabs-bar button { border: none; border-bottom: 3px solid transparent; border-radius: 0; background: none; flex: none;
+    padding: 11px 14px 8px; font-size: 15px; color: var(--secondary-text-color); }
+  .tabs-bar button.active { border-bottom-color: var(--homestead-accent, #3a7d44); color: var(--homestead-accent, #3a7d44); font-weight: 700; }
   .tabs { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 1px solid var(--divider-color); }
   .tabs { overflow-x: auto; scrollbar-width: none; }
   .tabs button { border: none; border-bottom: 2px solid transparent; border-radius: 0; background: none; flex: 1 0 auto;
@@ -944,35 +975,61 @@ const STYLE = `
   .csv-row.off { opacity: .5; }
   .csv-row .err { font-size: 12px; color: var(--warning-color, #ffa600); }
   .csv-list { display: grid; gap: 8px; margin: 12px 0; }
-  .calendar { flex: 1; min-width: 0; overflow: auto; padding: 8px; box-sizing: border-box; display: none;
+  .calendar { flex: 1; min-width: 0; overflow: auto; padding: 10px; box-sizing: border-box; display: none;
     background: var(--primary-background-color); }
   .calendar-on .calendar { display: block; }
   .calendar-on .map { display: none; }
-  .narrow.calendar-on .calendar { flex: 0 0 55%; }
-  .days { display: grid; grid-template-columns: repeat(14, minmax(46px, 1fr)); gap: 2px; text-align: center; font-size: 13px;
-    margin-bottom: 8px; overflow-x: auto; }
-  .day-col { display: grid; gap: 1px; align-content: start; padding: 4px 2px; border-radius: 6px; background: var(--card-background-color); }
-  .day-col.alert { box-shadow: inset 0 0 0 2px var(--warning-color, #ffa600); }
-  .day-col .sub { white-space: normal; }
-  .day-col .wx { font-size: 20px; }
-  .day-col .rain { color: #1e88e5; min-height: 14px; }
-  .alert-chip { font-size: 14px; }
-  .task-chip { padding: 0; border: none; background: none; font-size: 16px; border-radius: 4px; }
-  .task-chip.good { box-shadow: inset 0 -3px 0 #43a047; }
-  .task-chip.warn { box-shadow: inset 0 -3px 0 #ffa600; }
-  .task-chip.better { opacity: .7; font-weight: 700; color: #43a047; }
-  .cal-grid { display: grid; grid-template-columns: minmax(100px, 170px) repeat(12, minmax(22px, 1fr)); gap: 2px; font-size: 12px; }
-  .cal-month { text-align: center; color: var(--secondary-text-color); }
-  .cal-month.now { color: var(--primary-color); font-weight: 700; }
-  .cal-name { text-align: left; border: none; background: none; padding: 2px 4px; white-space: nowrap; overflow: hidden;
-    text-overflow: ellipsis; font-size: 12px; border-radius: 4px; }
-  .cal-name.static { color: var(--secondary-text-color); }
-  .cal-cell { position: relative; min-height: 24px; display: flex; flex-direction: column; justify-content: center; gap: 1px;
-    background: var(--card-background-color); border: none; padding: 1px; border-radius: 3px; font-size: 12px; }
-  .cal-cell.now { box-shadow: inset 0 0 0 1px var(--primary-color); }
-  .cal-cell.icons { align-items: center; }
-  .cal-band { display: block; height: 4px; border-radius: 2px; }
-  .cal-task { position: absolute; top: -2px; right: -2px; border: none; background: none; padding: 0; font-size: 11px; }
+  .narrow.calendar-on .calendar { flex: 0 0 60%; }
+  .cal-box { background: var(--card-background-color); border: 1px solid var(--divider-color); border-radius: 10px;
+    padding: 10px 12px; margin-bottom: 10px; display: grid; gap: 8px; }
+  .cal-head { display: flex; align-items: center; gap: 8px; }
+  .cal-head h3 { flex: 1; margin: 0; font-size: 16px; font-weight: 700; }
+  .cal-head .tabs { flex: 1; margin: 0; }
+  .action-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; }
+  .action-card { display: flex; border: 2px solid var(--divider-color); border-radius: 10px; background: var(--card-background-color); }
+  .action-card.good { border-color: #2f7d32; background: rgba(47, 125, 50, .07); }
+  .action-card.warn { border-color: #e69100; background: rgba(230, 145, 0, .08); }
+  .action-card.late { border-color: #b3261e; background: rgba(179, 38, 30, .07); }
+  .action-main { flex: 1; min-width: 0; text-align: left; border: none; background: none; display: grid; gap: 2px; padding: 8px 10px; }
+  .action-date { font-size: 12px; font-weight: 700; color: var(--secondary-text-color); }
+  .action-title { font-size: 15px; font-weight: 700; }
+  .action-verdict { font-size: 12px; }
+  .action-card.warn .action-verdict { color: #8a4b00; }
+  .action-card.good .action-verdict { color: #1f5e24; }
+  .action-card.late .action-verdict { color: #8c1d15; font-weight: 700; }
+  .action-card .tick { border: none; background: none; width: 44px; color: #2f7d32; font-size: 18px; border-radius: 0 8px 8px 0; }
+  .alert-line { font-size: 13px; background: #fff4e0; color: #6b3e00; border-radius: 8px; padding: 6px 10px; }
+  .wx-strip { display: flex; gap: 4px; overflow-x: auto; }
+  .wx-day { flex: 1 0 42px; display: grid; justify-items: center; font-size: 12px; padding: 4px 2px; border-radius: 6px;
+    background: var(--secondary-background-color); }
+  .wx-day.alert { box-shadow: inset 0 0 0 2px var(--warning-color, #ffa600); }
+  .timeline-grid { position: relative; --lab: 208px; }
+  .narrow .timeline-grid { --lab: 128px; }
+  .tl-row { display: grid; grid-template-columns: calc(var(--lab) - 8px) minmax(0, 1fr); column-gap: 8px; align-items: center; }
+  .tl-track { position: relative; height: 30px; border-bottom: 1px solid var(--divider-color); }
+  .tl-months .tl-track { height: 20px; border: none; }
+  .tl-month { position: absolute; top: 2px; font-size: 11px; color: var(--secondary-text-color); padding-left: 3px;
+    border-left: 1px solid var(--divider-color); }
+  .tl-label { text-align: left; border: none; background: none; padding: 4px 4px 4px 22px; font-size: 13px; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; border-radius: 4px; }
+  .tl-label.static { color: var(--secondary-text-color); padding-left: 4px; }
+  .tl-group { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; width: 100%; text-align: left; margin-top: 8px;
+    border: none; border-radius: 6px; padding: 6px 8px; background: var(--secondary-background-color); font-size: 14px; }
+  .tl-arrow { width: 14px; }
+  .tl-band { position: absolute; height: 5px; border-radius: 3px; }
+  .tl-pill { position: absolute; transform: translateX(-50%); z-index: 2; white-space: nowrap; font-size: 11px;
+    font-weight: 700; color: #fff; background: #c0522f; border: 2px solid var(--card-background-color); border-radius: 11px;
+    padding: 1px 7px; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); }
+  .tl-pill.warn { background: #a35c00; }
+  .tl-pill.late { background: #b3261e; }
+  .tl-pill-sample { display: inline-block; width: 22px; height: 10px; border-radius: 5px; background: #c0522f; margin-right: 4px; }
+  .tl-mark { position: absolute; top: 50%; transform: translateY(-50%); font-size: 14px; border: none; border-bottom: 3px solid transparent;
+    background: none; padding: 0; line-height: 1; white-space: nowrap; }
+  .tl-mark.event { transform: translate(-50%, -50%); }
+  .tl-today { position: absolute; top: 18px; bottom: 0; width: 2px; background: #1d4fd8; pointer-events: none; z-index: 3;
+    left: calc(var(--lab) + (100% - var(--lab)) * var(--x)); }
+  .tl-today span { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 10px; font-weight: 700;
+    color: #fff; background: #1d4fd8; border-radius: 4px; padding: 0 5px; }
   .legend { margin-bottom: 6px; }
   .legend i { display: inline-block; width: 12px; height: 6px; border-radius: 2px; margin-right: 4px; }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -1061,6 +1118,7 @@ class HomesteadPanel extends HTMLElement {
           "⚙️",
         ),
       ),
+      (this._tabsEl = h("nav", { className: "tabs-bar" })),
       h("div", { className: "body" }, this._mapWrap, (this._calWrap = h("div", { className: "calendar" })), this._aside),
     );
     root.append(
@@ -1660,6 +1718,7 @@ class HomesteadPanel extends HTMLElement {
 
   _render() {
     if (!this._aside) return;
+    this._tabsEl.replaceChildren(this._renderTabs());
     this._renderBanner();
     this._showMessage(this._message.text, this._message.error);
     let content;
@@ -1681,7 +1740,7 @@ class HomesteadPanel extends HTMLElement {
         expenses: () => this._renderExpenseList(),
         tools: () => this._renderToolList(),
       };
-      content = [this._renderTabs(), ...lists[this._tab](), this._renderBackup()];
+      content = [...lists[this._tab](), this._renderBackup()];
     }
     this._content.replaceChildren(...content.filter(Boolean));
   }
@@ -1691,7 +1750,7 @@ class HomesteadPanel extends HTMLElement {
       h("button", { className: this._tab === name ? "active" : "", onclick: () => this._setTab(name) }, label);
     return h(
       "div",
-      { className: "tabs" },
+      { style: "display:contents" },
       tab("plantings", this.t("tabPlantings")),
       tab("zones", this.t("tabZones")),
       tab("diary", this.t("tabDiary")),
@@ -4183,10 +4242,79 @@ class HomesteadPanel extends HTMLElement {
         },
         label,
       );
+    const scroll = this._calWrap.scrollTop;
     this._calWrap.replaceChildren(
-      this._daysStrip(),
-      h("div", { className: "tabs" }, tab("plan", this.t("calPlan")), tab("history", this.t("calHistory"))),
-      mode === "history" ? this._historyGrid() : this._planGrid(),
+      this._actionsBox(),
+      h(
+        "div",
+        { className: "cal-box" },
+        h("div", { className: "cal-head" }, h("div", { className: "tabs" }, tab("plan", this.t("calPlan")), tab("history", this.t("calHistory")))),
+        mode === "history" ? this._historyTimeline() : this._planTimeline(),
+      ),
+    );
+    this._calWrap.scrollTop = scroll;
+  }
+
+  // ----- top: what to do in the next two weeks -----
+
+  _actionsBox() {
+    const now = today();
+    const limit = new Date(`${now}T12:00:00`);
+    limit.setDate(limit.getDate() + 14);
+    const end = limit.toISOString().slice(0, 10);
+    const advice = this._outlook?.advice || {};
+    const tasks = this._data.tasks
+      .filter((t) => !t.done_on && t.due_on <= end)
+      .sort((a, b) => a.due_on.localeCompare(b.due_on));
+    const weekday = new Intl.DateTimeFormat(this._lang(), { weekday: "short" });
+    const cards = tasks.slice(0, 8).map((t) => {
+      const verdict = advice[t.id];
+      const late = t.due_on < now;
+      const state = late ? "late" : !verdict ? "" : verdict.issues.length ? "warn" : "good";
+      const verdictText = late
+        ? this.t("overdue")
+        : !verdict
+          ? ""
+          : verdict.issues.length
+            ? `⚠️ ${verdict.issues.map((issue) => this.t(`issue_${issue}`)).join(", ")}${verdict.best ? ` · ${this.t("better_on", { date: this._date(verdict.best, false) })}` : ""}`
+            : this.t("goodDay");
+      return h(
+        "div",
+        { className: `action-card ${state}` },
+        h(
+          "button",
+          { type: "button", className: "action-main", onclick: () => this._openTask(t) },
+          h("span", { className: "action-date" }, `${weekday.format(new Date(`${t.due_on}T12:00:00`))} ${this._date(t.due_on, false)}`),
+          h("span", { className: "action-title" }, `${EVENT_ICONS[t.kind] || "📝"} ${t.title || this.t(`ev_${t.kind}`)}`),
+          t.planting_id || t.zone_id ? h("span", { className: "sub" }, this._targetName(t)) : null,
+          verdictText ? h("span", { className: "action-verdict" }, verdictText) : null,
+        ),
+        h("button", { type: "button", className: "tick", title: this.t("done"), onclick: () => this._completeFromTask(t) }, "✔"),
+      );
+    });
+    const alerts = this._outlook?.alerts || [];
+    const when = (a) => (a.start === a.end ? this._date(a.start, false) : `${this._date(a.start, false)}–${this._date(a.end, false)}`);
+    return h(
+      "div",
+      { className: "cal-box" },
+      h(
+        "div",
+        { className: "cal-head" },
+        h("h3", {}, this.t("calNext")),
+        h("button", { type: "button", onclick: () => this._openTask({ kind: "note", due_on: today() }) }, this.t("addTask")),
+      ),
+      cards.length ? h("div", { className: "action-cards" }, cards) : h("p", { className: "hint" }, this.t("nothingToDo")),
+      tasks.length > cards.length ? h("div", { className: "sub" }, this.t("calMore", { count: tasks.length - cards.length })) : null,
+      alerts.map((a) => {
+        const names = a.plantings.map((id) => this._planting(id)?.name).filter(Boolean);
+        const everyone = ["heatwave", "heat_extreme"].includes(a.kind);
+        return h(
+          "div",
+          { className: "alert-line" },
+          `${this.t(`al_${a.kind}`, { when: when(a), value: a.value })}${names.length && !everyone ? ` — ${names.slice(0, 5).join(", ")}` : ""}`,
+        );
+      }),
+      this._weatherStrip(),
     );
   }
 
@@ -4219,114 +4347,225 @@ class HomesteadPanel extends HTMLElement {
     return byCondition[day.condition] || ((day.rain_mm || 0) >= 1 ? "🌧️" : "☀️");
   }
 
-  /** The next two weeks: weather, alerts and the planned activities with their weather verdict. */
-  _daysStrip() {
+  _weatherStrip() {
     const days = (this._outlook?.forecast || []).slice(0, 14);
     if (!days.length) return h("p", { className: "hint" }, this.t("calNoForecast"));
     const alerts = this._outlook?.alerts || [];
-    const advice = this._outlook?.advice || {};
-    const tasks = this._data.tasks.filter((t) => !t.done_on);
-    const weekday = new Intl.DateTimeFormat(this._lang(), { weekday: "short" });
-    const alertIcon = { frost: "❄️", cold: "🥶", heatwave: "🔥", heat_extreme: "🔥", heat_stress: "🥵" };
-    const columns = days.map((day) => {
-      const dayAlerts = alerts.filter((a) => a.start <= day.date && day.date <= a.end);
-      const due = tasks.filter((t) => t.due_on === day.date);
-      const better = tasks.filter((t) => advice[t.id]?.best === day.date);
-      return h(
-        "div",
-        { className: `day-col${dayAlerts.length ? " alert" : ""}` },
-        h("div", { className: "sub" }, `${weekday.format(new Date(`${day.date}T12:00:00`))} ${this._date(day.date, false)}`),
-        h("div", { className: "wx" }, this._weatherIcon(day)),
-        h("div", {}, `${day.t_max != null ? Math.round(day.t_max) : "–"}°`),
-        h("div", { className: "sub" }, `${day.t_min != null ? Math.round(day.t_min) : "–"}°`),
-        h("div", { className: "sub rain" }, day.rain_mm ? `${Math.round(day.rain_mm)} mm` : ""),
-        dayAlerts.map((a) =>
-          h("div", { className: `alert-chip ${a.kind}`, title: this.t(`al_${a.kind}`, { when: this._date(a.start, false), value: a.value }) }, alertIcon[a.kind]),
+    const weekday = new Intl.DateTimeFormat(this._lang(), { weekday: "narrow" });
+    return h(
+      "div",
+      { className: "wx-strip" },
+      days.map((day) =>
+        h(
+          "div",
+          { className: `wx-day${alerts.some((a) => a.start <= day.date && day.date <= a.end) ? " alert" : ""}`, title: `${this._date(day.date)}${day.rain_mm ? ` · ${day.rain_mm} mm` : ""}` },
+          h("span", { className: "sub" }, `${weekday.format(new Date(`${day.date}T12:00:00`))} ${day.date.slice(8)}`),
+          h("span", {}, this._weatherIcon(day)),
+          h("span", {}, `${day.t_max != null ? Math.round(day.t_max) : "–"}°`),
+          h("span", { className: "sub" }, `${day.t_min != null ? Math.round(day.t_min) : "–"}°`),
         ),
-        due.map((t) => {
-          const verdict = advice[t.id];
-          const state = !verdict ? "" : verdict.issues.length ? " warn" : " good";
-          return h(
-            "button",
-            { className: `task-chip${state}`, title: this._taskLabel(t), onclick: () => this._openTask(t) },
-            EVENT_ICONS[t.kind] || "📝",
-          );
-        }),
-        better.map((t) => h("button", { className: "task-chip better", title: `↪ ${this._taskLabel(t)}`, onclick: () => this._openTask(t) }, "↪")),
-      );
-    });
-    return h("div", { className: "days" }, columns);
+      ),
+    );
   }
 
-  _monthHeader(first) {
-    const letters = this._monthLetters();
-    const now = new Date().getMonth();
-    return [first, ...letters.map((m, i) => h("div", { className: `cal-month${i === now ? " now" : ""}` }, m))];
+  // ----- the year as one continuous line, grouped by zone -----
+
+  /** Fraction of the year (0–1) of an ISO date. */
+  _yearFraction(iso) {
+    const [y, m, d] = iso.split("-").map(Number);
+    const start = Date.UTC(y, 0, 1);
+    const length = Date.UTC(y + 1, 0, 1) - start;
+    return (Date.UTC(y, m - 1, d) - start + 43200000) / length;
   }
 
-  _plantRows() {
-    const order = Object.keys(PLANT_ICONS);
-    return this._data.plantings
-      .filter((p) => p.status === "active")
-      .sort((a, b) => {
-        const ta = order.indexOf(a.plant_type);
-        const tb = order.indexOf(b.plant_type);
-        return (ta < 0 ? 99 : ta) - (tb < 0 ? 99 : tb) || a.name.localeCompare(b.name);
+  /** Month numbers → continuous [from, to] fractions, consecutive months merged. */
+  _monthSegments(months) {
+    const sorted = [...new Set(months)].sort((a, b) => a - b);
+    const segments = [];
+    for (const month of sorted) {
+      const from = (month - 1) / 12;
+      if (segments.length && Math.abs(segments.at(-1)[1] - from) < 1e-9) segments.at(-1)[1] = month / 12;
+      else segments.push([from, month / 12]);
+    }
+    return segments;
+  }
+
+  _calClosed() {
+    if (!this._calClosedSet) {
+      try {
+        this._calClosedSet = new Set(JSON.parse(localStorage.getItem("homestead-cal-closed") || "[]"));
+      } catch {
+        this._calClosedSet = new Set();
+      }
+    }
+    return this._calClosedSet;
+  }
+
+  _toggleGroup(id) {
+    const closed = this._calClosed();
+    closed.has(id) ? closed.delete(id) : closed.add(id);
+    try {
+      localStorage.setItem("homestead-cal-closed", JSON.stringify([...closed]));
+    } catch {
+      // not remembered
+    }
+    this._renderCalendar();
+  }
+
+  /** Zones in tree order (with their path) and the plantings and tasks of each; then what has no zone. */
+  _calendarGroups() {
+    const groups = [];
+    const seen = new Set();
+    const walk = (parent) =>
+      this._data.zones
+        .filter((z) => (z.parent_id || null) === parent || (parent === null && z.parent_id && !this._zone(z.parent_id)))
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .forEach((z) => {
+          if (seen.has(z.id)) return;
+          seen.add(z.id);
+          groups.push({ id: z.id, zone: z, name: this._zonePath(z.id), plantings: this._data.plantings.filter((p) => p.zone_id === z.id) });
+          walk(z.id);
+        });
+    walk(null);
+    const loose = this._data.plantings.filter((p) => !p.zone_id || !this._zone(p.zone_id));
+    groups.push({ id: "", zone: null, name: this.t("calNoZone"), plantings: loose });
+    return groups;
+  }
+
+  _timelineHeader() {
+    const letters = new Intl.DateTimeFormat(this._lang(), { month: "short" });
+    return h(
+      "div",
+      { className: "tl-row tl-months" },
+      h("div"),
+      h(
+        "div",
+        { className: "tl-track" },
+        Array.from({ length: 12 }, (_, i) =>
+          h("span", { className: "tl-month", style: `left:${(i / 12) * 100}%` }, letters.format(new Date(2025, i, 15)).replace(".", "")),
+        ),
+      ),
+    );
+  }
+
+  _todayLine() {
+    return h("div", { className: "tl-today", style: `--x:${this._yearFraction(today())}` }, h("span", {}, this.t("calToday")));
+  }
+
+  _groupHeader(group, summary) {
+    const open = !this._calClosed().has(group.id);
+    return h(
+      "button",
+      { type: "button", className: "tl-group", onclick: () => this._toggleGroup(group.id), "aria-expanded": open ? "true" : "false" },
+      h("span", { className: "tl-arrow" }, open ? "▾" : "▸"),
+      h("strong", {}, group.zone ? `${ZONE_ICONS[group.zone.kind] || "▭"} ${group.name}` : group.name),
+      h("span", { className: "sub" }, summary),
+    );
+  }
+
+  _bandRow(label, onclick, bands, pills, extra = null) {
+    const lanes = [...new Set(bands.map((b) => b.lane))];
+    const pillRows = Math.max(0, ...pills.map((pill) => Number(pill.dataset.row ?? -1) + 1));
+    const height = Math.max(30, 10 + lanes.length * 7, 6 + pillRows * 20);
+    return h(
+      "div",
+      { className: "tl-row" },
+      h("button", { type: "button", className: "tl-label", title: label, onclick }, label),
+      h(
+        "div",
+        { className: "tl-track", style: `height:${height}px` },
+        bands.map((b) =>
+          h("i", {
+            className: "tl-band",
+            title: b.title,
+            style: `left:${b.from * 100}%;width:${Math.max((b.to - b.from) * 100, 0.8)}%;top:${5 + lanes.indexOf(b.lane) * 7}px;background:${b.color}`,
+          }),
+        ),
+        pills,
+        extra,
+      ),
+    );
+  }
+
+  /** Planned activities as pills at their date; pills too close to each other go on the next line. */
+  _taskPills(tasks, year) {
+    const now = today();
+    const lastAt = [];
+    return tasks
+      .filter((t) => !t.done_on && t.due_on.startsWith(year))
+      .sort((a, b) => a.due_on.localeCompare(b.due_on))
+      .map((t) => {
+        const verdict = this._outlook?.advice?.[t.id];
+        const state = t.due_on < now ? " late" : verdict?.issues.length ? " warn" : "";
+        const x = this._yearFraction(t.due_on);
+        let row = lastAt.findIndex((end) => x - end > 0.09);
+        if (row < 0) row = lastAt.length;
+        lastAt[row] = x;
+        return h(
+          "button",
+          {
+            type: "button",
+            className: `tl-pill${state}`,
+            "data-row": row,
+            style: `left:${x * 100}%;top:${4 + row * 20}px`,
+            title: `${this._date(t.due_on)} · ${this._taskLabel(t)}`,
+            onclick: () => this._openTask(t),
+          },
+          `${EVENT_ICONS[t.kind] || "📝"} ${t.title || this.t(`ev_${t.kind}`)}`,
+        );
       });
   }
 
-  /** Every active plant over the 12 months: what its crop data says, plus the planned activities. */
-  _planGrid() {
-    const now = new Date().getMonth() + 1;
-    const year = new Date().getFullYear();
-    const plants = this._plantRows();
-    if (!plants.length) return h("p", { className: "hint" }, this.t("empty"));
-    const legend = h(
-      "div",
-      { className: "chips legend" },
-      CROP_MONTHS.map((key) => h("span", { className: "chip" }, h("i", { style: `background:${CROP_COLOR[key]}` }), this.t(key))),
-      h("span", { className: "chip" }, "📋 ", this.t("calPlanned")),
-    );
-    const cells = [];
-    for (const p of plants) {
-      const crop = this._crop(p.species);
-      const keys = CROP_MONTHS.filter((key) => crop?.[key]?.length);
-      const tasks = this._data.tasks.filter(
-        (t) => !t.done_on && (t.planting_id === p.id || (t.zone_id && this._inZone(p, t.zone_id))) && Number(t.due_on.slice(0, 4)) <= year + 1,
-      );
-      cells.push(
-        h(
-          "button",
-          { className: "cal-name", title: [p.name, p.species].join(" — "), onclick: () => this._select(p.id) },
-          `${PLANT_ICONS[p.plant_type] || "🌱"} ${p.name}`,
-        ),
-      );
-      for (let month = 1; month <= 12; month++) {
-        const planned = tasks.filter((t) => Number(t.due_on.slice(5, 7)) === month);
-        cells.push(
-          h(
-            "div",
-            {
-              className: `cal-cell${month === now ? " now" : ""}`,
-              title: keys.filter((key) => crop[key].includes(month)).map((key) => this.t(key)).join(", "),
-            },
-            keys.map((key) => h("i", { className: "cal-band", style: crop[key].includes(month) ? `background:${CROP_COLOR[key]}` : "" })),
-            planned.length
-              ? h(
-                  "button",
-                  { className: "cal-task", title: planned.map((t) => `${this._date(t.due_on)} ${this._taskLabel(t)}`).join("\n"), onclick: () => this._openTask(planned[0]) },
-                  "📋",
-                )
-              : null,
+  /** The year to come per zone: crop calendar bands, typical zone work, and the planned activities as pills. */
+  _planTimeline() {
+    const year = String(new Date().getFullYear());
+    const openTasks = this._data.tasks.filter((t) => !t.done_on);
+    const rows = [this._timelineHeader()];
+    const legendKeys = new Set();
+    for (const group of this._calendarGroups()) {
+      const plantings = group.plantings.filter((p) => p.status === "active");
+      const zoneTasks = group.zone ? openTasks.filter((t) => t.zone_id === group.zone.id) : openTasks.filter((t) => !t.planting_id && !t.zone_id);
+      const plantTasks = openTasks.filter((t) => plantings.some((p) => p.id === t.planting_id));
+      const zoneBands = group.zone ? ZONE_SEASONS[group.zone.kind] || [] : [];
+      if (!plantings.length && !zoneTasks.length && !zoneBands.length) continue;
+      const count = zoneTasks.length + plantTasks.length;
+      rows.push(this._groupHeader(group, [plantings.length ? this.t("calPlants", { count: plantings.length }) : null, count ? this.t("calTasks", { count }) : null].filter(Boolean).join(" · ")));
+      if (this._calClosed().has(group.id)) continue;
+      if (zoneBands.length || zoneTasks.length) {
+        const bands = zoneBands.map(([key, months]) => {
+          legendKeys.add(key);
+          return this._monthSegments(months).map(([from, to]) => ({ from, to, lane: key, color: CAL_COLOR[key], title: this.t(`cal_${key}`) }));
+        });
+        rows.push(
+          this._bandRow(
+            group.zone ? `▭ ${this.t("calWholeZone")}` : this.t("calGeneral"),
+            () => group.zone && this._selectZone(group.zone.id),
+            bands.flat(),
+            this._taskPills(zoneTasks, year),
           ),
         );
       }
+      for (const p of plantings.sort((a, b) => a.name.localeCompare(b.name))) {
+        const crop = this._crop(p.species);
+        const bands = CROP_MONTHS.filter((key) => crop?.[key]?.length).flatMap((key) => {
+          legendKeys.add(key);
+          return this._monthSegments(crop[key]).map(([from, to]) => ({ from, to, lane: key, color: CROP_COLOR[key], title: this.t(key) }));
+        });
+        const label = `${PLANT_ICONS[p.plant_type] || "🌱"} ${p.name}${p.kind === "group" && p.quantity > 1 ? ` (${p.quantity})` : ""}`;
+        rows.push(this._bandRow(label, () => this._select(p.id), bands, this._taskPills(openTasks.filter((t) => t.planting_id === p.id), year)));
+      }
     }
-    return h("div", {}, legend, h("div", { className: "cal-grid" }, this._monthHeader(h("div")), cells));
+    const legend = h(
+      "div",
+      { className: "chips legend" },
+      [...legendKeys].map((key) => h("span", { className: "chip" }, h("i", { style: `background:${CROP_COLOR[key] || CAL_COLOR[key]}` }), CROP_COLOR[key] ? this.t(key) : this.t(`cal_${key}`))),
+      h("span", { className: "chip" }, h("b", { className: "tl-pill-sample" }), this.t("calPlanned")),
+    );
+    return h("div", {}, legend, h("div", { className: "timeline-grid" }, rows, this._todayLine()));
   }
 
-  /** A past year: what was really done, month by month, under the weather extremes of that year. */
-  _historyGrid() {
+  /** A past year: what was really done, at its date, under that year's weather extremes. */
+  _historyTimeline() {
     const extremes = this._outlook?.climate?.extremes || [];
     const events = this._data.events;
     const years = [...new Set([...events.map((e) => e.done_on.slice(0, 4)), ...extremes.map((x) => x.start.slice(0, 4))])].sort().reverse();
@@ -4343,61 +4582,60 @@ class HomesteadPanel extends HTMLElement {
       years.map((y) => h("option", { value: y, selected: y === year }, y)),
     );
     const extremeIcon = { frost: "❄️", heatwave: "🔥", heat_extreme: "🔥", hail: "🧊", heavy_rain: "🌧️" };
-    const cells = [h("div", { className: "cal-name static" }, `🌦️ ${this.t("calWeather")}`)];
-    for (let month = 1; month <= 12; month++) {
-      const inMonth = extremes.filter((x) => x.start.slice(0, 4) === year && Number(x.start.slice(5, 7)) === month);
-      const icons = [...new Set(inMonth.map((x) => extremeIcon[x.kind]))].join("");
-      const title = inMonth
-        .map((x) => `${extremeIcon[x.kind]} ${this.t(`xt_${x.kind}`)} ${this._date(x.start, false)}${x.end !== x.start ? `–${this._date(x.end, false)}` : ""}${x.value != null ? ` (${x.value}${x.kind === "heavy_rain" ? " mm" : " °C"})` : ""}`)
-        .join("\n");
-      cells.push(h("div", { className: "cal-cell icons", title }, icons));
-    }
-    const ofYear = events.filter((e) => e.done_on.startsWith(year));
-    const targets = new Map();
-    for (const e of ofYear) {
-      const key = e.planting_id ? `p:${e.planting_id}` : `z:${e.zone_id}`;
-      if (!targets.has(key)) targets.set(key, []);
-      targets.get(key).push(e);
-    }
-    const rows = [...targets.entries()]
-      .map(([key, list]) => {
-        const [type, id] = key.split(":");
-        const item = type === "p" ? this._planting(id) : this._zone(id);
-        return item ? { type, item, list } : null;
-      })
-      .filter(Boolean)
-      .sort((a, b) => a.type.localeCompare(b.type) || a.item.name.localeCompare(b.item.name));
-    for (const { type, item, list } of rows) {
-      const icon = type === "p" ? PLANT_ICONS[item.plant_type] || "🌱" : "▭";
-      cells.push(
+    const extremeColor = { frost: "#4a90d9", heatwave: "#d84315", heat_extreme: "#d84315", hail: "#7e57c2", heavy_rain: "#1e88e5" };
+    const ofYear = extremes.filter((x) => x.start.startsWith(year));
+    const rows = [this._timelineHeader()];
+    rows.push(
+      h(
+        "div",
+        { className: "tl-row" },
+        h("div", { className: "tl-label static" }, `🌦️ ${this.t("calWeather")}`),
+        h(
+          "div",
+          { className: "tl-track" },
+          ofYear.map((x) => {
+            const from = this._yearFraction(x.start);
+            const to = this._yearFraction(x.end.startsWith(year) ? x.end : `${year}-12-31`);
+            const title = `${extremeIcon[x.kind]} ${this.t(`xt_${x.kind}`)} ${this._date(x.start, false)}${x.end !== x.start ? `–${this._date(x.end, false)}` : ""}${x.value != null ? ` (${x.value}${x.kind === "heavy_rain" ? " mm" : " °C"})` : ""}`;
+            return h("span", { className: "tl-mark", title, style: `left:${from * 100}%;min-width:${Math.max((to - from) * 100, 0)}%;border-color:${extremeColor[x.kind]}` }, extremeIcon[x.kind]);
+          }),
+        ),
+      ),
+    );
+    const ofYearEvents = events.filter((e) => e.done_on.startsWith(year));
+    const marks = (list) =>
+      list.map((e) =>
         h(
           "button",
-          { className: "cal-name", onclick: () => (type === "p" ? this._select(item.id) : this._selectZone(item.id)) },
-          `${icon} ${item.name}`,
+          {
+            type: "button",
+            className: "tl-mark event",
+            style: `left:${this._yearFraction(e.done_on) * 100}%`,
+            title: `${this._date(e.done_on)} ${this._eventLabel(e)}${e.quantity ? ` ${this._quantity(e.quantity, e.unit)}` : ""}`,
+            onclick: () => this._openEvent(e),
+          },
+          EVENT_ICONS[e.kind] || "📝",
         ),
       );
-      for (let month = 1; month <= 12; month++) {
-        const done = list.filter((e) => Number(e.done_on.slice(5, 7)) === month).sort((a, b) => a.done_on.localeCompare(b.done_on));
-        const shown = done.slice(0, 2).map((e) => EVENT_ICONS[e.kind] || "📝").join("");
-        cells.push(
-          h(
-            "button",
-            {
-              className: "cal-cell icons",
-              title: done.map((e) => `${this._date(e.done_on)} ${this._eventLabel(e)}${e.quantity ? ` ${this._quantity(e.quantity, e.unit)}` : ""}`).join("\n"),
-              onclick: () => done[0] && this._openEvent(done[0]),
-            },
-            `${shown}${done.length > 2 ? `+${done.length - 2}` : ""}`,
-          ),
-        );
-      }
+    let any = false;
+    for (const group of this._calendarGroups()) {
+      const zoneEvents = group.zone ? ofYearEvents.filter((e) => e.zone_id === group.zone.id) : [];
+      const plantRows = group.plantings
+        .map((p) => ({ p, list: ofYearEvents.filter((e) => e.planting_id === p.id) }))
+        .filter((r) => r.list.length);
+      if (!zoneEvents.length && !plantRows.length) continue;
+      any = true;
+      rows.push(this._groupHeader(group, this.t("calEvents", { count: zoneEvents.length + plantRows.reduce((n, r) => n + r.list.length, 0) })));
+      if (this._calClosed().has(group.id)) continue;
+      if (zoneEvents.length) rows.push(this._bandRow(`▭ ${this.t("calWholeZone")}`, () => this._selectZone(group.zone.id), [], marks(zoneEvents)));
+      for (const { p, list } of plantRows) rows.push(this._bandRow(`${PLANT_ICONS[p.plant_type] || "🌱"} ${p.name}`, () => this._select(p.id), [], marks(list)));
     }
     return h(
       "div",
       {},
       h("div", { className: "row", style: "margin-bottom:6px" }, yearSelect),
-      h("div", { className: "cal-grid" }, this._monthHeader(h("div")), cells),
-      rows.length ? null : h("p", { className: "hint" }, this.t("emptyDiary")),
+      h("div", { className: "timeline-grid" }, rows, year === String(new Date().getFullYear()) ? this._todayLine() : null),
+      any ? null : h("p", { className: "hint" }, this.t("emptyDiary")),
     );
   }
 
