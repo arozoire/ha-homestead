@@ -11,6 +11,7 @@ from pytest_homeassistant_custom_component.common import (
 )
 
 from custom_components.homestead.const import CONF_NOTIFY, CONF_NOTIFY_TIME, DOMAIN
+from custom_components.homestead.crops import full_table, load_cropgraph, load_defaults, plant_type
 from custom_components.homestead.forecast import Outlook
 
 
@@ -90,3 +91,19 @@ async def test_frost_hurting_no_plant_is_not_notified(hass: HomeAssistant) -> No
     frost = {"kind": "frost", "start": "2026-03-01", "end": "2026-03-03", "value": -1, "plantings": []}
     assert not outlook._relevant(frost)
     assert outlook._relevant({**frost, "kind": "heatwave"})
+
+
+def test_plant_type_from_species() -> None:
+    assert plant_type("Malus domestica") == "fruit_tree"
+    assert plant_type("Corylus avellana", "fruit") == "shrub"
+    assert plant_type("Vitis vinifera", "fruit") == "vine"
+    assert plant_type("Quercus cerris") == "tree"
+    assert plant_type("Fragaria × ananassa", "fruit") == "vegetable"
+    assert plant_type("Solanum lycopersicum", "vegetable") == "vegetable"
+    assert plant_type("Ocimum basilicum", "herb") == "herb"
+    assert plant_type("Helianthus annuus", "flower") == "flower"
+    assert plant_type("Unknownia rara", "fruit") is None
+    table = full_table(load_defaults(), load_cropgraph(), None)
+    assert table["malus domestica"]["plant_type"] == "fruit_tree"
+    assert table["solanum lycopersicum"]["plant_type"] == "vegetable"
+    assert table["rosa"]["plant_type"] == "shrub"

@@ -65,6 +65,13 @@ const TEXT = {
     what: "What (porcini, chestnuts…)",
     essence: "Species",
     woodBox: "🪵 Wood and woodland harvests",
+    typesTitle: "Fill in the missing plant types",
+    typesHintOne: "1 planting: the type comes from its species",
+    typesHintMany: "{count} plantings: the type comes from their species",
+    typesApply: "Apply",
+    typesDoneOne: "1 type set",
+    typesDoneMany: "{count} types set",
+    showGone: "Show dead or removed plantings ({count})",
     tabCalendar: "Calendar",
     tabMap: "Map",
     tabMore: "More",
@@ -551,6 +558,13 @@ const TEXT = {
     what: "Cosa (porcini, castagne…)",
     essence: "Essenza",
     woodBox: "🪵 Legna e raccolti del bosco",
+    typesTitle: "Completa i tipi mancanti",
+    typesHintOne: "1 pianta: il tipo si ricava dalla specie",
+    typesHintMany: "{count} piante: il tipo si ricava dalla specie",
+    typesApply: "Applica",
+    typesDoneOne: "1 tipo impostato",
+    typesDoneMany: "{count} tipi impostati",
+    showGone: "Mostra le piante morte o tolte ({count})",
     tabCalendar: "Calendario",
     tabMap: "Mappa",
     tabMore: "Altro",
@@ -1149,6 +1163,7 @@ const STYLE = `
   .repeat-row { display: flex; align-items: center; gap: 10px; min-height: 44px; border-bottom: 1px solid var(--divider-color); }
   .repeat-row input { width: 22px; height: 22px; flex: none; }
   .repeat-name { flex: 1; display: grid; }
+  .show-gone { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 14px; color: var(--secondary-text-color); }
   .more-list { display: grid; border: 1px solid var(--divider-color); border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
   .more-item { display: flex; align-items: center; gap: 12px; text-align: left; border: none; border-bottom: 1px solid var(--divider-color);
     border-radius: 0; background: var(--card-background-color); min-height: 60px; padding: 6px 14px; font-size: 18px; color: var(--secondary-text-color); }
@@ -1565,6 +1580,7 @@ class HomesteadPanel extends HTMLElement {
       .callWS({ type: "homestead/crops/defaults" })
       .then((result) => {
         this._cropDefaults = result.crops || {};
+        this._genusTypes = result.genus_types || {};
         if (!this._form && !this._eventForm && !this._taskForm && !this._zoneForm && !this._expenseForm && !this._toolForm && !this._seedForm && !this._cropForm && !this._import) this._render();
         else if (this._cropEl && this._form) this._cropEl.replaceChildren(...[this._cropBox(this._form)].filter(Boolean));
       })
@@ -1704,7 +1720,7 @@ class HomesteadPanel extends HTMLElement {
   _syncMarkers() {
     const seen = new Set();
     for (const p of this._data.plantings) {
-      if (!hasPosition(p)) continue;
+      if (!hasPosition(p) || (!this._showGone() && p.status !== "active" && p.id !== this._selected)) continue;
       seen.add(p.id);
       const selected = p.id === this._selected || (this._eventForm && p.id === this._eventForm.planting_id);
       const color = STATUS_COLOR[p.status] || STATUS_COLOR.active;
@@ -2269,8 +2285,79 @@ class HomesteadPanel extends HTMLElement {
     return f.id ? `${where} — ${this.t("dragHint")}` : where;
   }
 
+  /** Dead and removed plantings stay in the history, hidden from the map and the list unless asked. */
+  _showGone() {
+    if (this._showGoneValue === undefined) {
+      try {
+        this._showGoneValue = localStorage.getItem("homestead-show-gone") === "1";
+      } catch {
+        this._showGoneValue = false;
+      }
+    }
+    return this._showGoneValue;
+  }
+
+  _setShowGone(on) {
+    this._showGoneValue = on;
+    try {
+      localStorage.setItem("homestead-show-gone", on ? "1" : "");
+    } catch {
+      // private mode: the choice is just not remembered
+    }
+    this._syncMap();
+    this._render();
+  }
+
+  /** Plantings without a type whose species tells it: proposed all at once. */
+  _typesBox() {
+    const missing = this._data.plantings
+      .filter((p) => !p.plant_type)
+      .map((p) => ({ planting: p, type: this._plantTypeFor(p.species) }))
+      .filter((m) => m.type);
+    if (!missing.length) return null;
+    if (!this._typesOpen)
+      return h(
+        "button",
+        { type: "button", className: "repeat-card", onclick: () => ((this._typesOpen = true), this._render()) },
+        h("strong", {}, `🏷️ ${this.t("typesTitle")}`),
+        h("span", { className: "sub" }, this._plural("typesHint", missing.length)),
+      );
+    const off = new Set();
+    const button = h("button", { type: "button", className: "primary" }, this.t("typesApply"));
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      let done = 0;
+      for (const m of missing.filter((m) => !off.has(m.planting.id))) {
+        if (await this._call("update_planting", { id: m.planting.id, plant_type: m.type })) done++;
+      }
+      this._typesOpen = false;
+      this._render();
+      this._showMessage(`✓ ${this._plural("typesDone", done)}`);
+    });
+    return h(
+      "div",
+      { className: "repeat-box" },
+      h("div", { className: "cal-head" }, h("h3", {}, `🏷️ ${this.t("typesTitle")}`), h("button", { type: "button", onclick: () => ((this._typesOpen = false), this._render()) }, "✕")),
+      missing.map((m) => {
+        const box = h("input", { type: "checkbox", checked: true });
+        box.addEventListener("change", () => (box.checked ? off.delete(m.planting.id) : off.add(m.planting.id)));
+        return h(
+          "label",
+          { className: "repeat-row" },
+          box,
+          h("span", { className: "repeat-name" }, h("strong", {}, m.planting.name), h("span", { className: "sub" }, m.planting.species || "")),
+          h("span", {}, `${PLANT_ICONS[m.type]} ${this.t(`pt_${m.type}`)}`),
+        );
+      }),
+      button,
+    );
+  }
+
   _renderList() {
-    const plantings = [...this._data.plantings].sort((a, b) => a.name.localeCompare(b.name));
+    const gone = this._data.plantings.filter((p) => p.status !== "active");
+    const plantings = [...this._data.plantings]
+      .filter((p) => this._showGone() || p.status === "active" || p.id === this._selected)
+      .sort((a, b) => a.name.localeCompare(b.name));
     return [
       h(
         "div",
@@ -2280,6 +2367,15 @@ class HomesteadPanel extends HTMLElement {
         h("button", { onclick: () => this._csvTemplate("plantings") }, this.t("csvTemplate")),
       ),
       this._repeatBox(),
+      this._typesBox(),
+      gone.length
+        ? h(
+            "label",
+            { className: "show-gone" },
+            h("input", { type: "checkbox", checked: this._showGone(), onchange: (ev) => this._setShowGone(ev.target.checked) }),
+            this.t("showGone", { count: gone.length }),
+          )
+        : null,
       this._loaded === false ? h("p", { className: "error" }, this.t("notLoaded")) : null,
       plantings.length
         ? h(
@@ -2424,7 +2520,16 @@ class HomesteadPanel extends HTMLElement {
       "form",
       {
         onsubmit: (ev) => this._save(ev),
-        onchange: (ev) => updateRotation(ev.currentTarget),
+        onchange: (ev) => {
+          const el = ev.currentTarget.elements;
+          if (ev.target.name === "plant_type") el.plant_type.dataset.chosen = "1";
+          // New planting: the species beats the zone's guess; an existing one keeps its type.
+          if (ev.target.name === "species" && !el.plant_type.dataset.chosen && (!f.id || !el.plant_type.value)) {
+            const guess = this._plantTypeFor(el.species.value);
+            if (guess) el.plant_type.value = guess;
+          }
+          updateRotation(ev.currentTarget);
+        },
       },
         h("h2", {}, f.id ? this.t("editTitle") : this.t("newTitle")),
         this._field(f, "name", { required: true, maxLength: 100 }),
@@ -4665,6 +4770,14 @@ class HomesteadPanel extends HTMLElement {
     return builtIn ? { ...builtIn, source: builtIn.source === "cropgraph" ? "cropgraph" : "default" } : null;
   }
 
+  /** Plant type guessed from the species: woody habit by genus, else the crop table's category. */
+  _plantTypeFor(species) {
+    const key = this._cropKey(species);
+    if (!key) return null;
+    const genus = key.split(" ")[0];
+    return this._genusTypes?.[genus] || (this._cropDefaults[key] || this._cropDefaults[genus])?.plant_type || null;
+  }
+
   _inMonth(crop, keys, month = new Date().getMonth() + 1) {
     return !!crop && keys.some((key) => (crop[key] || []).includes(month));
   }
@@ -5065,7 +5178,7 @@ class HomesteadPanel extends HTMLElement {
       v.latitude = number("latitude");
       v.longitude = number("longitude");
       if ((v.latitude == null) !== (v.longitude == null)) issues[v.latitude == null ? "latitude" : "longitude"] = this.t("csvMissing");
-      if (!v.plant_type && !issues.plant_type && v.zone_id) v.plant_type = ZONE_PLANT_TYPE[this._zone(v.zone_id)?.kind] || null;
+      if (!v.plant_type && !issues.plant_type) v.plant_type = this._plantTypeFor(v.species) || ZONE_PLANT_TYPE[this._zone(v.zone_id)?.kind] || null;
       if (this._data.plantings.some((p) => p.name.toLowerCase() === (v.name || "").toLowerCase())) issues.duplicate = this.t("csvDuplicate");
     }
     row.values = v;

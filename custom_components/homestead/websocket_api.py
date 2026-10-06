@@ -18,6 +18,7 @@ from homeassistant.util import dt as dt_util
 
 from .backup import BackupError, make_backup, read_backup, summary
 from .const import DOMAIN, SIGNAL_DATA_UPDATED, SIGNAL_OUTLOOK_UPDATED
+from .crops import GENUS_TYPES
 from .forecast import async_crop_defaults, get_outlook
 from .models import HomesteadData, Photo
 from .photos import MAX_PHOTO_BYTES, delete_all, image_type, photo_dir, write_photo
@@ -48,7 +49,8 @@ async def ws_crop_defaults(
     hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]
 ) -> None:
     """The built-in crop table, keyed by normalized species name."""
-    connection.send_result(msg["id"], {"crops": await async_crop_defaults(hass)})
+    table = await async_crop_defaults(hass)
+    connection.send_result(msg["id"], {"crops": table, "genus_types": GENUS_TYPES})
 
 
 @websocket_api.websocket_command({vol.Required("type"): "homestead/outlook/subscribe"})
