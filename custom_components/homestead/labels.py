@@ -28,6 +28,13 @@ ICONS = {
     "wood_cutting": "🪓",
     "brushwood": "🪵",
     "foraging": "🍄",
+    "compost_turn": "♻️",
+    "compost_harvest": "🪱",
+    "eggs": "🥚",
+    "flock_in": "🐔",
+    "flock_out": "🦊",
+    "animal_care": "🥣",
+    "coop_cleaning": "🧹",
 }
 
 

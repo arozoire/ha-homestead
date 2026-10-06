@@ -48,7 +48,11 @@
 | Storico meteo (v0.9) | Sensori di HA prima, Open-Meteo per il resto; previsioni dall'entità meteo di HA, Open-Meteo in riserva | Richiesta dell'autore: usare i dati che HA ha già |
 | Calendario al posto della mappa (v0.9) | 14 giorni (meteo, allerte, attività) + 12 mesi per pianta; modalità Storico con eventi fatti ed estremi meteo | Idea dell'autore: vedere l'anno intero e cosa fare a colpo d'occhio |
 | CropGraph (v0.9) | Integrato: date ancorate alle gelate locali, consociazioni, famiglie; la tabella italiana e le correzioni dell'utente restano prioritarie | Unica fonte colturale open raggiungibile; licenza dati CC-BY-4.0 |
-| Indice di annata (dopo) | Calcolato, non chiesto: quantità raccolta vs mediana anni precedenti + voto del bilancio annata, 50/50 | Da fare dopo la 0.9 |
+| Indice di annata (v0.10) | Calcolato, non chiesto: resa **per pianta** vs mediana degli anni precedenti (max 1,5) + voto del bilancio/3,5, 50/50; non per alberi sotto i 5 anni | Con 10 pomodori un anno e 15 l'altro il totale inganna |
+| Menu e calendario (v0.10) | Schede in barra sotto l'intestazione; anno continuo con riga *oggi*, gruppi per zona espandibili, attività previste in evidenza, bosco nel calendario | Mockup approvato dall'autore |
+| Analisi pluriennali (v0.10) | Scheda Analisi: Totale / Per pianta, raggruppata per zona, meteo, periodo dei lavori, luna (con avviso dati deboli), lezioni | Mockup approvato dall'autore |
+| Compost (v0.10) | 2 compostiere come zone; solo eventi rivoltare e raccolta con qualità, niente kg; promemoria a 4 settimane | Decisione dell'autore |
+| Polli (v0.10) | Uova ogni giorno anche retrodatate; galline come gruppo con movimenti (arrivo/uscita con motivo), numero calcolato; niente scheda per gallina | Ogni anno ne arrivano una o due e la volpe ne prende qualcuna |
 | Import mappa **tolto** (v0.4.1) | Al suo posto **backup JSON** (esporta / ripristina tutto) | Disegnare nel pannello basta; serve invece poter salvare e ripristinare i dati |
 | Specie (v0.4) | Ricerca combinata Wikidata (nomi comuni) + GBIF (tassonomia); la specie scelta è copiata in locale con id GBIF/Wikidata e data di import | Funziona offline dopo l'import, tracciabilità come da §4 |
 | Licenza | MIT | Richiesta da HACS; la più diffusa tra le integrazioni custom |
@@ -228,8 +232,7 @@ Decisione v0.4.1: si usa solo il metodo A; l'import B/C (v0.3) è stato tolto pe
 ## 9. Backlog idee (non pianificate)
 
 - Attrezzi prestati/condivisi (a chi, quando, rientro).
-- **Gestione bosco e legna da riscaldamento** (tagli, cataste, stagionatura, consumo per inverno) — idea dell'autore, non ora.
-- Correlazioni fase lunare ↔ risultati (dati già registrati da v1).
+- Bosco: stagionatura e consumo per inverno (tagli e quantità fatti nella v0.8).
 - Contributo comunitario delle correzioni ai dati colturali.
 
 ## 10. Domande aperte

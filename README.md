@@ -8,7 +8,7 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 
 **Non sporcare Home Assistant**: nessuna area creata, poche entità aggregate, rimozione pulita (disinstallando l'integrazione i dati vengono cancellati).
 
-## Cosa fa oggi (v0.9)
+## Cosa fa oggi (v0.10)
 
 | Funzione | Come |
 |---|---|
@@ -31,7 +31,11 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 | Attrezzi | Scheda *Attrezzi* (stato a colori, 🔧 manutenzione scaduta) o servizi `add_tool`/`update_tool`/`delete_tool` |
 | Foto | Nella scheda pianta: *📷 Aggiungi foto* (fotocamera o galleria del telefono), ridotte a 1600 px e salvate in `/media/homestead/`; visibili solo agli utenti HA |
 | Sfondo "Nessuna mappa" | Dal selettore dei livelli: zoom fino al livello 23 per lavorare dentro un'aiuola |
-| 📅 Calendario | Pulsante 📅 in alto: al posto della mappa, le **prossime 2 settimane** (meteo, allerte, attività con ✅/⚠️ e ↪ giorno migliore) e i **12 mesi** per pianta (semina, messa a dimora, fioritura, raccolta, potatura, concimazione, fine coltura, 📋 attività); *📜 Storico*: per anno, gli eventi fatti mese per mese sotto il meteo estremo (gelo, ondate di calore, grandine, piogge forti) |
+| Menu | Schede (Piante, Zone, Diario, Semi, Spese, Analisi, Attrezzi) in una barra sotto l'intestazione |
+| 📅 Calendario | Pulsante 📅 in alto: al posto della mappa, *Da fare nelle prossime 2 settimane* (schede grandi con verdetto meteo, in ritardo in rosso, ✔), allerte, meteo; l'**anno come linea continua** con la riga *oggi* al giorno giusto, piante raggruppate per zona (gruppi che si aprono e chiudono), attività previste come pastiglie alla data, lavori del bosco; *📜 Storico*: per anno, gli eventi fatti alla data sotto il meteo estremo (gelo, ondate di calore, grandine, piogge forti) |
+| 📈 Analisi | Scheda a tutta larghezza: riquadro per anno (indice dell'annata, kg, saldo, meteo estremo); raccolti per coltura e zona negli ultimi 5 anni, **Totale o Per pianta** (10 pomodori un anno, 15 l'altro), colore = resa per pianta rispetto agli anni precedenti + voto della stagione, costo per kg; raccolto e meteo della coltura scelta; mese di potatura o messa a dimora a confronto; fase lunare alla semina vs voto (con avviso se i dati sono pochi); lezioni (da rifare / da evitare); uova per anno |
+| ♻️ Compost | Zona di tipo *Compostiera*: solo eventi *rivoltare* e *raccolta* (qualità ★1–5 e note, niente kg); dopo 4 settimane senza rivoltare: suggerimento nel Diario e nel Calendario, notifica sul telefono (poi una volta a settimana) |
+| 🐔 Pollaio | Zona di tipo *Pollaio*: **+ Uova** rapido con data (anche giorni passati) e numero; galline come gruppo con *+ Arrivo* (numero, razza, prezzo) e *− Uscita* (numero, motivo: volpe, malattia, vecchiaia, venduta…); galline attuali calcolate; uova ultimi 7 giorni, mese, anno, per gallina, costo per uovo (dalle spese di mangime e cure); le uova non riempiono Diario e calendario HA |
 | Allerte gelo e caldo | Gelo sotto la rusticità di ogni pianta (piante giovani o tenere da 0 °C), ondata di calore (3 giorni con massima ≥ 35 °C **e** minima ≥ 22 °C), caldo estremo (≥ 40 °C), troppo caldo per le colture fresche; riquadro nel Diario, sensore `sensor.ha_homestead_weather_alerts`, notifica sul telefono a scelta: mai, solo con un'attività prevista quei giorni, sempre |
 | Regole meteo | Per ogni attività prevista: trattamento (pioggia entro 48 h, vento, caldo), potatura (gelo nei giorni dopo, pioggia), semina (notti fredde per le colture calde), irrigazione (pioggia in arrivo)… con il giorno buono più vicino; anche nel promemoria sul telefono |
 | Date di gelo e storico | Calcolate dai tuoi sensori (statistiche di HA), Open-Meteo per gli anni mancanti; usate per adattare il calendario colturale |

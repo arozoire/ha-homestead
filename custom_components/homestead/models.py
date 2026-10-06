@@ -52,6 +52,8 @@ class ZoneKind(StrEnum):
     POTS = "pots"
     LAWN = "lawn"
     WOODLAND = "woodland"
+    COMPOST = "compost"  # compost bin: only turning and harvesting events
+    COOP = "coop"  # hen house: eggs and flock movements
     OTHER = "other"
 
 
@@ -75,6 +77,7 @@ class ExpenseCategory(StrEnum):
     WATER = "water"
     SERVICES = "services"  # labour, pressing olives, a gardener…
     SALES = "sales"  # for incomes
+    ANIMALS = "animals"  # feed, bedding, vet, new hens
     OTHER = "other"
 
 
@@ -98,6 +101,29 @@ class EventKind(StrEnum):
     WOOD_CUTTING = "wood_cutting"  # firewood: quantity in q, stere or m³
     BRUSHWOOD = "brushwood"  # branches, faggots
     FORAGING = "foraging"  # mushrooms, chestnuts, wild berries…
+    COMPOST_TURN = "compost_turn"
+    COMPOST_HARVEST = "compost_harvest"  # quality in rating, no quantity
+    EGGS = "eggs"  # eggs collected, any day (also afterwards): count in quantity
+    FLOCK_IN = "flock_in"  # hens arrived: count in quantity, breed in product
+    FLOCK_OUT = "flock_out"  # hens gone: count in quantity, why in reason
+    ANIMAL_CARE = "animal_care"  # feed, vet, bedding: product and cost
+    COOP_CLEANING = "coop_cleaning"
+
+
+class LeaveReason(StrEnum):
+    PREDATOR = "predator"
+    ILLNESS = "illness"
+    AGE = "age"
+    SOLD = "sold"
+    SLAUGHTERED = "slaughtered"
+    OTHER = "other"
+
+
+# Animal and compost entries: no weather snapshot (eggs are logged every day).
+NO_WEATHER_KINDS = frozenset(
+    {"compost_turn", "compost_harvest", "eggs", "flock_in", "flock_out", "animal_care", "coop_cleaning"}
+)
+COMPOST_TURN_DAYS = 28
 
 
 class Abundance(StrEnum):
@@ -121,6 +147,10 @@ EVENT_COST_CATEGORY = {
     EventKind.CLEARING: ExpenseCategory.SERVICES,
     EventKind.WOOD_CUTTING: ExpenseCategory.SERVICES,
     EventKind.BRUSHWOOD: ExpenseCategory.SERVICES,
+    EventKind.FLOCK_IN: ExpenseCategory.ANIMALS,
+    EventKind.ANIMAL_CARE: ExpenseCategory.ANIMALS,
+    EventKind.COOP_CLEANING: ExpenseCategory.ANIMALS,
+    EventKind.COMPOST_TURN: ExpenseCategory.SERVICES,
 }
 
 
@@ -273,6 +303,7 @@ class Event(_Record):
     abundance: str | None = None
     keep: str | None = None
     avoid: str | None = None
+    reason: str | None = None  # flock_out: why the hens left
     moon_phase: str | None = None
     weather: dict[str, Any] | None = None
     notes: str | None = None
@@ -455,3 +486,35 @@ class HomesteadData:
             if t.status != ToolStatus.OK
             or (t.next_service_on is not None and date.fromisoformat(t.next_service_on) <= today)
         ]
+
+
+def hens(data: HomesteadData, zone_id: str, until: str | None = None) -> int:
+    """Hens in a coop: arrivals minus departures (up to a date, included)."""
+    count = 0
+    for e in data.events.values():
+        if e.zone_id != zone_id or (until and e.done_on > until) or not e.quantity:
+            continue
+        if e.kind == EventKind.FLOCK_IN:
+            count += int(e.quantity)
+        elif e.kind == EventKind.FLOCK_OUT:
+            count -= int(e.quantity)
+    return max(count, 0)
+
+
+def compost_due(data: HomesteadData, today: date) -> list[tuple[Zone, int]]:
+    """Compost bins not turned for at least COMPOST_TURN_DAYS days (since the last turn or harvest)."""
+    out = []
+    for zone in data.zones.values():
+        if zone.kind != ZoneKind.COMPOST:
+            continue
+        last = max(
+            (
+                e.done_on
+                for e in data.events.values()
+                if e.zone_id == zone.id and e.kind in (EventKind.COMPOST_TURN, EventKind.COMPOST_HARVEST)
+            ),
+            default=None,
+        )
+        if last and (days := (today - date.fromisoformat(last)).days) >= COMPOST_TURN_DAYS:
+            out.append((zone, days))
+    return out

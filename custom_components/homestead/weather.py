@@ -23,6 +23,7 @@ from .const import (
     CONF_SOIL,
     CONF_TEMPERATURE,
 )
+from .models import NO_WEATHER_KINDS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -196,7 +197,7 @@ def _entry_options(hass: HomeAssistant) -> dict[str, Any]:
 async def async_fill_event(hass: HomeAssistant, store: Any, event_id: str) -> bool:
     """Store the weather snapshot on an event; True when it changed."""
     event = store.data.events.get(event_id)
-    if event is None:
+    if event is None or event.kind in NO_WEATHER_KINDS:
         return False
     snapshot = await async_snapshot(hass, _entry_options(hass), event.kind, date.fromisoformat(event.done_on))
     event = store.data.events.get(event_id)  # it may have been deleted meanwhile
@@ -212,7 +213,8 @@ async def async_refresh(hass: HomeAssistant, store: Any, force: bool = False, li
     todo = [
         e.id
         for e in sorted(store.data.events.values(), key=lambda e: e.done_on, reverse=True)
-        if (force or not e.weather or not e.weather.get("complete"))
+        if e.kind not in NO_WEATHER_KINDS
+        and (force or not e.weather or not e.weather.get("complete"))
         and window(e.kind, date.fromisoformat(e.done_on))[0] <= today
     ]
     changed = 0

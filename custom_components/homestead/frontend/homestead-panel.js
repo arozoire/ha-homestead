@@ -2,7 +2,7 @@ import * as L from "./vendor/leaflet.js";
 
 const BASE = new URL(".", import.meta.url).href;
 
-const ZONE_KINDS = ["vegetable_garden", "orchard", "flower_bed", "greenhouse", "pots", "lawn", "woodland", "other"];
+const ZONE_KINDS = ["vegetable_garden", "orchard", "flower_bed", "greenhouse", "pots", "lawn", "woodland", "compost", "coop", "other"];
 
 const TEXT = {
   en: {
@@ -65,6 +65,56 @@ const TEXT = {
     what: "What (porcini, chestnuts…)",
     essence: "Species",
     woodBox: "🪵 Wood and woodland harvests",
+    compost: "Compost bin",
+    coop: "Hen house",
+    ev_compost_turn: "Compost turning",
+    ev_compost_harvest: "Compost harvest",
+    ev_eggs: "Eggs",
+    ev_flock_in: "Hens arrived",
+    ev_flock_out: "Hens gone",
+    ev_animal_care: "Feed and care",
+    ev_coop_cleaning: "Coop cleaning",
+    cat_animals: "Animals (feed, care)",
+    reason: "Reason",
+    breed: "Breed",
+    feedOrCare: "Feed, care",
+    eggCount: "Eggs",
+    henCount: "Number of hens",
+    lr_predator: "Predator (fox…)",
+    lr_illness: "Illness",
+    lr_age: "Old age",
+    lr_sold: "Sold or given",
+    lr_slaughtered: "Slaughtered",
+    lr_other: "Other",
+    compostBox: "♻️ Compost",
+    compostTurned: "Last turned {date} ({days} days ago)",
+    compostNever: "Never turned yet",
+    compostHarvested: "Last harvest {date}",
+    compostQuality: "Average quality {avg} ★ (harvests: {count})",
+    compostDue: "♻️ To turn: {days} days since last time",
+    compostDays: "{days} days",
+    compostTurn: "♻️ Turned",
+    compostHarvest: "🪱 Harvested",
+    compostTodo: "♻️ Compost to turn",
+    coopBox: "🐔 Hen house",
+    hensNow: "{count} hens",
+    henOne: "1 hen",
+    eggsAdd: "+ Eggs",
+    eggsSaved: "✓ {count} eggs",
+    eggsWeek: "Last 7 days",
+    eggsMonth: "This month",
+    eggsYear: "This year",
+    eggsPerHen: "Per hen this year",
+    eggsCost: "Cost per egg",
+    eggsRecent: "Latest entries",
+    flockIn: "+ Arrival",
+    flockOut: "− Departure",
+    animalCare: "🥣 Feed, care",
+    flockLog: "Flock",
+    anEggs: "🥚 Eggs over the years",
+    anHens: "avg hens",
+    anPerHen: "per hen",
+    anEggCost: "cost/egg",
     u_q: "q",
     u_stere: "steres",
     u_m3: "m³",
@@ -465,6 +515,56 @@ const TEXT = {
     what: "Cosa (porcini, castagne…)",
     essence: "Essenza",
     woodBox: "🪵 Legna e raccolti del bosco",
+    compost: "Compostiera",
+    coop: "Pollaio",
+    ev_compost_turn: "Rivoltare il compost",
+    ev_compost_harvest: "Raccolta compost",
+    ev_eggs: "Uova",
+    ev_flock_in: "Arrivo galline",
+    ev_flock_out: "Uscita galline",
+    ev_animal_care: "Mangime e cure",
+    ev_coop_cleaning: "Pulizia pollaio",
+    cat_animals: "Animali (mangime, cure)",
+    reason: "Motivo",
+    breed: "Razza",
+    feedOrCare: "Mangime, cure",
+    eggCount: "Uova",
+    henCount: "Numero di galline",
+    lr_predator: "Predatore (volpe…)",
+    lr_illness: "Malattia",
+    lr_age: "Vecchiaia",
+    lr_sold: "Venduta o regalata",
+    lr_slaughtered: "Macellata",
+    lr_other: "Altro",
+    compostBox: "♻️ Compost",
+    compostTurned: "Rivoltato il {date} ({days} giorni fa)",
+    compostNever: "Mai rivoltato finora",
+    compostHarvested: "Ultima raccolta {date}",
+    compostQuality: "Qualità media {avg} ★ (raccolte: {count})",
+    compostDue: "♻️ Da rivoltare: {days} giorni dall'ultima volta",
+    compostDays: "{days} giorni",
+    compostTurn: "♻️ Rivoltato",
+    compostHarvest: "🪱 Raccolto",
+    compostTodo: "♻️ Compost da rivoltare",
+    coopBox: "🐔 Pollaio",
+    hensNow: "{count} galline",
+    henOne: "1 gallina",
+    eggsAdd: "+ Uova",
+    eggsSaved: "✓ {count} uova",
+    eggsWeek: "Ultimi 7 giorni",
+    eggsMonth: "Questo mese",
+    eggsYear: "Quest'anno",
+    eggsPerHen: "Per gallina quest'anno",
+    eggsCost: "Costo per uovo",
+    eggsRecent: "Ultime registrazioni",
+    flockIn: "+ Arrivo",
+    flockOut: "− Uscita",
+    animalCare: "🥣 Mangime, cure",
+    flockLog: "Gruppo",
+    anEggs: "🥚 Uova negli anni",
+    anHens: "galline in media",
+    anPerHen: "per gallina",
+    anEggCost: "costo/uovo",
     u_q: "q",
     u_stere: "steri",
     u_m3: "m³",
@@ -807,7 +907,7 @@ const TEXT = {
   },
 };
 
-const EXPENSE_CATEGORIES = ["plants", "seeds", "tools", "fertilizers", "treatments", "water", "services", "sales", "other"];
+const EXPENSE_CATEGORIES = ["plants", "seeds", "tools", "fertilizers", "treatments", "water", "services", "sales", "animals", "other"];
 const EVENT_ICONS = {
   pruning: "✂️",
   fertilizing: "🌿",
@@ -828,18 +928,37 @@ const EVENT_ICONS = {
   wood_cutting: "🪓",
   brushwood: "🪵",
   foraging: "🍄",
+  compost_turn: "♻️",
+  compost_harvest: "🪱",
+  eggs: "🥚",
+  flock_in: "🐔",
+  flock_out: "🦊",
+  animal_care: "🥣",
+  coop_cleaning: "🧹",
 };
 const WOOD_KINDS = ["clearing", "wood_cutting", "brushwood", "foraging"];
 // Garden kinds that still make sense in a woodland.
 const WOODLAND_ALSO = ["pruning", "treatment", "problem", "note"];
+const COMPOST_KINDS = ["compost_turn", "compost_harvest"];
+const COOP_KINDS = ["eggs", "flock_in", "flock_out", "animal_care", "coop_cleaning"];
+// Kinds that make sense in a compost bin or a hen house besides their own.
+const YARD_ALSO = ["note", "problem"];
+const COMPOST_TURN_DAYS = 28;
+const LEAVE_REASONS = ["predator", "illness", "age", "sold", "slaughtered", "other"];
+const LEAVE_ICONS = { predator: "🦊", illness: "🤒", age: "⌛", sold: "🤝", slaughtered: "🔪", other: "❔" };
+// Quantity label when it is not a harvest.
+const QUANTITY_LABEL = { eggs: "eggCount", flock_in: "henCount", flock_out: "henCount" };
 const QUANTITY_UNITS = {
   harvest: ["kg", "pieces", "l"],
   foraging: ["kg", "pieces", "l"],
   wood_cutting: ["q", "stere", "m3"],
   brushwood: ["q", "stere", "m3", "pieces"],
+  eggs: ["pieces"],
+  flock_in: ["pieces"],
+  flock_out: ["pieces"],
 };
 // Kinds with a "product" field, and its label.
-const PRODUCT_LABEL = { fertilizing: "product", treatment: "product", foraging: "what", wood_cutting: "essence" };
+const PRODUCT_LABEL = { fertilizing: "product", treatment: "product", foraging: "what", wood_cutting: "essence", flock_in: "breed", animal_care: "feedOrCare" };
 const PLANT_ICONS = { tree: "🌳", fruit_tree: "🍎", shrub: "🍃", vine: "🍇", vegetable: "🥕", herb: "🌿", flower: "🌸", other: "🌱" };
 // Years seeds usually keep germinating well, by botanical family (default 3).
 const SEED_VIABILITY = {
@@ -856,7 +975,7 @@ const SEED_VIABILITY = {
   Malvaceae: 3,
 };
 const ROTATION_YEARS = 3;
-const ZONE_ICONS = { vegetable_garden: "🥕", orchard: "🍎", flower_bed: "🌸", greenhouse: "🏠", pots: "🪴", lawn: "🌾", woodland: "🌲", other: "▭" };
+const ZONE_ICONS = { vegetable_garden: "🥕", orchard: "🍎", flower_bed: "🌸", greenhouse: "🏠", pots: "🪴", lawn: "🌾", woodland: "🌲", compost: "♻️", coop: "🐔", other: "▭" };
 // Typical work of a whole zone, shown on the calendar when the zone itself has no plantings.
 const ZONE_SEASONS = { woodland: [["wood", [11, 12, 1, 2, 3]], ["foraging", [9, 10, 11]]] };
 const CAL_COLOR = { wood: "#6d4c41", foraging: "#8e7cc3" };
@@ -994,6 +1113,18 @@ const STYLE = `
   .task .tick { flex: none; width: 36px; padding: 0; color: var(--success-color, #43a047); font-size: 18px; }
   .task-main { flex: 1; display: grid; gap: 2px; text-align: left; }
   .task.late .sub { color: var(--error-color, #db4437); }
+  button.link { font: inherit; background: none; border: none; padding: 0; color: var(--primary-color, #03a9f4); cursor: pointer; }
+  .coop { margin-bottom: 16px; }
+  .quick-eggs { align-items: center; }
+  .quick-eggs button { flex: none; white-space: nowrap; }
+  .coop-recent button.link, .coop-flock button.link { font-size: 13px; }
+  .quick-eggs input { flex: 1 1 8em; min-width: 0; }
+  .coop-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 6px; }
+  .coop-stat { display: flex; flex-direction: column; background: var(--secondary-background-color, #f4f5f0); border-radius: 8px; padding: 6px 8px; }
+  .coop-stat strong { font-size: 18px; }
+  .coop-stat .sub { white-space: normal; }
+  .coop-recent, .coop-flock { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
+  .coop-flock strong { flex-basis: 100%; }
   .check { display: flex; gap: 8px; align-items: center; color: var(--primary-text-color); }
   .income { color: var(--success-color, #43a047); }
   .kinds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
@@ -1332,7 +1463,7 @@ class HomesteadPanel extends HTMLElement {
         this._renderCalendar();
         if (first) this._fitAll();
         first = false;
-        if (window.location.search.includes("task=")) {
+        if (/[?&](task|zone)=/.test(window.location.search)) {
           this._openTaskFromUrl();
           if (this._eventForm) return;
         }
@@ -1340,7 +1471,7 @@ class HomesteadPanel extends HTMLElement {
         else if (this._zoneForm) {
           this._refreshDiaryBox();
           const zone = this._zone(this._zoneForm.id);
-          if (this._woodEl && zone) this._woodEl.replaceChildren(...[this._woodBox(zone)].filter(Boolean));
+          if (this._woodEl && zone) this._woodEl.replaceChildren(...[this._zoneBox(zone)].filter(Boolean));
         }
         else if (this._eventForm) this._fillEventPhotos();
         else if (this._taskForm) return;
@@ -2405,6 +2536,17 @@ class HomesteadPanel extends HTMLElement {
     }
   }
 
+  _hensText(count) {
+    return count === 1 ? this.t("henOne") : this.t("hensNow", { count });
+  }
+
+  /** Quantity of a diary entry: eggs and hens are counted, not weighed. */
+  _eventQuantity(e) {
+    if (e.kind === "eggs") return `${new Intl.NumberFormat(this._lang()).format(e.quantity)} 🥚`;
+    if (e.kind === "flock_in" || e.kind === "flock_out") return this._hensText(e.quantity);
+    return this._quantity(e.quantity, e.unit);
+  }
+
   _quantity(value, unit) {
     const number = new Intl.NumberFormat(this._lang(), { maximumFractionDigits: 1 }).format(value);
     return `${number} ${this.t(`u_${unit || "kg"}`)}`;
@@ -2760,7 +2902,7 @@ class HomesteadPanel extends HTMLElement {
                   [
                     this._eventLabel(e),
                     showTarget ? this._targetName(e) : null,
-                    e.quantity ? this._quantity(e.quantity, e.unit) : null,
+                    e.quantity ? this._eventQuantity(e) : null,
                     [e.product, e.dose].filter(Boolean).join(" "),
                   ]
                     .filter(Boolean)
@@ -2797,7 +2939,7 @@ class HomesteadPanel extends HTMLElement {
 
   _refreshDiaryBox() {
     if (!this._diaryEl || !this._diaryTarget) return;
-    const events = this._eventsFor(this._diaryTarget);
+    const events = this._eventsFor(this._diaryTarget).filter((e) => e.kind !== "eggs");
     const planting = this._diaryTarget.planting_id && this._planting(this._diaryTarget.planting_id);
     const recent = [
       ...[...events].sort((a, b) => b.done_on.localeCompare(a.done_on)).slice(0, 5),
@@ -2826,6 +2968,15 @@ class HomesteadPanel extends HTMLElement {
     );
   }
 
+  /** "woodland", "compost" or "coop" when the target is (in) such a zone, else null. */
+  _zoneFamily(target) {
+    const planting = target.planting_id && this._planting(target.planting_id);
+    for (let z = this._zone(target.zone_id || planting?.zone_id), guard = 0; z && guard < 20; z = this._zone(z.parent_id), guard++) {
+      if (["woodland", "compost", "coop"].includes(z.kind)) return z.kind;
+    }
+    return null;
+  }
+
   /** True when the event target is a woodland zone, inside one, or a planting in one. */
   _isWoodland(target) {
     const planting = target.planting_id && this._planting(target.planting_id);
@@ -2841,6 +2992,216 @@ class HomesteadPanel extends HTMLElement {
       .filter((e) => (e.kind === "wood_cutting" || e.kind === "brushwood") && ["q", "stere", "m3"].includes(e.unit))
       .sort((a, b) => b.done_on.localeCompare(a.done_on))[0];
     return last?.unit || { it: "q", fr: "stere" }[this._lang()] || "m3";
+  }
+
+  /** The extra box of a zone card, by zone kind. */
+  _zoneBox(zone) {
+    if (zone.kind === "compost") return this._compostBox(zone);
+    if (zone.kind === "coop") return this._coopBox(zone);
+    return this._woodBox(zone);
+  }
+
+  /** Compost bins not turned for COMPOST_TURN_DAYS days (since the last turn or harvest), unless a turn is planned. */
+  _compostDue() {
+    const now = today();
+    const planned = new Set(this._data.tasks.filter((t) => !t.done_on && t.kind === "compost_turn").map((t) => t.zone_id));
+    return this._data.zones
+      .filter((z) => z.kind === "compost" && !planned.has(z.id))
+      .map((zone) => {
+        const last = this._data.events
+          .filter((e) => e.zone_id === zone.id && COMPOST_KINDS.includes(e.kind))
+          .reduce((max, e) => (e.done_on > max ? e.done_on : max), "");
+        return { zone, days: last ? daysBetween(last, now) : null };
+      })
+      .filter(({ days }) => days != null && days >= COMPOST_TURN_DAYS);
+  }
+
+  _compostBoxes() {
+    const due = this._compostDue();
+    if (!due.length) return null;
+    return h(
+      "div",
+      { className: "todo" },
+      h("h3", {}, this.t("compostTodo")),
+      due.map(({ zone, days }) =>
+        h(
+          "div",
+          { className: "task" },
+          h("button", { type: "button", className: "tick", title: this.t("done"), onclick: () => this._openEvent({ kind: "compost_turn", done_on: today(), zone_id: zone.id }) }, "✔"),
+          h(
+            "button",
+            { type: "button", className: "task-main", onclick: () => this._selectZone(zone.id) },
+            h("span", {}, `♻️ ${this.t("ev_compost_turn")} — ${zone.name}`),
+            h("span", { className: "sub" }, this.t("compostDays", { days })),
+          ),
+        ),
+      ),
+    );
+  }
+
+  _compostBox(zone) {
+    const events = this._data.events
+      .filter((e) => e.zone_id === zone.id && COMPOST_KINDS.includes(e.kind))
+      .sort((a, b) => b.done_on.localeCompare(a.done_on));
+    const turn = events.find((e) => e.kind === "compost_turn");
+    const harvests = events.filter((e) => e.kind === "compost_harvest");
+    const rated = harvests.filter((e) => e.rating);
+    const avg = rated.length ? rated.reduce((sum, e) => sum + e.rating, 0) / rated.length : null;
+    const due = this._compostDue().find((d) => d.zone.id === zone.id);
+    const back = { zone_id: zone.id };
+    const open = (kind) => this._openEvent({ kind, done_on: today(), zone_id: zone.id }, back);
+    return h(
+      "div",
+      { className: "seasons" },
+      h("h3", {}, this.t("compostBox")),
+      h("div", { className: "sub" }, turn ? this.t("compostTurned", { date: this._date(turn.done_on), days: daysBetween(turn.done_on, today()) }) : this.t("compostNever")),
+      harvests[0]
+        ? h("div", { className: "sub" }, `${this.t("compostHarvested", { date: this._date(harvests[0].done_on) })}${harvests[0].rating ? ` · ${"★".repeat(harvests[0].rating)}` : ""}`)
+        : null,
+      avg != null ? h("div", { className: "sub" }, this.t("compostQuality", { avg: avg.toFixed(1).replace(".", ","), count: rated.length })) : null,
+      due ? h("div", { className: "alert-line" }, this.t("compostDue", { days: due.days })) : null,
+      h(
+        "div",
+        { className: "row" },
+        h("button", { type: "button", onclick: () => open("compost_turn") }, this.t("compostTurn")),
+        h("button", { type: "button", onclick: () => open("compost_harvest") }, this.t("compostHarvest")),
+      ),
+    );
+  }
+
+  /** Hens in the given zones on a day: arrivals minus departures up to that day. */
+  _hensAt(zones, day) {
+    return Math.max(
+      this._data.events
+        .filter((e) => zones.has(e.zone_id) && e.done_on <= day && e.quantity && (e.kind === "flock_in" || e.kind === "flock_out"))
+        .reduce((n, e) => n + (e.kind === "flock_in" ? e.quantity : -e.quantity), 0),
+      0,
+    );
+  }
+
+  /** Eggs, average hens, eggs per hen and cost per egg between two days (included). */
+  _eggStats(zones, from, to) {
+    const events = this._data.events.filter((e) => zones.has(e.zone_id) && e.done_on >= from && e.done_on <= to);
+    const eggs = events.filter((e) => e.kind === "eggs").reduce((n, e) => n + (e.quantity || 0), 0);
+    let henDays = 0;
+    let days = 0;
+    for (let day = from; day <= to; day = addDays(day, 1)) {
+      henDays += this._hensAt(zones, day);
+      days++;
+    }
+    const hens = days ? henDays / days : 0;
+    const ids = new Set(events.map((e) => e.id));
+    const spent = this._data.expenses.filter((x) => !x.income && ids.has(x.event_id)).reduce((sum, x) => sum + x.amount, 0);
+    return { eggs, hens, perHen: hens ? eggs / hens : null, costPerEgg: spent && eggs ? spent / eggs : null };
+  }
+
+  _coopBox(zone) {
+    const zones = new Set([zone.id, ...this._zoneDescendants(zone.id)]);
+    const now = today();
+    const back = { zone_id: zone.id };
+    const open = (kind, extra = {}) => this._openEvent({ kind, done_on: now, zone_id: zone.id, ...extra }, back);
+    const sum = (from) =>
+      this._data.events.filter((e) => zones.has(e.zone_id) && e.kind === "eggs" && e.done_on >= from && e.done_on <= now).reduce((n, e) => n + (e.quantity || 0), 0);
+    const year = this._eggStats(zones, `${now.slice(0, 4)}-01-01`, now);
+    const number = (value, digits = 0) => new Intl.NumberFormat(this._lang(), { maximumFractionDigits: digits }).format(value);
+    const dateInput = h("input", { type: "date", value: now, max: now, required: true });
+    const countInput = h("input", { type: "number", min: 1, step: 1, required: true, inputMode: "numeric", placeholder: "🥚", style: "width:5em" });
+    const quick = h(
+      "form",
+      {
+        className: "row quick-eggs",
+        onsubmit: async (ev) => {
+          ev.preventDefault();
+          const count = Number(countInput.value);
+          if (!count || !dateInput.value) return;
+          const result = await this._call("add_event", { kind: "eggs", zone_id: zone.id, done_on: dateInput.value, quantity: count });
+          if (result) this._showMessage(this.t("eggsSaved", { count }));
+        },
+      },
+      dateInput,
+      countInput,
+      h("button", { type: "submit", className: "primary" }, this.t("eggsAdd")),
+    );
+    const stat = (label, value) => h("div", { className: "coop-stat" }, h("strong", {}, value), h("span", { className: "sub" }, label));
+    const recent = this._data.events
+      .filter((e) => zones.has(e.zone_id) && e.kind === "eggs")
+      .sort((a, b) => b.done_on.localeCompare(a.done_on))
+      .slice(0, 7);
+    const flock = this._data.events
+      .filter((e) => zones.has(e.zone_id) && (e.kind === "flock_in" || e.kind === "flock_out"))
+      .sort((a, b) => b.done_on.localeCompare(a.done_on));
+    return h(
+      "div",
+      { className: "seasons coop" },
+      h("div", { className: "cal-head" }, h("h3", {}, this.t("coopBox")), h("strong", {}, this._hensText(this._hensAt(zones, now)))),
+      quick,
+      h(
+        "div",
+        { className: "coop-stats" },
+        stat(this.t("eggsWeek"), number(sum(addDays(now, -6)))),
+        stat(this.t("eggsMonth"), number(sum(`${now.slice(0, 7)}-01`))),
+        stat(this.t("eggsYear"), number(year.eggs)),
+        stat(this.t("eggsPerHen"), year.perHen != null ? number(year.perHen, 1) : "—"),
+        stat(this.t("eggsCost"), year.costPerEgg != null ? this._money(year.costPerEgg) : "—"),
+      ),
+      recent.length
+        ? h(
+            "div",
+            { className: "sub coop-recent" },
+            `${this.t("eggsRecent")}: `,
+            recent.map((e) => h("button", { type: "button", className: "link", onclick: () => this._openEvent(e, back) }, `${this._date(e.done_on, false)} ${number(e.quantity || 0)}`)),
+          )
+        : null,
+      h(
+        "div",
+        { className: "row" },
+        h("button", { type: "button", onclick: () => open("flock_in") }, this.t("flockIn")),
+        h("button", { type: "button", onclick: () => open("flock_out", { reason: "predator" }) }, this.t("flockOut")),
+        h("button", { type: "button", onclick: () => open("animal_care") }, this.t("animalCare")),
+      ),
+      flock.length
+        ? h(
+            "div",
+            { className: "coop-flock" },
+            h("strong", {}, this.t("flockLog")),
+            flock.map((e) =>
+              h(
+                "button",
+                { type: "button", className: "link", onclick: () => this._openEvent(e, back) },
+                `${this._date(e.done_on)} · ${e.kind === "flock_in" ? `🐔 +${number(e.quantity || 0)}${e.product ? ` ${e.product}` : ""}` : `${LEAVE_ICONS[e.reason] || "🦊"} −${number(e.quantity || 0)}${e.reason ? ` ${this.t(`lr_${e.reason}`)}` : ""}`}`,
+              ),
+            ),
+          )
+        : null,
+    );
+  }
+
+  /** Analysis: eggs per year for all hen houses. */
+  _eggsBox(years) {
+    const zones = new Set(this._data.zones.filter((z) => z.kind === "coop").flatMap((z) => [z.id, ...this._zoneDescendants(z.id)]));
+    if (!zones.size || !this._data.events.some((e) => e.kind === "eggs" && zones.has(e.zone_id))) return null;
+    const now = today();
+    const number = (value, digits = 0) => new Intl.NumberFormat(this._lang(), { maximumFractionDigits: digits }).format(value);
+    const rows = years.map((year) => ({ year, ...this._eggStats(zones, `${year}-01-01`, year === now.slice(0, 4) ? now : `${year}-12-31`) }));
+    return h(
+      "div",
+      { className: "an-box" },
+      h("h3", {}, this.t("anEggs")),
+      h(
+        "div",
+        { className: "an-table", style: `grid-template-columns: minmax(110px, 1.4fr) repeat(${years.length}, minmax(52px, 1fr))` },
+        h("div"),
+        years.map((y) => h("div", { className: "an-th" }, y)),
+        h("div", { className: "an-name" }, `🥚 ${this.t("ev_eggs")}`),
+        rows.map((r) => h("div", { className: "an-cell" }, r.eggs ? number(r.eggs) : "—")),
+        h("div", { className: "an-name" }, `🐔 ${this.t("anHens")}`),
+        rows.map((r) => h("div", { className: "an-cell" }, r.hens ? number(r.hens, 1) : "—")),
+        h("div", { className: "an-name" }, this.t("anPerHen")),
+        rows.map((r) => h("div", { className: "an-cell" }, r.perHen != null && r.eggs ? number(r.perHen) : "—")),
+        h("div", { className: "an-name" }, this.t("anEggCost")),
+        rows.map((r) => h("div", { className: "an-cell" }, r.costPerEgg != null ? this._money(r.costPerEgg) : "—")),
+      ),
+    );
   }
 
   /** Per year: firewood, branches and foraging of a zone and its sub-zones, by unit. */
@@ -2912,7 +3273,7 @@ class HomesteadPanel extends HTMLElement {
     const start = new Date(year, now.getMonth(), now.getDate());
     const near = events.filter((e) => {
       const [y, m, d] = e.done_on.split("-").map(Number);
-      if (y >= year || e.kind === "review") return false;
+      if (y >= year || e.kind === "review" || e.kind === "eggs") return false;
       const days = (new Date(year, m - 1, d) - start) / 86400000;
       return days >= -7 && days <= 21;
     });
@@ -2956,6 +3317,7 @@ class HomesteadPanel extends HTMLElement {
     const years = [...new Set(all.map((e) => e.done_on.slice(0, 4)))].sort().reverse();
     const events = all.filter((e) => {
       if (f.kind && e.kind !== f.kind) return false;
+      if (!f.kind && e.kind === "eggs") return false; // every day: shown in the hen house card
       if (f.year && !e.done_on.startsWith(f.year)) return false;
       if (f.zone) {
         const planting = e.planting_id && this._planting(e.planting_id);
@@ -2984,6 +3346,7 @@ class HomesteadPanel extends HTMLElement {
       ),
       this._alertsBox(),
       this._todoBox(this._data.tasks),
+      this._compostBoxes(),
       this._monthBox(),
       this._lastYearsBox(this._data.events),
       h(
@@ -3035,10 +3398,11 @@ class HomesteadPanel extends HTMLElement {
       const phase = iso ? moonPhase(iso) : null;
       moonEl.textContent = phase ? `${MOON_ICONS[phase]} ${this.t(`moon_${phase}`)}` : "";
     };
+    extras.stars = h("div", { className: "review" }, this._starsField(f.rating));
+    extras.reason = this._selectField(f, "reason", LEAVE_REASONS.map((r) => [r, `${LEAVE_ICONS[r]} ${this.t(`lr_${r}`)}`]));
     extras.review = h(
       "div",
       { className: "review" },
-      this._starsField(f.rating),
       this._selectField(f, "abundance", [["", "—"], ...["poor", "normal", "abundant"].map((a) => [a, this.t(`ab_${a}`)])]),
       h("label", {}, this.t("keep"), h("textarea", { name: "keep", rows: 2, value: f.keep ?? "" })),
       h("label", {}, this.t("avoid"), h("textarea", { name: "avoid", rows: 2, value: f.avoid ?? "" })),
@@ -3057,18 +3421,24 @@ class HomesteadPanel extends HTMLElement {
       const [type, id] = (form?.elements.target?.value || (f.planting_id ? `p:${f.planting_id}` : f.zone_id ? `z:${f.zone_id}` : "")).split(":");
       return type === "p" ? { planting_id: id } : type === "z" ? { zone_id: id } : {};
     };
-    // Woodland targets get the woodland kinds; gardens the others. The current kind always stays visible.
+    // Woodland, compost and hen house targets get their own kinds; gardens the others. The current kind always stays visible.
     const filterKinds = () => {
-      const wood = this._isWoodland(currentTarget());
+      const family = this._zoneFamily(currentTarget());
+      const own = { woodland: [...WOOD_KINDS, ...WOODLAND_ALSO], compost: [...COMPOST_KINDS, ...YARD_ALSO], coop: [...COOP_KINDS, ...YARD_ALSO] }[family];
+      const special = [...WOOD_KINDS, ...COMPOST_KINDS, ...COOP_KINDS];
       kinds.querySelectorAll("button").forEach((b) => {
         const kind = b.dataset.kind;
-        b.hidden = kind !== kindInput.value && (wood ? !WOOD_KINDS.includes(kind) && !WOODLAND_ALSO.includes(kind) : WOOD_KINDS.includes(kind));
+        b.hidden = kind !== kindInput.value && (own ? !own.includes(kind) : special.includes(kind));
       });
     };
     const showExtras = () => {
       const kind = kindInput.value;
       updateLast();
       extras.review.hidden = kind !== "review";
+      extras.stars.hidden = !["review", "compost_harvest"].includes(kind);
+      extras.reason.hidden = kind !== "flock_out";
+      quantityLabel.firstChild.textContent = this.t(QUANTITY_LABEL[kind] || "quantity_h");
+      unitLabel.hidden = (QUANTITY_UNITS[kind] || []).length < 2;
       extras.product.hidden = !PRODUCT_LABEL[kind];
       productLabel.firstChild.textContent = this.t(PRODUCT_LABEL[kind] || "product");
       doseLabel.hidden = !["fertilizing", "treatment"].includes(kind);
@@ -3142,11 +3512,18 @@ class HomesteadPanel extends HTMLElement {
       h("datalist", { id: "homestead-essences" }, essences.map((name) => h("option", { value: name }))),
     );
     const unitSelect = h("select", { name: "unit" });
+    const unitLabel = h("label", {}, this.t("unit"), unitSelect);
+    const quantityLabel = h(
+      "label",
+      {},
+      this.t("quantity_h"),
+      h("input", { name: "quantity", type: "number", min: 0, step: "any", value: f.quantity ?? "", inputMode: "decimal" }),
+    );
     extras.harvest = h(
       "div",
       { className: "row" },
-      h("label", {}, this.t("quantity_h"), h("input", { name: "quantity", type: "number", min: 0, step: "any", value: f.quantity ?? "", inputMode: "decimal" })),
-      h("label", {}, this.t("unit"), unitSelect),
+      quantityLabel,
+      unitLabel,
     );
     const money = f.id
       ? null
@@ -3171,6 +3548,8 @@ class HomesteadPanel extends HTMLElement {
       lastEl,
       extras.product,
       extras.harvest,
+      extras.reason,
+      extras.stars,
       extras.review,
       money,
       this._notes(f),
@@ -3216,7 +3595,8 @@ class HomesteadPanel extends HTMLElement {
       product: v.product?.trim() || null,
       dose: v.dose?.trim() || null,
       quantity: QUANTITY_UNITS[v.kind] && v.quantity ? Number(v.quantity) : null,
-      rating: v.kind === "review" && v.rating ? Number(v.rating) : null,
+      rating: ["review", "compost_harvest"].includes(v.kind) && v.rating ? Number(v.rating) : null,
+      reason: v.kind === "flock_out" ? v.reason || null : null,
       abundance: v.kind === "review" ? v.abundance || null : null,
       keep: v.kind === "review" ? v.keep?.trim() || null : null,
       avoid: v.kind === "review" ? v.avoid?.trim() || null : null,
@@ -3374,9 +3754,16 @@ class HomesteadPanel extends HTMLElement {
 
   /** `/homestead?task=<id>` (from a notification) opens that task once the data has arrived. */
   _openTaskFromUrl() {
-    const id = new URLSearchParams(window.location.search).get("task");
-    if (!id || !this._loaded) return;
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("task");
+    const zone = params.get("zone");
+    if (!(id || zone) || !this._loaded) return;
     history.replaceState(history.state, "", window.location.pathname);
+    if (zone && this._zone(zone)) {
+      // From the compost reminder: the diary form already filled in.
+      this._openEvent({ kind: params.get("kind") || "note", done_on: today(), zone_id: zone }, { zone_id: zone });
+      return;
+    }
     const task = this._data.tasks.find((t) => t.id === id);
     if (task && !task.done_on) this._completeFromTask(task);
     else if (task) this._setTab("diary");
@@ -4404,6 +4791,20 @@ class HomesteadPanel extends HTMLElement {
         h("button", { type: "button", className: "tick", title: this.t("done"), onclick: () => this._completeFromTask(t) }, "✔"),
       );
     });
+    const turns = this._compostDue().map(({ zone, days }) =>
+      h(
+        "div",
+        { className: "action-card warn" },
+        h(
+          "button",
+          { type: "button", className: "action-main", onclick: () => this._selectZone(zone.id) },
+          h("span", { className: "action-date" }, this.t("compostDays", { days })),
+          h("span", { className: "action-title" }, `♻️ ${this.t("ev_compost_turn")}`),
+          h("span", { className: "sub" }, zone.name),
+        ),
+        h("button", { type: "button", className: "tick", title: this.t("done"), onclick: () => this._openEvent({ kind: "compost_turn", done_on: today(), zone_id: zone.id }) }, "✔"),
+      ),
+    );
     const alerts = this._outlook?.alerts || [];
     const when = (a) => (a.start === a.end ? this._date(a.start, false) : `${this._date(a.start, false)}–${this._date(a.end, false)}`);
     return h(
@@ -4415,7 +4816,7 @@ class HomesteadPanel extends HTMLElement {
         h("h3", {}, this.t("calNext")),
         h("button", { type: "button", onclick: () => this._openTask({ kind: "note", due_on: today() }) }, this.t("addTask")),
       ),
-      cards.length ? h("div", { className: "action-cards" }, cards) : h("p", { className: "hint" }, this.t("nothingToDo")),
+      cards.length || turns.length ? h("div", { className: "action-cards" }, cards, turns) : h("p", { className: "hint" }, this.t("nothingToDo")),
       tasks.length > cards.length ? h("div", { className: "sub" }, this.t("calMore", { count: tasks.length - cards.length })) : null,
       alerts.map((a) => {
         const names = a.plantings.map((id) => this._planting(id)?.name).filter(Boolean);
@@ -4723,7 +5124,7 @@ class HomesteadPanel extends HTMLElement {
             type: "button",
             className: "tl-mark event",
             style: `left:${this._yearFraction(e.done_on) * 100}%`,
-            title: `${this._date(e.done_on)} ${this._eventLabel(e)}${e.quantity ? ` ${this._quantity(e.quantity, e.unit)}` : ""}`,
+            title: `${this._date(e.done_on)} ${this._eventLabel(e)}${e.quantity ? ` ${this._eventQuantity(e)}` : ""}`,
             onclick: () => this._openEvent(e),
           },
           EVENT_ICONS[e.kind] || "📝",
@@ -4923,6 +5324,7 @@ class HomesteadPanel extends HTMLElement {
         rows.length ? table : h("p", { className: "hint" }, this.t("anNoHarvest")),
         h("p", { className: "hint" }, this.t("anYieldsHint")),
       ),
+      this._eggsBox(years),
       selected ? this._weatherYieldBox(selected, years, weatherOf, perPlant) : null,
       this._timingBox(rows),
       this._moonBox(),
@@ -5347,7 +5749,11 @@ class HomesteadPanel extends HTMLElement {
     const toggleEssences = () => (essences.hidden = kindSelect.querySelector("select").value !== "woodland" && !z.species.length);
     kindSelect.addEventListener("change", toggleEssences);
     toggleEssences();
+    const box = z.id ? (this._woodEl = h("div", {}, this._zoneBox(z))) : null;
+    // Hen house and compost: the daily things first, the zone settings below.
+    const first = ["compost", "coop"].includes(z.kind);
     return [
+      first ? box : null,
       h(
         "form",
         { onsubmit: (ev) => this._saveZone(ev) },
@@ -5377,17 +5783,26 @@ class HomesteadPanel extends HTMLElement {
             )
           : null,
       ),
-      z.id ? (this._woodEl = h("div", {}, this._woodBox(z))) : null,
-      z.id && z.kind !== "woodland" ? this._rotationBox(z) : null,
+      first ? null : box,
+      z.id && !["woodland", "compost", "coop"].includes(z.kind) ? this._rotationBox(z) : null,
       z.id ? this._diaryBox({ zone_id: z.id }) : null,
       z.id ? this._lastYearsBox(this._data.events.filter((e) => e.zone_id === z.id || this._zoneDescendants(z.id).has(e.zone_id)), { zone_id: z.id }) : null,
     ];
   }
 }
 
-/** Same computation as moon.py, to show the phase while typing the date. */
 function capitalize(text) {
   return text ? text[0].toUpperCase() + text.slice(1) : "";
+}
+
+function addDays(iso, days) {
+  const d = new Date(`${iso}T12:00:00`);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+function daysBetween(from, to) {
+  return Math.round((Date.parse(`${to}T12:00:00`) - Date.parse(`${from}T12:00:00`)) / 86400000);
 }
 
 function median(values) {
@@ -5396,6 +5811,7 @@ function median(values) {
   return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
+/** Same computation as moon.py, to show the phase while typing the date. */
 function moonPhase(iso) {
   const synodic = 29.530588853;
   const days = Math.round((Date.UTC(...iso.split("-").map((v, i) => Number(v) - (i === 1 ? 1 : 0))) - Date.UTC(2000, 0, 6)) / 86400000);

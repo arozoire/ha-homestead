@@ -55,6 +55,7 @@ class HomesteadCalendar(CalendarEntity):
                 uid=f"event-{e.id}",
             )
             for e in data.events.values()
+            if e.kind != "eggs"  # logged every day: they would fill the calendar
         ]
         return sorted(items, key=lambda i: i.start)
 
