@@ -107,6 +107,7 @@ ADD_PLANTING_SCHEMA = vol.Schema(
         vol.Optional("moisture_entity"): vol.Any(None, cv.entity_id),
         vol.Optional("moisture_min"): vol.Any(None, vol.All(vol.Coerce(float), vol.Range(min=0, max=100))),
         vol.Optional("price"): vol.Any(None, _positive),
+        vol.Optional("care"): _opt_str,
         vol.Optional("notes"): _opt_str,
     }
 )

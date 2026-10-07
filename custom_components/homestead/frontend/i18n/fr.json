@@ -81,6 +81,8 @@
  "moisture_entity": "Capteur d'humidité du terreau",
  "moisture_min": "Arroser sous (%)",
  "careHint": "En hiver l'intervalle augmente de moitié. Avec un capteur, le rappel arrive quand le terreau est sec.",
+ "careNotes": "Entretien",
+ "careNotesHint": "Vos notes d'entretien : quand tailler, ce qu'elle aime, ce qui n'a pas marché…",
  "woodStock": "🔥 Bois de chauffage",
  "woodStockLine": "Tas : {stock} · sec : {seasoned}",
  "woodShort": "⚠️ Hiver {winter} : il faut environ {need}, sec pour octobre {ready} : il manque {missing}",

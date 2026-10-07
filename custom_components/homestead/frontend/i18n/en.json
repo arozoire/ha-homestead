@@ -81,6 +81,8 @@
  "moisture_entity": "Soil moisture sensor",
  "moisture_min": "Water below (%)",
  "careHint": "In winter the interval grows by half. With a sensor, the reminder comes when the soil is dry.",
+ "careNotes": "Care",
+ "careNotesHint": "Your care notes: when to prune, what it likes, what went wrong…",
  "woodStock": "🔥 Firewood",
  "woodStockLine": "Stack: {stock} · seasoned: {seasoned}",
  "woodShort": "⚠️ Winter {winter}: about {need} needed, {ready} seasoned by October: {missing} short",

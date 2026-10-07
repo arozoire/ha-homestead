@@ -468,6 +468,10 @@
           "name": "Gießen unter (%)",
           "description": "Standard 20 %."
         },
+        "care": {
+          "name": "Pflege",
+          "description": "Deine Pflegenotizen: Schnitt, Düngung, Besonderheiten."
+        },
         "notes": {
           "name": "Notizen",
           "description": "Freie Notizen."
@@ -589,6 +593,10 @@
         "moisture_min": {
           "name": "Gießen unter (%)",
           "description": "Standard 20 %."
+        },
+        "care": {
+          "name": "Pflege",
+          "description": "Deine Pflegenotizen: Schnitt, Düngung, Besonderheiten."
         },
         "notes": {
           "name": "Notizen",

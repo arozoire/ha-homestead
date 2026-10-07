@@ -235,6 +235,10 @@ add_planting:
           max: 100
           unit_of_measurement: "%"
           mode: box
+    care:
+      selector:
+        text:
+          multiline: true
     sown_count:
       selector:
         number:
@@ -401,6 +405,10 @@ update_planting:
           max: 100
           unit_of_measurement: "%"
           mode: box
+    care:
+      selector:
+        text:
+          multiline: true
     sown_count:
       selector:
         number:

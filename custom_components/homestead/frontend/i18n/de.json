@@ -81,6 +81,8 @@
  "moisture_entity": "Bodenfeuchtesensor",
  "moisture_min": "Gießen unter (%)",
  "careHint": "Im Winter wird der Abstand um die Hälfte länger. Mit einem Sensor kommt die Erinnerung, wenn die Erde trocken ist.",
+ "careNotes": "Pflege",
+ "careNotesHint": "Deine Pflegenotizen: wann schneiden, was sie mag, was schiefging…",
  "woodStock": "🔥 Brennholz",
  "woodStockLine": "Stapel: {stock} · trocken: {seasoned}",
  "woodShort": "⚠️ Winter {winter}: etwa {need} nötig, trocken bis Oktober {ready}: es fehlen {missing}",

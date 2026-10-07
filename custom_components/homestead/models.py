@@ -291,6 +291,7 @@ class Planting(_Record):
     fertilize_weeks: int | None = None
     moisture_entity: str | None = None
     moisture_min: float | None = None
+    care: str | None = None  # the user's own care notes (pruning, feeding, quirks…)
     notes: str | None = None
 
     def __post_init__(self) -> None:

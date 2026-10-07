@@ -468,6 +468,10 @@
           "name": "Water below (%)",
           "description": "Default 20%."
         },
+        "care": {
+          "name": "Care",
+          "description": "Your own care notes: pruning, feeding, quirks."
+        },
         "notes": {
           "name": "Notes",
           "description": "Free notes."
@@ -589,6 +593,10 @@
         "moisture_min": {
           "name": "Water below (%)",
           "description": "Default 20%."
+        },
+        "care": {
+          "name": "Care",
+          "description": "Your own care notes: pruning, feeding, quirks."
         },
         "notes": {
           "name": "Notes",

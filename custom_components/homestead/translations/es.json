@@ -468,6 +468,10 @@
           "name": "Regar por debajo de (%)",
           "description": "Por defecto 20 %."
         },
+        "care": {
+          "name": "Cuidados",
+          "description": "Tus notas de cuidado: poda, abonado, particularidades."
+        },
         "notes": {
           "name": "Notas",
           "description": "Notas libres."
@@ -589,6 +593,10 @@
         "moisture_min": {
           "name": "Regar por debajo de (%)",
           "description": "Por defecto 20 %."
+        },
+        "care": {
+          "name": "Cuidados",
+          "description": "Tus notas de cuidado: poda, abonado, particularidades."
         },
         "notes": {
           "name": "Notas",
