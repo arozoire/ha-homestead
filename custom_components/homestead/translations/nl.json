@@ -468,6 +468,10 @@
           "name": "Water geven onder (%)",
           "description": "Standaard 20%."
         },
+        "care": {
+          "name": "Verzorging",
+          "description": "Je eigen verzorgingsnotities: snoei, bemesting, eigenaardigheden."
+        },
         "notes": {
           "name": "Notities",
           "description": "Vrije notities."
@@ -589,6 +593,10 @@
         "moisture_min": {
           "name": "Water geven onder (%)",
           "description": "Standaard 20%."
+        },
+        "care": {
+          "name": "Verzorging",
+          "description": "Je eigen verzorgingsnotities: snoei, bemesting, eigenaardigheden."
         },
         "notes": {
           "name": "Notities",

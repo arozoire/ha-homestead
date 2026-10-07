@@ -81,6 +81,8 @@
  "moisture_entity": "Sensore umidità terriccio",
  "moisture_min": "Annaffia sotto (%)",
  "careHint": "D'inverno l'intervallo si allunga della metà. Con un sensore, il promemoria arriva quando il terriccio è secco.",
+ "careNotes": "Cura",
+ "careNotesHint": "Le tue note di cura: quando potare, cosa le piace, cosa è andato storto…",
  "woodStock": "🔥 Legna",
  "woodStockLine": "Catasta: {stock} · stagionata: {seasoned}",
  "woodShort": "⚠️ Inverno {winter}: servono circa {need}, stagionata per ottobre {ready}: mancano {missing}",

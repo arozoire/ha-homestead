@@ -74,3 +74,14 @@ async def test_houseplant_reminder_and_no_weather(
     async_fire_time_changed(hass)
     await hass.async_block_till_done()
     assert [c.data["message"] for c in sent] == ["🪴 To water: Ficus"]
+
+
+async def test_care_notes(hass: HomeAssistant) -> None:
+    entry = await _setup(hass)
+    data = {"name": "Rosa", "species": "Rosa", "care": "Potare a marzo"}
+    rose = (await _call(hass, "add_planting", data))["id"]
+    await _call(hass, "update_planting", {"id": rose, "notes": "Dal vivaio"})
+    planting = entry.runtime_data.data.plantings[rose]
+    assert (planting.care, planting.notes) == ("Potare a marzo", "Dal vivaio")
+    await _call(hass, "update_planting", {"id": rose, "care": None})
+    assert entry.runtime_data.data.plantings[rose].care is None

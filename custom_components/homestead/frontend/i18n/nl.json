@@ -81,6 +81,8 @@
  "moisture_entity": "Vochtsensor potgrond",
  "moisture_min": "Water geven onder (%)",
  "careHint": "In de winter wordt de tussenpoos de helft langer. Met een sensor komt de herinnering als de grond droog is.",
+ "careNotes": "Verzorging",
+ "careNotesHint": "Je verzorgingsnotities: wanneer snoeien, wat ze graag heeft, wat misging…",
  "woodStock": "🔥 Brandhout",
  "woodStockLine": "Stapel: {stock} · gedroogd: {seasoned}",
  "woodShort": "⚠️ Winter {winter}: ongeveer {need} nodig, gedroogd voor oktober {ready}: tekort {missing}",

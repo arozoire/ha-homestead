@@ -468,6 +468,10 @@
           "name": "Arroser sous (%)",
           "description": "Par défaut 20 %."
         },
+        "care": {
+          "name": "Entretien",
+          "description": "Vos notes d'entretien : taille, engrais, particularités."
+        },
         "notes": {
           "name": "Notes",
           "description": "Notes libres."
@@ -589,6 +593,10 @@
         "moisture_min": {
           "name": "Arroser sous (%)",
           "description": "Par défaut 20 %."
+        },
+        "care": {
+          "name": "Entretien",
+          "description": "Vos notes d'entretien : taille, engrais, particularités."
         },
         "notes": {
           "name": "Notes",

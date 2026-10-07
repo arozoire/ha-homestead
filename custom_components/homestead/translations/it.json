@@ -468,6 +468,10 @@
           "name": "Annaffia sotto (%)",
           "description": "Predefinito 20%."
         },
+        "care": {
+          "name": "Cura",
+          "description": "Le tue note di cura: potatura, concime, particolarità."
+        },
         "notes": {
           "name": "Note",
           "description": "Note libere."
@@ -589,6 +593,10 @@
         "moisture_min": {
           "name": "Annaffia sotto (%)",
           "description": "Predefinito 20%."
+        },
+        "care": {
+          "name": "Cura",
+          "description": "Le tue note di cura: potatura, concime, particolarità."
         },
         "notes": {
           "name": "Note",

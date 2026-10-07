@@ -283,6 +283,10 @@ const STYLE = `
   .review { display: grid; gap: 10px; }
   .weather { color: var(--secondary-text-color); }
   .seasons { margin-top: 16px; display: grid; gap: 8px; }
+  .care-notes { margin-top: 12px; }
+  .care-notes summary { cursor: pointer; color: var(--secondary-text-color); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .care-notes[open] { display: grid; gap: 8px; }
+  .care-notes textarea { width: 100%; box-sizing: border-box; font: inherit; }
   .season { padding: 8px 10px; border-radius: 6px; border: 1px solid var(--divider-color); display: grid; gap: 3px; }
   .season.current { border-color: var(--primary-color); }
   .season-head { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
@@ -580,8 +584,16 @@ class HomesteadPanel extends HTMLElement {
     this._calWrap = h("div", { className: "calendar" });
     // On a phone the menu sits at the bottom: hide it while typing, so the keyboard does not push it up.
     const keyboard = 'textarea, input:not([type="checkbox"]):not([type="radio"]):not([type="date"]):not([type="file"]):not([type="button"])';
-    this._aside.addEventListener("focusin", (ev) => ev.target.matches(keyboard) && this._layout.classList.add("typing"));
-    this._aside.addEventListener("focusout", () => this._layout.classList.remove("typing"));
+    // Bring the menu back a moment later: the layout must not move under the tap that left the field (a Save button).
+    let typingOff = null;
+    this._aside.addEventListener("focusin", (ev) => {
+      clearTimeout(typingOff);
+      this._layout.classList.toggle("typing", ev.target.matches(keyboard));
+    });
+    this._aside.addEventListener("focusout", () => {
+      clearTimeout(typingOff);
+      typingOff = setTimeout(() => this._layout.classList.remove("typing"), 300);
+    });
     this._createMap();
     this._render();
     if (this.isConnected) this._subscribe();
@@ -1468,7 +1480,8 @@ class HomesteadPanel extends HTMLElement {
                 "li",
                 {
                   className: p.id === this._selected ? "selected" : "",
-                  onclick: () => (hasPosition(p) ? this._select(p.id) : this._startPlacing(p.id)),
+                  // Houseplants live in a room: no point on the map to ask for.
+                  onclick: () => (hasPosition(p) || this._isIndoor(p) ? this._select(p.id) : this._startPlacing(p.id)),
                 },
                 PLANT_ICONS[p.plant_type]
                   ? h("span", { className: "badge", style: `border-color:${STATUS_COLOR[p.status] || STATUS_COLOR.active}` }, PLANT_ICONS[p.plant_type])
@@ -1491,7 +1504,7 @@ class HomesteadPanel extends HTMLElement {
                       .filter(Boolean)
                       .join(" · "),
                   ),
-                  hasPosition(p) ? null : h("div", { className: "sub warn" }, `📍 ${this.t("noPosition")}`),
+                  hasPosition(p) || this._isIndoor(p) ? null : h("div", { className: "sub warn" }, `📍 ${this.t("noPosition")}`),
                 ),
               ),
             ),
@@ -1589,8 +1602,7 @@ class HomesteadPanel extends HTMLElement {
     let careEl = null;
     const showCare = (el) => {
       if (!careEl) return;
-      const zone = el.zone_id.value;
-      careEl.hidden = !(el.plant_type.value === "houseplant" || ["indoor", "pots"].includes(this._zoneFamily({ zone_id: zone }) || this._zone(zone)?.kind));
+      careEl.hidden = this._zoneFamily({ zone_id: el.zone_id.value }) !== "indoor";
     };
     const updateRotation = (form) => {
       const el = form.elements;
@@ -1661,11 +1673,13 @@ class HomesteadPanel extends HTMLElement {
           : null,
     );
     updateRotation(form);
+    showCare(form.elements);
     return [
       form,
       f.id ? this._plantingActions(f) : null,
       f.id ? this._plantingExpenses(f) : null,
       f.id ? (this._cropEl = h("div", {}, this._cropBox(f))) : null,
+      f.id ? this._careNotes(f) : null,
       f.id ? (this._seasonsEl = h("div", {}, this._seasonsBox(f))) : null,
       f.id ? this._plantingTodo(f) : null,
       f.id ? this._diaryBox({ planting_id: f.id }) : null,
@@ -3700,7 +3714,30 @@ class HomesteadPanel extends HTMLElement {
     );
   }
 
-  /** Planting form: watering plan for houseplants (and plants in pots). */
+  /** Planting sheet: the user's own care notes, folded under the crop data. */
+  _careNotes(planting) {
+    const text = h("textarea", { rows: 4, value: planting.care ?? "", placeholder: this.t("careNotesHint") });
+    const first = (planting.care || "").split("\n")[0];
+    return h(
+      "details",
+      { className: "care-notes" },
+      h("summary", {}, `🩺 ${this.t("careNotes")}`, first ? h("span", { className: "sub" }, ` · ${first}`) : null),
+      text,
+      h(
+        "button",
+        {
+          type: "button",
+          onclick: async () => {
+            const care = text.value.trim() || null;
+            if ((await this._call("update_planting", { id: planting.id, care })) !== null) this._showMessage(this.t("saved", { name: planting.name }));
+          },
+        },
+        this.t("save"),
+      ),
+    );
+  }
+
+  /** Planting form: watering plan, only for plants in an indoor zone. */
   _careFields(f) {
     const sensors = Object.entries(this._hass.states)
       .filter(([id, st]) => id.startsWith("sensor.") && st.attributes?.device_class === "moisture")

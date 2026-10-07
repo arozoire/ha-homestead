@@ -81,6 +81,8 @@
  "moisture_entity": "Sensor de humedad del sustrato",
  "moisture_min": "Regar por debajo de (%)",
  "careHint": "En invierno el intervalo aumenta la mitad. Con un sensor, el aviso llega cuando el sustrato está seco.",
+ "careNotes": "Cuidados",
+ "careNotesHint": "Tus notas de cuidado: cuándo podar, qué le gusta, qué salió mal…",
  "woodStock": "🔥 Leña",
  "woodStockLine": "Pila: {stock} · seca: {seasoned}",
  "woodShort": "⚠️ Invierno {winter}: hacen falta unos {need}, seca para octubre {ready}: faltan {missing}",
