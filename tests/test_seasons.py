@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import pytest
 from freezegun.api import FrozenDateTimeFactory
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -181,3 +182,6 @@ async def test_options_flow(hass: HomeAssistant) -> None:
         "heat_days": 3,
         "heat_extreme": 40,
     }
+    # The reload with the new options runs in the background: let it finish.
+    await hass.async_block_till_done()
+    assert entry.state is ConfigEntryState.LOADED
