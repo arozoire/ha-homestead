@@ -24,7 +24,7 @@ Integrazione custom Home Assistant (HACS) per orto, frutteto e homesteading. Spe
 
 ## Comandi
 ```bash
-pip install -r requirements_test.txt ruff   # Python 3.13
+pip install -r requirements_test.txt ruff   # Python 3.14 (con 3.13 pip si ferma a HA 2026.2)
 ruff check custom_components tests && ruff format --check custom_components tests
 pytest
 ```
@@ -72,6 +72,7 @@ pytest
 - v0.12.0 rilasciata e provata dal vivo ("direi bene").
 - v0.13: piante da interno — `ZoneKind.INDOOR` (una zona per stanza), `PlantType.HOUSEPLANT`, `EventKind.REPOTTING`; `Planting.water_days`, `fertilize_weeks`, `moisture_entity`, `moisture_min`; `models.watering_due` (sensore sotto soglia, altrimenti intervallo dall'ultima annaffiatura ×1,5 da novembre a febbraio), `is_indoor`/`zone_kind`; niente meteo per eventi di piante da interno (`weather._indoor`), escluse da allerte; promemoria "🪴 Da annaffiare: …"; pannello `_houseplantsBox` (per stanza, spunte + 💧 Annaffiate = un evento per pianta, 🌿 da concimare mar–set, rinvaso in primavera ogni 2 anni, 🏖️ "via fino al" mostra quelle da annaffiare prima di partire), `_careFields` nel form pianta, `_newHouseplant` senza mappa; escluse da lista rapida e calendario. Legna — `EventKind.WOOD_BURNED` (registrata a fine inverno su una zona bosco), `_woodStock` (tagliata − bruciata per unità, stagionata = tagliata da ≥`WOOD_SEASON_MONTHS` 18 mesi, la più vecchia bruciata per prima, fabbisogno = media ultimi 3 inverni), `_woodStockBox` (catasta, inverno prossimo: serve/pronta/manca, quanto tagliare e entro quando), giorni di gelo per inverno da `climate.extremes`, `_woodReminder` a marzo–maggio. Traduzioni in 6 lingue (vedi Architettura), titolo nella barra laterale per lingua, nomi comuni delle specie in tutte e 6; chiave doppia `yearly` corretta (`yearByYear`); 103 test
 - v0.13.1: "Cura in casa" nel form pianta solo se la zona è da interno (prima visibile per tutte); piante da interno nella lista senza "non sulla mappa" e senza posizionamento; `Planting.care` = note di cura dell'utente per ogni pianta, riquadro 🩺 Cura chiuso (`<details>`) sotto la scheda colturale con anteprima della prima riga e Salva (`update_planting` solo `care`); barra in basso ricompare 300 ms dopo l'uscita dal campo (il tocco su Salva andava a vuoto); 104 test
+- Verifica HA 2026.10.0 (Python 3.14.8): 104 test ok, nessun avviso di deprecazione dal nostro codice; `test_options_flow` aspetta il ricaricamento in background (timer rimasto acceso solo nel test); CI su Python 3.14
 - Rete della sessione cloud: `api.gbif.org`, `www.wikidata.org` e Open-Meteo bloccati, parsing scritto sui formati documentati → da verificare dal vivo.
 - Più avanti: caratteristiche colturali (rusticità, esposizione, fioritura/raccolta) da fonti §5.
 - Prova del pannello: harness Playwright con `hass` finto (non nel repo); in CI solo i test Python.
