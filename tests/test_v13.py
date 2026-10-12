@@ -2,6 +2,8 @@ from datetime import date, timedelta
 
 from freezegun.api import FrozenDateTimeFactory
 from homeassistant.core import HomeAssistant
+from homeassistant.loader import async_get_integration
+from homeassistant.setup import async_setup_component
 from homeassistant.util import dt as dt_util
 from pytest_homeassistant_custom_component.common import (
     MockConfigEntry,
@@ -85,3 +87,14 @@ async def test_care_notes(hass: HomeAssistant) -> None:
     assert (planting.care, planting.notes) == ("Potare a marzo", "Dal vivaio")
     await _call(hass, "update_planting", {"id": rose, "care": None})
     assert entry.runtime_data.data.plantings[rose].care is None
+
+
+async def test_brand_images(hass: HomeAssistant, hass_client) -> None:
+    integration = await async_get_integration(hass, DOMAIN)
+    assert integration.has_branding
+    assert await async_setup_component(hass, "brands", {})
+    client = await hass_client()
+    for image in ("icon.png", "dark_icon@2x.png", "logo.png"):
+        response = await client.get(f"/api/brands/integration/{DOMAIN}/{image}")
+        assert response.status == 200
+        assert (await response.read()).startswith(b"\x89PNG")

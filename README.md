@@ -1,8 +1,10 @@
+<p align="center"><img src="https://raw.githubusercontent.com/arozoire/ha-homestead/main/custom_components/homestead/brand/icon.png" width="128" alt="HA Homestead"></p>
+
 # HA Homestead
 
 Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, alberi da frutto, aiuole, spese, attrezzi e, nelle prossime versioni, raccolto e consigli basati sul meteo.
 
-> Stato: **v0.7 — attività pianificate, to-do e calendario**. Specifiche complete in [SPEC.md](SPEC.md).
+> Stato: **v0.13** (vedi *Cosa fa oggi*). Specifiche complete in [SPEC.md](SPEC.md).
 
 ## Principio guida
 
