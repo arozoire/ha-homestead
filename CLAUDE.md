@@ -81,3 +81,4 @@ pytest
 ## Preferenze dell'autore
 - Risposte brevi, tabelle quando bastano, in italiano.
 - Soluzioni open source/self-hosted, niente servizi con pubblicità.
+- Preparazione lista default HACS: README in inglese (`README.md`, italiano in `README.it.md`), controllo HACS nella CI senza `ignore` (servono descrizione e argomenti del repository su GitHub), `photos.existing_photo` nell'executor (niente `Path.resolve()` nell'event loop).

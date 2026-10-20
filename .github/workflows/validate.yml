@@ -14,11 +14,11 @@ jobs:
   hacs:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+      # The HACS default list requires this check without any ignored rule.
       - uses: hacs/action@main
         with:
           category: integration
-          # description and topics are GitHub repo settings, needed only for the HACS default list (v5)
-          ignore: brands description topics
 
   tests:
     runs-on: ubuntu-latest

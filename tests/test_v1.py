@@ -6,7 +6,7 @@ from homeassistant.exceptions import ServiceValidationError
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.homestead.const import DOMAIN
-from custom_components.homestead.photos import image_type, photo_dir
+from custom_components.homestead.photos import existing_photo, image_type, photo_dir
 
 JPEG = b"\xff\xd8\xff\xe0" + b"\x00" * 64
 PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 64
@@ -125,3 +125,14 @@ async def test_restore_keeps_only_photos_with_files(hass: HomeAssistant, tmp_pat
     await ws.send_json({"id": 4, "type": "homestead/backup/import", "backup": backup})
     assert (await ws.receive_json())["result"]["photos"] == 1
     assert lost["id"] not in entry.runtime_data.data.photos
+
+
+def test_existing_photo_stays_inside_the_folder(tmp_path) -> None:
+    """Only files inside the photo folder are served; nothing else on disk."""
+    folder = tmp_path / "homestead"
+    (folder / "p1").mkdir(parents=True)
+    (folder / "p1" / "a.jpg").write_bytes(JPEG)
+    (tmp_path / "secret.txt").write_text("no")
+    assert existing_photo(folder, "p1/a.jpg") == (folder / "p1" / "a.jpg").resolve()
+    assert existing_photo(folder, "p1/missing.jpg") is None
+    assert existing_photo(folder, "../secret.txt") is None
