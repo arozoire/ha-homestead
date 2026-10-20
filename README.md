@@ -4,6 +4,8 @@
 
 **English** · [Italiano](README.it.md)
 
+<p align="center"><a href="https://www.buymeacoffee.com/arozoire" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="40"></a></p>
+
 A Home Assistant integration to manage your vegetable garden, orchard and garden: plants, fruit trees, beds, a diary, expenses, tools, seeds, harvests and weather-aware advice.
 
 > Status: **v0.13** (see *What it does today*). Full specification in [SPEC.md](SPEC.md) (Italian).

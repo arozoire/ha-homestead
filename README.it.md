@@ -4,6 +4,8 @@
 
 [English](README.md) · **Italiano**
 
+<p align="center"><a href="https://www.buymeacoffee.com/arozoire" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="40"></a></p>
+
 Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, alberi da frutto, aiuole, spese, attrezzi e, nelle prossime versioni, raccolto e consigli basati sul meteo.
 
 > Stato: **v0.13** (vedi *Cosa fa oggi*). Specifiche complete in [SPEC.md](SPEC.md).
