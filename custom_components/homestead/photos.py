@@ -49,6 +49,14 @@ def delete_all(folder: Path) -> None:
     shutil.rmtree(folder, ignore_errors=True)
 
 
+def existing_photo(folder: Path, name: str) -> Path | None:
+    """The photo file inside ``folder``, or None. Touches the disk: run in the executor."""
+    path = (folder / name).resolve()
+    if folder.resolve() not in path.parents or not path.is_file():
+        return None
+    return path
+
+
 class PhotoView(HomeAssistantView):
     """`/api/homestead/photo/<id>`: needs auth; the panel uses signed paths for <img>."""
 
@@ -65,7 +73,7 @@ class PhotoView(HomeAssistantView):
         if photo is None:
             return web.Response(status=HTTPStatus.NOT_FOUND)
         folder = photo_dir(self.hass)
-        path = (folder / photo.file).resolve()
-        if folder.resolve() not in path.parents or not await self.hass.async_add_executor_job(path.is_file):
+        path = await self.hass.async_add_executor_job(existing_photo, folder, photo.file)
+        if path is None:
             return web.Response(status=HTTPStatus.NOT_FOUND)
         return web.FileResponse(path, headers={"Cache-Control": "private, max-age=86400"})
