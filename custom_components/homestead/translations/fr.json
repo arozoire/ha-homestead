@@ -1175,7 +1175,7 @@
       }
     },
     "postpone_task": {
-      "name": "Reporter une tâche planifiée",
+      "name": "Replanifier une tâche planifiée",
       "description": "La déplace à un autre jour. Dans une liste faite en partie, les plantes pas encore faites passent dans une nouvelle tâche ; la partie faite se clôt aujourd'hui.",
       "fields": {
         "id": {

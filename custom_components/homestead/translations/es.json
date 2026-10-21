@@ -1175,7 +1175,7 @@
       }
     },
     "postpone_task": {
-      "name": "Aplazar tarea planificada",
+      "name": "Reprogramar tarea planificada",
       "description": "La pasa a otro día. En una lista hecha en parte, las plantas que faltan pasan a una tarea nueva; la parte hecha se cierra hoy.",
       "fields": {
         "id": {

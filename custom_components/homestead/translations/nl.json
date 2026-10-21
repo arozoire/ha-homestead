@@ -1175,7 +1175,7 @@
       }
     },
     "postpone_task": {
-      "name": "Geplande taak verplaatsen",
+      "name": "Geplande taak opnieuw plannen",
       "description": "Verplaatst haar naar een andere dag. Bij een half afgewerkte lijst gaan de nog niet gedane planten naar een nieuwe taak; het gedane deel sluit vandaag.",
       "fields": {
         "id": {
