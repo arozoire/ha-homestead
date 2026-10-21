@@ -1082,6 +1082,14 @@
           "name": "Zone",
           "description": "ID de la zone."
         },
+        "planting_ids": {
+          "name": "Plantes",
+          "description": "Tâche avec liste : plusieurs plantes, cochées une par une (au lieu d'une plante ou d'une zone)."
+        },
+        "seed_ids": {
+          "name": "Lots de graines",
+          "description": "Lots de graines à semer, dans une liste de semis."
+        },
         "yearly": {
           "name": "Chaque année",
           "description": "Une fois faite, la même tâche est replanifiée un an plus tard."
@@ -1120,6 +1128,14 @@
           "name": "Zone",
           "description": "ID de la zone."
         },
+        "planting_ids": {
+          "name": "Plantes",
+          "description": "Tâche avec liste : plusieurs plantes, cochées une par une (au lieu d'une plante ou d'une zone)."
+        },
+        "seed_ids": {
+          "name": "Lots de graines",
+          "description": "Lots de graines à semer, dans une liste de semis."
+        },
         "yearly": {
           "name": "Chaque année",
           "description": "Une fois faite, la même tâche est replanifiée un an plus tard."
@@ -1151,6 +1167,24 @@
         "done_on": {
           "name": "Faite le",
           "description": "Par défaut : aujourd'hui."
+        },
+        "items": {
+          "name": "Éléments",
+          "description": "Tâche avec liste : les plantes ou lots faits (par défaut : tous ceux qui restent)."
+        }
+      }
+    },
+    "postpone_task": {
+      "name": "Reporter une tâche planifiée",
+      "description": "La déplace à un autre jour. Dans une liste faite en partie, les plantes pas encore faites passent dans une nouvelle tâche ; la partie faite se clôt aujourd'hui.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID de la tâche."
+        },
+        "due_on": {
+          "name": "Nouvelle date",
+          "description": "Le jour où la faire."
         }
       }
     },

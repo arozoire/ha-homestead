@@ -362,6 +362,18 @@ class Task(_Record):
     notes: str | None = None
     done_on: str | None = None
     event_id: str | None = None
+    # A list task ("prune these 5 plants on Saturday"): plants and seed lots, ticked one by one.
+    planting_ids: list[str] = field(default_factory=list)
+    seed_ids: list[str] = field(default_factory=list)
+    done_ids: list[str] = field(default_factory=list)
+
+    @property
+    def items(self) -> list[str]:
+        return [*self.planting_ids, *self.seed_ids]
+
+    @property
+    def remaining(self) -> list[str]:
+        return [i for i in self.items if i not in self.done_ids]
 
     def next_year(self) -> Task:
         """The same task one year later (29 February becomes 28)."""
@@ -378,6 +390,8 @@ class Task(_Record):
             zone_id=self.zone_id,
             yearly=True,
             notes=self.notes,
+            planting_ids=list(self.planting_ids),
+            seed_ids=list(self.seed_ids),
         )
 
 

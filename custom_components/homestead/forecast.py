@@ -275,7 +275,8 @@ class Outlook:
         for task in self.store.data.tasks.values():
             if task.done_on:
                 continue
-            verdict = advice(task.kind, self.forecast, task.due_on, task.planting_id in tender)
+            tender_plant = bool(tender & {task.planting_id, *task.planting_ids})
+            verdict = advice(task.kind, self.forecast, task.due_on, tender_plant)
             if verdict is not None:
                 self.advice[task.id] = verdict
 
@@ -327,9 +328,9 @@ class Outlook:
                 if alert["kind"] in ("heatwave", "heat_extreme"):
                     return True
                 continue
-            if not task.planting_id and not task.zone_id:
+            if not task.planting_id and not task.zone_id and not task.planting_ids:
                 return True
-            if task.planting_id in hit:
+            if hit & {task.planting_id, *task.planting_ids}:
                 return True
             if task.zone_id:
                 zones = {task.zone_id, *data.zone_descendants(task.zone_id)}

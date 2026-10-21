@@ -1082,6 +1082,14 @@
           "name": "Zona",
           "description": "ID de la zona."
         },
+        "planting_ids": {
+          "name": "Plantas",
+          "description": "Tarea con lista: varias plantas, marcadas una a una (en lugar de una planta o zona)."
+        },
+        "seed_ids": {
+          "name": "Lotes de semillas",
+          "description": "Lotes de semillas para sembrar, en una lista de siembra."
+        },
         "yearly": {
           "name": "Cada año",
           "description": "Una vez hecha, la misma tarea se planifica un año después."
@@ -1120,6 +1128,14 @@
           "name": "Zona",
           "description": "ID de la zona."
         },
+        "planting_ids": {
+          "name": "Plantas",
+          "description": "Tarea con lista: varias plantas, marcadas una a una (en lugar de una planta o zona)."
+        },
+        "seed_ids": {
+          "name": "Lotes de semillas",
+          "description": "Lotes de semillas para sembrar, en una lista de siembra."
+        },
         "yearly": {
           "name": "Cada año",
           "description": "Una vez hecha, la misma tarea se planifica un año después."
@@ -1151,6 +1167,24 @@
         "done_on": {
           "name": "Hecha el",
           "description": "Por defecto: hoy."
+        },
+        "items": {
+          "name": "Elementos",
+          "description": "Tarea con lista: las plantas o lotes hechos (por defecto: todos los que faltan)."
+        }
+      }
+    },
+    "postpone_task": {
+      "name": "Aplazar tarea planificada",
+      "description": "La pasa a otro día. En una lista hecha en parte, las plantas que faltan pasan a una tarea nueva; la parte hecha se cierra hoy.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID de la tarea."
+        },
+        "due_on": {
+          "name": "Nueva fecha",
+          "description": "El día en que hacerla."
         }
       }
     },

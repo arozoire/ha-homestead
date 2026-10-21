@@ -1082,6 +1082,14 @@
           "name": "Zone",
           "description": "ID of the zone."
         },
+        "planting_ids": {
+          "name": "Plants",
+          "description": "A list task: several plants, ticked one by one (instead of one plant or zone)."
+        },
+        "seed_ids": {
+          "name": "Seed lots",
+          "description": "Seed lots to sow, in a sowing list."
+        },
         "yearly": {
           "name": "Every year",
           "description": "When done, the same task is planned one year later."
@@ -1120,6 +1128,14 @@
           "name": "Zone",
           "description": "ID of the zone."
         },
+        "planting_ids": {
+          "name": "Plants",
+          "description": "A list task: several plants, ticked one by one (instead of one plant or zone)."
+        },
+        "seed_ids": {
+          "name": "Seed lots",
+          "description": "Seed lots to sow, in a sowing list."
+        },
         "yearly": {
           "name": "Every year",
           "description": "When done, the same task is planned one year later."
@@ -1151,6 +1167,24 @@
         "done_on": {
           "name": "Done on",
           "description": "Default: today."
+        },
+        "items": {
+          "name": "Items",
+          "description": "List task: the plants or seed lots done (default: all the remaining)."
+        }
+      }
+    },
+    "postpone_task": {
+      "name": "Postpone planned activity",
+      "description": "Moves it to another day. In a list half done, the plants not yet done move to a new task; the done part closes today.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Task ID."
+        },
+        "due_on": {
+          "name": "New date",
+          "description": "The day to do it."
         }
       }
     },

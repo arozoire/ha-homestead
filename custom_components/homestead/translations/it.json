@@ -1082,6 +1082,14 @@
           "name": "Zona",
           "description": "ID della zona."
         },
+        "planting_ids": {
+          "name": "Piante",
+          "description": "Attività con lista: più piante, spuntate una alla volta (al posto di una pianta o zona)."
+        },
+        "seed_ids": {
+          "name": "Lotti di semi",
+          "description": "Lotti di semi da seminare, in una lista di semina."
+        },
         "yearly": {
           "name": "Ogni anno",
           "description": "Completata, si ripianifica un anno dopo."
@@ -1120,6 +1128,14 @@
           "name": "Zona",
           "description": "ID della zona."
         },
+        "planting_ids": {
+          "name": "Piante",
+          "description": "Attività con lista: più piante, spuntate una alla volta (al posto di una pianta o zona)."
+        },
+        "seed_ids": {
+          "name": "Lotti di semi",
+          "description": "Lotti di semi da seminare, in una lista di semina."
+        },
         "yearly": {
           "name": "Ogni anno",
           "description": "Completata, si ripianifica un anno dopo."
@@ -1151,6 +1167,24 @@
         "done_on": {
           "name": "Fatta il",
           "description": "Di default oggi."
+        },
+        "items": {
+          "name": "Voci",
+          "description": "Attività con lista: le piante o i lotti fatti (predefinito: tutti i rimanenti)."
+        }
+      }
+    },
+    "postpone_task": {
+      "name": "Sposta attività pianificata",
+      "description": "La sposta a un altro giorno. In una lista fatta in parte, le piante non ancora fatte passano a una nuova attività; la parte fatta si chiude oggi.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID dell'attività."
+        },
+        "due_on": {
+          "name": "Nuova data",
+          "description": "Il giorno in cui farla."
         }
       }
     },

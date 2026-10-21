@@ -1082,6 +1082,14 @@
           "name": "Zone",
           "description": "ID van de zone."
         },
+        "planting_ids": {
+          "name": "Planten",
+          "description": "Taak met lijst: meerdere planten, één voor één afgevinkt (in plaats van één plant of zone)."
+        },
+        "seed_ids": {
+          "name": "Zaadpartijen",
+          "description": "Te zaaien zaadpartijen, in een zaailijst."
+        },
         "yearly": {
           "name": "Elk jaar",
           "description": "Na afronden wordt dezelfde taak een jaar later opnieuw gepland."
@@ -1120,6 +1128,14 @@
           "name": "Zone",
           "description": "ID van de zone."
         },
+        "planting_ids": {
+          "name": "Planten",
+          "description": "Taak met lijst: meerdere planten, één voor één afgevinkt (in plaats van één plant of zone)."
+        },
+        "seed_ids": {
+          "name": "Zaadpartijen",
+          "description": "Te zaaien zaadpartijen, in een zaailijst."
+        },
         "yearly": {
           "name": "Elk jaar",
           "description": "Na afronden wordt dezelfde taak een jaar later opnieuw gepland."
@@ -1151,6 +1167,24 @@
         "done_on": {
           "name": "Gedaan op",
           "description": "Standaard: vandaag."
+        },
+        "items": {
+          "name": "Items",
+          "description": "Taak met lijst: de gedane planten of partijen (standaard: alle resterende)."
+        }
+      }
+    },
+    "postpone_task": {
+      "name": "Geplande taak verplaatsen",
+      "description": "Verplaatst haar naar een andere dag. Bij een half afgewerkte lijst gaan de nog niet gedane planten naar een nieuwe taak; het gedane deel sluit vandaag.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID van de taak."
+        },
+        "due_on": {
+          "name": "Nieuwe datum",
+          "description": "De dag om het te doen."
         }
       }
     },

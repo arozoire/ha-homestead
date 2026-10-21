@@ -1082,6 +1082,14 @@
           "name": "Bereich",
           "description": "ID des Bereichs."
         },
+        "planting_ids": {
+          "name": "Pflanzen",
+          "description": "Aufgabe mit Liste: mehrere Pflanzen, einzeln abgehakt (statt einer Pflanze oder Zone)."
+        },
+        "seed_ids": {
+          "name": "Saatgut-Chargen",
+          "description": "Zu säende Saatgut-Chargen, in einer Aussaatliste."
+        },
         "yearly": {
           "name": "Jedes Jahr",
           "description": "Nach dem Erledigen wird dieselbe Aufgabe ein Jahr später neu geplant."
@@ -1120,6 +1128,14 @@
           "name": "Bereich",
           "description": "ID des Bereichs."
         },
+        "planting_ids": {
+          "name": "Pflanzen",
+          "description": "Aufgabe mit Liste: mehrere Pflanzen, einzeln abgehakt (statt einer Pflanze oder Zone)."
+        },
+        "seed_ids": {
+          "name": "Saatgut-Chargen",
+          "description": "Zu säende Saatgut-Chargen, in einer Aussaatliste."
+        },
         "yearly": {
           "name": "Jedes Jahr",
           "description": "Nach dem Erledigen wird dieselbe Aufgabe ein Jahr später neu geplant."
@@ -1151,6 +1167,24 @@
         "done_on": {
           "name": "Erledigt am",
           "description": "Standard: heute."
+        },
+        "items": {
+          "name": "Einträge",
+          "description": "Aufgabe mit Liste: die erledigten Pflanzen oder Chargen (Standard: alle übrigen)."
+        }
+      }
+    },
+    "postpone_task": {
+      "name": "Geplante Aufgabe verschieben",
+      "description": "Verschiebt sie auf einen anderen Tag. Bei einer teilweise erledigten Liste kommen die noch offenen Pflanzen in eine neue Aufgabe; der erledigte Teil wird heute abgeschlossen.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID der Aufgabe."
+        },
+        "due_on": {
+          "name": "Neues Datum",
+          "description": "Der Tag, an dem sie erledigt werden soll."
         }
       }
     },
