@@ -1048,6 +1048,14 @@ add_task:
     zone_id:
       selector:
         text:
+    planting_ids:
+      selector:
+        text:
+          multiple: true
+    seed_ids:
+      selector:
+        text:
+          multiple: true
     yearly:
       selector:
         boolean:
@@ -1108,6 +1116,14 @@ update_task:
     zone_id:
       selector:
         text:
+    planting_ids:
+      selector:
+        text:
+          multiple: true
+    seed_ids:
+      selector:
+        text:
+          multiple: true
     yearly:
       selector:
         boolean:
@@ -1130,6 +1146,21 @@ complete_task:
       selector:
         text:
     done_on:
+      selector:
+        date:
+    items:
+      selector:
+        text:
+          multiple: true
+
+postpone_task:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+    due_on:
+      required: true
       selector:
         date:
 

@@ -57,6 +57,8 @@ const WOOD_KINDS = ["clearing", "wood_cutting", "brushwood", "foraging", "wood_b
 const INDOOR_KINDS = ["watering", "fertilizing", "repotting", "treatment", "pruning", "problem", "note", "removal"];
 // Months firewood needs to dry before burning.
 const WOOD_SEASON_MONTHS = 18;
+// Jobs the calendar can list for a period: the crop data month key, or seed lots for sowing.
+const WORK_KINDS = ["pruning", "fertilizing", "harvest", "sowing"];
 // Garden kinds that still make sense in a woodland.
 const WOODLAND_ALSO = ["pruning", "treatment", "problem", "note"];
 const COMPOST_KINDS = ["compost_turn", "compost_harvest"];
@@ -293,6 +295,30 @@ const STYLE = `
   .review-ask { border-color: #ffb300; text-align: left; }
   .todo { display: grid; gap: 4px; margin: 12px 0; }
   .task { display: flex; gap: 6px; align-items: stretch; }
+  .list-task { border: 1px solid var(--divider-color); border-radius: 12px; padding: 8px 10px; margin: 6px 0; display: grid; gap: 4px; }
+  .list-task.late .sub { color: var(--error-color, #db4437); }
+  .list-task .list-head { display: flex; gap: 8px; align-items: flex-start; }
+  .list-task .task-main { flex: 1; }
+  .list-count { flex: none; background: rgba(47, 125, 50, .12); color: var(--homestead-accent, #3a7d44); border-radius: 12px; padding: 2px 10px; font-weight: 700; font-size: 13px; }
+  .list-bar { height: 6px; border-radius: 3px; background: var(--divider-color); overflow: hidden; }
+  .list-bar i { display: block; height: 6px; background: var(--homestead-accent, #3a7d44); }
+  .list-item { display: flex; align-items: center; gap: 10px; min-height: 40px; border-bottom: 1px solid var(--divider-color); }
+  .list-item.done span { text-decoration: line-through; color: var(--secondary-text-color); }
+  .list-item input { width: 20px; height: 20px; flex: none; }
+  .list-actions { flex-wrap: wrap; margin-top: 4px; }
+  .work-box { border: 1px solid var(--divider-color); border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; display: grid; gap: 8px; }
+  .work-box h3 { margin: 0; }
+  .work-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .work-chips button { border-radius: 18px; }
+  .work-chips button.active { border: 2px solid var(--homestead-accent, #3a7d44); font-weight: 700; }
+  .work-days { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 200px)); gap: 6px; }
+  .work-day .sub { white-space: normal; }
+  .list-item > span { color: var(--primary-text-color); }
+  .work-day { display: grid; text-align: left; border: 2px solid var(--divider-color); border-radius: 10px; padding: 4px 8px; background: none; }
+  .work-day.good { border-color: #2f7d32; }
+  .work-day.warn { border-color: #c77700; }
+  .work-day.chosen { box-shadow: 0 0 0 2px var(--primary-text-color) inset; }
+  .tl-row.faded { opacity: .35; }
   .task .tick { flex: none; width: 36px; padding: 0; color: var(--success-color, #43a047); font-size: 18px; }
   .task-main { flex: 1; display: grid; gap: 2px; text-align: left; }
   .task.late .sub { color: var(--error-color, #db4437); }
@@ -2728,7 +2754,7 @@ class HomesteadPanel extends HTMLElement {
     const near = events.filter((e) => {
       const [y, m, d] = e.done_on.split("-").map(Number);
       if (y >= year || e.kind === "review" || e.kind === "eggs") return false;
-      const days = (new Date(year, m - 1, d) - start) / 86400000;
+      const days = Math.round((new Date(year, m - 1, d) - start) / 86400000);
       return days >= -7 && days <= 21;
     });
     if (!near.length) return null;
@@ -3157,8 +3183,9 @@ class HomesteadPanel extends HTMLElement {
     );
   }
 
-  _openSow(preset = {}) {
+  _openSow(preset = {}, fromList = null) {
     const nursery = this._nurseryZones()[0];
+    this._sowTask = fromList;
     this._clearSelection();
     this._showMessage("");
     this._sowForm = { count: 24, zone_id: nursery?.id || "", sown_on: today(), ...preset };
@@ -3239,7 +3266,9 @@ class HomesteadPanel extends HTMLElement {
       sown_count: count,
       zone_id: v.zone_id || null,
     };
+    const fromList = this._sowTask;
     if (await this._call("add_planting", data)) {
+      if (fromList && lot?.id === fromList.item) await this._call("complete_task", { id: fromList.task_id, items: [fromList.item] });
       this._close();
       this._showMessage(`✓ ${this.t("sowDone", { name, count })}`);
     }
@@ -4217,7 +4246,7 @@ class HomesteadPanel extends HTMLElement {
 
   _taskLabel(task) {
     const icon = EVENT_ICONS[task.kind] || "📝";
-    const target = task.planting_id || task.zone_id ? this._targetName(task) : null;
+    const target = this._isList(task) ? this._listNames(task) : task.planting_id || task.zone_id ? this._targetName(task) : null;
     return `${icon} ${[task.title || this.t(`ev_${task.kind}`), target].filter(Boolean).join(" — ")}`;
   }
 
@@ -4231,7 +4260,7 @@ class HomesteadPanel extends HTMLElement {
       headExtra ? h("div", { className: "cal-head" }, h("h3", {}, this.t("tabTodo")), headExtra) : h("h3", {}, this.t("tabTodo")),
       open.length
         ? open.map((t) =>
-            h(
+            this._isList(t) ? this._listCard(t, back, now) : h(
               "div",
               { className: `task${t.due_on < now ? " late" : ""}` },
               h(
@@ -4271,8 +4300,367 @@ class HomesteadPanel extends HTMLElement {
     return h("span", { className: "sub warn", style: "white-space:normal" }, `⚠️ ${reasons}${better}`);
   }
 
+  // ----- list tasks: one job for many plants, ticked one by one -----
+
+  _isList(task) {
+    return !!(task?.planting_ids?.length || task?.seed_ids?.length);
+  }
+
+  _listItems(task) {
+    return [...(task.planting_ids || []), ...(task.seed_ids || [])];
+  }
+
+  _itemName(id) {
+    const planting = this._planting(id);
+    if (planting) return `${PLANT_ICONS[planting.plant_type] || "🌱"} ${planting.name}`;
+    const lot = this._data.seeds.find((x) => x.id === id);
+    return lot ? `🌱 ${this._seedName(lot)}` : "?";
+  }
+
+  /** "Lampone, Ribes, Uva spina +2" (the names without icons). */
+  _listNames(task, max = 3) {
+    const names = this._listItems(task).map((id) => this._planting(id)?.name || this._seedName(this._data.seeds.find((x) => x.id === id) || { species: "?" }));
+    return names.slice(0, max).join(", ") + (names.length > max ? ` +${names.length - max}` : "");
+  }
+
+  _listCard(t, back, now) {
+    const items = this._listItems(t);
+    const done = new Set(t.done_ids || []);
+    const count = items.filter((id) => done.has(id)).length;
+    const actions = h("div", { className: "row list-actions" });
+    const showActions = () =>
+      actions.replaceChildren(
+        h("button", { type: "button", className: "primary", onclick: () => this._call("complete_task", { id: t.id }) }, `✔ ${this.t("listAllDone")}`),
+        h("button", { type: "button", onclick: () => this._addToList(t, actions, showActions) }, `＋ ${this.t("listAdd")}`),
+        h("button", { type: "button", onclick: () => this._postponeMenu(t, actions, showActions) }, `↪ ${this.t("listMove")}`),
+      );
+    showActions();
+    return h(
+      "div",
+      { className: `list-task${t.due_on < now ? " late" : ""}` },
+      h(
+        "div",
+        { className: "list-head" },
+        h(
+          "button",
+          { type: "button", className: "task-main", onclick: () => this._openTask(t, back) },
+          h("span", {}, `${EVENT_ICONS[t.kind] || "📝"} ${t.title || this.t(`ev_${t.kind}`)}`),
+          h("span", { className: "sub" }, `${this._date(t.due_on)}${t.due_on < now ? ` · ${this.t("overdue")}` : ""}${t.yearly ? " · 🔁" : ""}`),
+          this._adviceLine(t),
+        ),
+        h("span", { className: "list-count" }, this.t("listProgress", { done: count, total: items.length })),
+      ),
+      h("div", { className: "list-bar" }, h("i", { style: `width:${items.length ? (count / items.length) * 100 : 0}%` })),
+      items.map((id) =>
+        h(
+          "label",
+          { className: `list-item${done.has(id) ? " done" : ""}` },
+          h("input", {
+            type: "checkbox",
+            checked: done.has(id),
+            disabled: done.has(id),
+            onchange: (ev) => {
+              ev.target.checked = false;
+              this._tickItem(t, id, back);
+            },
+          }),
+          h("span", {}, this._itemName(id)),
+        ),
+      ),
+      actions,
+    );
+  }
+
+  /** One plant done: straight into its diary; a harvest asks the quantity, a seed lot opens the sowing form. */
+  _tickItem(t, id, back) {
+    if (t.seed_ids?.includes(id)) {
+      this._openSow({ seed_lot_id: id }, { task_id: t.id, item: id });
+      return;
+    }
+    if (t.kind === "harvest") {
+      this._newEvent({ kind: "harvest", planting_id: id, task_id: t.id }, back);
+      return;
+    }
+    this._call("complete_task", { id: t.id, items: [id] });
+  }
+
+  _addToList(t, actions, showActions) {
+    const seeds = !!t.seed_ids?.length && !t.planting_ids?.length;
+    const inList = new Set(this._listItems(t));
+    const options = seeds
+      ? this._data.seeds.filter((x) => !x.finished && !inList.has(x.id)).map((x) => [x.id, this._seedName(x)])
+      : this._data.plantings
+          .filter((p) => p.status === "active" && !inList.has(p.id))
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((p) => [p.id, p.name]);
+    const select = h("select", {}, options.map(([id, name]) => h("option", { value: id }, name)));
+    actions.replaceChildren(
+      select,
+      h(
+        "button",
+        {
+          type: "button",
+          className: "primary",
+          onclick: () => {
+            if (!select.value) return;
+            const key = seeds ? "seed_ids" : "planting_ids";
+            this._call("update_task", { id: t.id, [key]: [...(t[key] || []), select.value] });
+          },
+        },
+        this.t("ok"),
+      ),
+      h("button", { type: "button", onclick: showActions }, this.t("cancel")),
+    );
+  }
+
+  /** Tomorrow, next weekend or a chosen day; a half-done list leaves the done plants behind. */
+  _postponeMenu(t, actions, showActions) {
+    const now = today();
+    const from = t.due_on > now ? t.due_on : now;
+    const nextSaturday = addDays(from, ((6 - weekday(from) + 7) % 7) || 7);
+    const date = h("input", { type: "date", value: addDays(now, 1), min: now });
+    const move = async (due_on) => {
+      const rest = this._listItems(t).filter((id) => !(t.done_ids || []).includes(id)).length;
+      const split = !!t.done_ids?.length;
+      if (await this._call("postpone_task", { id: t.id, due_on }))
+        this._showMessage(`✓ ${split ? this.t("listMovedRest", { count: rest, date: this._date(due_on) }) : this.t("listMoved", { date: this._date(due_on) })}`);
+    };
+    actions.replaceChildren(
+      h("button", { type: "button", onclick: () => move(addDays(now, 1)) }, this.t("listTomorrow")),
+      h("button", { type: "button", onclick: () => move(nextSaturday) }, `${this.t("listNextWeekend")} · ${this._date(nextSaturday, false)}`),
+      date,
+      h("button", { type: "button", className: "primary", onclick: () => date.value && move(date.value) }, this.t("ok")),
+      h("button", { type: "button", onclick: showActions }, this.t("cancel")),
+    );
+  }
+
+  // ----- calendar: what to do in a period, for one job -----
+
+  /** The coming weekend (today if it is Sunday), the next 7 days, or the rest of the month. */
+  _workRange() {
+    const now = today();
+    if (this._workPeriod === "week") return [now, addDays(now, 6)];
+    if (this._workPeriod === "month") {
+      const [y, m] = now.split("-").map(Number);
+      return [now, `${now.slice(0, 7)}-${String(new Date(Date.UTC(y, m, 0)).getUTCDate()).padStart(2, "0")}`];
+    }
+    const day = weekday(now);
+    if (day === 0) return [now, now];
+    const saturday = addDays(now, 6 - day);
+    return [saturday, addDays(saturday, 1)];
+  }
+
+  _rangeDays([from, to]) {
+    const days = [];
+    for (let d = from; d <= to; d = addDays(d, 1)) days.push(d);
+    return days;
+  }
+
+  /** First day of the run of crop months that holds `iso` (a run may cross New Year). */
+  _seasonStart(months, iso) {
+    let [year, month] = iso.split("-").map(Number);
+    for (let i = 0; i < 11; i++) {
+      const prev = month === 1 ? 12 : month - 1;
+      if (!months.includes(prev)) break;
+      if (prev === 12) year -= 1;
+      month = prev;
+    }
+    return `${year}-${String(month).padStart(2, "0")}-01`;
+  }
+
+  /** Plants (or seed lots) whose crop data has this job in the period: not yet done this season, or already planned. */
+  _workItems(kind, days) {
+    const months = new Set(days.map((d) => Number(d.slice(5, 7))));
+    const planned = new Map();
+    for (const t of this._data.tasks) {
+      if (t.done_on || t.kind !== kind) continue;
+      for (const id of [t.planting_id, ...this._listItems(t)]) if (id && !(t.done_ids || []).includes(id)) planned.set(id, t.due_on);
+    }
+    if (kind === "sowing") {
+      return this._data.seeds
+        .filter((lot) => !lot.finished)
+        .map((lot) => {
+          const crop = this._crop(lot.species);
+          const where = ["sow_indoor", "sow_outdoor"].find((key) => (crop?.[key] || []).some((m) => months.has(m)));
+          return where && { id: lot.id, name: `🌱 ${this._seedName(lot)}`, sub: this.t(`work_${where}`), planned: planned.get(lot.id) };
+        })
+        .filter(Boolean);
+    }
+    return this._data.plantings
+      .filter((p) => p.status === "active" && !this._inNursery(p) && !this._isIndoor(p))
+      .map((p) => ({ p, months: this._crop(p.species)?.[kind] || [] }))
+      .filter(({ months: m }) => m.some((x) => months.has(x)))
+      .sort((a, b) => a.p.name.localeCompare(b.p.name))
+      .map(({ p, months: m }) => {
+        const last = this._lastDone(p, kind);
+        const first = days.find((d) => m.includes(Number(d.slice(5, 7)))) || days[0];
+        const done = kind !== "harvest" && last && last >= this._seasonStart(m, first) ? last : null;
+        const zone = this._zone(p.zone_id)?.name;
+        return {
+          id: p.id,
+          name: this._itemName(p.id),
+          sub: [zone, last ? this.t("workLast", { date: this._date(last) }) : this.t("workNever")].filter(Boolean).join(" · "),
+          done,
+          planned: planned.get(p.id),
+        };
+      });
+  }
+
+  /** A day of the forecast for outdoor work: rain, frost, strong gusts. */
+  _dayFlags(day) {
+    const f = (this._outlook?.forecast || []).find((x) => x.date === day);
+    if (!f) return null;
+    const flags = [];
+    if ((f.rain_mm ?? 0) >= 2) flags.push("issue_rain_today");
+    if (f.t_min != null && f.t_min <= 0) flags.push("issue_frozen");
+    if ((f.gust_kmh ?? 0) >= 50) flags.push("issue_gusts");
+    return { forecast: f, flags };
+  }
+
+  _workBox() {
+    const days = this._rangeDays(this._workRange());
+    const period = (name) =>
+      h(
+        "button",
+        {
+          type: "button",
+          className: (this._workPeriod || "weekend") === name ? "active" : "",
+          onclick: () => {
+            this._workPeriod = name;
+            this._workDay = null;
+            this._renderCalendar();
+          },
+        },
+        this.t(`period_${name}`),
+      );
+    const chips = WORK_KINDS.map((kind) => {
+      const count = this._workItems(kind, days).filter((i) => !i.done && !i.planned).length;
+      return h(
+        "button",
+        {
+          type: "button",
+          className: this._work === kind ? "active" : "",
+          onclick: () => {
+            this._work = this._work === kind ? null : kind;
+            this._workSkip = new Set();
+            this._renderCalendar();
+          },
+        },
+        `${EVENT_ICONS[kind]} ${this.t(`ev_${kind}`)} · ${count}`,
+      );
+    });
+    const box = h("div", { className: "work-box" }, h("h3", {}, this.t("workTitle")), h("div", { className: "work-chips" }, chips), h("div", { className: "tabs" }, period("weekend"), period("week"), period("month")));
+    if (!this._work) return box;
+
+    const kind = this._work;
+    const items = this._workItems(kind, days);
+    const todo = items.filter((i) => !i.done);
+    const doneItems = items.filter((i) => i.done);
+    const skip = this._workSkip || (this._workSkip = new Set());
+    const forecastDays = days.map((d) => ({ day: d, info: this._dayFlags(d) })).filter((x) => x.info).slice(0, 7);
+    const good = forecastDays.find((x) => !x.info.flags.length)?.day;
+    const chosen = this._workDay && days.includes(this._workDay) ? this._workDay : good || days[0];
+    const weekdayName = new Intl.DateTimeFormat(this._lang(), { weekday: "short" });
+    if (forecastDays.length)
+      box.append(
+        h(
+          "div",
+          { className: "work-days" },
+          forecastDays.map(({ day, info }) =>
+            h(
+              "button",
+              {
+                type: "button",
+                className: `work-day ${info.flags.length ? "warn" : "good"}${day === chosen ? " chosen" : ""}`,
+                onclick: () => {
+                  this._workDay = day;
+                  this._renderCalendar();
+                },
+              },
+              h("b", {}, `${weekdayName.format(new Date(`${day}T12:00:00`))} ${this._date(day, false)} ${this._weatherIcon(info.forecast)}`),
+              h("span", { className: "sub" }, `${Math.round(info.forecast.t_max)}° / ${Math.round(info.forecast.t_min)}° · ${Math.round(info.forecast.rain_mm ?? 0)} mm`),
+              h("span", { className: `sub ${info.flags.length ? "warn" : "info"}` }, info.flags.length ? `⚠️ ${info.flags.map((x) => this.t(x)).join(", ")}` : this.t("goodDay")),
+            ),
+          ),
+        ),
+      );
+    box.append(
+      todo.length
+        ? h(
+            "div",
+            {},
+            todo.map((i) =>
+              h(
+                "label",
+                { className: "list-item" },
+                h("input", {
+                  type: "checkbox",
+                  checked: !i.planned && !skip.has(i.id),
+                  disabled: !!i.planned,
+                  onchange: (ev) => {
+                    if (ev.target.checked) skip.delete(i.id);
+                    else skip.add(i.id);
+                    this._renderCalendar();
+                  },
+                }),
+                h(
+                  "span",
+                  { style: "display:grid" },
+                  h("span", {}, i.name),
+                  h("span", { className: "sub" }, i.planned ? this.t("workPlanned", { date: this._date(i.planned) }) : i.sub),
+                ),
+              ),
+            ),
+          )
+        : h("p", { className: "hint" }, this.t("workNone")),
+      doneItems.length
+        ? h("p", { className: "hint" }, this.t("workDone", { list: doneItems.map((i) => `${i.name.replace(/^\S+ /, "")} (${this._date(i.done, false)})`).join(", ") }))
+        : null,
+    );
+    const picked = todo.filter((i) => !i.planned && !skip.has(i.id)).map((i) => i.id);
+    if (picked.length) {
+      const other = h("input", {
+        type: "date",
+        value: chosen,
+        min: today(),
+        onchange: (ev) => {
+          this._workDay = ev.target.value;
+          this._renderCalendar();
+        },
+      });
+      box.append(
+        h(
+          "button",
+          {
+            type: "button",
+            className: "primary",
+            onclick: async () => {
+              const due_on = this._workDay && this._workDay >= today() ? this._workDay : chosen;
+              const key = kind === "sowing" ? "seed_ids" : "planting_ids";
+              if (await this._call("add_task", { kind, due_on, [key]: picked })) {
+                this._work = null;
+                this._workDay = null;
+                this._showMessage(`✓ ${this.t("workCreated", { name: this.t(`ev_${kind}`), date: this._date(due_on) })}`);
+                this._renderCalendar();
+              }
+            },
+          },
+          this.t("workCreate", { count: picked.length, date: this._date(this._workDay || chosen, false) }),
+        ),
+        h("label", { className: "sub", style: "display:flex;gap:8px;align-items:center" }, this.t("workOtherDay"), other),
+      );
+    }
+    return box;
+  }
+
   /** The diary form filled in from a planned activity (✔, or a tapped phone notification). */
   _completeFromTask(t, back = null) {
+    if (this._isList(t)) {
+      // A list is ticked plant by plant in the Diary's to-do.
+      this._setTab("diary");
+      this._render();
+      return;
+    }
     this._newEvent(
       {
         kind: t.kind,
@@ -4327,7 +4715,7 @@ class HomesteadPanel extends HTMLElement {
   _refreshPlantingTodo() {
     const f = this._todoPlanting;
     if (!this._todoEl || !f) return;
-    const mine = this._data.tasks.filter((t) => t.planting_id === f.id || (t.zone_id && this._inZone(f, t.zone_id)));
+    const mine = this._data.tasks.filter((t) => t.planting_id === f.id || t.planting_ids?.includes(f.id) || (t.zone_id && this._inZone(f, t.zone_id)));
     this._todoEl.replaceChildren(this._todoBox(mine, { planting_id: f.id }));
   }
 
@@ -4340,7 +4728,7 @@ class HomesteadPanel extends HTMLElement {
         { onsubmit: (ev) => this._saveTask(ev) },
         h("h2", {}, f.id ? this.t("editTaskTitle") : this.t("newTaskTitle")),
         this._selectField(f, "kind", kinds),
-        this._targetSelect(f, false),
+        this._isList(f) ? h("p", { className: "hint", style: "white-space:normal" }, this._listNames(f, 50)) : this._targetSelect(f, false),
         h("div", { className: "row" }, this._field(f, "due_on", { type: "date", required: true })),
         this._field(f, "title", { maxLength: 100 }),
         h("label", { className: "check" }, h("input", { type: "checkbox", name: "yearly", checked: !!f.yearly }), this.t("yearly")),
@@ -4374,6 +4762,11 @@ class HomesteadPanel extends HTMLElement {
     if (data.planting_id) delete data.zone_id;
     else if (data.zone_id) delete data.planting_id;
     else delete data.zone_id;
+    if (this._isList(this._taskForm)) {
+      // The list stays as it is: plants are added or ticked from its card.
+      delete data.planting_id;
+      delete data.zone_id;
+    }
     const id = this._taskForm.id;
     if (await this._call(id ? "update_task" : "add_task", id ? { id, ...data } : data)) {
       this._taskDone(data.title || this.t(`ev_${data.kind}`));
@@ -5286,6 +5679,7 @@ class HomesteadPanel extends HTMLElement {
       );
     const scroll = this._calWrap.scrollTop;
     this._calWrap.replaceChildren(
+      this._workBox(),
       this._actionsBox(),
       h(
         "div",
@@ -5301,9 +5695,7 @@ class HomesteadPanel extends HTMLElement {
 
   _actionsBox() {
     const now = today();
-    const limit = new Date(`${now}T12:00:00`);
-    limit.setDate(limit.getDate() + 14);
-    const end = limit.toISOString().slice(0, 10);
+    const end = addDays(now, 14);
     const advice = this._outlook?.advice || {};
     const tasks = this._data.tasks
       .filter((t) => !t.done_on && t.due_on <= end)
@@ -5328,7 +5720,7 @@ class HomesteadPanel extends HTMLElement {
           { type: "button", className: "action-main", onclick: () => this._openTask(t) },
           h("span", { className: "action-date" }, `${weekday.format(new Date(`${t.due_on}T12:00:00`))} ${this._date(t.due_on, false)}`),
           h("span", { className: "action-title" }, `${EVENT_ICONS[t.kind] || "📝"} ${t.title || this.t(`ev_${t.kind}`)}`),
-          t.planting_id || t.zone_id ? h("span", { className: "sub" }, this._targetName(t)) : null,
+          this._isList(t) || t.planting_id || t.zone_id ? h("span", { className: "sub" }, this._isList(t) ? this._listNames(t) : this._targetName(t)) : null,
           verdictText ? h("span", { className: "action-verdict" }, verdictText) : null,
         ),
         h("button", { type: "button", className: "tick", title: this.t("done"), onclick: () => this._completeFromTask(t) }, "✔"),
@@ -5561,13 +5953,13 @@ class HomesteadPanel extends HTMLElement {
     );
   }
 
-  _bandRow(label, onclick, bands, pills, extra = null) {
+  _bandRow(label, onclick, bands, pills, extra = null, faded = "") {
     const lanes = [...new Set(bands.map((b) => b.lane))];
     const pillRows = Math.max(0, ...pills.map((pill) => Number(pill.dataset.row ?? -1) + 1));
     const height = Math.max(30, 10 + lanes.length * 7, 6 + pillRows * 20);
     return h(
       "div",
-      { className: "tl-row" },
+      { className: `tl-row${faded}` },
       h("button", { type: "button", className: "tl-label", title: label, onclick }, label),
       h(
         "div",
@@ -5617,14 +6009,21 @@ class HomesteadPanel extends HTMLElement {
   /** The year to come per zone: crop calendar bands, typical zone work, and the planned activities as pills. */
   _planTimeline() {
     const year = String(new Date().getFullYear());
+    // A job chosen in "What do I do…": the other plants fade.
+    const highlight =
+      this._work && this._work !== "sowing"
+        ? new Set(this._workItems(this._work, this._rangeDays(this._workRange())).filter((i) => !i.done).map((i) => i.id))
+        : null;
     const openTasks = this._data.tasks.filter((t) => !t.done_on);
     const rows = [this._timelineHeader()];
     const legendKeys = new Set();
     for (const group of this._calendarGroups()) {
       if (group.zone && this._zoneFamily({ zone_id: group.zone.id }) === "indoor") continue;
       const plantings = group.plantings.filter((p) => p.status === "active");
-      const zoneTasks = group.zone ? openTasks.filter((t) => t.zone_id === group.zone.id) : openTasks.filter((t) => !t.planting_id && !t.zone_id);
-      const plantTasks = openTasks.filter((t) => plantings.some((p) => p.id === t.planting_id));
+      const zoneTasks = group.zone
+        ? openTasks.filter((t) => t.zone_id === group.zone.id)
+        : openTasks.filter((t) => !t.planting_id && !t.zone_id && !this._isList(t));
+      const plantTasks = openTasks.filter((t) => plantings.some((p) => p.id === t.planting_id || t.planting_ids?.includes(p.id)));
       const zoneBands = group.zone ? ZONE_SEASONS[group.zone.kind] || [] : [];
       if (!plantings.length && !zoneTasks.length && !zoneBands.length) continue;
       const count = zoneTasks.length + plantTasks.length;
@@ -5657,7 +6056,8 @@ class HomesteadPanel extends HTMLElement {
           return this._monthSegments(crop[key]).map(([from, to]) => ({ from, to, lane: key, color: CROP_COLOR[key], title: this.t(key) }));
         });
         const label = `${PLANT_ICONS[p.plant_type] || "🌱"} ${p.name}${p.kind === "group" && p.quantity > 1 ? ` (${p.quantity})` : ""}`;
-        rows.push(this._bandRow(label, () => this._select(p.id), bands, this._taskPills(openTasks.filter((t) => t.planting_id === p.id), year)));
+        const pills = this._taskPills(openTasks.filter((t) => t.planting_id === p.id || t.planting_ids?.includes(p.id)), year);
+        rows.push(this._bandRow(label, () => this._select(p.id), bands, pills, null, highlight && !highlight.has(p.id) ? " faded" : ""));
       }
     }
     const tools = this._data.tools.filter((t) => t.next_service_on && t.status !== "broken" && t.next_service_on.slice(0, 4) <= year);
@@ -6436,9 +6836,15 @@ function capitalize(text) {
 }
 
 function addDays(iso, days) {
-  const d = new Date(`${iso}T12:00:00`);
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+  // Calendar arithmetic in UTC: no daylight saving shift, no time zone far from UTC moving the date.
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
+}
+
+/** Day of the week of a date, 0 = Sunday (in UTC: no time zone shift). */
+function weekday(iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).getUTCDay();
 }
 
 function addMonths(iso, months) {

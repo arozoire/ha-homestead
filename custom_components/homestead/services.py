@@ -47,7 +47,7 @@ from .models import (
 from .photos import delete_photo_file, photo_dir
 from .species import SourcesUnavailable, fetch_details, upsert_taxon
 from .store import HomesteadStore, get_store
-from .tasks import async_complete_task, mark_task_done
+from .tasks import async_complete_task, drop_item, mark_task_done, postpone_task
 from .weather import async_fill_event, async_refresh, schedule_weather
 
 _opt_str = vol.Any(None, cv.string)
@@ -268,6 +268,8 @@ _TASK_FIELDS = {
     vol.Optional("title"): _opt_str,
     vol.Exclusive("planting_id", "target"): vol.Any(None, cv.string),
     vol.Exclusive("zone_id", "target"): vol.Any(None, cv.string),
+    vol.Exclusive("planting_ids", "target"): vol.All(cv.ensure_list, [cv.string]),
+    vol.Optional("seed_ids"): vol.All(cv.ensure_list, [cv.string]),
     vol.Optional("yearly"): cv.boolean,
     vol.Optional("notes"): _opt_str,
 }
@@ -289,7 +291,15 @@ UPDATE_TASK_SCHEMA = vol.Schema(
     }
 )
 
-COMPLETE_TASK_SCHEMA = vol.Schema({vol.Required("id"): cv.string, vol.Optional("done_on"): cv.date})
+COMPLETE_TASK_SCHEMA = vol.Schema(
+    {
+        vol.Required("id"): cv.string,
+        vol.Optional("done_on"): cv.date,
+        vol.Optional("items"): vol.All(cv.ensure_list, [cv.string]),
+    }
+)
+
+POSTPONE_TASK_SCHEMA = vol.Schema({vol.Required("id"): cv.string, vol.Required("due_on"): cv.date})
 
 ADD_EVENT_SCHEMA = vol.All(
     vol.Schema(
@@ -486,6 +496,7 @@ def async_register_services(hass: HomeAssistant) -> None:
             await _remove_event(store, event.id)
         for task in [t for t in store.data.tasks.values() if t.planting_id == planting_id]:
             del store.data.tasks[task.id]
+        drop_item(store, planting_id)
         await store.async_save()
         return {"id": planting_id}
 
@@ -622,6 +633,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         for planting in store.data.plantings.values():
             if planting.seed_lot_id == lot_id:
                 planting.seed_lot_id = None
+        drop_item(store, lot_id)
         await store.async_save()
         return {"id": lot_id}
 
@@ -697,10 +709,21 @@ def async_register_services(hass: HomeAssistant) -> None:
         _check_ref(store.data.zones, args.get("zone_id"), "zone_id")
         if "due_on" in args:
             args["due_on"] = _iso(args["due_on"])
+        for planting_id in args.get("planting_ids", []):
+            _check_ref(store.data.plantings, planting_id, "planting_ids")
+        for lot_id in args.get("seed_ids", []):
+            _check_ref(store.data.seeds, lot_id, "seed_ids")
         if "planting_id" in args or "zone_id" in args:
             # One target at most; sending only "planting_id": null clears both.
             planting_id = args.get("planting_id")
             args["planting_id"], args["zone_id"] = planting_id, None if planting_id else args.get("zone_id")
+            args["planting_ids"] = []
+        if args.get("planting_ids"):
+            # A list of plants instead of one plant or zone.
+            args["planting_ids"] = list(dict.fromkeys(args["planting_ids"]))
+            args["planting_id"] = args["zone_id"] = None
+        if "seed_ids" in args:
+            args["seed_ids"] = list(dict.fromkeys(args["seed_ids"]))
         return args
 
     async def add_task(call: ServiceCall) -> ServiceResponse:
@@ -715,7 +738,8 @@ def async_register_services(hass: HomeAssistant) -> None:
         args = dict(call.data)
         task_id = args.pop("id")
         _check_ref(store.data.tasks, task_id, "id")
-        store.data.tasks[task_id] = replace(store.data.tasks[task_id], **_task_args(store, args))
+        task = store.data.tasks[task_id] = replace(store.data.tasks[task_id], **_task_args(store, args))
+        task.done_ids = [i for i in task.done_ids if i in task.items]
         await store.async_save()
         return {"id": task_id}
 
@@ -730,8 +754,18 @@ def async_register_services(hass: HomeAssistant) -> None:
         """Done: record it in the diary (today by default)."""
         store = _store(hass)
         _check_ref(store.data.tasks, call.data["id"], "id")
-        event = await async_complete_task(hass, store, call.data["id"], _iso(call.data.get("done_on")))
-        return {"id": event.id}
+        events = await async_complete_task(
+            hass, store, call.data["id"], _iso(call.data.get("done_on")), call.data.get("items")
+        )
+        return {"id": events[-1].id if events else None, "ids": [e.id for e in events]}
+
+    async def postpone(call: ServiceCall) -> ServiceResponse:
+        """Another day; the plants not yet done of a list move to a new task."""
+        store = _store(hass)
+        _check_ref(store.data.tasks, call.data["id"], "id")
+        task_id = postpone_task(store, call.data["id"], _iso(call.data["due_on"]))
+        await store.async_save()
+        return {"id": task_id}
 
     async def update_event(call: ServiceCall) -> ServiceResponse:
         store = _store(hass)
@@ -885,6 +919,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         ("update_task", update_task, UPDATE_TASK_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_task", delete_task, ID_SCHEMA, SupportsResponse.OPTIONAL),
         ("complete_task", complete_task, COMPLETE_TASK_SCHEMA, SupportsResponse.OPTIONAL),
+        ("postpone_task", postpone, POSTPONE_TASK_SCHEMA, SupportsResponse.OPTIONAL),
         ("export", export, vol.Schema({}), SupportsResponse.ONLY),
     ):
         hass.services.async_register(DOMAIN, name, handler, schema=schema, supports_response=response)
