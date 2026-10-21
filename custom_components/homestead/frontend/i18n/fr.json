@@ -607,9 +607,9 @@
  "listProgress": "{done} sur {total}",
  "listAllDone": "Tout est fait",
  "listAdd": "Ajouter",
- "listMove": "Reporter",
+ "listMove": "Replanifier",
  "listTomorrow": "Demain",
  "listNextWeekend": "Week-end suivant",
- "listMoved": "Reportée au {date}",
- "listMovedRest": "Les {count} restantes reportées au {date}"
+ "listMoved": "Replanifiée au {date}",
+ "listMovedRest": "Les {count} restantes replanifiées au {date}"
 }

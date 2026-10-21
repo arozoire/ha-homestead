@@ -607,9 +607,9 @@
  "listProgress": "{done} van {total}",
  "listAllDone": "Allemaal gedaan",
  "listAdd": "Toevoegen",
- "listMove": "Verplaatsen",
+ "listMove": "Opnieuw plannen",
  "listTomorrow": "Morgen",
  "listNextWeekend": "Volgend weekend",
- "listMoved": "Verplaatst naar {date}",
- "listMovedRest": "De {count} resterende verplaatst naar {date}"
+ "listMoved": "Opnieuw gepland op {date}",
+ "listMovedRest": "De {count} resterende opnieuw gepland op {date}"
 }

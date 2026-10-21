@@ -607,9 +607,9 @@
  "listProgress": "{done} of {total}",
  "listAllDone": "All done",
  "listAdd": "Add",
- "listMove": "Move",
+ "listMove": "Reschedule",
  "listTomorrow": "Tomorrow",
  "listNextWeekend": "Next weekend",
- "listMoved": "Moved to {date}",
- "listMovedRest": "The {count} left moved to {date}"
+ "listMoved": "Rescheduled to {date}",
+ "listMovedRest": "The {count} left rescheduled to {date}"
 }

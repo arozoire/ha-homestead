@@ -1175,7 +1175,7 @@
       }
     },
     "postpone_task": {
-      "name": "Postpone planned activity",
+      "name": "Reschedule planned activity",
       "description": "Moves it to another day. In a list half done, the plants not yet done move to a new task; the done part closes today.",
       "fields": {
         "id": {
