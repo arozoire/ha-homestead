@@ -1175,7 +1175,7 @@
       }
     },
     "postpone_task": {
-      "name": "Sposta attività pianificata",
+      "name": "Ripianifica attività pianificata",
       "description": "La sposta a un altro giorno. In una lista fatta in parte, le piante non ancora fatte passano a una nuova attività; la parte fatta si chiude oggi.",
       "fields": {
         "id": {

@@ -29,7 +29,7 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 | Bilancio | Evento *⭐ Bilancio annata* (voto 1–5, raccolto scarso/normale/abbondante, da rifare, da evitare); chiesto subito dopo *🏁 Fine coltura* e, da settembre, nella scheda pianta |
 | Meteo | Ogni evento registra il meteo della settimana prima (+3 giorni dopo per trattamenti e semine): temperatura media/min/max, umidità, pioggia, umidità del suolo. Dai tuoi sensori (statistiche a lungo termine di HA, scelti in *Configura*), il resto da Open-Meteo (gratis, senza account) |
 | Attività pianificate | *📋 Da fare* nella scheda Diario e nella scheda pianta: tipo, pianta o zona, data, *ogni anno*; ✔ apre l'evento del diario già compilato. Servizi `add_task`, `update_task`, `delete_task`, `complete_task` |
-| 🗓️ Lavori del weekend | Nel Calendario, *Cosa devo fare…*: scegli un lavoro (✂️ potatura, 🌿 concimazione, 🍎 raccolta, 🌱 semina) e un periodo (weekend, settimana, mese): le piante che secondo la scheda colturale hanno quel lavoro adesso e non sono ancora state fatte in questa stagione (per la semina, i lotti di semi), con il meteo di ogni giorno; sulla linea dell'anno le altre piante si sbiadiscono. **Crea attività con lista**: un'attività sola con tutte, una notifica; nel Da fare si spuntano una alla volta (ogni spunta scrive il diario di quella pianta; la raccolta chiede la quantità, un lotto di semi apre la semina), *Fatte tutte*, *＋ Aggiungi*, *↪ Sposta* (domani, weekend dopo o una data: quelle non ancora fatte passano a una nuova attività). Servizi `add_task` con `planting_ids` / `seed_ids`, `complete_task` con `items`, `postpone_task` |
+| 🗓️ Lavori del weekend | Nel Calendario, *Cosa devo fare…*: scegli un lavoro (✂️ potatura, 🌿 concimazione, 🍎 raccolta, 🌱 semina) e un periodo (weekend, settimana, mese): le piante che secondo la scheda colturale hanno quel lavoro adesso e non sono ancora state fatte in questa stagione (per la semina, i lotti di semi), con il meteo di ogni giorno; sulla linea dell'anno le altre piante si sbiadiscono. **Crea attività con lista**: un'attività sola con tutte, una notifica; nel Da fare si spuntano una alla volta (ogni spunta scrive il diario di quella pianta; la raccolta chiede la quantità, un lotto di semi apre la semina), *Fatte tutte*, *＋ Aggiungi*, *↪ Ripianifica* (domani, weekend dopo o una data: quelle non ancora fatte passano a una nuova attività). Servizi `add_task` con `planting_ids` / `seed_ids`, `complete_task` con `items`, `postpone_task` |
 | Promemoria sul telefono | Ora e telefoni in *Configura*; tocco → form del diario precompilato; ✔ Fatto dalla notifica |
 | To-do e calendario HA | `todo.ha_homestead_garden_tasks` (spuntare = registrare nel diario oggi; si possono aggiungere voci dall'app HA) e `calendar.ha_homestead_garden` (attività pianificate + ✔ eventi fatti) |
 | Inizio pianta | Il diario mostra in fondo semina, messa a dimora/trapianto o "presente da ~N anni" (dai dati della pianta) |
@@ -119,10 +119,22 @@ Entità create: `sensor.ha_homestead_plantings`, `sensor.ha_homestead_expenses_t
 | Tabella colturale di base (~85 specie) | valori indicativi per clima temperato, scritti per questo progetto | MIT |
 | Meteo | i tuoi sensori, l'entità meteo di HA, [Open-Meteo](https://open-meteo.com) | CC-BY-4.0 (Open-Meteo) |
 
-## Installazione (HACS, repository personalizzato)
+## Installazione
+
+### HACS (consigliata)
+
+[![Apri questo repository in HACS nella tua istanza di Home Assistant.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=arozoire&repository=ha-homestead&category=integration)
+
+1. In HACS cerca **HA Homestead** (o usa il pulsante qui sopra) e scaricalo.
+2. Riavvia Home Assistant.
+3. *Impostazioni → Dispositivi e servizi → Aggiungi integrazione → HA Homestead*.
+
+### Repository personalizzato (alternativa)
+
+Se HA Homestead non compare nella ricerca (per esempio con una versione vecchia di HACS):
 
 1. HACS → menu ⋮ → *Repository personalizzati* → `https://github.com/arozoire/ha-homestead`, categoria *Integrazione*.
-2. Installa **HA Homestead** e riavvia Home Assistant.
+2. Scarica **HA Homestead** e riavvia Home Assistant.
 3. *Impostazioni → Dispositivi e servizi → Aggiungi integrazione → HA Homestead*.
 
 ## Sviluppo

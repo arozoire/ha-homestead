@@ -29,7 +29,7 @@ A Home Assistant integration to manage your vegetable garden, orchard and garden
 | Season review | *⭐ Season review* event (rating 1–5, harvest poor/normal/abundant, repeat, avoid); asked right after *🏁 End of crop* and, from September, in the plant card |
 | Weather | Each event records the weather of the week before (+3 days after for treatments and sowing): mean/min/max temperature, humidity, rain, soil moisture. From your sensors (HA long-term statistics, chosen in *Configure*), the rest from Open-Meteo (free, no account) |
 | Planned tasks | *📋 To do* in the Diary tab and in the plant card: type, plant or zone, date, *every year*; ✔ opens the diary event already filled in. Services `add_task`, `update_task`, `delete_task`, `complete_task` |
-| 🗓️ Jobs of the weekend | In the Calendar, *What do I do…*: pick a job (✂️ pruning, 🌿 feeding, 🍎 harvest, 🌱 sowing) and a period (weekend, week, month): the plants whose crop data has that job now and that are not done yet this season (seed lots to sow, for sowing), with the weather of each day; the other plants fade on the year line. **Create list task**: one task with all of them, one notification; in the To do you tick them one by one (each tick writes the diary of that plant; a harvest asks the quantity, a seed lot opens the sowing form), *All done*, *＋ Add*, *↪ Move* (tomorrow, next weekend or a date: the ones not done yet go to a new task). Services `add_task` with `planting_ids` / `seed_ids`, `complete_task` with `items`, `postpone_task` |
+| 🗓️ Jobs of the weekend | In the Calendar, *What do I do…*: pick a job (✂️ pruning, 🌿 feeding, 🍎 harvest, 🌱 sowing) and a period (weekend, week, month): the plants whose crop data has that job now and that are not done yet this season (seed lots to sow, for sowing), with the weather of each day; the other plants fade on the year line. **Create list task**: one task with all of them, one notification; in the To do you tick them one by one (each tick writes the diary of that plant; a harvest asks the quantity, a seed lot opens the sowing form), *All done*, *＋ Add*, *↪ Reschedule* (tomorrow, next weekend or a date: the ones not done yet go to a new task). Services `add_task` with `planting_ids` / `seed_ids`, `complete_task` with `items`, `postpone_task` |
 | Phone reminders | Time and phones in *Configure*; tap → prefilled diary form; ✔ Done from the notification |
 | HA to-do and calendar | `todo.ha_homestead_garden_tasks` (ticking = recording it in today's diary; items can be added from the HA app) and `calendar.ha_homestead_garden` (planned tasks + ✔ done events) |
 | Start of the plant | The diary shows sowing, planting/transplanting or "there for ~N years" at the bottom (from the plant data) |
@@ -119,10 +119,22 @@ Entities created: `sensor.ha_homestead_plantings`, `sensor.ha_homestead_expenses
 | Base crop table (~85 species) | indicative values for a temperate climate, written for this project | MIT |
 | Weather | your sensors, the HA weather entity, [Open-Meteo](https://open-meteo.com) | CC-BY-4.0 (Open-Meteo) |
 
-## Installation (HACS, custom repository)
+## Installation
+
+### HACS (recommended)
+
+[![Open your Home Assistant instance and open this repository in HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=arozoire&repository=ha-homestead&category=integration)
+
+1. In HACS, search for **HA Homestead** (or use the button above) and download it.
+2. Restart Home Assistant.
+3. *Settings → Devices & services → Add integration → HA Homestead*.
+
+### Custom repository (fallback)
+
+If HA Homestead does not show up in the search (an older HACS, for example):
 
 1. HACS → ⋮ menu → *Custom repositories* → `https://github.com/arozoire/ha-homestead`, category *Integration*.
-2. Install **HA Homestead** and restart Home Assistant.
+2. Download **HA Homestead** and restart Home Assistant.
 3. *Settings → Devices & services → Add integration → HA Homestead*.
 
 ## Development
