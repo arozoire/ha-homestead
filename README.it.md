@@ -119,10 +119,22 @@ Entità create: `sensor.ha_homestead_plantings`, `sensor.ha_homestead_expenses_t
 | Tabella colturale di base (~85 specie) | valori indicativi per clima temperato, scritti per questo progetto | MIT |
 | Meteo | i tuoi sensori, l'entità meteo di HA, [Open-Meteo](https://open-meteo.com) | CC-BY-4.0 (Open-Meteo) |
 
-## Installazione (HACS, repository personalizzato)
+## Installazione
+
+### HACS (consigliata)
+
+[![Apri questo repository in HACS nella tua istanza di Home Assistant.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=arozoire&repository=ha-homestead&category=integration)
+
+1. In HACS cerca **HA Homestead** (o usa il pulsante qui sopra) e scaricalo.
+2. Riavvia Home Assistant.
+3. *Impostazioni → Dispositivi e servizi → Aggiungi integrazione → HA Homestead*.
+
+### Repository personalizzato (alternativa)
+
+Se HA Homestead non compare nella ricerca (per esempio con una versione vecchia di HACS):
 
 1. HACS → menu ⋮ → *Repository personalizzati* → `https://github.com/arozoire/ha-homestead`, categoria *Integrazione*.
-2. Installa **HA Homestead** e riavvia Home Assistant.
+2. Scarica **HA Homestead** e riavvia Home Assistant.
 3. *Impostazioni → Dispositivi e servizi → Aggiungi integrazione → HA Homestead*.
 
 ## Sviluppo
