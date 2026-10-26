@@ -1,0 +1,44 @@
+name: Release
+
+# A merge to main that changes the version in manifest.json publishes the release by itself:
+# tag = version, notes = the "## Release notes" section of the merged pull request
+# (its title when the section is missing). Run it by hand to publish the current version.
+on:
+  push:
+    branches: [main]
+    paths: [custom_components/homestead/manifest.json]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency: release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(jq -r .version custom_components/homestead/manifest.json)
+          if gh release view "$version" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $version already exists: nothing to do."
+            exit 0
+          fi
+          number=$(gh api "repos/${{ github.repository }}/commits/${{ github.sha }}/pulls" --jq '.[0].number // empty')
+          if [ -n "$number" ]; then
+            body=$(gh pr view "$number" --repo "$GITHUB_REPOSITORY" --json body --jq .body)
+            title=$(gh pr view "$number" --repo "$GITHUB_REPOSITORY" --json title --jq .title)
+            notes=$(printf '%s\n' "$body" | tr -d '\r' | awk '/^## Release notes/{on=1; next} on && /^## /{exit} on')
+            if [ -z "$(printf '%s' "$notes" | tr -d '[:space:]')" ]; then
+              notes="$title"
+            fi
+            notes=$(printf '%s\n\nPull request: #%s' "$notes" "$number")
+          else
+            notes="Version $version."
+          fi
+          gh release create "$version" --repo "$GITHUB_REPOSITORY" --target "${{ github.sha }}" --title "$version" --notes "$notes"
