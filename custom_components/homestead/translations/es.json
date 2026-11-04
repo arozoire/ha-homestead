@@ -28,7 +28,11 @@
           "heat_max": "Ola de calor: máxima desde",
           "heat_night": "Ola de calor: mínima nocturna desde",
           "heat_days": "Ola de calor: días seguidos",
-          "heat_extreme": "Calor extremo: máxima desde (aunque sea un solo día)"
+          "heat_extreme": "Calor extremo: máxima desde (aunque sea un solo día)",
+          "photo_media": "Carpeta de las fotos originales"
+        },
+        "data_description": {
+          "photo_media": "Carpeta multimedia de HA donde el plan de fotos guarda los originales, sin compresión. Un NAS añadido en Ajustes → Sistema → Almacenamiento aparece aquí."
         }
       }
     }
@@ -199,7 +203,8 @@
         "animal_care": "Pienso y cuidados",
         "coop_cleaning": "Limpieza del gallinero",
         "repotting": "Trasplante a maceta",
-        "wood_burned": "Leña quemada (invierno)"
+        "wood_burned": "Leña quemada (invierno)",
+        "photo": "Foto"
       }
     },
     "harvest_unit": {
@@ -1185,6 +1190,28 @@
         "due_on": {
           "name": "Nueva fecha",
           "description": "El día en que hacerla."
+        }
+      }
+    },
+    "set_photo_plan": {
+      "name": "Definir plan de fotos",
+      "description": "Zonas y plantas para fotografiar, por periodos (principios de mayo…) o cada N semanas. Vacío: no más tareas de fotos.",
+      "fields": {
+        "zone_ids": {
+          "name": "Zonas",
+          "description": "Zonas para fotografiar."
+        },
+        "planting_ids": {
+          "name": "Plantas",
+          "description": "Plantas sueltas para fotografiar (una muerta sale del plan)."
+        },
+        "periods": {
+          "name": "Periodos",
+          "description": "Lista de {month, part}: part = start, mid o end del mes."
+        },
+        "every_weeks": {
+          "name": "Cada N semanas",
+          "description": "En lugar de periodos."
         }
       }
     },

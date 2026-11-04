@@ -181,6 +181,7 @@ async def test_options_flow(hass: HomeAssistant) -> None:
         "heat_night": 22,
         "heat_days": 3,
         "heat_extreme": 40,
+        "photo_media": "local",
     }
     # The reload with the new options runs in the background: let it finish.
     await hass.async_block_till_done()

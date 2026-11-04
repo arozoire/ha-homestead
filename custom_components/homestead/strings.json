@@ -28,7 +28,11 @@
           "heat_max": "Heatwave: maximum from",
           "heat_night": "Heatwave: night minimum from",
           "heat_days": "Heatwave: days in a row",
-          "heat_extreme": "Extreme heat: maximum from (a single day)"
+          "heat_extreme": "Extreme heat: maximum from (a single day)",
+          "photo_media": "Folder for the photo originals"
+        },
+        "data_description": {
+          "photo_media": "HA media folder where the photo plan keeps the originals, uncompressed. A NAS added in Settings → System → Storage shows up here."
         }
       }
     }
@@ -199,7 +203,8 @@
         "animal_care": "Feed and care",
         "coop_cleaning": "Coop cleaning",
         "repotting": "Repotting",
-        "wood_burned": "Firewood burnt (winter)"
+        "wood_burned": "Firewood burnt (winter)",
+        "photo": "Photo"
       }
     },
     "harvest_unit": {
@@ -1185,6 +1190,28 @@
         "due_on": {
           "name": "New date",
           "description": "The day to do it."
+        }
+      }
+    },
+    "set_photo_plan": {
+      "name": "Set photo plan",
+      "description": "Zones and plants to photograph, by periods (early May…) or every N weeks. Empty: no more photo tasks.",
+      "fields": {
+        "zone_ids": {
+          "name": "Zones",
+          "description": "Zones to photograph."
+        },
+        "planting_ids": {
+          "name": "Plants",
+          "description": "Single plants to photograph (a dead one leaves the plan)."
+        },
+        "periods": {
+          "name": "Periods",
+          "description": "List of {month, part}: part = start, mid or end of the month."
+        },
+        "every_weeks": {
+          "name": "Every N weeks",
+          "description": "Instead of periods."
         }
       }
     },

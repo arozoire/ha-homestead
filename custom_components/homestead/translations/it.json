@@ -28,7 +28,11 @@
           "heat_max": "Ondata di calore: massima da",
           "heat_night": "Ondata di calore: minima notturna da",
           "heat_days": "Ondata di calore: giorni di fila",
-          "heat_extreme": "Caldo estremo: massima da (anche un solo giorno)"
+          "heat_extreme": "Caldo estremo: massima da (anche un solo giorno)",
+          "photo_media": "Cartella per le foto originali"
+        },
+        "data_description": {
+          "photo_media": "Cartella media di HA dove il piano foto salva gli originali, senza compressione. Un NAS aggiunto in Impostazioni → Sistema → Archiviazione compare qui."
         }
       }
     }
@@ -199,7 +203,8 @@
         "animal_care": "Mangime e cure",
         "coop_cleaning": "Pulizia pollaio",
         "repotting": "Rinvaso",
-        "wood_burned": "Legna bruciata (inverno)"
+        "wood_burned": "Legna bruciata (inverno)",
+        "photo": "Foto"
       }
     },
     "harvest_unit": {
@@ -1185,6 +1190,28 @@
         "due_on": {
           "name": "Nuova data",
           "description": "Il giorno in cui farla."
+        }
+      }
+    },
+    "set_photo_plan": {
+      "name": "Imposta piano foto",
+      "description": "Zone e piante da fotografare, per periodi (inizio maggio…) o ogni N settimane. Vuoto: niente più attività foto.",
+      "fields": {
+        "zone_ids": {
+          "name": "Zone",
+          "description": "Zone da fotografare."
+        },
+        "planting_ids": {
+          "name": "Piante",
+          "description": "Piante singole da fotografare (se muoiono escono dal piano)."
+        },
+        "periods": {
+          "name": "Periodi",
+          "description": "Lista di {month, part}: part = start, mid o end del mese."
+        },
+        "every_weeks": {
+          "name": "Ogni N settimane",
+          "description": "Al posto dei periodi."
         }
       }
     },

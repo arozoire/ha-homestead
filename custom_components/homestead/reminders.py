@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Callable
-from datetime import time
+from datetime import time, timedelta
 from typing import Any
 
 from homeassistant.core import Event, HomeAssistant, callback
@@ -49,8 +49,13 @@ async def async_send_reminders(hass: HomeAssistant, store: HomesteadStore, servi
     now = dt_util.now().date()
     today = now.isoformat()
     open_tasks = [t for t in store.data.tasks.values() if not t.done_on]
-    due = sorted((t for t in open_tasks if t.due_on == today), key=lambda t: t.id)
-    late = [t for t in open_tasks if t.due_on < today]
+    # A period (the photo plan) is announced on its first day and again three days before its end.
+    closing = (now + timedelta(days=3)).isoformat()
+    due = sorted(
+        (t for t in open_tasks if t.due_on == today or (t.due_on < today and t.due_until == closing)),
+        key=lambda t: t.id,
+    )
+    late = [t for t in open_tasks if (t.due_until or t.due_on) < today]
     planned = {t.zone_id for t in open_tasks if t.kind == "compost_turn"}
     # Once at four weeks, then once a week until it is done (or planned as a task).
     compost = [

@@ -38,7 +38,7 @@ class HomesteadCalendar(CalendarEntity):
         items = [
             CalendarEvent(
                 start=date.fromisoformat(t.due_on),
-                end=date.fromisoformat(t.due_on) + timedelta(days=1),
+                end=date.fromisoformat(t.due_until or t.due_on) + timedelta(days=1),
                 summary=summary(data, t, self._kinds),
                 description=t.notes,
                 uid=f"task-{t.id}",

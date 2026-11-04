@@ -17,11 +17,11 @@ from homeassistant.loader import async_get_integration
 from homeassistant.util import dt as dt_util
 
 from .backup import BackupError, make_backup, read_backup, summary
-from .const import DOMAIN, SIGNAL_DATA_UPDATED, SIGNAL_OUTLOOK_UPDATED
+from .const import CONF_PHOTO_MEDIA, DOMAIN, SIGNAL_DATA_UPDATED, SIGNAL_OUTLOOK_UPDATED
 from .crops import GENUS_TYPES
 from .forecast import async_crop_defaults, get_outlook
 from .models import HomesteadData, Photo
-from .photos import MAX_PHOTO_BYTES, delete_all, image_type, photo_dir, write_photo
+from .photos import MAX_PHOTO_BYTES, delete_all, image_type, photo_dir, photo_roots, write_photo
 from .species import SourcesUnavailable, combine, search_local, search_remote
 from .store import get_store
 
@@ -37,6 +37,7 @@ def async_register_websocket(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, ws_backup_import)
     websocket_api.async_register_command(hass, ws_reset)
     websocket_api.async_register_command(hass, ws_photo_upload)
+    websocket_api.async_register_command(hass, ws_photo_storage)
     websocket_api.async_register_command(hass, ws_search_species)
     websocket_api.async_register_command(hass, ws_crop_defaults)
     websocket_api.async_register_command(hass, ws_outlook_subscribe)
@@ -171,9 +172,8 @@ async def ws_backup_import(
         connection.send_error(msg["id"], "invalid_format", str(err))
         return
     # The JSON has no image bytes: keep only photo records whose file is still on this instance.
-    folder = photo_dir(hass)
     exists = await hass.async_add_executor_job(
-        lambda: {i for i, p in data.photos.items() if (folder / p.file).is_file()}
+        lambda: {i for i, p in data.photos.items() if (photo_dir(hass, p.root) / p.file).is_file()}
     )
     data.photos = {i: p for i, p in data.photos.items() if i in exists}
     store.data = data
@@ -191,7 +191,8 @@ async def ws_reset(
     if (store := get_store(hass)) is None:
         connection.send_error(msg["id"], "not_loaded", "HA Homestead is not loaded")
         return
-    await hass.async_add_executor_job(delete_all, photo_dir(hass))
+    for folder in photo_roots(hass, store.data.photos.values()):
+        await hass.async_add_executor_job(delete_all, folder)
     store.data = HomesteadData()
     await store.async_save()
     connection.send_result(msg["id"], summary(store.data))
@@ -240,3 +241,17 @@ async def ws_photo_upload(
     store.data.photos[photo.id] = photo
     await store.async_save()
     connection.send_result(msg["id"], {"id": photo.id})
+
+
+@websocket_api.websocket_command({vol.Required("type"): "homestead/photo/storage"})
+@callback
+def ws_photo_storage(
+    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]
+) -> None:
+    """Where the originals of the photo plan go: the media folder chosen in the options, and its path."""
+    entries = hass.config_entries.async_entries(DOMAIN)
+    media = entries[0].options.get(CONF_PHOTO_MEDIA) if entries else None
+    if media not in hass.config.media_dirs:
+        media = "local"
+    result = {"media": media, "path": str(photo_dir(hass, media)), "folders": list(hass.config.media_dirs)}
+    connection.send_result(msg["id"], result)

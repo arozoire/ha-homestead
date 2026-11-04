@@ -28,7 +28,11 @@
           "heat_max": "Hittegolf: maximum vanaf",
           "heat_night": "Hittegolf: nachtminimum vanaf",
           "heat_days": "Hittegolf: dagen achter elkaar",
-          "heat_extreme": "Extreme hitte: maximum vanaf (ook één dag)"
+          "heat_extreme": "Extreme hitte: maximum vanaf (ook één dag)",
+          "photo_media": "Map voor de originele foto's"
+        },
+        "data_description": {
+          "photo_media": "HA-mediamap waar het fotoplan de originelen ongecomprimeerd bewaart. Een NAS toegevoegd via Instellingen → Systeem → Opslag verschijnt hier."
         }
       }
     }
@@ -199,7 +203,8 @@
         "animal_care": "Voer en verzorging",
         "coop_cleaning": "Kippenhok schoonmaken",
         "repotting": "Verpotten",
-        "wood_burned": "Gestookt hout (winter)"
+        "wood_burned": "Gestookt hout (winter)",
+        "photo": "Foto"
       }
     },
     "harvest_unit": {
@@ -1185,6 +1190,28 @@
         "due_on": {
           "name": "Nieuwe datum",
           "description": "De dag om het te doen."
+        }
+      }
+    },
+    "set_photo_plan": {
+      "name": "Fotoplan instellen",
+      "description": "Zones en planten om te fotograferen, per periode (begin mei…) of elke N weken. Leeg: geen fototaken meer.",
+      "fields": {
+        "zone_ids": {
+          "name": "Zones",
+          "description": "Te fotograferen zones."
+        },
+        "planting_ids": {
+          "name": "Planten",
+          "description": "Losse planten om te fotograferen (een dode verlaat het plan)."
+        },
+        "periods": {
+          "name": "Periodes",
+          "description": "Lijst van {month, part}: part = start, mid of end van de maand."
+        },
+        "every_weeks": {
+          "name": "Elke N weken",
+          "description": "In plaats van periodes."
         }
       }
     },

@@ -8,7 +8,7 @@
 
 A Home Assistant integration to manage your vegetable garden, orchard and garden: plants, fruit trees, beds, a diary, expenses, tools, seeds, harvests and weather-aware advice.
 
-> Status: **v0.14** (see *What it does today*). Full specification in [SPEC.md](SPEC.md) (Italian).
+> Status: **v0.15** (see *What it does today*). Full specification in [SPEC.md](SPEC.md) (Italian).
 
 ## Guiding principle
 
@@ -30,6 +30,7 @@ A Home Assistant integration to manage your vegetable garden, orchard and garden
 | Weather | Each event records the weather of the week before (+3 days after for treatments and sowing): mean/min/max temperature, humidity, rain, soil moisture. From your sensors (HA long-term statistics, chosen in *Configure*), the rest from Open-Meteo (free, no account) |
 | Planned tasks | *📋 To do* in the Diary tab and in the plant card: type, plant or zone, date, *every year*; ✔ opens the diary event already filled in. Services `add_task`, `update_task`, `delete_task`, `complete_task` |
 | 🗓️ Jobs of the weekend | In the Calendar, *What do I do…*: pick a job (✂️ pruning, 🌿 feeding, 🍎 harvest, 🌱 sowing) and a period (weekend, week, month): the plants whose crop data has that job now and that are not done yet this season (seed lots to sow, for sowing), with the weather of each day; the other plants fade on the year line. **Create list task**: one task with all of them, one notification; in the To do you tick them one by one (each tick writes the diary of that plant; a harvest asks the quantity, a seed lot opens the sowing form), *All done*, *＋ Add*, *↪ Reschedule* (tomorrow, next weekend or a date: the ones not done yet go to a new task). Services `add_task` with `planting_ids` / `seed_ids`, `complete_task` with `items`, `postpone_task` |
+| 📸 Photos over the years | *More → Zone photos*: pick zones and single plants (a plant that dies leaves the plan by itself) and **periods** (early / mid / late of a month, 14 days each) or *every N weeks*. Each period opens one list task (one notification, again 3 days before the end); **📸 Take** opens the live camera with the previous photo shown through (adjustable transparency) to keep the same framing, or the phone camera at full resolution. Originals are kept **uncompressed** in the HA media folder chosen in the options (a NAS added in *Settings → System → Storage* works), with a small copy for the lists. In the zone and plant cards, *📸 Over the years*: years × periods grid, **↔ Compare** two photos with a slider, **▶ Timelapse**, download the original. Service `set_photo_plan` |
 | Phone reminders | Time and phones in *Configure*; tap → prefilled diary form; ✔ Done from the notification |
 | HA to-do and calendar | `todo.ha_homestead_garden_tasks` (ticking = recording it in today's diary; items can be added from the HA app) and `calendar.ha_homestead_garden` (planned tasks + ✔ done events) |
 | Start of the plant | The diary shows sowing, planting/transplanting or "there for ~N years" at the bottom (from the plant data) |

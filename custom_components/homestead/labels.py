@@ -37,6 +37,7 @@ ICONS = {
     "coop_cleaning": "🧹",
     "repotting": "🪴",
     "wood_burned": "🔥",
+    "photo": "📸",
 }
 
 
@@ -49,7 +50,8 @@ async def async_kind_names(hass: HomeAssistant) -> dict[str, str]:
 
 def target_name(data: HomesteadData, item: Task | Event) -> str | None:
     if isinstance(item, Task) and item.items:
-        names = [data.plantings[i].name for i in item.planting_ids if i in data.plantings]
+        names = [data.zones[i].name for i in item.zone_ids if i in data.zones]
+        names += [data.plantings[i].name for i in item.planting_ids if i in data.plantings]
         lots = [data.seeds[i] for i in item.seed_ids if i in data.seeds]
         names += [" ".join(filter(None, [lot.species, lot.variety])) for lot in lots]
         return ", ".join(names[:3]) + (f" +{len(names) - 3}" if len(names) > 3 else "")

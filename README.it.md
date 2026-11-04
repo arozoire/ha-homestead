@@ -8,7 +8,7 @@
 
 Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, alberi da frutto, aiuole, spese, attrezzi e, nelle prossime versioni, raccolto e consigli basati sul meteo.
 
-> Stato: **v0.14** (vedi *Cosa fa oggi*). Specifiche complete in [SPEC.md](SPEC.md).
+> Stato: **v0.15** (vedi *Cosa fa oggi*). Specifiche complete in [SPEC.md](SPEC.md).
 
 ## Principio guida
 
@@ -30,6 +30,7 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 | Meteo | Ogni evento registra il meteo della settimana prima (+3 giorni dopo per trattamenti e semine): temperatura media/min/max, umidità, pioggia, umidità del suolo. Dai tuoi sensori (statistiche a lungo termine di HA, scelti in *Configura*), il resto da Open-Meteo (gratis, senza account) |
 | Attività pianificate | *📋 Da fare* nella scheda Diario e nella scheda pianta: tipo, pianta o zona, data, *ogni anno*; ✔ apre l'evento del diario già compilato. Servizi `add_task`, `update_task`, `delete_task`, `complete_task` |
 | 🗓️ Lavori del weekend | Nel Calendario, *Cosa devo fare…*: scegli un lavoro (✂️ potatura, 🌿 concimazione, 🍎 raccolta, 🌱 semina) e un periodo (weekend, settimana, mese): le piante che secondo la scheda colturale hanno quel lavoro adesso e non sono ancora state fatte in questa stagione (per la semina, i lotti di semi), con il meteo di ogni giorno; sulla linea dell'anno le altre piante si sbiadiscono. **Crea attività con lista**: un'attività sola con tutte, una notifica; nel Da fare si spuntano una alla volta (ogni spunta scrive il diario di quella pianta; la raccolta chiede la quantità, un lotto di semi apre la semina), *Fatte tutte*, *＋ Aggiungi*, *↪ Ripianifica* (domani, weekend dopo o una data: quelle non ancora fatte passano a una nuova attività). Servizi `add_task` con `planting_ids` / `seed_ids`, `complete_task` con `items`, `postpone_task` |
+| 📸 Foto negli anni | *Altro → Foto delle zone*: scegli zone e piante singole (una pianta che muore esce dal piano da sola) e i **periodi** (inizio / metà / fine di un mese, 14 giorni ciascuno) oppure *ogni N settimane*. Ogni periodo apre un'attività con lista (una notifica, e di nuovo 3 giorni prima della fine); **📸 Scatta** apre la fotocamera dal vivo con la foto precedente in trasparenza (regolabile) per rifare la stessa inquadratura, oppure la fotocamera del telefono a risoluzione piena. Gli originali restano **senza compressione** nella cartella media di HA scelta nelle opzioni (va bene un NAS aggiunto in *Impostazioni → Sistema → Archiviazione*), con una copia piccola per le liste. Nelle schede zona e pianta, *📸 Negli anni*: griglia anni × periodi, **↔ Confronta** due foto con il cursore, **▶ Timelapse**, scarica l'originale. Servizio `set_photo_plan` |
 | Promemoria sul telefono | Ora e telefoni in *Configura*; tocco → form del diario precompilato; ✔ Fatto dalla notifica |
 | To-do e calendario HA | `todo.ha_homestead_garden_tasks` (spuntare = registrare nel diario oggi; si possono aggiungere voci dall'app HA) e `calendar.ha_homestead_garden` (attività pianificate + ✔ eventi fatti) |
 | Inizio pianta | Il diario mostra in fondo semina, messa a dimora/trapianto o "presente da ~N anni" (dai dati della pianta) |

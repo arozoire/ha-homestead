@@ -30,6 +30,7 @@ from .const import (
     CONF_NOTIFY,
     CONF_NOTIFY_TIME,
     CONF_OPEN_METEO,
+    CONF_PHOTO_MEDIA,
     CONF_RAIN,
     CONF_SOIL,
     CONF_TEMPERATURE,
@@ -114,6 +115,14 @@ class HomesteadOptionsFlow(OptionsFlow):
                     NumberSelectorConfig(min=1, max=10, step=1, mode=NumberSelectorMode.BOX)
                 ),
                 vol.Optional(CONF_HEAT_EXTREME, default=40): _degrees(30, 55),
+                # Where the originals of the photo plan go: any HA media folder (a NAS added as storage).
+                vol.Optional(CONF_PHOTO_MEDIA, default="local"): SelectSelector(
+                    SelectSelectorConfig(
+                        options=list(self.hass.config.media_dirs) or ["local"],
+                        custom_value=False,
+                        mode=SelectSelectorMode.DROPDOWN,
+                    )
+                ),
             }
         )
         return self.async_show_form(

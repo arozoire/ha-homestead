@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field, fields
-from datetime import date
+from datetime import date, timedelta
 from enum import StrEnum
 from typing import Any, Self
 from uuid import uuid4
@@ -113,6 +113,7 @@ class EventKind(StrEnum):
     COOP_CLEANING = "coop_cleaning"
     REPOTTING = "repotting"
     WOOD_BURNED = "wood_burned"  # firewood burnt over a winter, logged once at its end
+    PHOTO = "photo"  # a picture of a zone or a plant from the photo plan, to compare over the years
 
 
 class EndReason(StrEnum):
@@ -365,11 +366,16 @@ class Task(_Record):
     # A list task ("prune these 5 plants on Saturday"): plants and seed lots, ticked one by one.
     planting_ids: list[str] = field(default_factory=list)
     seed_ids: list[str] = field(default_factory=list)
+    zone_ids: list[str] = field(default_factory=list)
     done_ids: list[str] = field(default_factory=list)
+    # A period instead of a day (the photos of "early November"), and the plan that made it.
+    due_until: str | None = None
+    plan_id: str | None = None
+    window_on: str | None = None  # first day of the plan period that made it (never moved)
 
     @property
     def items(self) -> list[str]:
-        return [*self.planting_ids, *self.seed_ids]
+        return [*self.zone_ids, *self.planting_ids, *self.seed_ids]
 
     @property
     def remaining(self) -> list[str]:
@@ -392,6 +398,7 @@ class Task(_Record):
             notes=self.notes,
             planting_ids=list(self.planting_ids),
             seed_ids=list(self.seed_ids),
+            zone_ids=list(self.zone_ids),
         )
 
 
@@ -457,6 +464,52 @@ class Photo(_Record):
     event_id: str | None = None
     taken_on: str | None = None
     caption: str | None = None
+    # Originals of the photo plan: the HA media folder they live in (None = "local") and a small copy.
+    root: str | None = None
+    thumb: str | None = None
+
+
+PHOTO_PARTS = {"start": 1, "mid": 11, "end": 21}  # first day of "early / mid / late" in a month
+PHOTO_WINDOW_DAYS = 14
+
+
+@dataclass(kw_only=True)
+class PhotoPlan(_Record):
+    """Pictures of the same zones and plants, period after period: "early May", or every N weeks."""
+
+    id: str = field(default_factory=new_id)
+    zone_ids: list[str] = field(default_factory=list)
+    planting_ids: list[str] = field(default_factory=list)
+    periods: list[dict[str, Any]] = field(default_factory=list)  # [{"month": 5, "part": "start"}]
+    every_weeks: int | None = None
+    start_on: str | None = None  # first day of the first window, with every_weeks
+
+    def windows(self, year: int) -> list[tuple[date, date]]:
+        """The periods of a year (and those of the year before that end in it), sorted."""
+        out = []
+        if self.every_weeks:
+            step = timedelta(weeks=self.every_weeks)
+            length = timedelta(days=min(PHOTO_WINDOW_DAYS, max(3, self.every_weeks * 7 // 2)) - 1)
+            day = date.fromisoformat(self.start_on) if self.start_on else date(year, 1, 1)
+            while day.year <= year:
+                if (day + length).year >= year:
+                    out.append((day, day + length))
+                day += step
+            return out
+        for y in (year - 1, year):
+            for period in self.periods:
+                start = date(y, int(period["month"]), PHOTO_PARTS.get(period.get("part"), 1))
+                end = start + timedelta(days=PHOTO_WINDOW_DAYS - 1)
+                if year in (start.year, end.year):
+                    out.append((start, end))
+        return sorted(set(out))
+
+    def window_at(self, today: date) -> tuple[date, date] | None:
+        return next((w for w in self.windows(today.year) if w[0] <= today <= w[1]), None)
+
+    def next_window(self, today: date) -> tuple[date, date] | None:
+        later = [w for y in (today.year, today.year + 1) for w in self.windows(y) if w[0] > today]
+        return min(later) if later else None
 
 
 _COLLECTIONS: dict[str, type[_Record]] = {
@@ -470,6 +523,7 @@ _COLLECTIONS: dict[str, type[_Record]] = {
     "tasks": Task,
     "seeds": SeedLot,
     "crops": CropProfile,
+    "photo_plans": PhotoPlan,
 }
 
 
@@ -485,6 +539,7 @@ class HomesteadData:
     tasks: dict[str, Task] = field(default_factory=dict)
     seeds: dict[str, SeedLot] = field(default_factory=dict)
     crops: dict[str, CropProfile] = field(default_factory=dict)
+    photo_plans: dict[str, PhotoPlan] = field(default_factory=dict)
 
     @classmethod
     def from_dict(cls, raw: dict[str, Any]) -> HomesteadData:

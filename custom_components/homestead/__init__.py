@@ -10,16 +10,18 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.event import async_track_time_interval
+from homeassistant.helpers.event import async_track_time_change, async_track_time_interval
 from homeassistant.helpers.typing import ConfigType
+from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN
 from .forecast import FORECAST_REFRESH, OUTLOOK, Outlook
 from .panel import async_register_panel, async_unregister_panel
-from .photos import PhotoView, delete_all, photo_dir
+from .photos import PhotoThumbView, PhotoUploadView, PhotoView, delete_all, photo_roots
 from .reminders import async_setup_reminders
 from .services import async_register_services
 from .store import HomesteadStore
+from .tasks import sync_photo_tasks
 from .weather import async_refresh
 from .websocket_api import async_register_websocket
 
@@ -36,6 +38,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     async_register_services(hass)
     async_register_websocket(hass)
     hass.http.register_view(PhotoView(hass))
+    hass.http.register_view(PhotoThumbView(hass))
+    hass.http.register_view(PhotoUploadView(hass))
     return True
 
 
@@ -53,6 +57,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: HomesteadConfigEntry) ->
     entry.async_on_unload(async_track_time_interval(hass, refresh_weather, WEATHER_REFRESH))
     entry.async_create_background_task(hass, refresh_weather(), f"{DOMAIN} weather refresh")
     entry.async_on_unload(async_setup_reminders(hass, store, dict(entry.options)))
+
+    async def photo_periods(_now: Any = None) -> None:
+        # A new period of the photo plan opens its task just after midnight (and at start, if missed).
+        if sync_photo_tasks(store, dt_util.now().date()):
+            await store.async_save()
+
+    await photo_periods()
+    entry.async_on_unload(async_track_time_change(hass, photo_periods, hour=0, minute=5, second=0))
 
     outlook = Outlook(hass, store, dict(entry.options))
     await outlook.async_load()
@@ -83,6 +95,10 @@ async def async_unload_entry(hass: HomeAssistant, entry: HomesteadConfigEntry) -
 
 
 async def async_remove_entry(hass: HomeAssistant, entry: HomesteadConfigEntry) -> None:
-    await HomesteadStore(hass).async_remove()
+    store = HomesteadStore(hass)
+    await store.async_load()
+    folders = photo_roots(hass, store.data.photos.values())
+    await store.async_remove()
     await Outlook(hass, HomesteadStore(hass), {}).async_remove()
-    await hass.async_add_executor_job(delete_all, photo_dir(hass))
+    for folder in folders:
+        await hass.async_add_executor_job(delete_all, folder)

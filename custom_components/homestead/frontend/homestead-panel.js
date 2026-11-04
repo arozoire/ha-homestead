@@ -51,6 +51,7 @@ const EVENT_ICONS = {
   coop_cleaning: "🧹",
   repotting: "🪴",
   wood_burned: "🔥",
+  photo: "📸",
 };
 const WOOD_KINDS = ["clearing", "wood_cutting", "brushwood", "foraging", "wood_burned"];
 // Kinds that make sense for a houseplant.
@@ -59,6 +60,10 @@ const INDOOR_KINDS = ["watering", "fertilizing", "repotting", "treatment", "prun
 const WOOD_SEASON_MONTHS = 18;
 // Jobs the calendar can list for a period: the crop data month key, or seed lots for sowing.
 const WORK_KINDS = ["pruning", "fertilizing", "harvest", "sowing"];
+// Photo plan: "early / mid / late" month, first day of each (same as models.PHOTO_PARTS), a period lasts 14 days.
+const PHOTO_PARTS = { start: 1, mid: 11, end: 21 };
+const PHOTO_WINDOW_DAYS = 14;
+const THUMB_PX = 480;
 // Garden kinds that still make sense in a woodland.
 const WOODLAND_ALSO = ["pruning", "treatment", "problem", "note"];
 const COMPOST_KINDS = ["compost_turn", "compost_harvest"];
@@ -319,6 +324,23 @@ const STYLE = `
   .work-day.warn { border-color: #c77700; }
   .work-day.chosen { box-shadow: 0 0 0 2px var(--primary-text-color) inset; }
   .tl-row.faded { opacity: .35; }
+  .shot-thumb { width: 56px; height: 42px; flex: none; border-radius: 6px; overflow: hidden; background: var(--secondary-background-color, #eee);
+    display: flex; align-items: center; justify-content: center; }
+  .shot-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .shot-stage { position: relative; background: #111; border-radius: 12px; overflow: hidden; aspect-ratio: 3 / 4; max-height: 62vh; margin: 8px auto; width: 100%; }
+  .shot-video, .shot-ghost { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .shot-ghost { pointer-events: none; }
+  .shot-buttons { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 8px 0; }
+  .shot-buttons .shutter { width: 72px; height: 72px; border-radius: 50%; border: 4px solid var(--primary-text-color); background: var(--homestead-accent, #3a7d44); flex: none; }
+  .history-grid { display: grid; gap: 4px; align-items: center; text-align: center; }
+  .history-cell { padding: 0; border: 2px solid transparent; border-radius: 6px; overflow: hidden; position: relative; background: var(--secondary-background-color, #eee); aspect-ratio: 4 / 3; }
+  .history-cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .history-cell span { position: absolute; right: 2px; bottom: 1px; font-size: 10px; color: #fff; text-shadow: 0 0 3px #000; }
+  .history-cell.picked { border-color: var(--homestead-accent, #3a7d44); }
+  .history-empty { aspect-ratio: 4 / 3; border: 1px dashed var(--divider-color); border-radius: 6px; }
+  .compare-stage { position: relative; max-width: 92vw; max-height: 70vh; }
+  .compare-stage img { display: block; max-width: 92vw; max-height: 70vh; }
+  .compare-stage .compare-top { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .task .tick { flex: none; width: 36px; padding: 0; color: var(--success-color, #43a047); font-size: 18px; }
   .task-main { flex: 1; display: grid; gap: 2px; text-align: left; }
   .task.late .sub { color: var(--error-color, #db4437); }
@@ -697,6 +719,7 @@ class HomesteadPanel extends HTMLElement {
           tools: data.tools || [],
           seeds: data.seeds || [],
           crops: data.crops || [],
+          photo_plans: data.photo_plans || [],
           photos: data.photos || [],
           events: data.events || [],
           tasks: data.tasks || [],
@@ -719,7 +742,7 @@ class HomesteadPanel extends HTMLElement {
           if (this._woodEl && zone) this._woodEl.replaceChildren(...[this._zoneBox(zone)].filter(Boolean));
         }
         else if (this._eventForm) this._fillEventPhotos();
-        else if (this._taskForm) return;
+        else if (this._taskForm || this._shot) return;
         else if (!this._expenseForm && !this._toolForm && !this._seedForm && !this._cropForm && !this._import) this._render();
       },
       { type: "homestead/subscribe" },
@@ -890,6 +913,8 @@ class HomesteadPanel extends HTMLElement {
     this._germForm = null;
     this._transplantForm = null;
     this._zoneTap = null;
+    this._stopCamera();
+    this._shot = null;
     this._selected = null;
     this._placing = null;
     this._drawing = null;
@@ -906,6 +931,7 @@ class HomesteadPanel extends HTMLElement {
 
   _setTab(tab) {
     if (tab === "expenses" && this._tab !== "expenses") this._expenseYear = undefined;
+    if (tab !== "photos") this._planDraft = null;
     if (tab === "plantings" || tab === "zones") this._mapTab = tab;
     this._tab = tab;
     this._close();
@@ -1231,6 +1257,7 @@ class HomesteadPanel extends HTMLElement {
     else if (this._germForm) content = this._renderGermForm();
     else if (this._transplantForm) content = this._renderTransplantForm();
     else if (this._zoneTap) content = this._renderZoneTap();
+    else if (this._shot) content = this._renderShot();
     else {
       const back = h("button", { type: "button", className: "back", onclick: () => this._setTab("more") }, `‹ ${this.t("tabMore")}`);
       const lists = {
@@ -1242,6 +1269,7 @@ class HomesteadPanel extends HTMLElement {
         expenses: () => [back, ...this._renderExpenseList()],
         analysis: () => this._renderAnalysis(),
         tools: () => [back, ...this._renderToolList()],
+        photos: () => [back, ...this._renderPhotoPlan()],
         more: () => this._renderMore(),
       };
       content = (lists[this._tab] || lists.diary)();
@@ -1266,7 +1294,7 @@ class HomesteadPanel extends HTMLElement {
 
   /** Main menu section of a page. */
   _section(tab = this._tab) {
-    return { plantings: "map", zones: "map", seeds: "more", expenses: "more", tools: "more" }[tab] || tab;
+    return { plantings: "map", zones: "map", seeds: "more", expenses: "more", tools: "more", photos: "more" }[tab] || tab;
   }
 
   _mapSwitch() {
@@ -1298,6 +1326,7 @@ class HomesteadPanel extends HTMLElement {
         item("seeds", "🌱", this.t("tabSeeds"), this.t("moreSeeds", { count: seedsLeft })),
         item("expenses", "💶", this.t("tabExpenses"), `${year}: −${this._money(spent)} · +${this._money(earned)}`),
         item("tools", "🔧", this.t("tabTools"), toolsDue ? this.t("moreToolsDue", { count: toolsDue }) : this.t("moreTools", { count: this._data.tools.length }), !!toolsDue),
+        item("photos", "📸", this.t("tabPhotos"), this._photoPlanSummary()),
         h(
           "button",
           {
@@ -1706,6 +1735,7 @@ class HomesteadPanel extends HTMLElement {
       f.id ? this._plantingExpenses(f) : null,
       f.id ? (this._cropEl = h("div", {}, this._cropBox(f))) : null,
       f.id ? this._careNotes(f) : null,
+      f.id ? this._photoHistoryBox(f.id) : null,
       f.id ? (this._seasonsEl = h("div", {}, this._seasonsBox(f))) : null,
       f.id ? this._plantingTodo(f) : null,
       f.id ? this._diaryBox({ planting_id: f.id }) : null,
@@ -4303,14 +4333,16 @@ class HomesteadPanel extends HTMLElement {
   // ----- list tasks: one job for many plants, ticked one by one -----
 
   _isList(task) {
-    return !!(task?.planting_ids?.length || task?.seed_ids?.length);
+    return !!(task?.planting_ids?.length || task?.seed_ids?.length || task?.zone_ids?.length);
   }
 
   _listItems(task) {
-    return [...(task.planting_ids || []), ...(task.seed_ids || [])];
+    return [...(task.zone_ids || []), ...(task.planting_ids || []), ...(task.seed_ids || [])];
   }
 
   _itemName(id) {
+    const zone = this._zone(id);
+    if (zone) return `🗺️ ${zone.name}`;
     const planting = this._planting(id);
     if (planting) return `${PLANT_ICONS[planting.plant_type] || "🌱"} ${planting.name}`;
     const lot = this._data.seeds.find((x) => x.id === id);
@@ -4319,7 +4351,7 @@ class HomesteadPanel extends HTMLElement {
 
   /** "Lampone, Ribes, Uva spina +2" (the names without icons). */
   _listNames(task, max = 3) {
-    const names = this._listItems(task).map((id) => this._planting(id)?.name || this._seedName(this._data.seeds.find((x) => x.id === id) || { species: "?" }));
+    const names = this._listItems(task).map((id) => this._zone(id)?.name || this._planting(id)?.name || this._seedName(this._data.seeds.find((x) => x.id === id) || { species: "?" }));
     return names.slice(0, max).join(", ") + (names.length > max ? ` +${names.length - max}` : "");
   }
 
@@ -4327,17 +4359,21 @@ class HomesteadPanel extends HTMLElement {
     const items = this._listItems(t);
     const done = new Set(t.done_ids || []);
     const count = items.filter((id) => done.has(id)).length;
+    const photo = t.kind === "photo";
+    const late = (t.due_until || t.due_on) < now;
     const actions = h("div", { className: "row list-actions" });
     const showActions = () =>
       actions.replaceChildren(
-        h("button", { type: "button", className: "primary", onclick: () => this._call("complete_task", { id: t.id }) }, `✔ ${this.t("listAllDone")}`),
-        h("button", { type: "button", onclick: () => this._addToList(t, actions, showActions) }, `＋ ${this.t("listAdd")}`),
-        h("button", { type: "button", onclick: () => this._postponeMenu(t, actions, showActions) }, `↪ ${this.t("listMove")}`),
+        ...[
+          photo ? null : h("button", { type: "button", className: "primary", onclick: () => this._call("complete_task", { id: t.id }) }, `✔ ${this.t("listAllDone")}`),
+          photo ? null : h("button", { type: "button", onclick: () => this._addToList(t, actions, showActions) }, `＋ ${this.t("listAdd")}`),
+          h("button", { type: "button", onclick: () => this._postponeMenu(t, actions, showActions) }, `↪ ${this.t("listMove")}`),
+        ].filter(Boolean),
       );
     showActions();
     return h(
       "div",
-      { className: `list-task${t.due_on < now ? " late" : ""}` },
+      { className: `list-task${late ? " late" : ""}` },
       h(
         "div",
         { className: "list-head" },
@@ -4345,14 +4381,14 @@ class HomesteadPanel extends HTMLElement {
           "button",
           { type: "button", className: "task-main", onclick: () => this._openTask(t, back) },
           h("span", {}, `${EVENT_ICONS[t.kind] || "📝"} ${t.title || this.t(`ev_${t.kind}`)}`),
-          h("span", { className: "sub" }, `${this._date(t.due_on)}${t.due_on < now ? ` · ${this.t("overdue")}` : ""}${t.yearly ? " · 🔁" : ""}`),
+          h("span", { className: "sub" }, `${this._taskWhen(t)}${late ? ` · ${this.t("overdue")}` : ""}${t.yearly ? " · 🔁" : ""}`),
           this._adviceLine(t),
         ),
         h("span", { className: "list-count" }, this.t("listProgress", { done: count, total: items.length })),
       ),
       h("div", { className: "list-bar" }, h("i", { style: `width:${items.length ? (count / items.length) * 100 : 0}%` })),
       items.map((id) =>
-        h(
+        photo ? this._shotRow(t, id, done.has(id)) : h(
           "label",
           { className: `list-item${done.has(id) ? " done" : ""}` },
           h("input", {
@@ -4368,6 +4404,32 @@ class HomesteadPanel extends HTMLElement {
         ),
       ),
       actions,
+    );
+  }
+
+  /** "12/10/2026", or "1–14/11" for a period. */
+  _taskWhen(t) {
+    if (!t.due_until) return this._date(t.due_on);
+    return `${this._date(t.due_on, false)}–${this._date(t.due_until, false)}`;
+  }
+
+  /** A zone or plant of a photo list: last picture as a thumbnail, then 📸 (the camera) or ✓. */
+  _shotRow(t, id, done) {
+    const last = this._lastPlanPhoto(id);
+    const thumb = h("span", { className: "shot-thumb" }, last ? null : "📸");
+    if (last) this._photoUrl(last.id, true).then((url) => thumb.replaceChildren(h("img", { src: url, alt: "" })));
+    const event = done ? this._data.events.find((e) => e.kind === "photo" && (e.zone_id === id || e.planting_id === id) && e.done_on >= t.due_on) : null;
+    return h(
+      "div",
+      { className: `list-item${done ? " done" : ""}` },
+      thumb,
+      h(
+        "span",
+        { style: "display:grid;flex:1" },
+        h("span", {}, this._itemName(id)),
+        h("span", { className: "sub" }, done ? (event ? `✓ ${this._date(event.done_on)}` : this.t("shotSkipped")) : last ? this.t("shotLast", { date: this._date(last.taken_on) }) : this.t("shotFirst")),
+      ),
+      done ? null : h("button", { type: "button", className: "primary", onclick: () => this._openShot(t, id) }, `📸 ${this.t("shotTake")}`),
     );
   }
 
@@ -6712,12 +6774,13 @@ class HomesteadPanel extends HTMLElement {
     return section;
   }
 
-  async _photoUrl(id) {
-    if (!this._photoUrls.has(id)) {
-      const signed = this._hass.callWS({ type: "auth/sign_path", path: `/api/homestead/photo/${id}`, expires: 86400 });
-      this._photoUrls.set(id, signed.then((r) => r.path));
+  async _photoUrl(id, thumb = false) {
+    const path = `/api/homestead/photo/${id}${thumb ? "/thumb" : ""}`;
+    if (!this._photoUrls.has(path)) {
+      const signed = this._hass.callWS({ type: "auth/sign_path", path, expires: 86400 });
+      this._photoUrls.set(path, signed.then((r) => r.path));
     }
-    return this._photoUrls.get(id);
+    return this._photoUrls.get(path);
   }
 
   _fillPhotos() {
@@ -6780,6 +6843,480 @@ class HomesteadPanel extends HTMLElement {
     }
   }
 
+  // ---------- photo plan: the same zones and plants, period after period ----------
+
+  _photoPlan() {
+    return this._data.photo_plans[0] || null;
+  }
+
+  /** "early November", "every 4 weeks". */
+  _periodLabel(period) {
+    const month = new Intl.DateTimeFormat(this._lang(), { month: "long" }).format(new Date(2026, period.month - 1, 15));
+    return this.t(`part_${period.part || "start"}`, { month });
+  }
+
+  _photoPlanSummary() {
+    const plan = this._photoPlan();
+    if (!plan) return this.t("photoPlanNone");
+    const count = (plan.zone_ids?.length || 0) + (plan.planting_ids?.length || 0);
+    const when = plan.every_weeks ? this.t("everyWeeks", { count: plan.every_weeks }) : plan.periods.map((p) => this._periodLabel(p)).join(", ");
+    return `${this._plural("photoTargets", count)} · ${when}`;
+  }
+
+  /** Photos taken for the plan (diary events of kind "photo") of a zone or plant, oldest first. */
+  _planPhotos(target) {
+    const events = new Map(this._data.events.filter((e) => e.kind === "photo" && (e.zone_id === target || e.planting_id === target)).map((e) => [e.id, e]));
+    return this._data.photos
+      .filter((p) => events.has(p.event_id))
+      .map((p) => ({ ...p, taken_on: p.taken_on || events.get(p.event_id).done_on }))
+      .sort((a, b) => a.taken_on.localeCompare(b.taken_on));
+  }
+
+  _lastPlanPhoto(target) {
+    return this._planPhotos(target).at(-1) || null;
+  }
+
+  _renderPhotoPlan() {
+    const plan = this._photoPlan();
+    const draft =
+      this._planDraft ||
+      (this._planDraft = {
+        zone_ids: [...(plan?.zone_ids || [])],
+        planting_ids: [...(plan?.planting_ids || [])],
+        periods: (plan?.periods || []).map((p) => ({ ...p })),
+        every_weeks: plan?.every_weeks || null,
+        mode: plan?.every_weeks ? "weeks" : "periods",
+      });
+    const redraw = () => this._render();
+    if (!this._photoStorage) {
+      this._photoStorage = this._hass.callWS({ type: "homestead/photo/storage" }).catch(() => null);
+      this._photoStorage.then(() => this._tab === "photos" && redraw());
+    }
+    const storage = h("p", { className: "hint", style: "white-space:normal" });
+    this._photoStorage.then((info) => info && storage.replaceChildren(this.t("photoStorage", { media: info.media, path: info.path })));
+    const toggle = (list, id) => {
+      const i = draft[list].indexOf(id);
+      if (i >= 0) draft[list].splice(i, 1);
+      else draft[list].push(id);
+      redraw();
+    };
+    const zones = this._data.zones.slice().sort((a, b) => a.name.localeCompare(b.name));
+    const plants = draft.planting_ids.map((id) => this._planting(id)).filter(Boolean);
+    const others = this._data.plantings.filter((p) => p.status === "active" && !draft.planting_ids.includes(p.id)).sort((a, b) => a.name.localeCompare(b.name));
+    const plantPick = h("select", {}, h("option", { value: "" }, `＋ ${this.t("photoAddPlant")}`), others.map((p) => h("option", { value: p.id }, p.name)));
+    plantPick.onchange = () => plantPick.value && toggle("planting_ids", plantPick.value);
+    const mode = (name) =>
+      h("button", { type: "button", className: draft.mode === name ? "active" : "", onclick: () => ((draft.mode = name), redraw()) }, this.t(name === "weeks" ? "photoEvery" : "photoPeriods"));
+    const part = h("select", {}, Object.keys(PHOTO_PARTS).map((p) => h("option", { value: p }, this.t(`partOnly_${p}`))));
+    const month = h(
+      "select",
+      {},
+      Array.from({ length: 12 }, (_, i) => h("option", { value: i + 1, selected: i + 1 === new Date().getMonth() + 1 }, new Intl.DateTimeFormat(this._lang(), { month: "long" }).format(new Date(2026, i, 15)))),
+    );
+    const weeks = h("input", { type: "number", min: 1, max: 52, step: 1, value: draft.every_weeks || 4, inputMode: "numeric", style: "width:6em" });
+    weeks.onchange = () => (draft.every_weeks = Number(weeks.value) || 4);
+    const periods = draft.periods.slice().sort((a, b) => a.month - b.month || PHOTO_PARTS[a.part] - PHOTO_PARTS[b.part]);
+    const save = async () => {
+      const data = {
+        zone_ids: draft.zone_ids,
+        planting_ids: draft.planting_ids,
+        periods: draft.mode === "periods" ? draft.periods : [],
+        every_weeks: draft.mode === "weeks" ? Number(weeks.value) || 4 : null,
+      };
+      const result = await this._call("set_photo_plan", data);
+      if (!result) return;
+      this._planDraft = null;
+      this._showMessage(result.next ? `✓ ${this.t("photoPlanSaved", { date: this._date(result.next) })}` : `✓ ${this.t("photoPlanOff")}`);
+      redraw();
+    };
+    return [
+      h("h2", {}, `📸 ${this.t("tabPhotos")}`),
+      h("p", { className: "hint", style: "white-space:normal" }, this.t("photoPlanHint")),
+      h(
+        "div",
+        { className: "work-box" },
+        h("h3", {}, this.t("photoTargetsTitle")),
+        zones.map((z) =>
+          h(
+            "label",
+            { className: "list-item" },
+            h("input", { type: "checkbox", checked: draft.zone_ids.includes(z.id), onchange: () => toggle("zone_ids", z.id) }),
+            h("span", { style: "flex:1" }, `🗺️ ${z.name}`),
+            h("span", { className: "sub" }, this._plural("photoCount", this._planPhotos(z.id).length)),
+          ),
+        ),
+        plants.map((p) =>
+          h(
+            "label",
+            { className: "list-item" },
+            h("input", { type: "checkbox", checked: true, onchange: () => toggle("planting_ids", p.id) }),
+            h("span", { style: "flex:1" }, this._itemName(p.id)),
+            h("span", { className: "sub" }, this._plural("photoCount", this._planPhotos(p.id).length)),
+          ),
+        ),
+        plantPick,
+        h("p", { className: "hint" }, this.t("photoPlantHint")),
+      ),
+      h(
+        "div",
+        { className: "work-box" },
+        h("h3", {}, this.t("photoWhen")),
+        h("div", { className: "tabs" }, mode("periods"), mode("weeks")),
+        draft.mode === "periods"
+          ? [
+              h(
+                "div",
+                { className: "work-chips" },
+                periods.map((p) =>
+                  h(
+                    "button",
+                    { type: "button", className: "active", title: this.t("delete"), onclick: () => ((draft.periods = draft.periods.filter((x) => x !== p)), redraw()) },
+                    `${this._periodLabel(p)} ✕`,
+                  ),
+                ),
+              ),
+              h(
+                "div",
+                { className: "row" },
+                part,
+                month,
+                h(
+                  "button",
+                  {
+                    type: "button",
+                    onclick: () => {
+                      const period = { month: Number(month.value), part: part.value };
+                      if (!draft.periods.some((p) => p.month === period.month && p.part === period.part)) draft.periods.push(period);
+                      redraw();
+                    },
+                  },
+                  `＋ ${this.t("photoAddPeriod")}`,
+                ),
+              ),
+              h("p", { className: "hint" }, this.t("photoPeriodHint", { days: PHOTO_WINDOW_DAYS })),
+            ]
+          : h("label", { className: "row", style: "align-items:center;gap:8px" }, this.t("photoEveryLabel"), weeks),
+      ),
+      h("div", { className: "work-box" }, h("h3", {}, this.t("photoStorageTitle")), storage),
+      h("button", { type: "button", className: "primary", onclick: save }, this.t("save")),
+    ];
+  }
+
+  // ----- the shot: live camera with the last photo over it -----
+
+  _openShot(task, item) {
+    this._clearSelection();
+    this._showMessage("");
+    this._shot = { task_id: task.id, item };
+    this._render();
+  }
+
+  _stopCamera() {
+    this._shotStream?.getTracks().forEach((track) => track.stop());
+    this._shotStream = null;
+  }
+
+  _renderShot() {
+    const shot = this._shot;
+    // Drawn once per shot: a redraw would restart the camera.
+    if (this._shotView?.shot === shot) return this._shotView.els;
+    const task = this._data.tasks.find((t) => t.id === shot.task_id);
+    const last = this._lastPlanPhoto(shot.item);
+    let ghost = 0.45;
+    try {
+      ghost = Number(localStorage.getItem("homestead-ghost") ?? 0.45);
+    } catch {
+      /* private mode */
+    }
+    const video = h("video", { autoplay: true, muted: true, playsInline: true, className: "shot-video" });
+    const overlay = h("img", { className: "shot-ghost", alt: "", style: `opacity:${ghost}` });
+    if (last) this._photoUrl(last.id).then((url) => (overlay.src = url));
+    const status = h("p", { className: "hint", style: "white-space:normal" });
+    const stage = h("div", { className: "shot-stage" }, video, last ? overlay : null);
+    const slider = h("input", {
+      type: "range",
+      min: 0,
+      max: 100,
+      value: Math.round(ghost * 100),
+      oninput: (ev) => {
+        overlay.style.opacity = ev.target.value / 100;
+        try {
+          localStorage.setItem("homestead-ghost", String(ev.target.value / 100));
+        } catch {
+          /* private mode */
+        }
+      },
+    });
+    const pick = (capture) =>
+      h("input", {
+        type: "file",
+        accept: "image/*",
+        hidden: true,
+        ...(capture ? { capture: "environment" } : {}),
+        onchange: (ev) => {
+          const file = ev.target.files?.[0];
+          ev.target.value = "";
+          if (file) this._savePlanPhoto(file, file.name);
+        },
+      });
+    const gallery = pick(false);
+    const phoneCamera = pick(true);
+    this._stopCamera();
+    if (navigator.mediaDevices?.getUserMedia) {
+      navigator.mediaDevices
+        .getUserMedia({ video: { facingMode: "environment", width: { ideal: 4096 }, height: { ideal: 3072 } }, audio: false })
+        .then((stream) => {
+          if (this._shot !== shot) return stream.getTracks().forEach((t) => t.stop());
+          this._shotStream = stream;
+          video.srcObject = stream;
+        })
+        .catch(() => status.replaceChildren(this.t("shotNoCamera")));
+    } else status.replaceChildren(this.t("shotNoCamera"));
+    const capture = async () => {
+      const track = this._shotStream?.getVideoTracks()[0];
+      if (!track) return phoneCamera.click();
+      let blob;
+      try {
+        // Full sensor resolution where the browser offers it (Chrome on Android), else the video frame.
+        if (window.ImageCapture) blob = await new ImageCapture(track).takePhoto();
+      } catch {
+        blob = null;
+      }
+      if (!blob) {
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0);
+        blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.95));
+      }
+      this._savePlanPhoto(blob, `${today()}.jpg`);
+    };
+    const skip = async () => {
+      if (await this._call("complete_task", { id: shot.task_id, items: [shot.item] })) this._nextShot(task, shot.item);
+    };
+    const els = [
+      h("button", { type: "button", className: "back", onclick: () => this._setTab("diary") }, `‹ ${this.t("tabDiary")}`),
+      h("h2", {}, `📸 ${this._itemName(shot.item)}`),
+      h("p", { className: "sub" }, [task ? this._taskWhen(task) : null, last ? this.t("shotCompare", { date: this._date(last.taken_on) }) : this.t("shotFirst")].filter(Boolean).join(" · ")),
+      stage,
+      status,
+      last ? h("label", { className: "row", style: "align-items:center;gap:8px" }, this.t("shotGhost"), slider) : null,
+      h(
+        "div",
+        { className: "shot-buttons" },
+        h("button", { type: "button", onclick: () => gallery.click() }, `🖼️ ${this.t("shotGallery")}`),
+        h("button", { type: "button", className: "shutter", "aria-label": this.t("shotTake"), onclick: capture }),
+        h("button", { type: "button", onclick: skip }, this.t("shotSkip")),
+      ),
+      h("button", { type: "button", onclick: () => phoneCamera.click() }, `📷 ${this.t("shotPhoneCamera")}`),
+      h("p", { className: "hint", style: "white-space:normal" }, this.t("shotHint")),
+      gallery,
+      phoneCamera,
+    ];
+    this._shotView = { shot, els };
+    return els;
+  }
+
+  /** The picture as it is (no compression) with a small copy for the lists, then the next zone or plant. */
+  async _savePlanPhoto(blob, name) {
+    const shot = this._shot;
+    const task = this._data.tasks.find((t) => t.id === shot?.task_id);
+    if (!shot) return;
+    this._showMessage(this.t("uploading"));
+    const target = this._zone(shot.item) ? { zone_id: shot.item } : { planting_id: shot.item };
+    const result = await this._call("add_event", { kind: "photo", done_on: today(), ...target, ...(task && !task.done_on ? { task_id: task.id } : {}) });
+    if (!result) return;
+    try {
+      const form = new FormData();
+      form.append("event_id", result.id);
+      form.append("file", blob, name);
+      const thumb = await thumbnail(blob, THUMB_PX).catch(() => null);
+      if (thumb) form.append("thumb", thumb, "thumb.jpg");
+      const response = await this._hass.fetchWithAuth("/api/homestead/photo/upload", { method: "POST", body: form });
+      if (!response.ok) throw new Error(`${response.status} ${await response.text()}`);
+    } catch (err) {
+      this._showMessage(err.message || String(err), true);
+      return;
+    }
+    this._showMessage(`✓ ${this.t("shotSaved", { name: this._itemName(shot.item) })}`);
+    this._nextShot(task, shot.item);
+  }
+
+  /** After a shot (or a skip): the next zone or plant of the list still to do, else back to the diary. */
+  _nextShot(task, item) {
+    const items = task ? this._listItems(task) : [];
+    const done = new Set([...(task?.done_ids || []), item]);
+    const next = items.find((id) => !done.has(id));
+    const message = this._message;
+    if (next) this._openShot(task, next);
+    else this._setTab("diary");
+    this._showMessage(message.text, message.error);
+  }
+
+  // ----- the history of a zone or plant -----
+
+  /** Columns: the plan periods (or the months), rows: the years; tap a picture, compare two, play them all. */
+  _photoHistoryBox(target) {
+    const photos = this._planPhotos(target);
+    const plan = this._photoPlan();
+    const inPlan = plan && [...(plan.zone_ids || []), ...(plan.planting_ids || [])].includes(target);
+    if (!photos.length && !inPlan) return null;
+    // Columns: the plan periods; a photo far from all of them (an older plan) gets a column for its month.
+    const monthName = (m) => new Intl.DateTimeFormat(this._lang(), { month: "short" }).format(new Date(2026, Number(m) - 1, 15));
+    const periods = plan && !plan.every_weeks ? plan.periods : [];
+    const columns = periods.map((p) => ({
+      label: this._periodLabel(p),
+      start: `${String(p.month).padStart(2, "0")}-${String(PHOTO_PARTS[p.part] || 1).padStart(2, "0")}`,
+    }));
+    const inPeriod = (photo) =>
+      // Up to 45 days after the start: rescheduled photos still belong to their period.
+      columns.findIndex((c) => {
+        const start = `${photo.taken_on.slice(0, 4)}-${c.start}`;
+        return start <= photo.taken_on && photo.taken_on <= addDays(start, 45);
+      });
+    for (const photo of photos)
+      if (inPeriod(photo) < 0 && !columns.some((c) => c.month === photo.taken_on.slice(5, 7)))
+        columns.push({ label: monthName(photo.taken_on.slice(5, 7)), start: `${photo.taken_on.slice(5, 7)}-01`, month: photo.taken_on.slice(5, 7) });
+    columns.sort((a, b) => a.start.localeCompare(b.start));
+    const cellOf = (photo) => {
+      const i = inPeriod(photo);
+      return i >= 0 ? i : columns.findIndex((c) => c.month === photo.taken_on.slice(5, 7));
+    };
+    const years = [...new Set(photos.map((p) => p.taken_on.slice(0, 4)))].sort().reverse();
+    const grid = new Map();
+    for (const photo of photos) grid.set(`${photo.taken_on.slice(0, 4)}:${cellOf(photo)}`, photo);
+    const compare = this._comparePick?.target === target ? this._comparePick : null;
+    const thumb = (photo) => {
+      const img = h("img", { alt: this._date(photo.taken_on), loading: "lazy" });
+      this._photoUrl(photo.id, true).then((url) => (img.src = url));
+      return h(
+        "button",
+        {
+          type: "button",
+          className: `history-cell${compare?.ids.includes(photo.id) ? " picked" : ""}`,
+          title: this._date(photo.taken_on),
+          onclick: () => {
+            if (!compare) return this._showPlanPhoto(photo);
+            compare.ids = compare.ids.includes(photo.id) ? compare.ids.filter((x) => x !== photo.id) : [...compare.ids, photo.id].slice(-2);
+            if (compare.ids.length === 2) {
+              const [a, b] = compare.ids.map((id) => photos.find((p) => p.id === id)).sort((x, y) => x.taken_on.localeCompare(y.taken_on));
+              this._comparePick = null;
+              this._showCompare(a, b);
+            }
+            this._render();
+          },
+        },
+        img,
+        h("span", {}, this._date(photo.taken_on, false)),
+      );
+    };
+    return h(
+      "div",
+      { className: "seasons photo-history" },
+      h("div", { className: "row header" }, h("h3", {}, `📸 ${this.t("photoHistory")}`), h("span", { className: "sub", style: "flex:none" }, this._plural("photoCount", photos.length))),
+      photos.length
+        ? h(
+            "div",
+            { className: "history-grid", style: `grid-template-columns: 3.2em repeat(${columns.length}, minmax(0, 1fr))` },
+            h("span"),
+            columns.map((c) => h("span", { className: "sub" }, c.label)),
+            years.flatMap((year) => [
+              h("b", {}, year),
+              ...columns.map((_, i) => (grid.get(`${year}:${i}`) ? thumb(grid.get(`${year}:${i}`)) : h("span", { className: "history-empty" }))),
+            ]),
+          )
+        : h("p", { className: "hint" }, this.t("photoHistoryEmpty")),
+      photos.length > 1
+        ? h(
+            "div",
+            { className: "row" },
+            h(
+              "button",
+              {
+                type: "button",
+                className: compare ? "active" : "",
+                onclick: () => {
+                  this._comparePick = compare ? null : { target, ids: [] };
+                  this._render();
+                },
+              },
+              compare ? this.t("photoComparePick") : `↔ ${this.t("photoCompare")}`,
+            ),
+            h("button", { type: "button", onclick: () => this._playTimelapse(photos) }, `▶ ${this.t("photoTimelapse")}`),
+          )
+        : null,
+    );
+  }
+
+  _showPlanPhoto(photo) {
+    const img = h("img", { alt: this._date(photo.taken_on) });
+    const link = h("a", { download: `${photo.taken_on}.jpg`, target: "_blank" }, `⬇ ${this.t("photoOriginal")}`);
+    this._photoUrl(photo.id).then((url) => {
+      img.src = url;
+      link.href = url;
+    });
+    const overlay = h(
+      "div",
+      { className: "lightbox", onclick: (ev) => ev.target === overlay && overlay.remove() },
+      img,
+      h("div", { className: "row" }, h("span", {}, this._date(photo.taken_on)), link, h("button", { type: "button", onclick: () => overlay.remove() }, this.t("close"))),
+    );
+    this.shadowRoot.append(overlay);
+  }
+
+  /** Two pictures one over the other: drag to wipe from one to the other. */
+  _showCompare(a, b) {
+    const before = h("img", { alt: this._date(a.taken_on) });
+    const after = h("img", { alt: this._date(b.taken_on), className: "compare-top", style: "clip-path: inset(0 0 0 50%)" });
+    this._photoUrl(a.id).then((url) => (before.src = url));
+    this._photoUrl(b.id).then((url) => (after.src = url));
+    const wipe = h("input", { type: "range", min: 0, max: 100, value: 50, oninput: (ev) => (after.style.clipPath = `inset(0 0 0 ${ev.target.value}%)`) });
+    const overlay = h(
+      "div",
+      { className: "lightbox" },
+      h("div", { className: "compare-stage" }, before, after),
+      wipe,
+      h("div", { className: "row" }, h("span", {}, `${this._date(a.taken_on)} ↔ ${this._date(b.taken_on)}`), h("button", { type: "button", onclick: () => overlay.remove() }, this.t("close"))),
+    );
+    this.shadowRoot.append(overlay);
+  }
+
+  _playTimelapse(photos) {
+    const img = h("img", { alt: "" });
+    const label = h("span", {});
+    let i = 0;
+    const show = () => {
+      const photo = photos[i % photos.length];
+      this._photoUrl(photo.id).then((url) => (img.src = url));
+      label.textContent = this._date(photo.taken_on);
+      i += 1;
+    };
+    show();
+    const timer = setInterval(show, 1200);
+    const overlay = h(
+      "div",
+      { className: "lightbox" },
+      img,
+      h(
+        "div",
+        { className: "row" },
+        label,
+        h(
+          "button",
+          {
+            type: "button",
+            onclick: () => {
+              clearInterval(timer);
+              overlay.remove();
+            },
+          },
+          this.t("close"),
+        ),
+      ),
+    );
+    this.shadowRoot.append(overlay);
+  }
+
   _renderZoneForm() {
     const z = this._zoneForm;
     const exclude = z.id ? new Set([z.id, ...this._zoneDescendants(z.id)]) : new Set();
@@ -6825,6 +7362,7 @@ class HomesteadPanel extends HTMLElement {
       ),
       first ? null : box,
       z.id && !["woodland", "compost", "coop"].includes(z.kind) ? this._rotationBox(z) : null,
+      z.id ? this._photoHistoryBox(z.id) : null,
       z.id ? this._diaryBox({ zone_id: z.id }) : null,
       z.id ? this._lastYearsBox(this._data.events.filter((e) => e.zone_id === z.id || this._zoneDescendants(z.id).has(e.zone_id)), { zone_id: z.id }) : null,
     ];
@@ -6949,6 +7487,18 @@ function today() {
 }
 
 /** Phone photos are several MB: send a JPEG of at most `maxPx` per side, as base64. */
+/** A small JPEG copy of a picture, for the lists and the history grid. */
+async function thumbnail(blob, maxPx) {
+  const bitmap = await createImageBitmap(blob, { imageOrientation: "from-image" });
+  const scale = Math.min(1, maxPx / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  return new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.85));
+}
+
 async function shrinkImage(file, maxPx) {
   const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
   const scale = Math.min(1, maxPx / Math.max(bitmap.width, bitmap.height));

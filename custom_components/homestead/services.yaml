@@ -713,6 +713,7 @@ add_event:
             - coop_cleaning
             - repotting
             - wood_burned
+            - photo
     done_on:
       selector:
         date:
@@ -853,6 +854,7 @@ update_event:
             - coop_cleaning
             - repotting
             - wood_burned
+            - photo
     done_on:
       selector:
         date:
@@ -1034,6 +1036,7 @@ add_task:
             - coop_cleaning
             - repotting
             - wood_burned
+            - photo
     due_on:
       required: true
       selector:
@@ -1103,6 +1106,7 @@ update_task:
             - coop_cleaning
             - repotting
             - wood_burned
+            - photo
     due_on:
       selector:
         date:
@@ -1165,6 +1169,27 @@ postpone_task:
         date:
 
 export:
+
+set_photo_plan:
+  fields:
+    zone_ids:
+      selector:
+        text:
+          multiple: true
+    planting_ids:
+      selector:
+        text:
+          multiple: true
+    periods:
+      example: '[{"month": 11, "part": "start"}, {"month": 5, "part": "start"}]'
+      selector:
+        object:
+    every_weeks:
+      selector:
+        number:
+          min: 1
+          max: 52
+          mode: box
 
 add_seed_lot:
   fields:

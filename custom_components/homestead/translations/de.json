@@ -28,7 +28,11 @@
           "heat_max": "Hitzewelle: Höchstwert ab",
           "heat_night": "Hitzewelle: nächtliches Minimum ab",
           "heat_days": "Hitzewelle: Tage hintereinander",
-          "heat_extreme": "Extreme Hitze: Höchstwert ab (auch nur ein Tag)"
+          "heat_extreme": "Extreme Hitze: Höchstwert ab (auch nur ein Tag)",
+          "photo_media": "Ordner für Originalfotos"
+        },
+        "data_description": {
+          "photo_media": "HA-Medienordner, in dem der Fotoplan die Originale unkomprimiert speichert. Ein unter Einstellungen → System → Speicher hinzugefügtes NAS erscheint hier."
         }
       }
     }
@@ -199,7 +203,8 @@
         "animal_care": "Futter und Pflege",
         "coop_cleaning": "Stallreinigung",
         "repotting": "Umtopfen",
-        "wood_burned": "Verheiztes Holz (Winter)"
+        "wood_burned": "Verheiztes Holz (Winter)",
+        "photo": "Foto"
       }
     },
     "harvest_unit": {
@@ -1185,6 +1190,28 @@
         "due_on": {
           "name": "Neues Datum",
           "description": "Der Tag, an dem sie erledigt werden soll."
+        }
+      }
+    },
+    "set_photo_plan": {
+      "name": "Fotoplan festlegen",
+      "description": "Zonen und Pflanzen zum Fotografieren, nach Zeiträumen (Anfang Mai…) oder alle N Wochen. Leer: keine Fotoaufgaben mehr.",
+      "fields": {
+        "zone_ids": {
+          "name": "Zonen",
+          "description": "Zu fotografierende Zonen."
+        },
+        "planting_ids": {
+          "name": "Pflanzen",
+          "description": "Einzelne Pflanzen zum Fotografieren (eine abgestorbene verlässt den Plan)."
+        },
+        "periods": {
+          "name": "Zeiträume",
+          "description": "Liste von {month, part}: part = start, mid oder end des Monats."
+        },
+        "every_weeks": {
+          "name": "Alle N Wochen",
+          "description": "Statt Zeiträumen."
         }
       }
     },

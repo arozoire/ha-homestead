@@ -29,3 +29,6 @@ CONF_HEAT_DAYS = "heat_days"
 CONF_HEAT_EXTREME = "heat_extreme"
 
 SIGNAL_OUTLOOK_UPDATED = f"{DOMAIN}_outlook_updated"
+
+# Options: the HA media folder for the originals of the photo plan (a NAS, for example).
+CONF_PHOTO_MEDIA = "photo_media"

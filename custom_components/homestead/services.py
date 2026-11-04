@@ -19,6 +19,7 @@ from .crops import normalize
 from .geo import validate_polygon
 from .models import (
     EVENT_COST_CATEGORY,
+    PHOTO_PARTS,
     Abundance,
     CropProfile,
     DeathCause,
@@ -30,6 +31,7 @@ from .models import (
     HarvestUnit,
     InitialForm,
     LeaveReason,
+    PhotoPlan,
     Planting,
     PlantingKind,
     PlantingOrigin,
@@ -44,10 +46,17 @@ from .models import (
     ZoneKind,
     new_id,
 )
-from .photos import delete_photo_file, photo_dir
+from .photos import delete_photo_files, photo_dir
 from .species import SourcesUnavailable, fetch_details, upsert_taxon
 from .store import HomesteadStore, get_store
-from .tasks import async_complete_task, drop_item, mark_task_done, postpone_task
+from .tasks import (
+    async_complete_task,
+    drop_item,
+    mark_task_done,
+    postpone_task,
+    retire_planting,
+    sync_photo_tasks,
+)
 from .weather import async_fill_event, async_refresh, schedule_weather
 
 _opt_str = vol.Any(None, cv.string)
@@ -182,6 +191,22 @@ UPDATE_TOOL_SCHEMA = vol.Schema(
 )
 
 ID_SCHEMA = vol.Schema({vol.Required("id"): cv.string})
+
+SET_PHOTO_PLAN_SCHEMA = vol.Schema(
+    {
+        vol.Optional("zone_ids", default=list): vol.All(cv.ensure_list, [cv.string]),
+        vol.Optional("planting_ids", default=list): vol.All(cv.ensure_list, [cv.string]),
+        vol.Optional("periods", default=list): [
+            vol.Schema(
+                {
+                    vol.Required("month"): vol.All(vol.Coerce(int), vol.Range(min=1, max=12)),
+                    vol.Optional("part", default="start"): vol.In(list(PHOTO_PARTS)),
+                }
+            )
+        ],
+        vol.Optional("every_weeks"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=52))),
+    }
+)
 
 ADD_SEED_LOT_SCHEMA = vol.Schema(
     {
@@ -417,6 +442,9 @@ def async_register_services(hass: HomeAssistant) -> None:
         for task in store.data.tasks.values():
             if task.zone_id == zone_id:
                 task.zone_id = zone.parent_id
+        drop_item(store, zone_id)
+        for plan in store.data.photo_plans.values():
+            plan.zone_ids = [i for i in plan.zone_ids if i != zone_id]
         for event in [e for e in store.data.events.values() if e.zone_id == zone_id]:
             if zone.parent_id:
                 event.zone_id = zone.parent_id
@@ -476,6 +504,8 @@ def async_register_services(hass: HomeAssistant) -> None:
         planting = replace(store.data.plantings[planting_id], **args)
         if planting.kind == PlantingKind.SINGLE:
             planting.quantity = 1
+        if planting.status != PlantingStatus.ACTIVE:
+            retire_planting(store, planting_id)
         _check_position(planting)
         store.data.plantings[planting_id] = planting
         await store.async_save()
@@ -488,7 +518,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         del store.data.plantings[planting_id]
         for photo in [p for p in store.data.photos.values() if p.planting_id == planting_id]:
             del store.data.photos[photo.id]
-            await hass.async_add_executor_job(delete_photo_file, photo_dir(hass), photo.file)
+            await hass.async_add_executor_job(delete_photo_files, photo_dir(hass, photo.root), photo)
         for expense in store.data.expenses.values():
             if expense.planting_id == planting_id:
                 expense.planting_id = None
@@ -672,7 +702,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         store = _store(hass)
         _check_ref(store.data.photos, call.data["id"], "id")
         photo = store.data.photos.pop(call.data["id"])
-        await hass.async_add_executor_job(delete_photo_file, photo_dir(hass), photo.file)
+        await hass.async_add_executor_job(delete_photo_files, photo_dir(hass, photo.root), photo)
         await store.async_save()
         return {"id": photo.id}
 
@@ -698,6 +728,7 @@ def async_register_services(hass: HomeAssistant) -> None:
             _add_expense(store, amount=revenue, category=ExpenseCategory.SALES, income=True, **link)
         if event.kind == EventKind.REMOVAL and event.planting_id:
             store.data.plantings[event.planting_id].status = _end_status(event)
+            retire_planting(store, event.planting_id)
         if task_id:
             mark_task_done(store, task_id, event)
         await store.async_save()
@@ -759,6 +790,46 @@ def async_register_services(hass: HomeAssistant) -> None:
         )
         return {"id": events[-1].id if events else None, "ids": [e.id for e in events]}
 
+    async def set_photo_plan(call: ServiceCall) -> ServiceResponse:
+        """The photo plan (one): zones and plants, periods or every N weeks; empty = no more photo tasks."""
+        store = _store(hass)
+        args: dict[str, Any] = dict(call.data)
+        for zone_id in args["zone_ids"]:
+            _check_ref(store.data.zones, zone_id, "zone_ids")
+        for planting_id in args["planting_ids"]:
+            _check_ref(store.data.plantings, planting_id, "planting_ids")
+        today = dt_util.now().date()
+        old = next(iter(store.data.photo_plans.values()), None)
+        plan = PhotoPlan(
+            id=old.id if old else new_id(),
+            zone_ids=list(dict.fromkeys(args["zone_ids"])),
+            planting_ids=list(dict.fromkeys(args["planting_ids"])),
+            periods=[dict(p) for p in args["periods"]],
+            every_weeks=args.get("every_weeks"),
+        )
+        if plan.every_weeks:
+            # Same rhythm kept when only the targets change; a new rhythm starts today.
+            same = old and old.every_weeks == plan.every_weeks and old.start_on
+            plan.start_on = old.start_on if same else today.isoformat()
+            plan.periods = []
+        store.data.photo_plans = {plan.id: plan}
+        if not (plan.zone_ids or plan.planting_ids) or not (plan.periods or plan.every_weeks):
+            store.data.photo_plans = {}
+        # An open photo task follows the new targets for what is not done yet.
+        for task in store.data.tasks.values():
+            if task.plan_id == plan.id and not task.done_on:
+                keep = set(task.done_ids) | set(plan.zone_ids) | set(plan.planting_ids)
+                task.zone_ids = [i for i in task.zone_ids if i in keep]
+                task.planting_ids = [i for i in task.planting_ids if i in keep]
+                task.zone_ids += [i for i in plan.zone_ids if i not in task.zone_ids]
+                task.planting_ids += [i for i in plan.planting_ids if i not in task.planting_ids]
+        sync_photo_tasks(store, today)
+        await store.async_save()
+        if not store.data.photo_plans:
+            return {"id": None, "next": None}
+        following = plan.window_at(today) or plan.next_window(today)
+        return {"id": plan.id, "next": following[0].isoformat() if following else None}
+
     async def postpone(call: ServiceCall) -> ServiceResponse:
         """Another day; the plants not yet done of a list move to a new task."""
         store = _store(hass)
@@ -787,6 +858,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         store.data.events[event_id] = event = replace(old, **args)
         if event.kind == EventKind.REMOVAL and event.planting_id in store.data.plantings and "reason" in args:
             store.data.plantings[event.planting_id].status = _end_status(event)
+            retire_planting(store, event.planting_id)
         await store.async_save()
         if store.data.events[event_id].weather is None:
             schedule_weather(hass, store, event_id)
@@ -879,7 +951,7 @@ def async_register_services(hass: HomeAssistant) -> None:
                 task.event_id = None
         for photo in [p for p in store.data.photos.values() if p.event_id == event_id]:
             del store.data.photos[photo.id]
-            await hass.async_add_executor_job(delete_photo_file, photo_dir(hass), photo.file)
+            await hass.async_add_executor_job(delete_photo_files, photo_dir(hass, photo.root), photo)
         for expense in store.data.expenses.values():
             if expense.event_id == event_id:
                 expense.event_id = None
@@ -920,6 +992,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         ("delete_task", delete_task, ID_SCHEMA, SupportsResponse.OPTIONAL),
         ("complete_task", complete_task, COMPLETE_TASK_SCHEMA, SupportsResponse.OPTIONAL),
         ("postpone_task", postpone, POSTPONE_TASK_SCHEMA, SupportsResponse.OPTIONAL),
+        ("set_photo_plan", set_photo_plan, SET_PHOTO_PLAN_SCHEMA, SupportsResponse.OPTIONAL),
         ("export", export, vol.Schema({}), SupportsResponse.ONLY),
     ):
         hass.services.async_register(DOMAIN, name, handler, schema=schema, supports_response=response)

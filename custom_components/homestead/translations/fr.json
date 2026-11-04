@@ -28,7 +28,11 @@
           "heat_max": "Canicule : maximale à partir de",
           "heat_night": "Canicule : minimale nocturne à partir de",
           "heat_days": "Canicule : jours de suite",
-          "heat_extreme": "Chaleur extrême : maximale à partir de (même un seul jour)"
+          "heat_extreme": "Chaleur extrême : maximale à partir de (même un seul jour)",
+          "photo_media": "Dossier des photos originales"
+        },
+        "data_description": {
+          "photo_media": "Dossier média de HA où le plan photo garde les originaux, sans compression. Un NAS ajouté dans Paramètres → Système → Stockage apparaît ici."
         }
       }
     }
@@ -199,7 +203,8 @@
         "animal_care": "Nourriture et soins",
         "coop_cleaning": "Nettoyage du poulailler",
         "repotting": "Rempotage",
-        "wood_burned": "Bois brûlé (hiver)"
+        "wood_burned": "Bois brûlé (hiver)",
+        "photo": "Photo"
       }
     },
     "harvest_unit": {
@@ -1185,6 +1190,28 @@
         "due_on": {
           "name": "Nouvelle date",
           "description": "Le jour où la faire."
+        }
+      }
+    },
+    "set_photo_plan": {
+      "name": "Définir le plan photo",
+      "description": "Zones et plantes à photographier, par périodes (début mai…) ou toutes les N semaines. Vide : plus de tâches photo.",
+      "fields": {
+        "zone_ids": {
+          "name": "Zones",
+          "description": "Zones à photographier."
+        },
+        "planting_ids": {
+          "name": "Plantes",
+          "description": "Plantes seules à photographier (une plante morte quitte le plan)."
+        },
+        "periods": {
+          "name": "Périodes",
+          "description": "Liste de {month, part} : part = start, mid ou end du mois."
+        },
+        "every_weeks": {
+          "name": "Toutes les N semaines",
+          "description": "Au lieu des périodes."
         }
       }
     },

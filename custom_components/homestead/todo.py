@@ -57,7 +57,7 @@ class HomesteadTodo(TodoListEntity):
                 uid=t.id,
                 summary=summary(data, t, self._kinds),
                 status=TodoItemStatus.COMPLETED if t.done_on else TodoItemStatus.NEEDS_ACTION,
-                due=date.fromisoformat(t.due_on),
+                due=date.fromisoformat(t.due_until or t.due_on),
                 description=t.notes,
             )
             for t in tasks
@@ -77,8 +77,14 @@ class HomesteadTodo(TodoListEntity):
         task = self._store.data.tasks[item.uid]
         if item.summary and item.summary != summary(self._store.data, task, self._kinds):
             task.title = item.summary
-        if item.due is not None:
-            task.due_on = _day(item.due)
+        if item.due is not None and _day(item.due) != (task.due_until or task.due_on):
+            if task.due_until:
+                # The due date of a period is its last day: the period moves whole, keeping its length.
+                length = date.fromisoformat(task.due_until) - date.fromisoformat(task.due_on)
+                task.due_until = _day(item.due)
+                task.due_on = (date.fromisoformat(task.due_until) - length).isoformat()
+            else:
+                task.due_on = _day(item.due)
         task.notes = item.description
         if item.status == TodoItemStatus.COMPLETED and not task.done_on:
             await async_complete_task(self.hass, self._store, task.id)
