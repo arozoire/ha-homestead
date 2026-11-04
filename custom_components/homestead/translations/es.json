@@ -1207,7 +1207,7 @@
         },
         "periods": {
           "name": "Periodos",
-          "description": "Lista de {month, part}: part = start, mid o end del mes."
+          "description": "Lista de mes (1–12) y parte: start, mid o end del mes."
         },
         "every_weeks": {
           "name": "Cada N semanas",

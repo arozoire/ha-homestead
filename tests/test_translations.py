@@ -30,6 +30,8 @@ def test_integration_translation(language: str) -> None:
     )
     assert other.keys() == base.keys()
     assert all(_placeholders(other[k]) == _placeholders(v) for k, v in base.items())
+    # Like hassfest: anything between braces must be a placeholder name.
+    assert not [k for k, v in other.items() if re.search(r"\{(?![A-Za-z_]\w*\})", v)]
 
 
 @pytest.mark.parametrize("language", LANGUAGES)

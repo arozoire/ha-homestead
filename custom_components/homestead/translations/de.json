@@ -1207,7 +1207,7 @@
         },
         "periods": {
           "name": "Zeiträume",
-          "description": "Liste von {month, part}: part = start, mid oder end des Monats."
+          "description": "Liste aus Monat (1–12) und Teil: start, mid oder end des Monats."
         },
         "every_weeks": {
           "name": "Alle N Wochen",

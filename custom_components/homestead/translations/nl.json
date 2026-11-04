@@ -1207,7 +1207,7 @@
         },
         "periods": {
           "name": "Periodes",
-          "description": "Lijst van {month, part}: part = start, mid of end van de maand."
+          "description": "Lijst van maand (1–12) en deel: start, mid of end van de maand."
         },
         "every_weeks": {
           "name": "Elke N weken",
