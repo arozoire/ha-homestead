@@ -33,7 +33,7 @@ jobs:
           if [ -n "$number" ]; then
             body=$(gh pr view "$number" --repo "$GITHUB_REPOSITORY" --json body --jq .body)
             title=$(gh pr view "$number" --repo "$GITHUB_REPOSITORY" --json title --jq .title)
-            notes=$(printf '%s\n' "$body" | tr -d '\r' | awk '/^## Release notes/{on=1; next} on && /^## /{exit} on')
+            notes=$(printf '%s\n' "$body" | tr -d '\r' | awk '/^## Release notes/{on=1; next} on && (/^## / || /^🤖/ || /^---$/){exit} on')
             if [ -z "$(printf '%s' "$notes" | tr -d '[:space:]')" ]; then
               notes="$title"
             fi
