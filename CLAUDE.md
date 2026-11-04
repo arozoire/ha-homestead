@@ -85,4 +85,5 @@ pytest
 
 ## Preferenze dell'autore
 - Risposte brevi, tabelle quando bastano, in italiano.
+- Commit e PR **senza codice né link della sessione**: niente riga `Claude-Session:` nei commit, niente link `claude.ai/code/session_…` nelle PR (la firma 🤖 resta, senza link).
 - Soluzioni open source/self-hosted, niente servizi con pubblicità.
