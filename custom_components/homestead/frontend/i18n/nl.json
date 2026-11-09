@@ -661,5 +661,10 @@
  "soilNow": "Bodem nu",
  "soilCold": "Bodem op {now} °C: dit gewas heeft minstens {min} nodig",
  "soilOk": "Bodem op {now} °C (minimaal {min} °C)",
- "soilColdShort": "koude bodem ({now} < {min} °C)"
+ "soilColdShort": "koude bodem ({now} < {min} °C)",
+ "serviceCost": "Onderhoudskosten",
+ "toolCostTotal": "{total} in totaal · {year} per jaar",
+ "toolExpenses": "Uitgaven voor dit gereedschap",
+ "noToolExpenses": "Nog geen gekoppelde uitgaven.",
+ "addToolExpense": "Uitgave toevoegen"
 }

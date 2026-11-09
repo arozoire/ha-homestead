@@ -6669,6 +6669,54 @@ class HomesteadPanel extends HTMLElement {
     this._render();
   }
 
+  /** Purchase and every expense linked to the tool; per year counts from the purchase (at least one year). */
+  _toolCosts(tool) {
+    const expenses = this._data.expenses.filter((e) => e.tool_id === tool.id && !e.income).sort((a, b) => b.spent_on.localeCompare(a.spent_on));
+    const total = expenses.reduce((sum, e) => sum + e.amount, 0);
+    const since = tool.purchased_on || expenses.at(-1)?.spent_on;
+    const years = since ? Math.max(1, (Date.parse(today()) - Date.parse(since)) / (365.25 * 86400000)) : 1;
+    return { expenses, total, perYear: total / years };
+  }
+
+  _toolCostText(tool) {
+    const c = this._toolCosts(tool);
+    return c.total ? `💶 ${this._money(c.total)}` : null;
+  }
+
+  _toolExpensesBox(tool) {
+    const c = this._toolCosts(tool);
+    return h(
+      "div",
+      { className: "seasons" },
+      h("h3", {}, `💶 ${this.t("toolExpenses")}`),
+      c.total ? h("div", {}, h("strong", {}, this.t("toolCostTotal", { total: this._money(c.total), year: this._money(c.perYear) }))) : h("p", { className: "hint" }, this.t("noToolExpenses")),
+      c.expenses.length
+        ? h(
+            "ul",
+            {},
+            c.expenses.map((e) =>
+              h(
+                "li",
+                { onclick: () => this._openExpense(e) },
+                h(
+                  "div",
+                  { className: "main" },
+                  h("div", {}, `${this._date(e.spent_on)} · ${this.t(`cat_${e.category}`)}`),
+                  e.notes || e.supplier ? h("div", { className: "sub" }, [e.supplier, e.notes].filter(Boolean).join(" · ")) : null,
+                ),
+                h("span", {}, this._money(e.amount)),
+              ),
+            ),
+          )
+        : null,
+      h(
+        "button",
+        { type: "button", onclick: () => this._openExpense({ spent_on: today(), category: "tools", tool_id: tool.id }) },
+        `+ ${this.t("addToolExpense")}`,
+      ),
+    );
+  }
+
   _renderToolList() {
     const now = today();
     const tools = [...this._data.tools].sort((a, b) => a.name.localeCompare(b.name));
@@ -6706,6 +6754,7 @@ class HomesteadPanel extends HTMLElement {
                   ),
                   due ? h("div", { className: "sub warn" }, `🔧 ${this.t("serviceDue", { date: this._date(t.next_service_on) })}`) : null,
                   !due && t.next_service_on ? h("div", { className: "sub" }, `🔧 ${this._date(t.next_service_on)}${t.service_months ? ` · ${this.t("everyMonths", { count: t.service_months })}` : ""}`) : null,
+                  this._toolCostText(t) ? h("div", { className: "sub" }, this._toolCostText(t)) : null,
                 ),
                 due
                   ? h(
@@ -6750,12 +6799,24 @@ class HomesteadPanel extends HTMLElement {
           this._field(f, "next_service_on", { type: "date" }),
           this._field(f, "service_months", { type: "number", min: 1, max: 120, step: 1, inputMode: "numeric" }),
         ),
-        f.id && f.next_service_on ? h("button", { type: "button", onclick: () => this._toolServiced(f) }, `✔ ${this.t("toolServiceDone")}`) : null,
+        f.id && f.next_service_on ? this._serviceRow(f) : null,
         f.id ? null : this._field(f, "price", { type: "number", min: 0, step: "0.01", inputMode: "decimal" }),
         this._notes(f),
         this._formButtons(f.id, () => this._deleteTool()),
       ),
-    ];
+      f.id ? this._toolExpensesBox(f) : null,
+    ].filter(Boolean);
+  }
+
+  /** ✔ Serviced with an optional cost: the cost becomes an expense linked to the tool. */
+  _serviceRow(tool) {
+    const cost = h("input", { type: "number", min: 0, step: "0.01", inputMode: "decimal", placeholder: "0,00" });
+    return h(
+      "div",
+      { className: "row" },
+      h("label", {}, this.t("serviceCost"), cost),
+      h("button", { type: "button", onclick: () => this._toolServiced(tool, Number(cost.value) || 0) }, `✔ ${this.t("toolServiceDone")}`),
+    );
   }
 
   async _saveTool(ev) {
@@ -6779,8 +6840,9 @@ class HomesteadPanel extends HTMLElement {
   }
 
   /** Service done today: the next one after the tool's interval, or none. */
-  async _toolServiced(tool) {
+  async _toolServiced(tool, cost = 0) {
     const next = tool.service_months ? addMonths(today(), tool.service_months) : null;
+    if (cost > 0 && !(await this._call("add_expense", { amount: cost, category: "tools", spent_on: today(), tool_id: tool.id, notes: this.t("toolServiceDone") }))) return;
     if (await this._call("update_tool", { id: tool.id, next_service_on: next, status: "ok" })) {
       this._toolForm = null;
       this._render();

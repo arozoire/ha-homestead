@@ -36,13 +36,13 @@ A Home Assistant integration to manage your vegetable garden, orchard and garden
 | Start of the plant | The diary shows sowing, planting/transplanting or "there for ~N years" at the bottom (from the plant data) |
 | Convenience | 🗺️ in the header hides/shows the map; *+ Harvest* (repeats the last quantity), *🔁 Repeat next year* (new crop with the same species, variety and zone) |
 | Expenses | *Expenses* tab (expenses, revenue, balance) in the panel (yearly total by category, edit, delete) or services `add_expense`/`update_expense`/`delete_expense`; the price of plants and tools becomes an expense; in the plant card: total spent + *+ Expense* |
-| Tools | *Tools* tab (status in colour, 🔧 service overdue) or services `add_tool`/`update_tool`/`delete_tool` |
+| Tools | *Tools* tab (status in colour, 🔧 service overdue, 💶 total cost: purchase + linked expenses, and cost per year) or services `add_tool`/`update_tool`/`delete_tool` |
 | Photos | In the plant card: *📷 Add photo* (phone camera or gallery), reduced to 1600 px and stored in `/media/homestead/`; visible only to HA users |
 | "No map" background | From the layer picker: zoom up to level 23 to work inside a bed |
 | Menu | 📓 Diary (opens first), 📅 Calendar, 🗺️ Map (Plants / Zones), 📈 Analysis, ⋯ More (Seeds, Expenses, Tools, Settings, Backup, Reset everything); at the bottom on phones, at the top on computers; the map only in the Map tab and the plant/zone cards |
 | 📓 Quick diary | 14-day weather with alerts and tasks, this week's to-dos, buttons 🍅 Harvest, 🥚 Eggs, 💧 Watering, 📝 Note; plants *Harvesting now* and *Recently updated* with one-tap **+ Harvest** (last quantity, − / +, ✔), search; the full diary with filters below |
 | 🔁 Repeat the vegetable garden | Map tab: last year's annual crops to tick (rating and "avoid" shown) become new plants with the same zone and variety |
-| 🔧 Tool service | *Service every (months)* + next date; ✔ Service done moves the next one; in the Calendar (Tools group and the 2-week cards) and a phone reminder on the day |
+| 🔧 Tool service | *Service every (months)* + next date; ✔ Service done moves the next one (optional cost → expense linked to the tool); in the Calendar (Tools group and the 2-week cards) and a phone reminder on the day |
 | Automatic plant type | From the species: tree, fruit tree, shrub, climber by genus (apple, hazel, vine, oak…), vegetable/herb/flower from the CropGraph category; proposed when choosing the species and with 🏷️ *Fill in missing types* for existing plants |
 | Dead or removed plants | Hidden from the map and the Map tab list; *Show dead or removed plants* to see them again (they stay in the diary and the analysis) |
 | 🌱 Seedbed | Zone of type *Seedbed*; from the Seeds tab *🌱 Sow* (how many seeds, where, what to expect from past years and the age of the lot); in the Diary *🌱 In the seedbed*: days since sowing, *late* compared to past years, *ready to transplant*; *🌿 Germinated* (date and how many → days and germination %); *↪️ Transplant* all or part (the part becomes a new plant), warning if a cold night is coming; Analysis *Germination over the years* |

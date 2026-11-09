@@ -661,5 +661,10 @@
  "soilNow": "Suolo ora",
  "soilCold": "Suolo a {now} °C: per questa coltura ne servono almeno {min}",
  "soilOk": "Suolo a {now} °C (minimo {min} °C)",
- "soilColdShort": "suolo freddo ({now} < {min} °C)"
+ "soilColdShort": "suolo freddo ({now} < {min} °C)",
+ "serviceCost": "Costo manutenzione",
+ "toolCostTotal": "{total} in tutto · {year} all'anno",
+ "toolExpenses": "Spese di questo attrezzo",
+ "noToolExpenses": "Nessuna spesa collegata.",
+ "addToolExpense": "Aggiungi una spesa"
 }

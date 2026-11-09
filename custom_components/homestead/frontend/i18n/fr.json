@@ -661,5 +661,10 @@
  "soilNow": "Sol maintenant",
  "soilCold": "Sol à {now} °C : cette culture demande au moins {min}",
  "soilOk": "Sol à {now} °C (minimum {min} °C)",
- "soilColdShort": "sol froid ({now} < {min} °C)"
+ "soilColdShort": "sol froid ({now} < {min} °C)",
+ "serviceCost": "Coût de l'entretien",
+ "toolCostTotal": "{total} au total · {year} par an",
+ "toolExpenses": "Dépenses de cet outil",
+ "noToolExpenses": "Aucune dépense liée.",
+ "addToolExpense": "Ajouter une dépense"
 }

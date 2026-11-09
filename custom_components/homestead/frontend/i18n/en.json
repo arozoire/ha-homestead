@@ -661,5 +661,10 @@
  "soilNow": "Soil now",
  "soilCold": "Soil at {now} °C: this crop needs at least {min}",
  "soilOk": "Soil at {now} °C (minimum {min} °C)",
- "soilColdShort": "cold soil ({now} < {min} °C)"
+ "soilColdShort": "cold soil ({now} < {min} °C)",
+ "serviceCost": "Service cost",
+ "toolCostTotal": "{total} in total · {year} a year",
+ "toolExpenses": "Expenses for this tool",
+ "noToolExpenses": "No expenses linked yet.",
+ "addToolExpense": "Add an expense"
 }

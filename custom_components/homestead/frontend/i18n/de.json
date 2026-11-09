@@ -661,5 +661,10 @@
  "soilNow": "Boden jetzt",
  "soilCold": "Boden bei {now} °C: diese Kultur braucht mindestens {min}",
  "soilOk": "Boden bei {now} °C (mindestens {min} °C)",
- "soilColdShort": "kalter Boden ({now} < {min} °C)"
+ "soilColdShort": "kalter Boden ({now} < {min} °C)",
+ "serviceCost": "Wartungskosten",
+ "toolCostTotal": "{total} insgesamt · {year} pro Jahr",
+ "toolExpenses": "Ausgaben für dieses Gerät",
+ "noToolExpenses": "Noch keine verknüpften Ausgaben.",
+ "addToolExpense": "Ausgabe hinzufügen"
 }
