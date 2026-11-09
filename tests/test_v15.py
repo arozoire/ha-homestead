@@ -78,7 +78,9 @@ async def test_photo_plan_tasks(hass: HomeAssistant, tmp_path, freezer: FrozenDa
     assert may.planting_ids == [melo] and may.zone_ids == [orto]
 
 
-async def test_originals_upload_and_removal(hass: HomeAssistant, tmp_path, hass_client) -> None:
+async def test_originals_upload_and_removal(
+    hass: HomeAssistant, tmp_path, hass_client, hass_ws_client
+) -> None:
     entry = await _setup(hass, tmp_path, {CONF_PHOTO_MEDIA: "nas"})
     data = entry.runtime_data.data
     orto = (await _call(hass, "add_zone", {"name": "Orto"}))["id"]
@@ -101,8 +103,20 @@ async def test_originals_upload_and_removal(hass: HomeAssistant, tmp_path, hass_
     bad.add_field("file", b"<svg/>", filename="x.svg")
     assert (await client.post("/api/homestead/photo/upload", data=bad)).status == 400
 
-    # Removing the integration deletes the originals on the NAS too.
-    folder = photo_dir(hass, "nas")
+    # Removing the integration keeps the photos and leaves a backup next to them...
     assert await hass.config_entries.async_remove(entry.entry_id)
     await hass.async_block_till_done()
-    assert not folder.exists()
+    assert (photo_dir(hass, "nas") / photo.file).read_bytes() == JPEG
+    assert (photo_dir(hass) / "homestead-last-backup.json").is_file()
+
+    # ...that adding it again offers and restores, photos included.
+    entry = await _setup(hass, tmp_path, {CONF_PHOTO_MEDIA: "nas"})
+    assert not entry.runtime_data.data.zones
+    ws = await hass_ws_client(hass)
+    await ws.send_json({"id": 1, "type": "homestead/backup/last"})
+    last = (await ws.receive_json())["result"]
+    assert last["counts"]["zones"] == 1 and last["counts"]["photos"] == 1
+    await ws.send_json({"id": 2, "type": "homestead/backup/restore_last"})
+    assert (await ws.receive_json())["result"]["photos"] == 1
+    assert entry.runtime_data.data.photos[photo.id].root == "nas"
+    assert entry.runtime_data.data.zones[orto].name == "Orto"

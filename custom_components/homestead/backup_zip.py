@@ -29,8 +29,29 @@ from .photos import photo_dir
 from .store import get_store
 
 BACKUP_JSON = "backup.json"
+# Written next to the photos when the integration is removed; offered back when it is added again.
+LAST_BACKUP = "homestead-last-backup.json"
 MAX_ZIP_BYTES = 8 * 1024**3
 CHUNK = 1024 * 1024
+
+
+def write_last_backup(hass: HomeAssistant, backup: dict[str, Any]) -> None:
+    folder = photo_dir(hass)
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / LAST_BACKUP).write_text(json.dumps(backup, ensure_ascii=False, indent=1), encoding="utf-8")
+
+
+def read_last_backup(hass: HomeAssistant) -> dict[str, Any] | None:
+    path = photo_dir(hass) / LAST_BACKUP
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
+def keep_existing_photos(hass: HomeAssistant, data: HomesteadData) -> None:
+    """The JSON has no image bytes: keep only the photo records whose file is on this instance."""
+    data.photos = {i: p for i, p in data.photos.items() if (photo_dir(hass, p.root) / p.file).is_file()}
 
 
 def zip_name(photo_root: str | None, name: str) -> str:
@@ -106,8 +127,7 @@ def restore_zip(hass: HomeAssistant, source: Path) -> HomesteadData:
                 with archive.open(entry) as src, target.open("wb") as dst:
                     while chunk := src.read(CHUNK):
                         dst.write(chunk)
-        # Like the JSON backup: only the photos whose file is there.
-        data.photos = {i: p for i, p in data.photos.items() if (photo_dir(hass, p.root) / p.file).is_file()}
+        keep_existing_photos(hass, data)
     return data
 
 

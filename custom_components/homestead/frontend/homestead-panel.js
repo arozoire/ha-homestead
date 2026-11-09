@@ -707,6 +707,13 @@ class HomesteadPanel extends HTMLElement {
       )
       .catch(() => {});
     this._hass
+      .callWS({ type: "homestead/backup/last" })
+      .then((last) => {
+        this._lastBackup = last;
+        if (last && this._isEmpty()) this._render();
+      })
+      .catch(() => {});
+    this._hass
       .callWS({ type: "homestead/soil" })
       .then((sensors) => {
         this._soilSensors = sensors;
@@ -1189,6 +1196,36 @@ class HomesteadPanel extends HTMLElement {
     } catch (err) {
       this._showMessage(err.message || String(err), true);
     }
+  }
+
+  _isEmpty() {
+    const d = this._data;
+    return !!d && !d.zones.length && !d.plantings.length && !d.events.length && !d.seeds.length;
+  }
+
+  /** After the integration was removed and added again: its last backup is still next to the photos. */
+  _lastBackupBox() {
+    const last = this._lastBackup;
+    if (!last || !this._isEmpty()) return null;
+    const date = this._date((last.exported_at || "").slice(0, 10));
+    const restore = async () => {
+      if (!confirm(this.t("lastBackupConfirm", { date }))) return;
+      try {
+        const result = await this._hass.callWS({ type: "homestead/backup/restore_last" });
+        this._lastBackup = null;
+        this._showMessage(`✓ ${this.t("restored", { summary: this._summary(result) })} · 📸 ${result.photos ?? 0}`);
+        this._fitAll();
+      } catch (err) {
+        this._showMessage(err.message || String(err), true);
+      }
+    };
+    return h(
+      "div",
+      { className: "seasons" },
+      h("h3", {}, `♻️ ${this.t("lastBackupTitle")}`),
+      h("p", {}, `${this.t("lastBackupText", { date })} ${this._summary(last.counts)} · 📸 ${last.counts.photos ?? 0}`),
+      this._hass.user?.is_admin === false ? null : h("button", { type: "button", className: "primary", onclick: restore }, `♻️ ${this.t("lastBackupRestore")}`),
+    );
   }
 
   async _restoreZip(file) {
@@ -2909,6 +2946,7 @@ class HomesteadPanel extends HTMLElement {
     const soon = this._data.tasks.filter((t) => !t.done_on && t.due_on <= week);
     const later = this._data.tasks.filter((t) => !t.done_on && t.due_on > week).length;
     return [
+      this._lastBackupBox(),
       this._weatherStrip(),
       ...this._soilLines(),
       this._alertsBox(),

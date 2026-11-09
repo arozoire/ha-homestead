@@ -572,7 +572,7 @@
  "other": "Other",
  "saved": "Saved: {name}",
  "backup": "Backup",
- "backupHint": "JSON: all the data (plants, zones, species, diary, seeds, expenses, tools, photo plan) and the links to the photos, not the photo files. .zip: the same plus every photo file (originals included: it can be large). Removing the integration deletes data and photos: export first.",
+ "backupHint": "JSON: all the data (plants, zones, species, diary, seeds, expenses, tools, photo plan) and the links to the photos, not the photo files. .zip: the same plus every photo file (originals included: it can be large), to move to another Home Assistant. Removing the integration keeps the photos and a last backup in the media folder: adding it again offers to restore them.",
  "exportBackup": "Export JSON",
  "importBackup": "Restore",
  "confirmRestore": "Replace ALL current data with this backup ({date})?\n{summary}\nTip: export the current data first.",
@@ -676,5 +676,9 @@
  "exportZip": "Export with photos (.zip)",
  "zipStarted": "The .zip is being prepared: the download starts in a moment (big with many originals).",
  "confirmRestoreZip": "Replace ALL current data and photos with the backup {name} ({size} MB)?\nTip: export the current data first.",
- "zipRestoring": "Restoring {size} MB…"
+ "zipRestoring": "Restoring {size} MB…",
+ "lastBackupTitle": "Garden found",
+ "lastBackupText": "Backup left when HA Homestead was removed ({date}):",
+ "lastBackupRestore": "Restore it",
+ "lastBackupConfirm": "Restore the garden saved on {date}? The photos are still in the media folder."
 }

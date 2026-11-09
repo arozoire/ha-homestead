@@ -12,13 +12,15 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.event import async_track_time_change, async_track_time_interval
 from homeassistant.helpers.typing import ConfigType
+from homeassistant.loader import async_get_integration
 from homeassistant.util import dt as dt_util
 
-from .backup_zip import BackupZipImportView, BackupZipView
+from .backup import make_backup, summary
+from .backup_zip import BackupZipImportView, BackupZipView, write_last_backup
 from .const import DOMAIN
 from .forecast import FORECAST_REFRESH, OUTLOOK, Outlook
 from .panel import async_register_panel, async_unregister_panel
-from .photos import PhotoThumbView, PhotoUploadView, PhotoView, delete_all, photo_roots
+from .photos import PhotoThumbView, PhotoUploadView, PhotoView
 from .reminders import async_setup_reminders
 from .services import async_register_services
 from .store import HomesteadStore
@@ -98,10 +100,14 @@ async def async_unload_entry(hass: HomeAssistant, entry: HomesteadConfigEntry) -
 
 
 async def async_remove_entry(hass: HomeAssistant, entry: HomesteadConfigEntry) -> None:
+    """HA's own storage goes; the photos stay in the media folder with a last backup next to them.
+
+    Adding the integration again offers to restore that backup, photos included (see backup_zip)."""
     store = HomesteadStore(hass)
     await store.async_load()
-    folders = photo_roots(hass, store.data.photos.values())
+    if any(getattr(store.data, name) for name in summary(store.data)):
+        version = str((await async_get_integration(hass, DOMAIN)).version)
+        backup = make_backup(store.data, dt_util.now().isoformat(), version)
+        await hass.async_add_executor_job(write_last_backup, hass, backup)
     await store.async_remove()
     await Outlook(hass, HomesteadStore(hass), {}).async_remove()
-    for folder in folders:
-        await hass.async_add_executor_job(delete_all, folder)

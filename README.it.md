@@ -89,7 +89,7 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 
 Specie: solo piante (regno Plantae); le specie già importate si trovano anche senza internet; le ricerche online restano in memoria 24 h. Home Assistant deve poter raggiungere `api.gbif.org` e `www.wikidata.org` (dati aperti, nessun account).
 
-I dati sono anche nei backup di Home Assistant (`.storage/homestead.data`), le foto anche se il backup include la cartella media (non un NAS). **Rimuovere l'integrazione cancella i suoi dati e le foto**: esporta prima uno .zip se pensi di riaggiungerla. HACS non fa backup.
+I dati sono anche nei backup di Home Assistant (`.storage/homestead.data`), le foto anche se il backup include la cartella media (non un NAS). Rimuovere l'integrazione cancella i suoi dati da HA ma **lascia le foto** nella cartella media, con accanto un ultimo backup (`homestead/homestead-last-backup.json`): riaggiungendo l'integrazione il Diario mostra *♻️ Giardino ritrovato* per ripristinare tutto con un tocco. Per toglierle del tutto, cancella la cartella `homestead` da *Media*. HACS non fa backup.
 
 Mappe: satellite **Esri World Imagery** (gratuito, senza account né pubblicità) e **OpenStreetMap**. Leaflet è incluso nell'integrazione, nessuna libreria scaricata da CDN; solo le tessere della mappa arrivano da internet.
 

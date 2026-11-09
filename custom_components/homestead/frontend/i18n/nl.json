@@ -572,7 +572,7 @@
  "other": "Overig",
  "saved": "Opgeslagen: {name}",
  "backup": "Back-up",
- "backupHint": "JSON: alle gegevens (planten, zones, soorten, dagboek, zaden, uitgaven, gereedschap, fotoplan) en de koppelingen naar de foto's, niet de fotobestanden. .zip: hetzelfde plus alle fotobestanden (ook de originelen: kan groot zijn). De integratie verwijderen wist gegevens en foto's: eerst exporteren.",
+ "backupHint": "JSON: alle gegevens (planten, zones, soorten, dagboek, zaden, uitgaven, gereedschap, fotoplan) en de koppelingen naar de foto's, niet de fotobestanden. .zip: hetzelfde plus alle fotobestanden (ook de originelen: kan groot zijn), om naar een andere Home Assistant te verhuizen. Bij het verwijderen van de integratie blijven de foto's en een laatste back-up in de mediamap: bij opnieuw toevoegen wordt herstel aangeboden.",
  "exportBackup": "JSON exporteren",
  "importBackup": "Herstellen",
  "confirmRestore": "ALLE huidige gegevens vervangen door deze back-up ({date})?\n{summary}\nTip: exporteer eerst de huidige gegevens.",
@@ -676,5 +676,9 @@
  "exportZip": "Exporteren met foto's (.zip)",
  "zipStarted": "De .zip wordt gemaakt: de download begint zo (groot met veel originelen).",
  "confirmRestoreZip": "ALLE huidige gegevens en foto's vervangen door de back-up {name} ({size} MB)?\nTip: exporteer eerst de huidige gegevens.",
- "zipRestoring": "{size} MB wordt hersteld…"
+ "zipRestoring": "{size} MB wordt hersteld…",
+ "lastBackupTitle": "Tuin teruggevonden",
+ "lastBackupText": "Back-up achtergelaten bij het verwijderen van HA Homestead ({date}):",
+ "lastBackupRestore": "Herstellen",
+ "lastBackupConfirm": "De tuin van {date} herstellen? De foto's staan nog in de mediamap."
 }

@@ -572,7 +572,7 @@
  "other": "Altro",
  "saved": "Salvato: {name}",
  "backup": "Backup",
- "backupHint": "JSON: tutti i dati (piante, zone, specie, diario, semi, spese, attrezzi, piano foto) e i collegamenti alle foto, non i file delle foto. .zip: lo stesso più tutti i file delle foto (anche gli originali: può essere grande). Rimuovere l'integrazione cancella dati e foto: esporta prima.",
+ "backupHint": "JSON: tutti i dati (piante, zone, specie, diario, semi, spese, attrezzi, piano foto) e i collegamenti alle foto, non i file delle foto. .zip: lo stesso più tutti i file delle foto (anche gli originali: può essere grande), per passare a un altro Home Assistant. Rimuovendo l'integrazione le foto e un ultimo backup restano nella cartella media: riaggiungendola ti propone di ripristinarli.",
  "exportBackup": "Esporta JSON",
  "importBackup": "Ripristina",
  "confirmRestore": "Sostituire TUTTI i dati attuali con questo backup ({date})?\n{summary}\nConsiglio: esporta prima i dati attuali.",
@@ -676,5 +676,9 @@
  "exportZip": "Esporta con le foto (.zip)",
  "zipStarted": "Preparo lo .zip: il download parte tra poco (grande se ci sono molti originali).",
  "confirmRestoreZip": "Sostituire TUTTI i dati e le foto attuali con il backup {name} ({size} MB)?\nConsiglio: esporta prima i dati attuali.",
- "zipRestoring": "Ripristino di {size} MB…"
+ "zipRestoring": "Ripristino di {size} MB…",
+ "lastBackupTitle": "Giardino ritrovato",
+ "lastBackupText": "Backup lasciato quando HA Homestead è stato rimosso ({date}):",
+ "lastBackupRestore": "Ripristina",
+ "lastBackupConfirm": "Ripristinare il giardino salvato il {date}? Le foto sono ancora nella cartella media."
 }

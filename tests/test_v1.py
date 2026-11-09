@@ -102,9 +102,10 @@ async def test_photos_follow_planting_and_entry_removal(
     await _call(hass, "delete_planting", {"id": planting})
     assert not entry.runtime_data.data.photos and not list(photo_dir(hass).rglob("*.png"))
 
+    # Nothing left to keep: no backup written next to the (empty) photo folder.
     await hass.config_entries.async_remove(entry.entry_id)
     await hass.async_block_till_done()
-    assert not photo_dir(hass).exists()
+    assert not (photo_dir(hass) / "homestead-last-backup.json").exists()
 
 
 async def test_restore_keeps_only_photos_with_files(hass: HomeAssistant, tmp_path, hass_ws_client) -> None:

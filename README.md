@@ -89,7 +89,7 @@ A Home Assistant integration to manage your vegetable garden, orchard and garden
 
 Species: plants only (kingdom Plantae); species already imported are found without internet too; online searches are kept in memory for 24 h. Home Assistant must be able to reach `api.gbif.org` and `www.wikidata.org` (open data, no account).
 
-The data is also in the Home Assistant backups (`.storage/homestead.data`), the photos too if the backup includes the media folder (not a NAS). **Removing the integration deletes its data and photos**: export a .zip first if you plan to add it again. HACS does not back anything up.
+The data is also in the Home Assistant backups (`.storage/homestead.data`), the photos too if the backup includes the media folder (not a NAS). Removing the integration deletes its data from HA but **keeps the photos** in the media folder, with a last backup next to them (`homestead/homestead-last-backup.json`): adding the integration again shows *♻️ Garden found* in the Diary to restore everything in one tap. To remove them for good, delete the `homestead` folder from *Media*. HACS does not back anything up.
 
 Maps: **Esri World Imagery** satellite (free, no account or ads) and **OpenStreetMap**. Leaflet ships with the integration, no library is downloaded from a CDN; only the map tiles come from the internet.
 
