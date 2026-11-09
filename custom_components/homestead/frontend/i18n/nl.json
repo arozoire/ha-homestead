@@ -697,5 +697,8 @@
  "seedSown": "{count} partijen gezaaid",
  "seedDeleteMany": "{count} zaadpartijen verwijderen?",
  "seedDeleted": "{count} partijen verwijderd",
- "seedNoMatch": "Geen partij met deze filters."
+ "seedNoMatch": "Geen partij met deze filters.",
+ "u_lb": "lb",
+ "u_oz": "oz",
+ "u_gal": "gal"
 }

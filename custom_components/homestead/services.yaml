@@ -772,6 +772,9 @@ add_event:
             - q
             - stere
             - m3
+            - lb
+            - oz
+            - gal
     rating:
       selector:
         number:
@@ -913,6 +916,9 @@ update_event:
             - q
             - stere
             - m3
+            - lb
+            - oz
+            - gal
     rating:
       selector:
         number:

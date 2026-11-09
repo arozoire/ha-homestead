@@ -184,6 +184,9 @@ class HarvestUnit(StrEnum):
     QUINTAL = "q"  # 100 kg (Italy)
     STERE = "stere"  # 1 m³ of stacked logs (France)
     CUBIC_METRE = "m3"
+    POUND = "lb"
+    OUNCE = "oz"
+    GALLON = "gal"
 
 
 class ToolStatus(StrEnum):

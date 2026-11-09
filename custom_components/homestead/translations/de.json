@@ -31,12 +31,14 @@
           "heat_night": "Hitzewelle: nächtliches Minimum ab",
           "heat_days": "Hitzewelle: Tage hintereinander",
           "heat_extreme": "Extreme Hitze: Höchstwert ab (auch nur ein Tag)",
-          "photo_media": "Ordner für Originalfotos"
+          "photo_media": "Ordner für Originalfotos",
+          "units": "Einheiten"
         },
         "data_description": {
           "photo_media": "HA-Medienordner, in dem der Fotoplan die Originale unkomprimiert speichert. Ein unter Einstellungen → System → Speicher hinzugefügtes NAS erscheint hier.",
           "soil_temperature_sensor": "Optional: Bodentemperatur im Tagebuchwetter und Prüfung vor Aussaat im Freiland oder Auspflanzen (ein Bodenfühler wie der Ecowitt WH52).",
-          "soil_ec_sensor": "Optional: elektrische Leitfähigkeit des Bodens (Salze, Dünger), mit dem Tagebuchwetter erfasst."
+          "soil_ec_sensor": "Optional: elektrische Leitfähigkeit des Bodens (Salze, Dünger), mit dem Tagebuchwetter erfasst.",
+          "units": "Auto: wie Home Assistant (Einstellungen → System → Allgemein). Imperial zeigt °F, Zoll, Fuß, Acres, Pfund und Gallonen; die Daten bleiben metrisch gespeichert."
         }
       }
     }
@@ -218,7 +220,10 @@
         "l": "Liter",
         "q": "Doppelzentner (100 kg)",
         "stere": "Ster",
-        "m3": "Kubikmeter"
+        "m3": "Kubikmeter",
+        "lb": "Pfund (lb)",
+        "oz": "Unzen (oz)",
+        "gal": "Gallonen (gal)"
       }
     },
     "abundance": {
@@ -279,6 +284,13 @@
         "off": "Aus (nur im Panel)",
         "tasks": "Nur mit einer geplanten Aufgabe an diesen Tagen",
         "always": "Immer"
+      }
+    },
+    "units": {
+      "options": {
+        "auto": "Wie Home Assistant",
+        "metric": "Metrisch (°C, mm, m, kg, l)",
+        "imperial": "Imperial (°F, in, ft, lb, gal)"
       }
     }
   },

@@ -53,6 +53,7 @@ from .outlook import (
     parse_open_meteo_daily,
 )
 from .store import HomesteadStore
+from .units import IMPERIAL, METRIC, resolve_units, temperature_text
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -356,7 +357,7 @@ class Outlook:
         for alert in new:
             message = {
                 "title": texts.get("notification_title", "Garden"),
-                "message": alert_text(alert, texts, self.store),
+                "message": alert_text(alert, texts, self.store, resolve_units(self.hass, self.options)),
                 "data": {"url": f"/{DOMAIN}", "clickAction": f"/{DOMAIN}", "tag": f"{DOMAIN}-{alert['key']}"},
             }
             for name in services:
@@ -395,7 +396,9 @@ def advice_text(verdict: dict[str, Any] | None, texts: dict[str, str]) -> str:
     return text
 
 
-def alert_text(alert: dict[str, Any], texts: dict[str, str], store: HomesteadStore) -> str:
+def alert_text(
+    alert: dict[str, Any], texts: dict[str, str], store: HomesteadStore, units: str = METRIC
+) -> str:
     def day(iso: str) -> str:
         return f"{iso[8:10]}/{iso[5:7]}"
 
@@ -407,7 +410,9 @@ def alert_text(alert: dict[str, Any], texts: dict[str, str], store: HomesteadSto
         else f"{day(alert['start'])}–{day(alert['end'])}"
     )
     template = texts.get(f"alert_{alert['kind']}", "{when}: {value} °C {plants}")
-    text = template.replace("{when}", when).replace("{value}", f"{alert['value']:g}")
+    text = template.replace("{when}", when).replace("{value}", temperature_text(alert["value"], units))
+    if units == IMPERIAL:
+        text = text.replace("°C", "°F")
     if alert["kind"] in ("heatwave", "heat_extreme") or not plants:
         return text.replace("{plants}", "").rstrip(" —:")
     return text.replace("{plants}", plants)

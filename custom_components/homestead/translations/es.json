@@ -31,12 +31,14 @@
           "heat_night": "Ola de calor: mínima nocturna desde",
           "heat_days": "Ola de calor: días seguidos",
           "heat_extreme": "Calor extremo: máxima desde (aunque sea un solo día)",
-          "photo_media": "Carpeta de las fotos originales"
+          "photo_media": "Carpeta de las fotos originales",
+          "units": "Unidades"
         },
         "data_description": {
           "photo_media": "Carpeta multimedia de HA donde el plan de fotos guarda los originales, sin compresión. Un NAS añadido en Ajustes → Sistema → Almacenamiento aparece aquí.",
           "soil_temperature_sensor": "Opcional: temperatura del suelo en el tiempo del diario y control antes de sembrar al aire libre o trasplantar (una sonda como la Ecowitt WH52).",
-          "soil_ec_sensor": "Opcional: conductividad eléctrica del suelo (sales, abono), registrada con el tiempo del diario."
+          "soil_ec_sensor": "Opcional: conductividad eléctrica del suelo (sales, abono), registrada con el tiempo del diario.",
+          "units": "Auto: como Home Assistant (Ajustes → Sistema → General). Imperial muestra °F, pulgadas, pies, acres, libras y galones; los datos se guardan en métrico."
         }
       }
     }
@@ -218,7 +220,10 @@
         "l": "Litros",
         "q": "Quintales (100 kg)",
         "stere": "Estéreos",
-        "m3": "Metros cúbicos"
+        "m3": "Metros cúbicos",
+        "lb": "Libras (lb)",
+        "oz": "Onzas (oz)",
+        "gal": "Galones (gal)"
       }
     },
     "abundance": {
@@ -279,6 +284,13 @@
         "off": "Desactivadas (solo en el panel)",
         "tasks": "Solo con una actividad prevista esos días",
         "always": "Siempre"
+      }
+    },
+    "units": {
+      "options": {
+        "auto": "Como Home Assistant",
+        "metric": "Métrico (°C, mm, m, kg, l)",
+        "imperial": "Imperial (°F, in, ft, lb, gal)"
       }
     }
   },

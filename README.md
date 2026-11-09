@@ -106,6 +106,7 @@ Maps: **Esri World Imagery** satellite (free, no account or ads) and **OpenStree
 | **Frost and heat alerts on phones** | only with a task planned on those days |
 | Heat wave: maximum / night minimum / days in a row | 35 °C / 22 °C / 3 |
 | Extreme heat: maximum (even one day) | 40 °C |
+| **Units**: as Home Assistant, metric, or imperial (°F, inches, feet, acres, lb/oz, gallons; data is stored in metric, the heat limits above are shown in °F) | as Home Assistant |
 
 Every day at the chosen time a notification arrives for each task planned for today (plus a summary of overdue tasks). **Tapping** it opens the panel on the prefilled diary form; the **✔ Done** button records it in the diary right away.
 

@@ -31,12 +31,14 @@
           "heat_night": "Heatwave: night minimum from",
           "heat_days": "Heatwave: days in a row",
           "heat_extreme": "Extreme heat: maximum from (a single day)",
-          "photo_media": "Folder for the photo originals"
+          "photo_media": "Folder for the photo originals",
+          "units": "Units"
         },
         "data_description": {
           "photo_media": "HA media folder where the photo plan keeps the originals, uncompressed. A NAS added in Settings → System → Storage shows up here.",
           "soil_temperature_sensor": "Optional: soil temperature in the diary weather, and a check before sowing outdoors or planting out (a soil probe such as an Ecowitt WH52).",
-          "soil_ec_sensor": "Optional: electrical conductivity of the soil (salts, fertilizer), recorded with the diary weather."
+          "soil_ec_sensor": "Optional: electrical conductivity of the soil (salts, fertilizer), recorded with the diary weather.",
+          "units": "Auto: as Home Assistant (Settings → System → General). Imperial shows °F, inches, feet, acres, pounds and gallons; data is stored in metric."
         }
       }
     }
@@ -218,7 +220,10 @@
         "l": "Litres",
         "q": "Quintals (100 kg)",
         "stere": "Steres",
-        "m3": "Cubic metres"
+        "m3": "Cubic metres",
+        "lb": "Pounds (lb)",
+        "oz": "Ounces (oz)",
+        "gal": "Gallons (gal)"
       }
     },
     "abundance": {
@@ -279,6 +284,13 @@
         "off": "Off (panel only)",
         "tasks": "Only with a planned activity on those days",
         "always": "Always"
+      }
+    },
+    "units": {
+      "options": {
+        "auto": "As Home Assistant",
+        "metric": "Metric (°C, mm, m, kg, l)",
+        "imperial": "Imperial (°F, in, ft, lb, gal)"
       }
     }
   },

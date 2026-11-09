@@ -31,12 +31,14 @@
           "heat_night": "Ondata di calore: minima notturna da",
           "heat_days": "Ondata di calore: giorni di fila",
           "heat_extreme": "Caldo estremo: massima da (anche un solo giorno)",
-          "photo_media": "Cartella per le foto originali"
+          "photo_media": "Cartella per le foto originali",
+          "units": "Unità"
         },
         "data_description": {
           "photo_media": "Cartella media di HA dove il piano foto salva gli originali, senza compressione. Un NAS aggiunto in Impostazioni → Sistema → Archiviazione compare qui.",
           "soil_temperature_sensor": "Facoltativo: temperatura del suolo nel meteo del diario e controllo prima di seminare all'aperto o mettere a dimora (una sonda come l'Ecowitt WH52).",
-          "soil_ec_sensor": "Facoltativo: conducibilità elettrica del suolo (sali, concime), registrata con il meteo del diario."
+          "soil_ec_sensor": "Facoltativo: conducibilità elettrica del suolo (sali, concime), registrata con il meteo del diario.",
+          "units": "Automatico: come Home Assistant (Impostazioni → Sistema → Generale). Imperiale mostra °F, pollici, piedi, acri, libbre e galloni; i dati restano salvati in metrico."
         }
       }
     }
@@ -218,7 +220,10 @@
         "l": "Litri",
         "q": "Quintali (100 kg)",
         "stere": "Steri",
-        "m3": "Metri cubi"
+        "m3": "Metri cubi",
+        "lb": "Libbre (lb)",
+        "oz": "Once (oz)",
+        "gal": "Galloni (gal)"
       }
     },
     "abundance": {
@@ -279,6 +284,13 @@
         "off": "Disattivate (solo nel pannello)",
         "tasks": "Solo con un'attività prevista in quei giorni",
         "always": "Sempre"
+      }
+    },
+    "units": {
+      "options": {
+        "auto": "Come Home Assistant",
+        "metric": "Metrico (°C, mm, m, kg, l)",
+        "imperial": "Imperiale (°F, in, ft, lb, gal)"
       }
     }
   },

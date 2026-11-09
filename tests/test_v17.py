@@ -157,3 +157,38 @@ async def test_backup_zip_with_photos(hass: HomeAssistant, tmp_path, hass_client
     form.add_field("file", b"not a zip", filename="x.zip")
     response = await client.post("/api/homestead/backup/import", data=form)
     assert response.status == 400
+
+
+async def test_units_imperial(hass: HomeAssistant) -> None:
+    from homeassistant.config_entries import ConfigEntryState
+    from homeassistant.util.unit_system import US_CUSTOMARY_SYSTEM
+
+    from custom_components.homestead.const import CONF_HEAT_MAX, CONF_UNITS
+    from custom_components.homestead.forecast import alert_text
+    from custom_components.homestead.units import IMPERIAL, METRIC, resolve_units
+
+    entry = MockConfigEntry(domain=DOMAIN, title="HA Homestead", options={CONF_HEAT_MAX: 35})
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    assert resolve_units(hass, {}) == METRIC
+    assert resolve_units(hass, {CONF_UNITS: IMPERIAL}) == IMPERIAL
+    hass.config.units = US_CUSTOMARY_SYSTEM
+    assert resolve_units(hass, {}) == IMPERIAL
+    assert resolve_units(hass, {CONF_UNITS: METRIC}) == METRIC
+
+    texts = {"alert_frost": "❄️ Frost {when}: {value} °C — {plants}"}
+    alert = {"kind": "frost", "start": "2026-11-10", "end": "2026-11-10", "value": -3, "plantings": []}
+    assert alert_text(alert, texts, entry.runtime_data, IMPERIAL) == "❄️ Frost 10/11: 27 °F"
+    assert alert_text(alert, texts, entry.runtime_data, METRIC) == "❄️ Frost 10/11: -3 °C"
+
+    # The options show the heat limits in °F and store them in °C.
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    schema = {str(k): k for k in result["data_schema"].schema}
+    assert schema[CONF_HEAT_MAX].description["suggested_value"] == 95
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"], {CONF_UNITS: "auto", CONF_HEAT_MAX: 100}
+    )
+    await hass.async_block_till_done()
+    assert entry.options[CONF_HEAT_MAX] == 38
+    assert entry.state is ConfigEntryState.LOADED

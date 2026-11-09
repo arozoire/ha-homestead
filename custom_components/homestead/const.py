@@ -34,3 +34,4 @@ SIGNAL_OUTLOOK_UPDATED = f"{DOMAIN}_outlook_updated"
 
 # Options: the HA media folder for the originals of the photo plan (a NAS, for example).
 CONF_PHOTO_MEDIA = "photo_media"
+CONF_UNITS = "units"  # auto (as Home Assistant), metric or imperial

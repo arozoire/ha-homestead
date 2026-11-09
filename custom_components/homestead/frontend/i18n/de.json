@@ -697,5 +697,8 @@
  "seedSown": "{count} Posten gesät",
  "seedDeleteMany": "{count} Saatgutposten löschen?",
  "seedDeleted": "{count} Posten gelöscht",
- "seedNoMatch": "Kein Posten passt zu den Filtern."
+ "seedNoMatch": "Kein Posten passt zu den Filtern.",
+ "u_lb": "lb",
+ "u_oz": "oz",
+ "u_gal": "gal"
 }

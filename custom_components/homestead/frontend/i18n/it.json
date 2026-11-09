@@ -697,5 +697,8 @@
  "seedSown": "{count} lotti seminati",
  "seedDeleteMany": "Eliminare {count} lotti di semi?",
  "seedDeleted": "{count} lotti eliminati",
- "seedNoMatch": "Nessun lotto con questi filtri."
+ "seedNoMatch": "Nessun lotto con questi filtri.",
+ "u_lb": "lb",
+ "u_oz": "oz",
+ "u_gal": "gal"
 }

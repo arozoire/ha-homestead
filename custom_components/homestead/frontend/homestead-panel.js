@@ -5,6 +5,8 @@ const BASE = new URL(".", import.meta.url).href;
 const ZONE_KINDS = ["vegetable_garden", "orchard", "flower_bed", "greenhouse", "pots", "lawn", "woodland", "compost", "coop", "nursery", "indoor", "other"];
 
 const TEXT = {};
+// Metric or imperial: set from the integration options (auto = as Home Assistant). Data stays metric.
+const UNITS = { imperial: false };
 // Panel texts, one file per language in i18n/ (English as fallback), loaded before the first render.
 const VERSION = new URL(import.meta.url).search;
 async function loadTexts(lang) {
@@ -96,6 +98,8 @@ const QUANTITY_UNITS = {
   flock_in: ["pieces"],
   flock_out: ["pieces"],
 };
+// The same in imperial units first; the metric ones stay for older entries.
+const IMPERIAL_UNITS = { harvest: ["lb", "oz", "pieces", "gal", "kg", "l"], foraging: ["lb", "oz", "pieces", "gal", "kg", "l"] };
 // Kinds with a "product" field, and its label.
 const PRODUCT_LABEL = { fertilizing: "product", treatment: "product", foraging: "what", wood_cutting: "essence", flock_in: "breed", animal_care: "feedOrCare" };
 const PLANT_ICONS = { tree: "🌳", fruit_tree: "🍎", shrub: "🍃", vine: "🍇", vegetable: "🥕", herb: "🌿", flower: "🌸", houseplant: "🪴", other: "🌱" };
@@ -590,7 +594,8 @@ class HomesteadPanel extends HTMLElement {
   t(key, vars = {}) {
     const lang = this._lang();
     const text = (TEXT[lang] || TEXT.en)[key] ?? TEXT.en[key] ?? key;
-    return text.replace(/\{(\w+)\}/g, (_, name) => vars[name] ?? "");
+    const out = text.replace(/\{(\w+)\}/g, (_, name) => vars[name] ?? "");
+    return UNITS.imperial ? out.replace(/°C/g, "°F") : out;
   }
 
   // ---------- setup ----------
@@ -716,6 +721,17 @@ class HomesteadPanel extends HTMLElement {
       .then((last) => {
         this._lastBackup = last;
         if (last && this._isEmpty()) this._render();
+      })
+      .catch(() => {});
+    this._hass
+      .callWS({ type: "homestead/units" })
+      .then((units) => {
+        const imperial = units?.system === "imperial";
+        if (imperial !== UNITS.imperial) {
+          UNITS.imperial = imperial;
+          this._render();
+          this._renderCalendar?.();
+        }
       })
       .catch(() => {});
     this._hass
@@ -2869,7 +2885,7 @@ class HomesteadPanel extends HTMLElement {
         return h(
           "div",
           { className: "sub", style: "white-space:normal" },
-          `${this.t(`al_${a.kind}`, { when: when(a), value: a.value })}${names.length && !everyone ? ` — ${names.slice(0, 5).join(", ")}${names.length > 5 ? " …" : ""}` : ""}`,
+          `${this.t(`al_${a.kind}`, { when: when(a), value: deg(a.value) })}${names.length && !everyone ? ` — ${names.slice(0, 5).join(", ")}${names.length > 5 ? " …" : ""}` : ""}`,
         );
       }),
     );
@@ -3139,7 +3155,7 @@ class HomesteadPanel extends HTMLElement {
   }
 
   _quickStepper(row) {
-    const unit = row.coop ? "eggs" : row.harvest?.unit || "kg";
+    const unit = row.coop ? "eggs" : row.harvest?.unit || (UNITS.imperial ? "lb" : "kg");
     const counted = unit === "eggs" || unit === "pieces";
     const step = (value) => (counted ? 1 : value < 2 ? 0.1 : value < 20 ? 0.5 : 1);
     const label = h("strong", { className: "quick-value" });
@@ -3572,7 +3588,10 @@ class HomesteadPanel extends HTMLElement {
     const read = (id) => {
       const state = id && this._hass.states[id];
       const value = state ? Number(state.state) : NaN;
-      return Number.isFinite(value) ? { value, unit: state.attributes?.unit_of_measurement || "" } : null;
+      if (!Number.isFinite(value)) return null;
+      const unit = state.attributes?.unit_of_measurement || "";
+      // Temperatures in °C inside the panel, whatever the sensor reports.
+      return unit === "°F" ? { value: ((value - 32) * 5) / 9, unit: "°C" } : { value, unit };
     };
     const sensors = this._soilSensorsFor(zoneId, ownOnly);
     return { temperature: read(sensors.temperature), moisture: read(sensors.moisture), ec: read(sensors.ec) };
@@ -3592,7 +3611,7 @@ class HomesteadPanel extends HTMLElement {
   _soilLine(zoneId = null, label = null, ownOnly = false) {
     const soil = this._soilNow(zoneId, ownOnly);
     const parts = [
-      soil.temperature ? `${this._number(soil.temperature.value)} ${soil.temperature.unit || "°C"}` : null,
+      soil.temperature ? `${this._number(this._degValue(soil.temperature.value))} ${UNITS.imperial ? "°F" : "°C"}` : null,
       soil.moisture ? `${this._number(soil.moisture.value, 0)} ${soil.moisture.unit || "%"}` : null,
       soil.ec ? `EC ${this._number(soil.ec.value, 0)} ${soil.ec.unit}`.trim() : null,
     ].filter(Boolean);
@@ -3600,18 +3619,23 @@ class HomesteadPanel extends HTMLElement {
   }
 
   /** Soil temperature now against the minimum of the crop (sowing outdoors, planting out). */
+  /** °C → the user's units, unrounded (for one decimal). */
+  _degValue(celsius) {
+    return UNITS.imperial ? (celsius * 9) / 5 + 32 : celsius;
+  }
+
   _soilCheck(species, zoneId = null) {
     const now = this._soilNow(zoneId).temperature;
     const min = species ? this._crop(species)?.min_soil_c : null;
     if (!now || min == null) return "";
-    const vars = { now: this._number(now.value), min: this._number(min) };
+    const vars = { now: this._number(this._degValue(now.value)), min: this._number(this._degValue(min)) };
     return now.value < min ? `⚠️ ${this.t("soilCold", vars)}` : `✅ ${this.t("soilOk", vars)}`;
   }
 
   _soilColdShort(species) {
     const now = this._soilNow().temperature;
     const min = this._crop(species)?.min_soil_c;
-    return now && min != null && now.value < min ? `⚠️ ${this.t("soilColdShort", { now: this._number(now.value), min: this._number(min) })}` : "";
+    return now && min != null && now.value < min ? `⚠️ ${this.t("soilColdShort", { now: this._number(this._degValue(now.value)), min: this._number(this._degValue(min)) })}` : "";
   }
 
   _coldWarning(planting, day) {
@@ -3619,7 +3643,7 @@ class HomesteadPanel extends HTMLElement {
     const tender = crop?.warm || (crop?.hardiness_c ?? -5) > 0;
     const limit = tender ? 10 : 2;
     const cold = (this._outlook?.forecast || []).find((d) => d.date >= day && daysBetween(day, d.date) <= 3 && d.t_min != null && d.t_min < limit);
-    return cold ? this.t("tpCold", { temp: Math.round(cold.t_min), date: this._date(cold.date, false) }) : "";
+    return cold ? this.t("tpCold", { temp: deg(cold.t_min), date: this._date(cold.date, false) }) : "";
   }
 
   _renderTransplantForm() {
@@ -4210,7 +4234,7 @@ class HomesteadPanel extends HTMLElement {
       productInput.setAttribute("list", kind === "wood_cutting" ? "homestead-essences" : "");
       extras.harvest.hidden = !QUANTITY_UNITS[kind];
       if (QUANTITY_UNITS[kind]) {
-        const units = QUANTITY_UNITS[kind];
+        const units = UNITS.imperial && IMPERIAL_UNITS[kind] ? IMPERIAL_UNITS[kind] : QUANTITY_UNITS[kind];
         const previous = unitSelect.value || f.unit;
         const fallback = WOOD_KINDS.includes(kind) && kind !== "foraging" ? this._woodUnit() : units[0];
         const value = units.includes(previous) ? previous : units.includes(fallback) ? fallback : units[0];
@@ -4815,7 +4839,7 @@ class HomesteadPanel extends HTMLElement {
                 },
               },
               h("b", {}, `${weekdayName.format(new Date(`${day}T12:00:00`))} ${this._date(day, false)} ${this._weatherIcon(info.forecast)}`),
-              h("span", { className: "sub" }, `${Math.round(info.forecast.t_max)}° / ${Math.round(info.forecast.t_min)}° · ${Math.round(info.forecast.rain_mm ?? 0)} mm`),
+              h("span", { className: "sub" }, `${deg(info.forecast.t_max)}° / ${deg(info.forecast.t_min)}° · ${rainText(info.forecast.rain_mm ?? 0)}`),
               h("span", { className: `sub ${info.flags.length ? "warn" : "info"}` }, info.flags.length ? `⚠️ ${info.flags.map((x) => this.t(x)).join(", ")}` : this.t("goodDay")),
             ),
           ),
@@ -5072,7 +5096,7 @@ class HomesteadPanel extends HTMLElement {
     const review = of("review").at(-1);
     const day = (e) => {
       const w = e.weather;
-      const extra = w ? ` ${w.t_mean != null ? `${Math.round(w.t_mean)}°` : ""}${w.rain_mm != null ? ` ${Math.round(w.rain_mm)}mm` : ""}` : "";
+      const extra = w ? ` ${w.t_mean != null ? `${deg(w.t_mean)}°` : ""}${w.rain_mm != null ? ` ${rainText(w.rain_mm)}` : ""}` : "";
       return `${this._date(e.done_on, false)} ${MOON_ICONS[e.moon_phase] || ""}${extra}`;
     };
     const sown = of("sowing")[0] || (planting.sown_on?.startsWith(year) ? { done_on: planting.sown_on, moon_phase: planting.sown_moon_phase } : null);
@@ -5120,7 +5144,7 @@ class HomesteadPanel extends HTMLElement {
           type: "button",
           onclick: () =>
             this._newEvent(
-              { kind: "harvest", planting_id: f.id, quantity: last?.quantity, unit: last?.unit || "kg" },
+              { kind: "harvest", planting_id: f.id, quantity: last?.quantity, unit: last?.unit || (UNITS.imperial ? "lb" : "kg") },
               { planting_id: f.id },
             ),
         },
@@ -5561,8 +5585,8 @@ class HomesteadPanel extends HTMLElement {
     const facts = crop
       ? [
           (crop.exposure || []).map((e) => this.t(`ex_${e}`)).join(" / ") || null,
-          crop.hardiness_c != null ? this.t("hardiness", { value: crop.hardiness_c }) : null,
-          crop.spacing_cm ? this.t("spacing", { value: crop.spacing_cm }) : null,
+          crop.hardiness_c != null ? this.t("hardiness", { value: deg(crop.hardiness_c) }) : null,
+          crop.spacing_cm ? `↔️ ${lengthText(crop.spacing_cm)}` : null,
         ].filter(Boolean)
       : [];
     return h(
@@ -5688,9 +5712,14 @@ class HomesteadPanel extends HTMLElement {
         h(
           "div",
           { className: "row" },
-          this._field(f, "hardiness_c", { type: "number", min: -60, max: 30, step: 1 }),
-          this._field(f, "spacing_cm", { type: "number", min: 1, max: 5000, step: 1 }),
-          this._field(f, "heat_max_c", { type: "number", min: 10, max: 50, step: 1 }),
+          this._field({ hardiness_c: deg(f.hardiness_c) }, "hardiness_c", { type: "number", step: 1 }),
+          h(
+            "label",
+            {},
+            UNITS.imperial ? this.t("spacing_cm").replace("cm", "in") : this.t("spacing_cm"),
+            h("input", { name: "spacing_cm", type: "number", min: 1, step: 1, value: f.spacing_cm == null ? "" : UNITS.imperial ? Math.round(f.spacing_cm / 2.54) : f.spacing_cm }),
+          ),
+          this._field({ heat_max_c: deg(f.heat_max_c) }, "heat_max_c", { type: "number", step: 1 }),
         ),
         grid,
         this._notes(f),
@@ -5708,9 +5737,9 @@ class HomesteadPanel extends HTMLElement {
     const data = {
       species: this._cropForm.species,
       exposure: ["sun", "partial", "shade"].filter((e) => v[`ex_${e}`] === "on"),
-      hardiness_c: v.hardiness_c === "" ? null : Number(v.hardiness_c),
-      spacing_cm: v.spacing_cm ? Number(v.spacing_cm) : null,
-      heat_max_c: v.heat_max_c ? Number(v.heat_max_c) : null,
+      hardiness_c: v.hardiness_c === "" ? null : toCelsius(Number(v.hardiness_c)),
+      spacing_cm: v.spacing_cm ? (UNITS.imperial ? Math.round(Number(v.spacing_cm) * 2.54) : Number(v.spacing_cm)) : null,
+      heat_max_c: v.heat_max_c ? toCelsius(Number(v.heat_max_c)) : null,
       notes: v.notes?.trim() || null,
       ...Object.fromEntries(CROP_MONTHS.map((key) => [key, [...this._cropMonthsState[key]].sort((a, b) => a - b)])),
     };
@@ -6195,7 +6224,7 @@ class HomesteadPanel extends HTMLElement {
         return h(
           "div",
           { className: "alert-line" },
-          `${this.t(`al_${a.kind}`, { when: when(a), value: a.value })}${names.length && !everyone ? ` — ${names.slice(0, 5).join(", ")}` : ""}`,
+          `${this.t(`al_${a.kind}`, { when: when(a), value: deg(a.value) })}${names.length && !everyone ? ` — ${names.slice(0, 5).join(", ")}` : ""}`,
         );
       }),
     );
@@ -6249,14 +6278,14 @@ class HomesteadPanel extends HTMLElement {
         { className: `day-col${dayAlerts.length ? " alert" : ""}${day.date === now ? " today" : ""}` },
         h("div", { className: "day-name" }, `${weekday.format(new Date(`${day.date}T12:00:00`)).replace(".", "")} ${Number(day.date.slice(8))}`),
         h("div", { className: "wx" }, this._weatherIcon(day)),
-        h("div", { className: "t-max" }, `${day.t_max != null ? Math.round(day.t_max) : "–"}°`),
-        h("div", { className: "sub" }, `${day.t_min != null ? Math.round(day.t_min) : "–"}°`),
-        h("div", { className: "sub rain" }, day.rain_mm ? `${Math.round(day.rain_mm)} mm` : ""),
+        h("div", { className: "t-max" }, `${day.t_max != null ? deg(day.t_max) : "–"}°`),
+        h("div", { className: "sub" }, `${day.t_min != null ? deg(day.t_min) : "–"}°`),
+        h("div", { className: "sub rain" }, day.rain_mm ? rainText(day.rain_mm) : ""),
         h(
           "div",
           { className: "day-chips" },
           dayAlerts.map((a) =>
-            h("span", { className: `alert-chip ${a.kind}`, title: this.t(`al_${a.kind}`, { when: this._date(a.start, false), value: a.value }) }, alertIcon[a.kind]),
+            h("span", { className: `alert-chip ${a.kind}`, title: this.t(`al_${a.kind}`, { when: this._date(a.start, false), value: deg(a.value) }) }, alertIcon[a.kind]),
           ),
           due.map((t) => {
             const verdict = advice[t.id];
@@ -6534,7 +6563,7 @@ class HomesteadPanel extends HTMLElement {
           ofYear.map((x) => {
             const from = this._yearFraction(x.start);
             const to = this._yearFraction(x.end.startsWith(year) ? x.end : `${year}-12-31`);
-            const title = `${extremeIcon[x.kind]} ${this.t(`xt_${x.kind}`)} ${this._date(x.start, false)}${x.end !== x.start ? `–${this._date(x.end, false)}` : ""}${x.value != null ? ` (${x.value}${x.kind === "heavy_rain" ? " mm" : " °C"})` : ""}`;
+            const title = `${extremeIcon[x.kind]} ${this.t(`xt_${x.kind}`)} ${this._date(x.start, false)}${x.end !== x.start ? `–${this._date(x.end, false)}` : ""}${x.value != null ? ` (${x.kind === "heavy_rain" ? rainText(x.value) : `${deg(x.value)} ${UNITS.imperial ? "°F" : "°C"}`})` : ""}`;
             return h("span", { className: "tl-mark", title, style: `left:${from * 100}%;min-width:${Math.max((to - from) * 100, 0)}%;border-color:${extremeColor[x.kind]}` }, extremeIcon[x.kind]);
           }),
         ),
@@ -6685,7 +6714,10 @@ class HomesteadPanel extends HTMLElement {
     const tiles = years.map((year) => {
       const indices = rows.map((row) => row.years[year]?.index).filter((v) => v != null);
       const index = indices.length ? indices.reduce((a, b) => a + b, 0) / indices.length : null;
-      const kg = rows.filter((row) => row.unit === "kg").reduce((sum, row) => sum + (row.years[year]?.total || 0), 0);
+      // Weight of the year in the user's unit: kg and lb rows together.
+      const toKg = { kg: 1, lb: 0.4536, oz: 0.02835 };
+      const kgTotal = rows.filter((row) => toKg[row.unit]).reduce((sum, row) => sum + (row.years[year]?.total || 0) * toKg[row.unit], 0);
+      const kg = UNITS.imperial ? Math.round((kgTotal / 0.4536) * 10) / 10 : Math.round(kgTotal * 10) / 10;
       const money = this._data.expenses.filter((e) => e.spent_on.startsWith(year));
       const balance = money.reduce((sum, e) => sum + (e.income ? e.amount : -e.amount), 0);
       const tone = this._tone(index);
@@ -6693,7 +6725,7 @@ class HomesteadPanel extends HTMLElement {
         "div",
         { className: "an-tile" },
         h("div", { className: "an-tile-head" }, h("strong", {}, year), tone ? h("span", { className: `an-badge ${tone}` }, this.t(`an_${tone}`)) : null),
-        h("div", { className: "sub" }, `${index != null ? `${this.t("anIndex")} ${index.toFixed(2).replace(".", ",")}` : ""}${index != null && kg ? " · " : ""}${kg ? this._quantity(kg, "kg") : ""}`),
+        h("div", { className: "sub" }, `${index != null ? `${this.t("anIndex")} ${index.toFixed(2).replace(".", ",")}` : ""}${index != null && kg ? " · " : ""}${kg ? this._quantity(kg, UNITS.imperial ? "lb" : "kg") : ""}`),
         money.length ? h("div", { className: "sub" }, `${this.t("balance")} ${balance >= 0 ? "+" : ""}${this._money(balance)}`) : null,
         h("div", { className: "sub" }, weatherText(weatherOf(year))),
       );
@@ -7929,12 +7961,12 @@ function commonsThumb(file, width) {
 
 function weatherText(w) {
   const parts = [];
-  if (w.t_mean != null) parts.push(`🌡️ ${Math.round(w.t_mean)}°${w.t_min != null ? ` (${Math.round(w.t_min)}–${Math.round(w.t_max)})` : ""}`);
+  if (w.t_mean != null) parts.push(`🌡️ ${deg(w.t_mean)}°${w.t_min != null ? ` (${deg(w.t_min)}–${deg(w.t_max)})` : ""}`);
   if (w.rh_mean != null) parts.push(`💧 ${Math.round(w.rh_mean)}%`);
-  if (w.rain_mm != null) parts.push(`🌧️ ${w.rain_mm} mm`);
+  if (w.rain_mm != null) parts.push(`🌧️ ${rainText(w.rain_mm)}`);
   const soil = [
     w.soil_mean != null ? `${Math.round(w.soil_mean)}%` : null,
-    w.soil_t_mean != null ? `${Math.round(w.soil_t_mean)}°` : null,
+    w.soil_t_mean != null ? `${deg(w.soil_t_mean)}°` : null,
     w.ec_mean != null ? `EC ${Math.round(w.ec_mean)}` : null,
   ].filter(Boolean);
   if (soil.length) parts.push(`🌱 ${soil.join(" ")}`);
@@ -8053,7 +8085,32 @@ function rad(deg) {
 
 function formatArea(m2) {
   if (m2 == null) return "";
+  if (UNITS.imperial) {
+    const acres = m2 / 4046.856;
+    return acres >= 0.25 ? `${acres.toFixed(2)} ac` : `${Math.round(m2 * 10.7639)} ft²`;
+  }
   return m2 >= 10000 ? `${(m2 / 10000).toFixed(2)} ha` : `${Math.round(m2)} m²`;
+}
+
+/** Temperature in the user's units (data is in °C): a rounded number, the text says °C or °F. */
+function deg(celsius) {
+  return celsius == null ? null : Math.round(UNITS.imperial ? (celsius * 9) / 5 + 32 : celsius);
+}
+
+/** A temperature typed by the user, back to °C (to the half degree). */
+function toCelsius(value) {
+  return UNITS.imperial ? Math.round(((value - 32) * 5) / 9 * 2) / 2 : value;
+}
+
+function rainText(mm) {
+  if (mm == null) return "";
+  if (!UNITS.imperial) return `${Math.round(mm * 10) / 10} mm`;
+  const inches = mm / 25.4;
+  return `${inches < 1 ? inches.toFixed(2) : inches.toFixed(1)} in`;
+}
+
+function lengthText(cm) {
+  return UNITS.imperial ? `${Math.round(cm / 2.54)} in` : `${cm} cm`;
 }
 
 customElements.define("homestead-panel", HomesteadPanel);

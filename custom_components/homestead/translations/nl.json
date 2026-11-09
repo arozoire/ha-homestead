@@ -31,12 +31,14 @@
           "heat_night": "Hittegolf: nachtminimum vanaf",
           "heat_days": "Hittegolf: dagen achter elkaar",
           "heat_extreme": "Extreme hitte: maximum vanaf (ook één dag)",
-          "photo_media": "Map voor de originele foto's"
+          "photo_media": "Map voor de originele foto's",
+          "units": "Eenheden"
         },
         "data_description": {
           "photo_media": "HA-mediamap waar het fotoplan de originelen ongecomprimeerd bewaart. Een NAS toegevoegd via Instellingen → Systeem → Opslag verschijnt hier.",
           "soil_temperature_sensor": "Optioneel: bodemtemperatuur in het dagboekweer en een controle vóór buiten zaaien of uitplanten (een bodemsonde zoals de Ecowitt WH52).",
-          "soil_ec_sensor": "Optioneel: elektrische geleidbaarheid van de bodem (zouten, mest), vastgelegd met het dagboekweer."
+          "soil_ec_sensor": "Optioneel: elektrische geleidbaarheid van de bodem (zouten, mest), vastgelegd met het dagboekweer.",
+          "units": "Auto: zoals Home Assistant (Instellingen → Systeem → Algemeen). Imperiaal toont °F, inch, voet, acres, pond en gallon; de gegevens blijven metrisch opgeslagen."
         }
       }
     }
@@ -218,7 +220,10 @@
         "l": "Liter",
         "q": "Kwintalen (100 kg)",
         "stere": "Stère",
-        "m3": "Kubieke meter"
+        "m3": "Kubieke meter",
+        "lb": "Pond (lb)",
+        "oz": "Ounce (oz)",
+        "gal": "Gallon (gal)"
       }
     },
     "abundance": {
@@ -279,6 +284,13 @@
         "off": "Uit (alleen in het paneel)",
         "tasks": "Alleen met een geplande activiteit op die dagen",
         "always": "Altijd"
+      }
+    },
+    "units": {
+      "options": {
+        "auto": "Zoals Home Assistant",
+        "metric": "Metrisch (°C, mm, m, kg, l)",
+        "imperial": "Imperiaal (°F, in, ft, lb, gal)"
       }
     }
   },

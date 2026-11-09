@@ -106,6 +106,7 @@ Mappe: satellite **Esri World Imagery** (gratuito, senza account né pubblicità
 | **Allerte gelo e caldo sui telefoni** | solo con un'attività prevista in quei giorni |
 | Ondata di calore: massima / minima notturna / giorni di fila | 35 °C / 22 °C / 3 |
 | Caldo estremo: massima (anche un giorno) | 40 °C |
+| **Unità**: come Home Assistant, metriche o imperiali (°F, pollici, piedi, acri, lb/oz, galloni; i dati restano salvati in metrico, le soglie di caldo qui sopra appaiono in °F) | come Home Assistant |
 
 Ogni giorno, all'ora scelta, arriva una notifica per ogni attività prevista oggi (più un riepilogo delle attività in ritardo). **Toccandola** si apre il pannello sul form del diario già compilato; il pulsante **✔ Fatto** la registra subito nel diario.
 

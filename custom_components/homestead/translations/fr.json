@@ -31,12 +31,14 @@
           "heat_night": "Canicule : minimale nocturne à partir de",
           "heat_days": "Canicule : jours de suite",
           "heat_extreme": "Chaleur extrême : maximale à partir de (même un seul jour)",
-          "photo_media": "Dossier des photos originales"
+          "photo_media": "Dossier des photos originales",
+          "units": "Unités"
         },
         "data_description": {
           "photo_media": "Dossier média de HA où le plan photo garde les originaux, sans compression. Un NAS ajouté dans Paramètres → Système → Stockage apparaît ici.",
           "soil_temperature_sensor": "Facultatif : température du sol dans la météo du journal, et contrôle avant de semer en pleine terre ou de repiquer (une sonde comme l'Ecowitt WH52).",
-          "soil_ec_sensor": "Facultatif : conductivité électrique du sol (sels, engrais), notée avec la météo du journal."
+          "soil_ec_sensor": "Facultatif : conductivité électrique du sol (sels, engrais), notée avec la météo du journal.",
+          "units": "Auto : comme Home Assistant (Paramètres → Système → Général). Impérial affiche °F, pouces, pieds, acres, livres et gallons ; les données restent enregistrées en métrique."
         }
       }
     }
@@ -218,7 +220,10 @@
         "l": "Litres",
         "q": "Quintaux (100 kg)",
         "stere": "Stères",
-        "m3": "Mètres cubes"
+        "m3": "Mètres cubes",
+        "lb": "Livres (lb)",
+        "oz": "Onces (oz)",
+        "gal": "Gallons (gal)"
       }
     },
     "abundance": {
@@ -279,6 +284,13 @@
         "off": "Désactivées (panneau seulement)",
         "tasks": "Seulement avec une activité prévue ces jours-là",
         "always": "Toujours"
+      }
+    },
+    "units": {
+      "options": {
+        "auto": "Comme Home Assistant",
+        "metric": "Métrique (°C, mm, m, kg, l)",
+        "imperial": "Impérial (°F, in, ft, lb, gal)"
       }
     }
   },

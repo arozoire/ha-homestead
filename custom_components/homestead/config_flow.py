@@ -36,11 +36,13 @@ from .const import (
     CONF_SOIL_EC,
     CONF_SOIL_TEMP,
     CONF_TEMPERATURE,
+    CONF_UNITS,
     CONF_WEATHER_ENTITY,
     DEFAULT_ALERT_NOTIFY,
     DEFAULT_NOTIFY_TIME,
     DOMAIN,
 )
+from .units import IMPERIAL, UNIT_CHOICES, c_to_f, f_to_c, resolve_units
 
 SENSORS = {
     CONF_TEMPERATURE: "temperature",
@@ -52,10 +54,16 @@ SENSORS = {
 }
 
 
-def _degrees(low: int, high: int) -> NumberSelector:
+HEAT_FIELDS = {CONF_HEAT_MAX: (35, 25, 50), CONF_HEAT_NIGHT: (22, 10, 35), CONF_HEAT_EXTREME: (40, 30, 55)}
+
+
+def _degrees(low: float, high: float, imperial: bool) -> NumberSelector:
+    unit = "°F" if imperial else "°C"
+    if imperial:
+        low, high = round(c_to_f(low)), round(c_to_f(high))
     return NumberSelector(
         NumberSelectorConfig(
-            min=low, max=high, step=0.5, unit_of_measurement="°C", mode=NumberSelectorMode.BOX
+            min=low, max=high, step=0.5, unit_of_measurement=unit, mode=NumberSelectorMode.BOX
         )
     )
 
@@ -85,8 +93,25 @@ class HomesteadOptionsFlow(OptionsFlow):
         )
 
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        # Heat thresholds are stored in °C and shown in the units of the moment.
+        imperial = resolve_units(self.hass, dict(self.config_entry.options)) == IMPERIAL
         if user_input is not None:
-            return self.async_create_entry(data=user_input)
+            data = dict(user_input)
+            if imperial:
+                for key in HEAT_FIELDS:
+                    if data.get(key) is not None:
+                        data[key] = round(f_to_c(data[key]) * 2) / 2
+            return self.async_create_entry(data=data)
+        shown = dict(self.config_entry.options)
+        if imperial:
+            for key in HEAT_FIELDS:
+                if shown.get(key) is not None:
+                    shown[key] = round(c_to_f(shown[key]))
+
+        def heat(key: str) -> vol.Optional:
+            default = HEAT_FIELDS[key][0]
+            return vol.Optional(key, default=round(c_to_f(default)) if imperial else default)
+
         schema = vol.Schema(
             {
                 **{
@@ -115,12 +140,17 @@ class HomesteadOptionsFlow(OptionsFlow):
                         mode=SelectSelectorMode.LIST,
                     )
                 ),
-                vol.Optional(CONF_HEAT_MAX, default=35): _degrees(25, 50),
-                vol.Optional(CONF_HEAT_NIGHT, default=22): _degrees(10, 35),
+                vol.Optional(CONF_UNITS, default="auto"): SelectSelector(
+                    SelectSelectorConfig(
+                        options=list(UNIT_CHOICES), translation_key="units", mode=SelectSelectorMode.DROPDOWN
+                    )
+                ),
+                heat(CONF_HEAT_MAX): _degrees(25, 50, imperial),
+                heat(CONF_HEAT_NIGHT): _degrees(10, 35, imperial),
                 vol.Optional(CONF_HEAT_DAYS, default=3): NumberSelector(
                     NumberSelectorConfig(min=1, max=10, step=1, mode=NumberSelectorMode.BOX)
                 ),
-                vol.Optional(CONF_HEAT_EXTREME, default=40): _degrees(30, 55),
+                heat(CONF_HEAT_EXTREME): _degrees(30, 55, imperial),
                 # Where the originals of the photo plan go: any HA media folder (a NAS added as storage).
                 vol.Optional(CONF_PHOTO_MEDIA, default="local"): SelectSelector(
                     SelectSelectorConfig(
@@ -132,5 +162,5 @@ class HomesteadOptionsFlow(OptionsFlow):
             }
         )
         return self.async_show_form(
-            step_id="init", data_schema=self.add_suggested_values_to_schema(schema, self.config_entry.options)
+            step_id="init", data_schema=self.add_suggested_values_to_schema(schema, shown)
         )

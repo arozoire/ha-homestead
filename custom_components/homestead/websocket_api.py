@@ -33,6 +33,7 @@ from .models import HomesteadData, Photo
 from .photos import MAX_PHOTO_BYTES, delete_all, image_type, photo_dir, photo_roots, write_photo
 from .species import SourcesUnavailable, combine, search_local, search_remote
 from .store import get_store
+from .units import resolve_units
 
 SEARCH_CACHE = f"{DOMAIN}_species_cache"
 SEARCH_CACHE_TTL_S = 24 * 3600
@@ -50,6 +51,7 @@ def async_register_websocket(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, ws_photo_upload)
     websocket_api.async_register_command(hass, ws_photo_storage)
     websocket_api.async_register_command(hass, ws_soil_sensors)
+    websocket_api.async_register_command(hass, ws_units)
     websocket_api.async_register_command(hass, ws_search_species)
     websocket_api.async_register_command(hass, ws_crop_defaults)
     websocket_api.async_register_command(hass, ws_outlook_subscribe)
@@ -300,6 +302,16 @@ def ws_photo_storage(
         media = "local"
     result = {"media": media, "path": str(photo_dir(hass, media)), "folders": list(hass.config.media_dirs)}
     connection.send_result(msg["id"], result)
+
+
+@websocket_api.websocket_command({vol.Required("type"): "homestead/units"})
+@callback
+def ws_units(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
+    """Metric or imperial, as chosen in the options (auto = as Home Assistant)."""
+    entries = hass.config_entries.async_entries(DOMAIN)
+    connection.send_result(
+        msg["id"], {"system": resolve_units(hass, dict(entries[0].options) if entries else {})}
+    )
 
 
 @websocket_api.websocket_command({vol.Required("type"): "homestead/soil"})
