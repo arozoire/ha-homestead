@@ -666,5 +666,11 @@
  "toolCostTotal": "{total} insgesamt · {year} pro Jahr",
  "toolExpenses": "Ausgaben für dieses Gerät",
  "noToolExpenses": "Noch keine verknüpften Ausgaben.",
- "addToolExpense": "Ausgabe hinzufügen"
+ "addToolExpense": "Ausgabe hinzufügen",
+ "soil_moisture_entity": "Bodenfeuchtesensor",
+ "soil_temperature_entity": "Bodentemperatursensor",
+ "soil_ec_entity": "Boden-EC-Sensor",
+ "soilInherited": "— von der Zone darüber oder aus den Optionen —",
+ "soilSensors": "Bodensensoren dieser Zone",
+ "soilSensorsHint": "Leer: die Sensoren der Zone darüber, sonst die allgemeinen aus den Optionen. Für den Boden jetzt, die Prüfungen bei Aussaat und Umpflanzen und das Wetter der Ereignisse dieser Zone."
 }

@@ -666,5 +666,11 @@
  "toolCostTotal": "{total} in total · {year} a year",
  "toolExpenses": "Expenses for this tool",
  "noToolExpenses": "No expenses linked yet.",
- "addToolExpense": "Add an expense"
+ "addToolExpense": "Add an expense",
+ "soil_moisture_entity": "Soil moisture sensor",
+ "soil_temperature_entity": "Soil temperature sensor",
+ "soil_ec_entity": "Soil EC sensor",
+ "soilInherited": "— from the zone above or the options —",
+ "soilSensors": "Soil sensors of this zone",
+ "soilSensorsHint": "Empty: the sensors of the zone above, otherwise the general ones in the options. Used for the soil now, the sowing and transplant checks and the weather of this zone's events."
 }

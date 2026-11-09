@@ -666,5 +666,11 @@
  "toolCostTotal": "{total} au total · {year} par an",
  "toolExpenses": "Dépenses de cet outil",
  "noToolExpenses": "Aucune dépense liée.",
- "addToolExpense": "Ajouter une dépense"
+ "addToolExpense": "Ajouter une dépense",
+ "soil_moisture_entity": "Capteur d'humidité du sol",
+ "soil_temperature_entity": "Capteur de température du sol",
+ "soil_ec_entity": "Capteur EC du sol",
+ "soilInherited": "— de la zone au-dessus ou des options —",
+ "soilSensors": "Capteurs du sol de cette zone",
+ "soilSensorsHint": "Vide : les capteurs de la zone au-dessus, sinon ceux des options. Utilisés pour le sol maintenant, les contrôles de semis et de repiquage et la météo des événements de cette zone."
 }

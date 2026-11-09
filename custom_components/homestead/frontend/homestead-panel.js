@@ -22,6 +22,11 @@ async function loadTexts(lang) {
 }
 
 const EXPENSE_CATEGORIES = ["plants", "seeds", "tools", "fertilizers", "treatments", "water", "services", "sales", "animals", "other"];
+const SOIL_SENSOR_FIELDS = [
+  ["moisture", "soil_moisture_entity"],
+  ["temperature", "soil_temperature_entity"],
+  ["ec", "soil_ec_entity"],
+];
 const EVENT_ICONS = {
   pruning: "✂️",
   fertilizing: "🌿",
@@ -1127,6 +1132,7 @@ class HomesteadPanel extends HTMLElement {
       parent_id: values.parent_id || null,
       species: this._zoneForm.species || [],
       notes: values.notes?.trim() || null,
+      ...Object.fromEntries(SOIL_SENSOR_FIELDS.map(([, attr]) => [attr, values[attr] || null])),
     };
     const id = this._zoneForm.id;
     if (id) {
@@ -2861,7 +2867,7 @@ class HomesteadPanel extends HTMLElement {
     const later = this._data.tasks.filter((t) => !t.done_on && t.due_on > week).length;
     return [
       this._weatherStrip(),
-      this._soilLine(),
+      ...this._soilLines(),
       this._alertsBox(),
       this._todoBox(soon, null, h("button", { type: "button", onclick: () => this._openTask({ kind: "note", due_on: today() }) }, this.t("addTask"))),
       later ? h("button", { type: "button", className: "link todo-later", onclick: () => this._setTab("calendar") }, this.t("todoLater", { count: later })) : null,
@@ -3250,7 +3256,7 @@ class HomesteadPanel extends HTMLElement {
       const lot = lots.find((x) => x.id === lotSelect.value);
       // Outdoors only: in a nursery or indoors the seed sits on a heated mat, not in this ground.
       const outdoors = !["nursery", "indoor"].includes(this._zoneFamily({ zone_id: zoneSelect.value }) || this._zone(zoneSelect.value)?.kind);
-      soil.textContent = outdoors ? this._soilCheck(lot ? lot.species : species.value) : "";
+      soil.textContent = outdoors ? this._soilCheck(lot ? lot.species : species.value, zoneSelect.value) : "";
       soil.hidden = !soil.textContent;
       speciesLabel.hidden = !!lot;
       const name = lot ? lot.species : species.value;
@@ -3459,13 +3465,30 @@ class HomesteadPanel extends HTMLElement {
   /** A cold night soon after planting out tender seedlings. */
   // ----- soil sensors (options): moisture, temperature, EC, read live from their states -----
 
-  _soilNow() {
+  /** Soil sensors of a zone: each from the zone itself, then its parents, then the general ones in the options. */
+  _soilSensorsFor(zoneId, ownOnly = false) {
+    const out = ownOnly ? {} : { ...(this._soilSensors || {}) };
+    const own = {};
+    const seen = new Set();
+    for (let z = this._zone(zoneId); z && !seen.has(z.id); z = this._zone(z.parent_id)) {
+      seen.add(z.id);
+      for (const [name, attr] of SOIL_SENSOR_FIELDS) if (!own[name] && z[attr]) own[name] = z[attr];
+    }
+    return { ...out, ...own };
+  }
+
+  _zoneHasSoil(zoneId) {
+    const z = this._zone(zoneId);
+    return !!z && SOIL_SENSOR_FIELDS.some(([, attr]) => z[attr]);
+  }
+
+  _soilNow(zoneId = null, ownOnly = false) {
     const read = (id) => {
       const state = id && this._hass.states[id];
       const value = state ? Number(state.state) : NaN;
       return Number.isFinite(value) ? { value, unit: state.attributes?.unit_of_measurement || "" } : null;
     };
-    const sensors = this._soilSensors || {};
+    const sensors = this._soilSensorsFor(zoneId, ownOnly);
     return { temperature: read(sensors.temperature), moisture: read(sensors.moisture), ec: read(sensors.ec) };
   }
 
@@ -3474,19 +3497,25 @@ class HomesteadPanel extends HTMLElement {
   }
 
   /** "🌱 Soil now: 11.2 °C · 34 % · EC 420 µS/cm" under the weather of the Diary. */
-  _soilLine() {
-    const soil = this._soilNow();
+  /** Diary: the general sensors, then one line per zone with its own. */
+  _soilLines() {
+    const zones = this._data.zones.filter((z) => this._zoneHasSoil(z.id)).sort((a, b) => a.name.localeCompare(b.name));
+    return [this._soilLine(), ...zones.map((z) => this._soilLine(z.id, z.name, true))].filter(Boolean);
+  }
+
+  _soilLine(zoneId = null, label = null, ownOnly = false) {
+    const soil = this._soilNow(zoneId, ownOnly);
     const parts = [
       soil.temperature ? `${this._number(soil.temperature.value)} ${soil.temperature.unit || "°C"}` : null,
       soil.moisture ? `${this._number(soil.moisture.value, 0)} ${soil.moisture.unit || "%"}` : null,
       soil.ec ? `EC ${this._number(soil.ec.value, 0)} ${soil.ec.unit}`.trim() : null,
     ].filter(Boolean);
-    return parts.length ? h("p", { className: "soil-now" }, `🌱 ${this.t("soilNow")}: ${parts.join(" · ")}`) : null;
+    return parts.length ? h("p", { className: "soil-now" }, `🌱 ${label ? `${label} · ` : ""}${this.t("soilNow")}: ${parts.join(" · ")}`) : null;
   }
 
   /** Soil temperature now against the minimum of the crop (sowing outdoors, planting out). */
-  _soilCheck(species) {
-    const now = this._soilNow().temperature;
+  _soilCheck(species, zoneId = null) {
+    const now = this._soilNow(zoneId).temperature;
     const min = species ? this._crop(species)?.min_soil_c : null;
     if (!now || min == null) return "";
     const vars = { now: this._number(now.value), min: this._number(min) };
@@ -3512,10 +3541,12 @@ class HomesteadPanel extends HTMLElement {
     const p = f.planting;
     const note = h("div", { className: "expect" });
     const cold = h("div", { className: "alert-line" });
-    const soil = h("div", { className: "alert-line" }, this._soilCheck(p.species));
+    const soil = h("div", { className: "alert-line" }, this._soilCheck(p.species, f.zone_id));
     soil.hidden = !soil.textContent;
     let form = null;
     const update = () => {
+      soil.textContent = this._soilCheck(p.species, form?.elements.zone_id.value || f.zone_id);
+      soil.hidden = !soil.textContent;
       const moved = Math.min(p.quantity, Math.max(1, Number(form?.elements.quantity.value ?? f.quantity)));
       const left = p.quantity - moved;
       note.textContent = left ? this.t("tpLeft", { moved, left }) : this.t("tpAllNote", { count: p.quantity });
@@ -7437,6 +7468,41 @@ class HomesteadPanel extends HTMLElement {
     this.shadowRoot.append(overlay);
   }
 
+  /** Soil sensors of the zone (a WH52 in the bed), folded: empty = the zone above or the general ones. */
+  _zoneSoilFields(z) {
+    const sensors = Object.entries(this._hass.states).filter(([id]) => id.startsWith("sensor."));
+    const fits = {
+      moisture: ([, st]) => ["moisture", "humidity"].includes(st.attributes?.device_class),
+      temperature: ([, st]) => st.attributes?.device_class === "temperature",
+      ec: ([, st]) => st.attributes?.device_class === "conductivity" || /S\/cm/.test(st.attributes?.unit_of_measurement || ""),
+    };
+    const select = (name, attr) => {
+      const matching = sensors.filter(fits[name]);
+      const list = (matching.length ? matching : sensors).filter(([id]) => id !== z[attr]);
+      const label = ([id, st]) => `${st.attributes?.friendly_name || id}${st.attributes?.unit_of_measurement ? ` (${st.attributes.unit_of_measurement})` : ""}`;
+      const current = z[attr] ? [[z[attr], this._hass.states[z[attr]] || { attributes: {} }]] : [];
+      return h(
+        "label",
+        {},
+        this.t(attr),
+        h(
+          "select",
+          { name: attr },
+          h("option", { value: "" }, this.t("soilInherited")),
+          [...current, ...list.sort((a, b) => label(a).localeCompare(label(b)))].map((entry) => h("option", { value: entry[0], selected: entry[0] === z[attr] }, label(entry))),
+        ),
+      );
+    };
+    const own = SOIL_SENSOR_FIELDS.filter(([, attr]) => z[attr]).length;
+    return h(
+      "details",
+      { className: "care-notes", open: own > 0 },
+      h("summary", {}, `🌱 ${this.t("soilSensors")}${own ? ` · ${own}` : ""}`),
+      h("p", { className: "hint" }, this.t("soilSensorsHint")),
+      SOIL_SENSOR_FIELDS.map(([name, attr]) => select(name, attr)),
+    );
+  }
+
   _renderZoneForm() {
     const z = this._zoneForm;
     const exclude = z.id ? new Set([z.id, ...this._zoneDescendants(z.id)]) : new Set();
@@ -7450,6 +7516,7 @@ class HomesteadPanel extends HTMLElement {
     // Hen house and compost: the daily things first, the zone settings below.
     const first = ["compost", "coop"].includes(z.kind);
     return [
+      z.id && this._zoneHasSoil(z.id) ? this._soilLine(z.id) : null,
       first ? box : null,
       h(
         "form",
@@ -7463,6 +7530,7 @@ class HomesteadPanel extends HTMLElement {
           this._selectField(z, "parent_id", this._zoneOptions(exclude)),
         ),
         essences,
+        ["compost", "coop"].includes(z.kind) ? null : this._zoneSoilFields(z),
         this._notes(z),
         area ? h("div", { className: "hint" }, `${this.t("surface")}: ${area}`) : null,
         h(
@@ -7488,6 +7556,7 @@ class HomesteadPanel extends HTMLElement {
     ];
   }
 }
+
 
 function capitalize(text) {
   return text ? text[0].toUpperCase() + text.slice(1) : "";

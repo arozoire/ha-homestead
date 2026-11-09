@@ -42,6 +42,7 @@ REFERENCES = (
     ("seeds", "taxon_id", "taxa"),
     ("plantings", "seed_lot_id", "seeds"),
     ("plantings", "from_planting_id", "plantings"),
+    ("tasks", "plan_id", "photo_plans"),
 )
 
 
@@ -101,7 +102,11 @@ def read_backup(raw: Any) -> HomesteadData:
     for task in data.tasks.values():
         task.planting_ids = [i for i in task.planting_ids if i in data.plantings]
         task.seed_ids = [i for i in task.seed_ids if i in data.seeds]
+        task.zone_ids = [i for i in task.zone_ids if i in data.zones]
         task.done_ids = [i for i in task.done_ids if i in task.items]
+    for plan in data.photo_plans.values():
+        plan.zone_ids = [i for i in plan.zone_ids if i in data.zones]
+        plan.planting_ids = [i for i in plan.planting_ids if i in data.plantings]
     for zone in data.zones.values():
         for item in zone.species:
             if item["taxon_id"] not in data.taxa:

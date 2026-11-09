@@ -666,5 +666,11 @@
  "toolCostTotal": "{total} en total · {year} al año",
  "toolExpenses": "Gastos de esta herramienta",
  "noToolExpenses": "Ningún gasto vinculado.",
- "addToolExpense": "Añadir un gasto"
+ "addToolExpense": "Añadir un gasto",
+ "soil_moisture_entity": "Sensor de humedad del suelo",
+ "soil_temperature_entity": "Sensor de temperatura del suelo",
+ "soil_ec_entity": "Sensor de CE del suelo",
+ "soilInherited": "— de la zona superior o de las opciones —",
+ "soilSensors": "Sensores del suelo de esta zona",
+ "soilSensorsHint": "Vacío: los sensores de la zona superior, si no los generales de las opciones. Sirven para el suelo ahora, los controles de siembra y trasplante y el tiempo de los eventos de esta zona."
 }

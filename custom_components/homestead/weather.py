@@ -25,7 +25,7 @@ from .const import (
     CONF_SOIL_TEMP,
     CONF_TEMPERATURE,
 )
-from .models import NO_WEATHER_KINDS, is_indoor
+from .models import NO_WEATHER_KINDS, is_indoor, zone_soil_sensors
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -215,6 +215,18 @@ def _entry_options(hass: HomeAssistant) -> dict[str, Any]:
     return dict(entries[0].options) if entries else {}
 
 
+ZONE_SOIL_OPTIONS = {"moisture": CONF_SOIL, "temperature": CONF_SOIL_TEMP, "ec": CONF_SOIL_EC}
+
+
+def _event_options(store: Any, event: Any, options: dict[str, Any]) -> dict[str, Any]:
+    """The zone's own soil sensors (or its parents') replace the general ones for its events."""
+    zone_id = event.zone_id
+    if not zone_id and (planting := store.data.plantings.get(event.planting_id)):
+        zone_id = planting.zone_id
+    own = zone_soil_sensors(store.data, zone_id)
+    return {**options, **{ZONE_SOIL_OPTIONS[name]: entity for name, entity in own.items()}}
+
+
 def _indoor(store: Any, event: Any) -> bool:
     """Houseplants live at room temperature: no weather snapshot for them."""
     return bool(event.planting_id) and is_indoor(store.data, store.data.plantings.get(event.planting_id))
@@ -225,7 +237,12 @@ async def async_fill_event(hass: HomeAssistant, store: Any, event_id: str) -> bo
     event = store.data.events.get(event_id)
     if event is None or event.kind in NO_WEATHER_KINDS or _indoor(store, event):
         return False
-    snapshot = await async_snapshot(hass, _entry_options(hass), event.kind, date.fromisoformat(event.done_on))
+    snapshot = await async_snapshot(
+        hass,
+        _event_options(store, event, _entry_options(hass)),
+        event.kind,
+        date.fromisoformat(event.done_on),
+    )
     event = store.data.events.get(event_id)  # it may have been deleted meanwhile
     if event is None or snapshot is None or snapshot == event.weather:
         return False

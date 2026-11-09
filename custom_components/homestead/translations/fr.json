@@ -314,6 +314,18 @@
         "notes": {
           "name": "Notes",
           "description": "Notes libres."
+        },
+        "soil_moisture_entity": {
+          "name": "Capteur d'humidité du sol",
+          "description": "Capteur de cette zone ; il remplace le capteur général des options."
+        },
+        "soil_temperature_entity": {
+          "name": "Capteur de température du sol",
+          "description": "Capteur de cette zone ; il remplace le capteur général des options."
+        },
+        "soil_ec_entity": {
+          "name": "Capteur EC du sol",
+          "description": "Capteur de conductivité électrique de cette zone (un Ecowitt WH52, par exemple)."
         }
       }
     },
@@ -352,6 +364,18 @@
         "notes": {
           "name": "Notes",
           "description": "Notes libres."
+        },
+        "soil_moisture_entity": {
+          "name": "Capteur d'humidité du sol",
+          "description": "Capteur de cette zone ; il remplace le capteur général des options."
+        },
+        "soil_temperature_entity": {
+          "name": "Capteur de température du sol",
+          "description": "Capteur de cette zone ; il remplace le capteur général des options."
+        },
+        "soil_ec_entity": {
+          "name": "Capteur EC du sol",
+          "description": "Capteur de conductivité électrique de cette zone (un Ecowitt WH52, par exemple)."
         }
       }
     },

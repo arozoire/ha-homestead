@@ -666,5 +666,11 @@
  "toolCostTotal": "{total} in totaal · {year} per jaar",
  "toolExpenses": "Uitgaven voor dit gereedschap",
  "noToolExpenses": "Nog geen gekoppelde uitgaven.",
- "addToolExpense": "Uitgave toevoegen"
+ "addToolExpense": "Uitgave toevoegen",
+ "soil_moisture_entity": "Bodemvochtsensor",
+ "soil_temperature_entity": "Bodemtemperatuursensor",
+ "soil_ec_entity": "Bodem-EC-sensor",
+ "soilInherited": "— van de zone erboven of uit de opties —",
+ "soilSensors": "Bodemsensoren van deze zone",
+ "soilSensorsHint": "Leeg: de sensoren van de zone erboven, anders de algemene uit de opties. Gebruikt voor de bodem nu, de controles bij zaaien en verplanten en het weer van de gebeurtenissen van deze zone."
 }

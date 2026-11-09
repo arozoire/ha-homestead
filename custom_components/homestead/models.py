@@ -226,6 +226,11 @@ class Zone(_Record):
         self.area_m2 = polygon_area_m2(self.geometry)
         self.species = clean_species(self.species)
 
+    # Soil sensors of this zone (a WH52 in the bed): they win over the general ones in the options.
+    soil_moisture_entity: str | None = None
+    soil_temperature_entity: str | None = None
+    soil_ec_entity: str | None = None
+
 
 def clean_species(value: Any) -> list[dict[str, Any]]:
     """Names (or {"name", "taxon_id"}) without blanks or duplicates."""
@@ -639,6 +644,26 @@ def zone_kind(data: HomesteadData, zone_id: str | None) -> str | None:
         seen.add(zone_id)
         zone_id = zone.parent_id
     return None
+
+
+SOIL_SENSOR_FIELDS = {
+    "moisture": "soil_moisture_entity",
+    "temperature": "soil_temperature_entity",
+    "ec": "soil_ec_entity",
+}
+
+
+def zone_soil_sensors(data: HomesteadData, zone_id: str | None) -> dict[str, str]:
+    """Soil sensors of a zone, each one taken from the closest zone (itself, then its parents) that has it."""
+    found: dict[str, str] = {}
+    seen: set[str] = set()
+    while zone_id and zone_id not in seen and (zone := data.zones.get(zone_id)):
+        for name, attr in SOIL_SENSOR_FIELDS.items():
+            if name not in found and getattr(zone, attr):
+                found[name] = getattr(zone, attr)
+        seen.add(zone_id)
+        zone_id = zone.parent_id
+    return found
 
 
 def is_indoor(data: HomesteadData, planting: Planting | None) -> bool:

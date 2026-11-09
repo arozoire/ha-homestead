@@ -20,6 +20,7 @@ from .geo import validate_polygon
 from .models import (
     EVENT_COST_CATEGORY,
     PHOTO_PARTS,
+    SOIL_SENSOR_FIELDS,
     Abundance,
     CropProfile,
     DeathCause,
@@ -75,6 +76,7 @@ ADD_ZONE_SCHEMA = vol.Schema(
             [vol.Any(cv.string, {vol.Required("name"): cv.string, vol.Optional("taxon_id"): _opt_str})],
         ),
         vol.Optional("notes"): _opt_str,
+        **{vol.Optional(attr): vol.Any(None, cv.entity_id) for attr in SOIL_SENSOR_FIELDS.values()},
     }
 )
 
