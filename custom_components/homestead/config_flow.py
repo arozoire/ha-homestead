@@ -33,6 +33,8 @@ from .const import (
     CONF_PHOTO_MEDIA,
     CONF_RAIN,
     CONF_SOIL,
+    CONF_SOIL_EC,
+    CONF_SOIL_TEMP,
     CONF_TEMPERATURE,
     CONF_WEATHER_ENTITY,
     DEFAULT_ALERT_NOTIFY,
@@ -45,6 +47,8 @@ SENSORS = {
     CONF_HUMIDITY: "humidity",
     CONF_RAIN: "precipitation",
     CONF_SOIL: "moisture",
+    CONF_SOIL_TEMP: "temperature",
+    CONF_SOIL_EC: None,  # few integrations set a device class for conductivity
 }
 
 
@@ -88,6 +92,8 @@ class HomesteadOptionsFlow(OptionsFlow):
                 **{
                     vol.Optional(key): EntitySelector(
                         EntitySelectorConfig(domain="sensor", device_class=device_class)
+                        if device_class
+                        else EntitySelectorConfig(domain="sensor")
                     )
                     for key, device_class in SENSORS.items()
                 },

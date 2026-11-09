@@ -657,5 +657,9 @@
  "photoComparePick": "Tik op twee foto's…",
  "photoCompare": "Vergelijken",
  "photoTimelapse": "Timelapse",
- "photoOriginal": "Origineel"
+ "photoOriginal": "Origineel",
+ "soilNow": "Bodem nu",
+ "soilCold": "Bodem op {now} °C: dit gewas heeft minstens {min} nodig",
+ "soilOk": "Bodem op {now} °C (minimaal {min} °C)",
+ "soilColdShort": "koude bodem ({now} < {min} °C)"
 }

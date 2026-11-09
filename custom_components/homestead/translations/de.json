@@ -20,6 +20,8 @@
           "humidity_sensor": "Außenluftfeuchte",
           "rain_sensor": "Regen (Summe, mm)",
           "soil_moisture_sensor": "Bodenfeuchte",
+          "soil_temperature_sensor": "Bodentemperatursensor",
+          "soil_ec_sensor": "Boden-EC-Sensor",
           "open_meteo": "Open-Meteo für fehlende Daten nutzen",
           "notify_services": "Erinnerungen senden an",
           "notify_time": "Uhrzeit der Erinnerungen",
@@ -32,7 +34,9 @@
           "photo_media": "Ordner für Originalfotos"
         },
         "data_description": {
-          "photo_media": "HA-Medienordner, in dem der Fotoplan die Originale unkomprimiert speichert. Ein unter Einstellungen → System → Speicher hinzugefügtes NAS erscheint hier."
+          "photo_media": "HA-Medienordner, in dem der Fotoplan die Originale unkomprimiert speichert. Ein unter Einstellungen → System → Speicher hinzugefügtes NAS erscheint hier.",
+          "soil_temperature_sensor": "Optional: Bodentemperatur im Tagebuchwetter und Prüfung vor Aussaat im Freiland oder Auspflanzen (ein Bodenfühler wie der Ecowitt WH52).",
+          "soil_ec_sensor": "Optional: elektrische Leitfähigkeit des Bodens (Salze, Dünger), mit dem Tagebuchwetter erfasst."
         }
       }
     }

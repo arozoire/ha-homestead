@@ -20,6 +20,8 @@
           "humidity_sensor": "Outdoor humidity",
           "rain_sensor": "Rain (total, mm)",
           "soil_moisture_sensor": "Soil moisture",
+          "soil_temperature_sensor": "Soil temperature sensor",
+          "soil_ec_sensor": "Soil EC sensor",
           "open_meteo": "Use Open-Meteo for missing data",
           "notify_services": "Send reminders to",
           "notify_time": "Reminder time",
@@ -32,7 +34,9 @@
           "photo_media": "Folder for the photo originals"
         },
         "data_description": {
-          "photo_media": "HA media folder where the photo plan keeps the originals, uncompressed. A NAS added in Settings → System → Storage shows up here."
+          "photo_media": "HA media folder where the photo plan keeps the originals, uncompressed. A NAS added in Settings → System → Storage shows up here.",
+          "soil_temperature_sensor": "Optional: soil temperature in the diary weather, and a check before sowing outdoors or planting out (a soil probe such as an Ecowitt WH52).",
+          "soil_ec_sensor": "Optional: electrical conductivity of the soil (salts, fertilizer), recorded with the diary weather."
         }
       }
     }

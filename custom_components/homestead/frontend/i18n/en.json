@@ -657,5 +657,9 @@
  "photoComparePick": "Tap two photos…",
  "photoCompare": "Compare",
  "photoTimelapse": "Timelapse",
- "photoOriginal": "Original"
+ "photoOriginal": "Original",
+ "soilNow": "Soil now",
+ "soilCold": "Soil at {now} °C: this crop needs at least {min}",
+ "soilOk": "Soil at {now} °C (minimum {min} °C)",
+ "soilColdShort": "cold soil ({now} < {min} °C)"
 }

@@ -20,6 +20,8 @@
           "humidity_sensor": "Luchtvochtigheid buiten",
           "rain_sensor": "Regen (totaal, mm)",
           "soil_moisture_sensor": "Bodemvochtigheid",
+          "soil_temperature_sensor": "Bodemtemperatuursensor",
+          "soil_ec_sensor": "Bodem-EC-sensor",
           "open_meteo": "Open-Meteo gebruiken voor ontbrekende gegevens",
           "notify_services": "Herinneringen sturen naar",
           "notify_time": "Tijd van de herinneringen",
@@ -32,7 +34,9 @@
           "photo_media": "Map voor de originele foto's"
         },
         "data_description": {
-          "photo_media": "HA-mediamap waar het fotoplan de originelen ongecomprimeerd bewaart. Een NAS toegevoegd via Instellingen → Systeem → Opslag verschijnt hier."
+          "photo_media": "HA-mediamap waar het fotoplan de originelen ongecomprimeerd bewaart. Een NAS toegevoegd via Instellingen → Systeem → Opslag verschijnt hier.",
+          "soil_temperature_sensor": "Optioneel: bodemtemperatuur in het dagboekweer en een controle vóór buiten zaaien of uitplanten (een bodemsonde zoals de Ecowitt WH52).",
+          "soil_ec_sensor": "Optioneel: elektrische geleidbaarheid van de bodem (zouten, mest), vastgelegd met het dagboekweer."
         }
       }
     }

@@ -657,5 +657,9 @@
  "photoComparePick": "Toca dos fotos…",
  "photoCompare": "Comparar",
  "photoTimelapse": "Timelapse",
- "photoOriginal": "Original"
+ "photoOriginal": "Original",
+ "soilNow": "Suelo ahora",
+ "soilCold": "Suelo a {now} °C: este cultivo necesita al menos {min}",
+ "soilOk": "Suelo a {now} °C (mínimo {min} °C)",
+ "soilColdShort": "suelo frío ({now} < {min} °C)"
 }

@@ -20,6 +20,8 @@
           "humidity_sensor": "Humidité extérieure",
           "rain_sensor": "Pluie (total, mm)",
           "soil_moisture_sensor": "Humidité du sol",
+          "soil_temperature_sensor": "Capteur de température du sol",
+          "soil_ec_sensor": "Capteur EC du sol",
           "open_meteo": "Utiliser Open-Meteo pour les données manquantes",
           "notify_services": "Envoyer les rappels à",
           "notify_time": "Heure des rappels",
@@ -32,7 +34,9 @@
           "photo_media": "Dossier des photos originales"
         },
         "data_description": {
-          "photo_media": "Dossier média de HA où le plan photo garde les originaux, sans compression. Un NAS ajouté dans Paramètres → Système → Stockage apparaît ici."
+          "photo_media": "Dossier média de HA où le plan photo garde les originaux, sans compression. Un NAS ajouté dans Paramètres → Système → Stockage apparaît ici.",
+          "soil_temperature_sensor": "Facultatif : température du sol dans la météo du journal, et contrôle avant de semer en pleine terre ou de repiquer (une sonde comme l'Ecowitt WH52).",
+          "soil_ec_sensor": "Facultatif : conductivité électrique du sol (sels, engrais), notée avec la météo du journal."
         }
       }
     }

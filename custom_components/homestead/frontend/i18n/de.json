@@ -657,5 +657,9 @@
  "photoComparePick": "Zwei Fotos antippen…",
  "photoCompare": "Vergleichen",
  "photoTimelapse": "Zeitraffer",
- "photoOriginal": "Original"
+ "photoOriginal": "Original",
+ "soilNow": "Boden jetzt",
+ "soilCold": "Boden bei {now} °C: diese Kultur braucht mindestens {min}",
+ "soilOk": "Boden bei {now} °C (mindestens {min} °C)",
+ "soilColdShort": "kalter Boden ({now} < {min} °C)"
 }

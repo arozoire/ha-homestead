@@ -21,6 +21,8 @@ from .const import (
     CONF_OPEN_METEO,
     CONF_RAIN,
     CONF_SOIL,
+    CONF_SOIL_EC,
+    CONF_SOIL_TEMP,
     CONF_TEMPERATURE,
 )
 from .models import NO_WEATHER_KINDS, is_indoor
@@ -41,7 +43,20 @@ DAILY = (
     "temperature_2m_mean,temperature_2m_min,temperature_2m_max,relative_humidity_2m_mean,precipitation_sum"
 )
 
-FIELDS = ("t_mean", "t_min", "t_max", "rh_mean", "rain_mm", "soil_mean")
+FIELDS = (
+    "t_mean",
+    "t_min",
+    "t_max",
+    "rh_mean",
+    "rain_mm",
+    "soil_mean",
+    "soil_t_mean",
+    "soil_t_min",
+    "soil_t_max",
+    "ec_mean",
+)
+# Only a sensor in the ground knows these: Open-Meteo is not asked for them.
+SOIL_FIELDS = frozenset({"soil_mean", "soil_t_mean", "soil_t_min", "soil_t_max", "ec_mean"})
 
 
 def window(kind: str, done_on: date) -> tuple[date, date]:
@@ -71,6 +86,12 @@ def summarize_statistics(
         out["rh_mean"] = _avg([r["mean"] for r in hum])
     if soil := usable(sensors.get(CONF_SOIL), "mean"):
         out["soil_mean"] = _avg([r["mean"] for r in soil])
+    if soil_t := usable(sensors.get(CONF_SOIL_TEMP), "mean"):
+        out["soil_t_mean"] = _avg([r["mean"] for r in soil_t])
+        out["soil_t_min"] = round(min(r.get("min", r["mean"]) for r in soil_t), 1)
+        out["soil_t_max"] = round(max(r.get("max", r["mean"]) for r in soil_t), 1)
+    if ec := usable(sensors.get(CONF_SOIL_EC), "mean"):
+        out["ec_mean"] = round(sum(r["mean"] for r in ec) / len(ec))
     if rain := usable(sensors.get(CONF_RAIN), "change"):
         out["rain_mm"] = round(sum(max(r["change"], 0) for r in rain), 1)
     return out
@@ -144,7 +165,7 @@ async def async_snapshot(
     last = min(end, today)
     sensors = {
         key: options[key]
-        for key in (CONF_TEMPERATURE, CONF_HUMIDITY, CONF_RAIN, CONF_SOIL)
+        for key in (CONF_TEMPERATURE, CONF_HUMIDITY, CONF_RAIN, CONF_SOIL, CONF_SOIL_TEMP, CONF_SOIL_EC)
         if options.get(key)
     }
     start_dt = dt_util.as_utc(datetime.combine(start, time.min, dt_util.get_default_time_zone()))
@@ -163,7 +184,7 @@ async def async_snapshot(
     if result:
         sources.append("sensors")
 
-    if options.get(CONF_OPEN_METEO, True) and any(f not in result for f in FIELDS if f != "soil_mean"):
+    if options.get(CONF_OPEN_METEO, True) and any(f not in result for f in FIELDS if f not in SOIL_FIELDS):
         try:
             remote = await _open_meteo(
                 async_get_clientsession(hass), hass.config.latitude, hass.config.longitude, start, end, today

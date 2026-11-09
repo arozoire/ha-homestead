@@ -17,7 +17,15 @@ from homeassistant.loader import async_get_integration
 from homeassistant.util import dt as dt_util
 
 from .backup import BackupError, make_backup, read_backup, summary
-from .const import CONF_PHOTO_MEDIA, DOMAIN, SIGNAL_DATA_UPDATED, SIGNAL_OUTLOOK_UPDATED
+from .const import (
+    CONF_PHOTO_MEDIA,
+    CONF_SOIL,
+    CONF_SOIL_EC,
+    CONF_SOIL_TEMP,
+    DOMAIN,
+    SIGNAL_DATA_UPDATED,
+    SIGNAL_OUTLOOK_UPDATED,
+)
 from .crops import GENUS_TYPES
 from .forecast import async_crop_defaults, get_outlook
 from .models import HomesteadData, Photo
@@ -38,6 +46,7 @@ def async_register_websocket(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, ws_reset)
     websocket_api.async_register_command(hass, ws_photo_upload)
     websocket_api.async_register_command(hass, ws_photo_storage)
+    websocket_api.async_register_command(hass, ws_soil_sensors)
     websocket_api.async_register_command(hass, ws_search_species)
     websocket_api.async_register_command(hass, ws_crop_defaults)
     websocket_api.async_register_command(hass, ws_outlook_subscribe)
@@ -255,3 +264,15 @@ def ws_photo_storage(
         media = "local"
     result = {"media": media, "path": str(photo_dir(hass, media)), "folders": list(hass.config.media_dirs)}
     connection.send_result(msg["id"], result)
+
+
+@websocket_api.websocket_command({vol.Required("type"): "homestead/soil"})
+@callback
+def ws_soil_sensors(
+    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]
+) -> None:
+    """The soil sensors chosen in the options (the panel reads their states): moisture, temperature, EC."""
+    entries = hass.config_entries.async_entries(DOMAIN)
+    options = entries[0].options if entries else {}
+    keys = {"moisture": CONF_SOIL, "temperature": CONF_SOIL_TEMP, "ec": CONF_SOIL_EC}
+    connection.send_result(msg["id"], {name: options.get(key) for name, key in keys.items()})
