@@ -96,3 +96,64 @@ async def test_zone_soil_sensors_by_service(hass: HomeAssistant) -> None:
         return_response=True,
     )
     assert store.data.zones[zone.id].soil_temperature_entity is None
+
+
+async def test_backup_zip_with_photos(hass: HomeAssistant, tmp_path, hass_client, hass_ws_client) -> None:
+    import io
+    import shutil
+    import zipfile
+
+    import aiohttp
+
+    from custom_components.homestead.const import CONF_PHOTO_MEDIA
+    from custom_components.homestead.photos import photo_dir
+
+    jpeg = b"\xff\xd8\xff\xe0" + b"\x01" * 2048
+    thumb = b"\xff\xd8\xff\xe0thumb"
+    hass.config.media_dirs = {"local": str(tmp_path / "local"), "nas": str(tmp_path / "nas")}
+    entry = MockConfigEntry(domain=DOMAIN, title="HA Homestead", options={CONF_PHOTO_MEDIA: "nas"})
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    call = hass.services.async_call
+    orto = (await call(DOMAIN, "add_zone", {"name": "Orto"}, blocking=True, return_response=True))["id"]
+    event = (
+        await call(
+            DOMAIN, "add_event", {"kind": "photo", "zone_id": orto}, blocking=True, return_response=True
+        )
+    )["id"]
+    client = await hass_client()
+    form = aiohttp.FormData()
+    form.add_field("event_id", event)
+    form.add_field("file", jpeg, filename="IMG.jpg", content_type="image/jpeg")
+    form.add_field("thumb", thumb, filename="t.jpg", content_type="image/jpeg")
+    photo_id = (await (await client.post("/api/homestead/photo/upload", data=form)).json())["id"]
+    photo = entry.runtime_data.data.photos[photo_id]
+
+    response = await client.get("/api/homestead/backup.zip")
+    assert response.status == 200 and response.headers["Content-Type"] == "application/zip"
+    content = await response.read()
+    with zipfile.ZipFile(io.BytesIO(content)) as archive:
+        assert archive.read(f"photos/nas/{photo.file}") == jpeg
+        assert archive.read(f"photos/nas/{photo.thumb}") == thumb
+        assert "backup.json" in archive.namelist()
+
+    # A new Home Assistant without the NAS: the photos come back into the local media folder.
+    shutil.rmtree(tmp_path / "nas")
+    hass.config.media_dirs = {"local": str(tmp_path / "local")}
+    entry.runtime_data.data.photos.clear()
+    form = aiohttp.FormData()
+    form.add_field("file", content, filename="backup.zip", content_type="application/zip")
+    response = await client.post("/api/homestead/backup/import", data=form)
+    assert response.status == 200, await response.text()
+    assert (await response.json())["photos"] == 1
+    restored = entry.runtime_data.data.photos[photo_id]
+    assert restored.root is None
+    assert (photo_dir(hass) / restored.file).read_bytes() == jpeg
+    assert (photo_dir(hass) / restored.thumb).read_bytes() == thumb
+    assert entry.runtime_data.data.zones[orto].name == "Orto"
+
+    form = aiohttp.FormData()
+    form.add_field("file", b"not a zip", filename="x.zip")
+    response = await client.post("/api/homestead/backup/import", data=form)
+    assert response.status == 400

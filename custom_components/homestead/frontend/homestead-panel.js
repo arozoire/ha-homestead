@@ -599,7 +599,7 @@ class HomesteadPanel extends HTMLElement {
     this._mapWrap = h("div", { className: "map" }, this._mapEl);
     this._fileInput = h("input", {
       type: "file",
-      accept: ".json,application/json",
+      accept: ".json,.zip,application/json,application/zip",
       hidden: true,
       onchange: (ev) => this._restoreBackup(ev.target),
     });
@@ -1177,10 +1177,46 @@ class HomesteadPanel extends HTMLElement {
     setTimeout(() => URL.revokeObjectURL(url), 10000);
   }
 
+  /** Backup with the photo files: the server streams the zip, the browser downloads it from a signed path. */
+  async _exportZip() {
+    try {
+      const { path } = await this._hass.callWS({ type: "auth/sign_path", path: "/api/homestead/backup.zip", expires: 300 });
+      const link = h("a", { href: path, download: "" });
+      this.shadowRoot.append(link);
+      link.click();
+      link.remove();
+      this._showMessage(`🗜️ ${this.t("zipStarted")}`);
+    } catch (err) {
+      this._showMessage(err.message || String(err), true);
+    }
+  }
+
+  async _restoreZip(file) {
+    const size = this._number(file.size / 1024 / 1024, 0);
+    if (!confirm(this.t("confirmRestoreZip", { name: file.name, size }))) return;
+    this._showMessage(`⏳ ${this.t("zipRestoring", { size })}`);
+    try {
+      const form = new FormData();
+      form.append("file", file, file.name);
+      const response = await this._hass.fetchWithAuth("/api/homestead/backup/import", { method: "POST", body: form });
+      if (!response.ok) throw new Error(response.status === 400 ? this.t("notBackup") : `${response.status} ${await response.text()}`);
+      const result = await response.json();
+      this._close();
+      this._showMessage(`✓ ${this.t("restored", { summary: this._summary(result) })} · 📸 ${result.photos ?? 0}`);
+      this._fitAll();
+    } catch (err) {
+      this._showMessage(err.message || String(err), true);
+    }
+  }
+
   async _restoreBackup(input) {
     const file = input.files?.[0];
     input.value = "";
     if (!file) return;
+    if (/\.zip$/i.test(file.name) || file.type === "application/zip") {
+      await this._restoreZip(file);
+      return;
+    }
     let backup;
     try {
       backup = JSON.parse(await file.text());
@@ -1381,7 +1417,13 @@ class HomesteadPanel extends HTMLElement {
       h("h3", {}, `🗑️ ${this.t("resetTitle")}`),
       h("p", { className: "hint" }, this.t("resetHint")),
       h("label", {}, this.t("resetType"), input),
-      h("div", { className: "row" }, h("button", { type: "button", onclick: () => this._exportBackup() }, `💾 ${this.t("exportBackup")}`), button),
+      h(
+        "div",
+        { className: "row" },
+        h("button", { type: "button", onclick: () => this._exportBackup() }, `💾 ${this.t("exportBackup")}`),
+        h("button", { type: "button", onclick: () => this._exportZip() }, `🗜️ ${this.t("exportZip")}`),
+        button,
+      ),
     );
   }
 
@@ -1418,6 +1460,7 @@ class HomesteadPanel extends HTMLElement {
         "div",
         { className: "actions" },
         h("button", { onclick: () => this._exportBackup() }, `💾 ${this.t("exportBackup")}`),
+        h("button", { onclick: () => this._exportZip() }, `🗜️ ${this.t("exportZip")}`),
         this._hass.user?.is_admin === false
           ? null
           : h("button", { onclick: () => this._fileInput.click() }, `📂 ${this.t("importBackup")}`),

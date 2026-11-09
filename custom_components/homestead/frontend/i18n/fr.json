@@ -572,8 +572,8 @@
  "other": "Autre",
  "saved": "Enregistré : {name}",
  "backup": "Sauvegarde",
- "backupHint": "Toutes les plantes, zones, espèces, dépenses et outils dans un fichier JSON (les fichiers photo restent dans le dossier média de HA). Les sauvegardes de Home Assistant incluent tout.",
- "exportBackup": "Exporter",
+ "backupHint": "JSON : toutes les données (plantes, zones, espèces, journal, graines, dépenses, outils, plan photo) et les liens vers les photos, pas les fichiers des photos. .zip : la même chose plus tous les fichiers des photos (originaux compris : il peut être gros). Supprimer l'intégration efface données et photos : exportez d'abord.",
+ "exportBackup": "Exporter JSON",
  "importBackup": "Restaurer",
  "confirmRestore": "Remplacer TOUTES les données actuelles par cette sauvegarde ({date}) ?\n{summary}\nConseil : exportez d'abord les données actuelles.",
  "restored": "Sauvegarde restaurée : {summary}",
@@ -672,5 +672,9 @@
  "soil_ec_entity": "Capteur EC du sol",
  "soilInherited": "— de la zone au-dessus ou des options —",
  "soilSensors": "Capteurs du sol de cette zone",
- "soilSensorsHint": "Vide : les capteurs de la zone au-dessus, sinon ceux des options. Utilisés pour le sol maintenant, les contrôles de semis et de repiquage et la météo des événements de cette zone."
+ "soilSensorsHint": "Vide : les capteurs de la zone au-dessus, sinon ceux des options. Utilisés pour le sol maintenant, les contrôles de semis et de repiquage et la météo des événements de cette zone.",
+ "exportZip": "Exporter avec les photos (.zip)",
+ "zipStarted": "Préparation du .zip : le téléchargement démarre dans un instant (gros avec beaucoup d'originaux).",
+ "confirmRestoreZip": "Remplacer TOUTES les données et photos actuelles par la sauvegarde {name} ({size} Mo) ?\nConseil : exportez d'abord les données actuelles.",
+ "zipRestoring": "Restauration de {size} Mo…"
 }

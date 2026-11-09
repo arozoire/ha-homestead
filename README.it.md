@@ -85,11 +85,11 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 | Stato | Verde = attiva, rosso = morta, grigio = rimossa |
 | Nuova zona | Scheda *Zone* → *+ Nuova zona* → clic sugli angoli → *Fine* → nome e tipo |
 | Zona di una pianta | Proposta in automatico se la pianta cade dentro un poligono (la zona più piccola) |
-| Backup | In fondo alla lista: *💾 Esporta* scarica un file JSON con tutto; *📂 Ripristina* (solo admin) sostituisce tutti i dati con quelli del file, dopo conferma |
+| Backup | In *Altro*: *💾 Esporta JSON* scarica tutti i dati e i collegamenti alle foto (non i file delle foto); *🗜️ Esporta con le foto (.zip)* aggiunge tutti i file delle foto, originali compresi (può essere grande); *📂 Ripristina* (solo admin) accetta i due file e sostituisce tutti i dati, dopo conferma. Da uno .zip tornano anche le foto, nella cartella media locale se quella d'origine (un NAS) non c'è |
 
 Specie: solo piante (regno Plantae); le specie già importate si trovano anche senza internet; le ricerche online restano in memoria 24 h. Home Assistant deve poter raggiungere `api.gbif.org` e `www.wikidata.org` (dati aperti, nessun account).
 
-I dati sono anche nei backup di Home Assistant (`.storage/homestead.data`); il backup del pannello serve per spostarli o ripristinarli a mano.
+I dati sono anche nei backup di Home Assistant (`.storage/homestead.data`), le foto anche se il backup include la cartella media (non un NAS). **Rimuovere l'integrazione cancella i suoi dati e le foto**: esporta prima uno .zip se pensi di riaggiungerla. HACS non fa backup.
 
 Mappe: satellite **Esri World Imagery** (gratuito, senza account né pubblicità) e **OpenStreetMap**. Leaflet è incluso nell'integrazione, nessuna libreria scaricata da CDN; solo le tessere della mappa arrivano da internet.
 

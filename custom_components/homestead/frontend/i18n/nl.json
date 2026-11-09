@@ -572,8 +572,8 @@
  "other": "Overig",
  "saved": "Opgeslagen: {name}",
  "backup": "Back-up",
- "backupHint": "Alle planten, zones, soorten, uitgaven en gereedschap in een JSON-bestand (de fotobestanden blijven in de mediamap van HA). Back-ups van Home Assistant bevatten alles.",
- "exportBackup": "Exporteren",
+ "backupHint": "JSON: alle gegevens (planten, zones, soorten, dagboek, zaden, uitgaven, gereedschap, fotoplan) en de koppelingen naar de foto's, niet de fotobestanden. .zip: hetzelfde plus alle fotobestanden (ook de originelen: kan groot zijn). De integratie verwijderen wist gegevens en foto's: eerst exporteren.",
+ "exportBackup": "JSON exporteren",
  "importBackup": "Herstellen",
  "confirmRestore": "ALLE huidige gegevens vervangen door deze back-up ({date})?\n{summary}\nTip: exporteer eerst de huidige gegevens.",
  "restored": "Back-up hersteld: {summary}",
@@ -672,5 +672,9 @@
  "soil_ec_entity": "Bodem-EC-sensor",
  "soilInherited": "— van de zone erboven of uit de opties —",
  "soilSensors": "Bodemsensoren van deze zone",
- "soilSensorsHint": "Leeg: de sensoren van de zone erboven, anders de algemene uit de opties. Gebruikt voor de bodem nu, de controles bij zaaien en verplanten en het weer van de gebeurtenissen van deze zone."
+ "soilSensorsHint": "Leeg: de sensoren van de zone erboven, anders de algemene uit de opties. Gebruikt voor de bodem nu, de controles bij zaaien en verplanten en het weer van de gebeurtenissen van deze zone.",
+ "exportZip": "Exporteren met foto's (.zip)",
+ "zipStarted": "De .zip wordt gemaakt: de download begint zo (groot met veel originelen).",
+ "confirmRestoreZip": "ALLE huidige gegevens en foto's vervangen door de back-up {name} ({size} MB)?\nTip: exporteer eerst de huidige gegevens.",
+ "zipRestoring": "{size} MB wordt hersteld…"
 }

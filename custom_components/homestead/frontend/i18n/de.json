@@ -572,8 +572,8 @@
  "other": "Sonstiges",
  "saved": "Gespeichert: {name}",
  "backup": "Sicherung",
- "backupHint": "Alle Pflanzen, Bereiche, Arten, Ausgaben und Geräte in einer JSON-Datei (die Fotodateien bleiben im Medienordner von HA). Die Sicherungen von Home Assistant enthalten alles.",
- "exportBackup": "Exportieren",
+ "backupHint": "JSON: alle Daten (Pflanzen, Zonen, Arten, Tagebuch, Saatgut, Ausgaben, Geräte, Fotoplan) und die Verweise auf die Fotos, nicht die Fotodateien. .zip: dasselbe plus alle Fotodateien (auch Originale: kann groß werden). Das Entfernen der Integration löscht Daten und Fotos: vorher exportieren.",
+ "exportBackup": "JSON exportieren",
  "importBackup": "Wiederherstellen",
  "confirmRestore": "ALLE aktuellen Daten durch diese Sicherung ({date}) ersetzen?\n{summary}\nTipp: zuerst die aktuellen Daten exportieren.",
  "restored": "Sicherung wiederhergestellt: {summary}",
@@ -672,5 +672,9 @@
  "soil_ec_entity": "Boden-EC-Sensor",
  "soilInherited": "— von der Zone darüber oder aus den Optionen —",
  "soilSensors": "Bodensensoren dieser Zone",
- "soilSensorsHint": "Leer: die Sensoren der Zone darüber, sonst die allgemeinen aus den Optionen. Für den Boden jetzt, die Prüfungen bei Aussaat und Umpflanzen und das Wetter der Ereignisse dieser Zone."
+ "soilSensorsHint": "Leer: die Sensoren der Zone darüber, sonst die allgemeinen aus den Optionen. Für den Boden jetzt, die Prüfungen bei Aussaat und Umpflanzen und das Wetter der Ereignisse dieser Zone.",
+ "exportZip": "Mit Fotos exportieren (.zip)",
+ "zipStarted": "Das .zip wird erstellt: der Download beginnt gleich (groß bei vielen Originalen).",
+ "confirmRestoreZip": "ALLE aktuellen Daten und Fotos durch die Sicherung {name} ({size} MB) ersetzen?\nTipp: zuerst die aktuellen Daten exportieren.",
+ "zipRestoring": "{size} MB werden wiederhergestellt…"
 }

@@ -572,8 +572,8 @@
  "other": "Altro",
  "saved": "Salvato: {name}",
  "backup": "Backup",
- "backupHint": "Tutte le piante, zone, specie, spese e attrezzi in un file JSON (i file delle foto restano nella cartella media di HA). I backup di Home Assistant includono tutto.",
- "exportBackup": "Esporta",
+ "backupHint": "JSON: tutti i dati (piante, zone, specie, diario, semi, spese, attrezzi, piano foto) e i collegamenti alle foto, non i file delle foto. .zip: lo stesso più tutti i file delle foto (anche gli originali: può essere grande). Rimuovere l'integrazione cancella dati e foto: esporta prima.",
+ "exportBackup": "Esporta JSON",
  "importBackup": "Ripristina",
  "confirmRestore": "Sostituire TUTTI i dati attuali con questo backup ({date})?\n{summary}\nConsiglio: esporta prima i dati attuali.",
  "restored": "Backup ripristinato: {summary}",
@@ -672,5 +672,9 @@
  "soil_ec_entity": "Sensore EC suolo",
  "soilInherited": "— dalla zona sopra o dalle opzioni —",
  "soilSensors": "Sensori del suolo di questa zona",
- "soilSensorsHint": "Vuoto: i sensori della zona sopra, altrimenti quelli generali delle opzioni. Servono per il suolo ora, i controlli di semina e trapianto e il meteo degli eventi di questa zona."
+ "soilSensorsHint": "Vuoto: i sensori della zona sopra, altrimenti quelli generali delle opzioni. Servono per il suolo ora, i controlli di semina e trapianto e il meteo degli eventi di questa zona.",
+ "exportZip": "Esporta con le foto (.zip)",
+ "zipStarted": "Preparo lo .zip: il download parte tra poco (grande se ci sono molti originali).",
+ "confirmRestoreZip": "Sostituire TUTTI i dati e le foto attuali con il backup {name} ({size} MB)?\nConsiglio: esporta prima i dati attuali.",
+ "zipRestoring": "Ripristino di {size} MB…"
 }

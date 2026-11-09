@@ -14,6 +14,7 @@ from homeassistant.helpers.event import async_track_time_change, async_track_tim
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.util import dt as dt_util
 
+from .backup_zip import BackupZipImportView, BackupZipView
 from .const import DOMAIN
 from .forecast import FORECAST_REFRESH, OUTLOOK, Outlook
 from .panel import async_register_panel, async_unregister_panel
@@ -40,6 +41,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     hass.http.register_view(PhotoView(hass))
     hass.http.register_view(PhotoThumbView(hass))
     hass.http.register_view(PhotoUploadView(hass))
+    hass.http.register_view(BackupZipView(hass))
+    hass.http.register_view(BackupZipImportView(hass))
     return True
 
 
