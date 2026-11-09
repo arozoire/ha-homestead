@@ -680,5 +680,22 @@
  "lastBackupTitle": "Jardin retrouvé",
  "lastBackupText": "Sauvegarde laissée quand HA Homestead a été supprimé ({date}) :",
  "lastBackupRestore": "Restaurer",
- "lastBackupConfirm": "Restaurer le jardin enregistré le {date} ? Les photos sont toujours dans le dossier média."
+ "lastBackupConfirm": "Restaurer le jardin enregistré le {date} ? Les photos sont toujours dans le dossier média.",
+ "seedSearch": "Rechercher",
+ "seedAllGenera": "Tous les genres",
+ "seedAllSuppliers": "Tous les fournisseurs",
+ "seedActive": "À utiliser",
+ "seedAll": "Tous",
+ "seedSelect": "Sélectionner",
+ "seedPickedCount": "{count} sélectionnés",
+ "seedPlan": "Planifier",
+ "seedMarkFinished": "Épuisés",
+ "seedSowAll": "Semer {count} lots : un semis par lot",
+ "seedPlanAll": "Planifier le semis de {count} lots : une tâche avec la liste",
+ "seedPerLot": "Graines par lot",
+ "seedPlanned": "✓ Semis de {count} lots planifié le {date}",
+ "seedSown": "{count} lots semés",
+ "seedDeleteMany": "Supprimer {count} lots de graines ?",
+ "seedDeleted": "{count} lots supprimés",
+ "seedNoMatch": "Aucun lot avec ces filtres."
 }

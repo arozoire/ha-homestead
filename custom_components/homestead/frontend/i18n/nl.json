@@ -680,5 +680,22 @@
  "lastBackupTitle": "Tuin teruggevonden",
  "lastBackupText": "Back-up achtergelaten bij het verwijderen van HA Homestead ({date}):",
  "lastBackupRestore": "Herstellen",
- "lastBackupConfirm": "De tuin van {date} herstellen? De foto's staan nog in de mediamap."
+ "lastBackupConfirm": "De tuin van {date} herstellen? De foto's staan nog in de mediamap.",
+ "seedSearch": "Zoeken",
+ "seedAllGenera": "Alle geslachten",
+ "seedAllSuppliers": "Alle leveranciers",
+ "seedActive": "Te gebruiken",
+ "seedAll": "Alle",
+ "seedSelect": "Selecteren",
+ "seedPickedCount": "{count} geselecteerd",
+ "seedPlan": "Plannen",
+ "seedMarkFinished": "Op",
+ "seedSowAll": "{count} partijen zaaien: één zaaiing per partij",
+ "seedPlanAll": "Zaaien van {count} partijen plannen: één taak met de lijst",
+ "seedPerLot": "Zaden per partij",
+ "seedPlanned": "✓ Zaaien van {count} partijen gepland op {date}",
+ "seedSown": "{count} partijen gezaaid",
+ "seedDeleteMany": "{count} zaadpartijen verwijderen?",
+ "seedDeleted": "{count} partijen verwijderd",
+ "seedNoMatch": "Geen partij met deze filters."
 }

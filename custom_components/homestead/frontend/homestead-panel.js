@@ -217,6 +217,11 @@ const STYLE = `
   .care { border: 1px solid var(--divider-color); border-radius: 10px; padding: 6px 10px; display: grid; gap: 6px; }
   .care legend { font-weight: 700; padding: 0 4px; }
   .sow-button { flex: none; border-radius: 20px; font-weight: 700; align-self: center; }
+  .seed-filters input[type=search] { flex: 1 1 140px; min-width: 0; }
+  .bulk-bar { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px; margin: 6px 0; border-radius: 10px; background: var(--secondary-background-color, #eef0ec); }
+  .bulk-bar .check { margin-right: auto; }
+  .bulk-form { margin: 0 0 8px; padding: 8px; border: 1px solid var(--divider-color, #dfe3dc); border-radius: 10px; }
+  li input.pick { width: 22px; height: 22px; flex: none; align-self: center; }
   .nursery { display: grid; gap: 8px; margin: 12px 0; }
   .batch { border: 2px solid var(--divider-color); border-radius: 12px; padding: 8px 10px; display: grid; gap: 6px; }
   .batch.late { border-color: #e69100; background: rgba(230, 145, 0, .07); }
@@ -5172,16 +5177,192 @@ class HomesteadPanel extends HTMLElement {
     this._render();
   }
 
+  _seedGenus(lot) {
+    return capitalize((lot.species || "").trim().split(/\s+/)[0].toLowerCase());
+  }
+
+  /** Filters of the seed list: text, year, genus, supplier, state (kept while the panel is open). */
+  _seedFilters(all) {
+    const f = (this._seedFilter ??= { text: "", year: "", genus: "", supplier: "", state: "active" });
+    const redraw = () => this._render();
+    const select = (key, label, values) =>
+      values.length > 1 || f[key]
+        ? h(
+            "select",
+            { onchange: (ev) => ((f[key] = ev.target.value), redraw()) },
+            h("option", { value: "" }, label),
+            values.map((v) => h("option", { value: v, selected: String(v) === f[key] }, v)),
+          )
+        : null;
+    const uniq = (list) => [...new Set(list.filter(Boolean).map(String))];
+    const text = h("input", { type: "search", value: f.text, placeholder: `🔍 ${this.t("seedSearch")}` });
+    text.addEventListener("input", () => {
+      f.text = text.value;
+      clearTimeout(this._seedSearchTimer);
+      this._seedSearchTimer = setTimeout(() => {
+        redraw();
+        const again = this.shadowRoot.querySelector(".seed-filters input[type=search]");
+        again?.focus();
+        again?.setSelectionRange(again.value.length, again.value.length);
+      }, 250);
+    });
+    return h(
+      "div",
+      { className: "row filters seed-filters" },
+      text,
+      select("year", this.t("allYears"), uniq(all.map((l) => l.year)).sort().reverse()),
+      select("genus", this.t("seedAllGenera"), uniq(all.map((l) => this._seedGenus(l))).sort()),
+      select("supplier", this.t("seedAllSuppliers"), uniq(all.map((l) => l.supplier?.trim())).sort((a, b) => a.localeCompare(b))),
+      h(
+        "select",
+        { onchange: (ev) => ((f.state = ev.target.value), redraw()) },
+        [["active", this.t("seedActive")], ["finished", this.t("finished")], ["", this.t("seedAll")]].map(([v, label]) => h("option", { value: v, selected: v === f.state }, label)),
+      ),
+    );
+  }
+
+  _filteredSeeds(all) {
+    const f = (this._seedFilter ??= { text: "", year: "", genus: "", supplier: "", state: "active" });
+    const text = (f.text || "").trim().toLowerCase();
+    return all.filter(
+      (l) =>
+        (!f.year || String(l.year) === f.year) &&
+        (!f.genus || this._seedGenus(l) === f.genus) &&
+        (!f.supplier || (l.supplier || "").trim() === f.supplier) &&
+        (!f.state || (f.state === "finished") === !!l.finished) &&
+        (!text || [l.species, l.variety, l.supplier, l.notes].some((v) => (v || "").toLowerCase().includes(text))),
+    );
+  }
+
+  /** The bar of the selected lots: sow them all now, plan the sowing, mark them finished, delete them. */
+  _seedBulkBar(visible) {
+    const picked = this._seedPicked;
+    const lots = this._data.seeds.filter((l) => picked.has(l.id));
+    const allShown = visible.length && visible.every((l) => picked.has(l.id));
+    const toggleAll = () => {
+      visible.forEach((l) => (allShown ? picked.delete(l.id) : picked.add(l.id)));
+      this._render();
+    };
+    const bar = h(
+      "div",
+      { className: "bulk-bar" },
+      h("label", { className: "check" }, h("input", { type: "checkbox", checked: !!allShown, onchange: toggleAll }), this.t("seedPickedCount", { count: lots.length })),
+      lots.length
+        ? [
+            h("button", { type: "button", className: "primary", onclick: () => ((this._seedBulk = "sow"), this._render()) }, `🌱 ${this.t("sow")}`),
+            h("button", { type: "button", onclick: () => ((this._seedBulk = "plan"), this._render()) }, `📋 ${this.t("seedPlan")}`),
+            h("button", { type: "button", onclick: () => this._seedBulkFinished(lots) }, `✔ ${this.t("seedMarkFinished")}`),
+            h("button", { type: "button", className: "danger", onclick: () => this._seedBulkDelete(lots) }, `🗑️ ${this.t("delete")}`),
+          ]
+        : null,
+      h("button", { type: "button", className: "link", onclick: () => ((this._seedPicked = null), (this._seedBulk = null), this._render()) }, "✕"),
+    );
+    return [bar, lots.length && this._seedBulk ? this._seedBulkForm(lots) : null];
+  }
+
+  _seedBulkForm(lots) {
+    const sow = this._seedBulk === "sow";
+    const zones = [...this._data.zones].sort((a, b) => (b.kind === "nursery") - (a.kind === "nursery") || a.name.localeCompare(b.name));
+    const date = h("input", { type: "date", name: "date", value: sow ? today() : addDays(today(), 1), required: true });
+    const zone = h("select", { name: "zone_id" }, h("option", { value: "" }, "—"), zones.map((z, i) => h("option", { value: z.id, selected: i === 0 && z.kind === "nursery" }, `${ZONE_ICONS[z.kind] || "📍"} ${this._zonePath(z.id)}`)));
+    const count = h("input", { type: "number", name: "count", min: 1, step: 1, value: 1, inputMode: "numeric" });
+    const submit = async (ev) => {
+      ev.preventDefault();
+      if (sow) await this._seedBulkSow(lots, zone.value || null, date.value, Math.max(1, Number(count.value) || 1));
+      else if (await this._call("add_task", { kind: "sowing", due_on: date.value, seed_ids: lots.map((l) => l.id) })) {
+        this._seedPicked = null;
+        this._seedBulk = null;
+        this._showMessage(`✓ ${this.t("seedPlanned", { count: lots.length, date: this._date(date.value) })}`);
+        this._render();
+      }
+    };
+    return h(
+      "form",
+      { className: "bulk-form", onsubmit: submit },
+      h("strong", {}, sow ? this.t("seedSowAll", { count: lots.length }) : this.t("seedPlanAll", { count: lots.length })),
+      h(
+        "div",
+        { className: "row" },
+        h("label", {}, this.t(sow ? "sown_on" : "due_on"), date),
+        sow ? h("label", {}, this.t("zone_id"), zone) : null,
+        sow ? h("label", {}, this.t("seedPerLot"), count) : null,
+      ),
+      h(
+        "div",
+        { className: "row" },
+        h("button", { type: "submit", className: "primary" }, sow ? `🌱 ${this.t("sow")}` : `📋 ${this.t("seedPlan")}`),
+        h("button", { type: "button", onclick: () => ((this._seedBulk = null), this._render()) }, this.t("cancel")),
+      ),
+    );
+  }
+
+  /** One sown planting per lot, like 🌱 Sow from a single lot. */
+  async _seedBulkSow(lots, zoneId, day, count) {
+    let done = 0;
+    for (const lot of lots) {
+      const name = this._seedName(lot).replace(" · ", " ");
+      const ok = await this._call("add_planting", {
+        name,
+        species: lot.species,
+        taxon_id: lot.taxon_id || null,
+        variety: lot.variety || null,
+        seed_lot_id: lot.id,
+        plant_type: this._plantTypeFor(lot.species),
+        origin: "sown",
+        sown_on: day,
+        kind: count > 1 ? "group" : "single",
+        quantity: count,
+        sown_count: count,
+        zone_id: zoneId,
+      });
+      if (!ok) break;
+      done += 1;
+    }
+    this._seedPicked = null;
+    this._seedBulk = null;
+    this._showMessage(`✓ ${this.t("seedSown", { count: done })}`);
+    this._render();
+  }
+
+  async _seedBulkFinished(lots) {
+    for (const lot of lots) if (!(await this._call("update_seed_lot", { id: lot.id, finished: !lots.every((l) => l.finished) }))) break;
+    this._seedPicked = null;
+    this._render();
+  }
+
+  async _seedBulkDelete(lots) {
+    if (!confirm(this.t("seedDeleteMany", { count: lots.length }))) return;
+    let done = 0;
+    for (const lot of lots) {
+      if (!(await this._call("delete_seed_lot", { id: lot.id }))) break;
+      done += 1;
+    }
+    this._seedPicked = null;
+    this._showMessage(`✓ ${this.t("seedDeleted", { count: done })}`);
+    this._render();
+  }
+
   _renderSeedList() {
-    const lots = [...this._data.seeds].sort((a, b) => a.finished - b.finished || this._seedName(a).localeCompare(this._seedName(b)));
+    const all = this._data.seeds;
+    const lots = this._filteredSeeds(all).sort((a, b) => a.finished - b.finished || this._seedName(a).localeCompare(this._seedName(b)));
+    const picking = !!this._seedPicked;
+    const pick = (lot) => (ev) => {
+      ev.stopPropagation();
+      if (ev.target.checked) this._seedPicked.add(lot.id);
+      else this._seedPicked.delete(lot.id);
+      this._render();
+    };
     return [
       h(
         "div",
         { className: "actions" },
         h("button", { className: "primary", onclick: () => this._openSeed({ year: new Date().getFullYear() }) }, `+ ${this.t("addSeed")}`),
+        all.length && !picking ? h("button", { onclick: () => ((this._seedPicked = new Set()), this._render()) }, `☑ ${this.t("seedSelect")}`) : null,
         h("button", { onclick: () => this._csvPick("seeds") }, this.t("csvImport")),
         h("button", { onclick: () => this._csvTemplate("seeds") }, this.t("csvTemplate")),
       ),
+      all.length > 1 ? this._seedFilters(all) : null,
+      ...(picking ? this._seedBulkBar(lots) : []),
       lots.length
         ? h(
             "ul",
@@ -5190,7 +5371,11 @@ class HomesteadPanel extends HTMLElement {
               const warning = this._seedWarning(lot);
               return h(
                 "li",
-                { onclick: () => this._openSeed(lot), style: lot.finished ? "opacity:.55" : "" },
+                {
+                  onclick: () => (picking ? (this._seedPicked.has(lot.id) ? this._seedPicked.delete(lot.id) : this._seedPicked.add(lot.id), this._render()) : this._openSeed(lot)),
+                  style: lot.finished ? "opacity:.55" : "",
+                },
+                picking ? h("input", { type: "checkbox", className: "pick", checked: this._seedPicked.has(lot.id), onclick: (ev) => ev.stopPropagation(), onchange: pick(lot) }) : null,
                 h("span", { className: "dot", style: `background:${lot.finished ? STATUS_COLOR.removed : warning ? "#ffa600" : STATUS_COLOR.active}` }),
                 h(
                   "div",
@@ -5207,7 +5392,7 @@ class HomesteadPanel extends HTMLElement {
                     : null,
                   this._germHistoryText(lot.species) ? h("div", { className: "sub" }, this._germHistoryText(lot.species)) : null,
                 ),
-                lot.finished
+                lot.finished || picking
                   ? null
                   : h(
                       "button",
@@ -5224,7 +5409,7 @@ class HomesteadPanel extends HTMLElement {
               );
             }),
           )
-        : h("p", { className: "hint" }, this.t("emptySeeds")),
+        : h("p", { className: "hint" }, all.length ? this.t("seedNoMatch") : this.t("emptySeeds")),
     ];
   }
 
