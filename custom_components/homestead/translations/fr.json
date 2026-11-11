@@ -302,6 +302,20 @@
         "overhead": "Par aspersion",
         "valve": "Vanne automatique"
       }
+    },
+    "severity": {
+      "options": {
+        "few": "quelques-uns",
+        "spread": "répandu",
+        "heavy": "infestation"
+      }
+    },
+    "worked": {
+      "options": {
+        "yes": "oui",
+        "partly": "en partie",
+        "no": "non"
+      }
     }
   },
   "services": {
@@ -1000,6 +1014,14 @@
         "revenue": {
           "name": "Recette",
           "description": "Enregistré comme recette liée à l'événement."
+        },
+        "severity": {
+          "name": "Gravité",
+          "description": "Ravageur ou maladie (événement problème) : quelques-uns, répandu, infestation."
+        },
+        "worked": {
+          "name": "Efficace",
+          "description": "Traitement : a-t-il marché."
         }
       }
     },
@@ -1070,6 +1092,14 @@
         "notes": {
           "name": "Notes",
           "description": "Notes libres."
+        },
+        "severity": {
+          "name": "Gravité",
+          "description": "Ravageur ou maladie (événement problème) : quelques-uns, répandu, infestation."
+        },
+        "worked": {
+          "name": "Efficace",
+          "description": "Traitement : a-t-il marché."
         }
       }
     },
@@ -1176,6 +1206,14 @@
         "notes": {
           "name": "Notes",
           "description": "Notes libres."
+        },
+        "repeat_weeks": {
+          "name": "Répéter toutes les (semaines)",
+          "description": "Semis échelonné : fait, la même tâche revient après ces semaines."
+        },
+        "repeat_until": {
+          "name": "Répéter jusqu'au",
+          "description": "Dernier jour du semis échelonné."
         }
       }
     },
@@ -1222,6 +1260,14 @@
         "notes": {
           "name": "Notes",
           "description": "Notes libres."
+        },
+        "repeat_weeks": {
+          "name": "Répéter toutes les (semaines)",
+          "description": "Semis échelonné : fait, la même tâche revient après ces semaines."
+        },
+        "repeat_until": {
+          "name": "Répéter jusqu'au",
+          "description": "Dernier jour du semis échelonné."
         }
       }
     },
@@ -1336,6 +1382,10 @@
         "notes": {
           "name": "Notes",
           "description": "Notes libres."
+        },
+        "from_planting_id": {
+          "name": "De la plante",
+          "description": "Vos graines : ID de la plante mère."
         }
       }
     },
@@ -1382,6 +1432,10 @@
         "notes": {
           "name": "Notes",
           "description": "Notes libres."
+        },
+        "from_planting_id": {
+          "name": "De la plante",
+          "description": "Vos graines : ID de la plante mère."
         }
       }
     },

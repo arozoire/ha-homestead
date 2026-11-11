@@ -302,6 +302,20 @@
         "overhead": "Dall'alto (irrigatori)",
         "valve": "Valvola automatica"
       }
+    },
+    "severity": {
+      "options": {
+        "few": "qualcuno",
+        "spread": "diffusi",
+        "heavy": "infestazione"
+      }
+    },
+    "worked": {
+      "options": {
+        "yes": "sì",
+        "partly": "in parte",
+        "no": "no"
+      }
     }
   },
   "services": {
@@ -1000,6 +1014,14 @@
         "revenue": {
           "name": "Ricavo",
           "description": "Registrato come ricavo collegato all'evento."
+        },
+        "severity": {
+          "name": "Quanto",
+          "description": "Parassita o malattia (evento problema): pochi, diffusi, infestazione."
+        },
+        "worked": {
+          "name": "Ha funzionato",
+          "description": "Trattamento: ha funzionato."
         }
       }
     },
@@ -1070,6 +1092,14 @@
         "notes": {
           "name": "Note",
           "description": "Note libere."
+        },
+        "severity": {
+          "name": "Quanto",
+          "description": "Parassita o malattia (evento problema): pochi, diffusi, infestazione."
+        },
+        "worked": {
+          "name": "Ha funzionato",
+          "description": "Trattamento: ha funzionato."
         }
       }
     },
@@ -1176,6 +1206,14 @@
         "notes": {
           "name": "Note",
           "description": "Note libere."
+        },
+        "repeat_weeks": {
+          "name": "Ripeti ogni (settimane)",
+          "description": "Semina scalare: fatta, la stessa attività torna dopo queste settimane."
+        },
+        "repeat_until": {
+          "name": "Ripeti fino al",
+          "description": "Ultimo giorno della semina scalare."
         }
       }
     },
@@ -1222,6 +1260,14 @@
         "notes": {
           "name": "Note",
           "description": "Note libere."
+        },
+        "repeat_weeks": {
+          "name": "Ripeti ogni (settimane)",
+          "description": "Semina scalare: fatta, la stessa attività torna dopo queste settimane."
+        },
+        "repeat_until": {
+          "name": "Ripeti fino al",
+          "description": "Ultimo giorno della semina scalare."
         }
       }
     },
@@ -1336,6 +1382,10 @@
         "notes": {
           "name": "Note",
           "description": "Note libere."
+        },
+        "from_planting_id": {
+          "name": "Dalla pianta",
+          "description": "Semi tuoi: ID della pianta madre."
         }
       }
     },
@@ -1382,6 +1432,10 @@
         "notes": {
           "name": "Note",
           "description": "Note libere."
+        },
+        "from_planting_id": {
+          "name": "Dalla pianta",
+          "description": "Semi tuoi: ID della pianta madre."
         }
       }
     },

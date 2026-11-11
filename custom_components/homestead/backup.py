@@ -43,6 +43,7 @@ REFERENCES = (
     ("plantings", "seed_lot_id", "seeds"),
     ("plantings", "from_planting_id", "plantings"),
     ("tasks", "plan_id", "photo_plans"),
+    ("seeds", "from_planting_id", "plantings"),
 )
 
 

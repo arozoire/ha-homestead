@@ -302,6 +302,20 @@
         "overhead": "Van bovenaf (sproeiers)",
         "valve": "Automatische klep"
       }
+    },
+    "severity": {
+      "options": {
+        "few": "enkele",
+        "spread": "verspreid",
+        "heavy": "plaag"
+      }
+    },
+    "worked": {
+      "options": {
+        "yes": "ja",
+        "partly": "deels",
+        "no": "nee"
+      }
     }
   },
   "services": {
@@ -1000,6 +1014,14 @@
         "revenue": {
           "name": "Opbrengst",
           "description": "Wordt geregistreerd als inkomst gekoppeld aan de gebeurtenis."
+        },
+        "severity": {
+          "name": "Hoe erg",
+          "description": "Plaag of ziekte (probleem-gebeurtenis): enkele, verspreid, plaag."
+        },
+        "worked": {
+          "name": "Werkte het",
+          "description": "Behandeling: werkte het."
         }
       }
     },
@@ -1070,6 +1092,14 @@
         "notes": {
           "name": "Notities",
           "description": "Vrije notities."
+        },
+        "severity": {
+          "name": "Hoe erg",
+          "description": "Plaag of ziekte (probleem-gebeurtenis): enkele, verspreid, plaag."
+        },
+        "worked": {
+          "name": "Werkte het",
+          "description": "Behandeling: werkte het."
         }
       }
     },
@@ -1176,6 +1206,14 @@
         "notes": {
           "name": "Notities",
           "description": "Vrije notities."
+        },
+        "repeat_weeks": {
+          "name": "Herhaal elke (weken)",
+          "description": "Gespreid zaaien: gedaan, dezelfde taak komt na zoveel weken terug."
+        },
+        "repeat_until": {
+          "name": "Herhaal tot",
+          "description": "Laatste dag van het gespreid zaaien."
         }
       }
     },
@@ -1222,6 +1260,14 @@
         "notes": {
           "name": "Notities",
           "description": "Vrije notities."
+        },
+        "repeat_weeks": {
+          "name": "Herhaal elke (weken)",
+          "description": "Gespreid zaaien: gedaan, dezelfde taak komt na zoveel weken terug."
+        },
+        "repeat_until": {
+          "name": "Herhaal tot",
+          "description": "Laatste dag van het gespreid zaaien."
         }
       }
     },
@@ -1336,6 +1382,10 @@
         "notes": {
           "name": "Notities",
           "description": "Vrije notities."
+        },
+        "from_planting_id": {
+          "name": "Van plant",
+          "description": "Eigen zaad: ID van de moederplant."
         }
       }
     },
@@ -1382,6 +1432,10 @@
         "notes": {
           "name": "Notities",
           "description": "Vrije notities."
+        },
+        "from_planting_id": {
+          "name": "Van plant",
+          "description": "Eigen zaad: ID van de moederplant."
         }
       }
     },

@@ -18,6 +18,8 @@ def close_task(store: HomesteadStore, task: Task, done_on: str, event_id: str | 
     if task.yearly:
         follow = task.next_year()
         store.data.tasks[follow.id] = follow
+    if repeat := task.next_repeat(done_on):
+        store.data.tasks[repeat.id] = repeat
 
 
 def mark_task_done(store: HomesteadStore, task_id: str, event: Event) -> None:

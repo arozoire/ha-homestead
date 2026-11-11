@@ -302,6 +302,20 @@
         "overhead": "Von oben (Regner)",
         "valve": "Automatisches Ventil"
       }
+    },
+    "severity": {
+      "options": {
+        "few": "wenige",
+        "spread": "verbreitet",
+        "heavy": "Befall"
+      }
+    },
+    "worked": {
+      "options": {
+        "yes": "ja",
+        "partly": "teilweise",
+        "no": "nein"
+      }
     }
   },
   "services": {
@@ -1000,6 +1014,14 @@
         "revenue": {
           "name": "Einnahme",
           "description": "Wird als mit dem Eintrag verknüpfte Einnahme erfasst."
+        },
+        "severity": {
+          "name": "Wie stark",
+          "description": "Schädling oder Krankheit (Problem-Ereignis): wenige, verbreitet, Befall."
+        },
+        "worked": {
+          "name": "Hat es gewirkt",
+          "description": "Behandlung: hat sie gewirkt."
         }
       }
     },
@@ -1070,6 +1092,14 @@
         "notes": {
           "name": "Notizen",
           "description": "Freie Notizen."
+        },
+        "severity": {
+          "name": "Wie stark",
+          "description": "Schädling oder Krankheit (Problem-Ereignis): wenige, verbreitet, Befall."
+        },
+        "worked": {
+          "name": "Hat es gewirkt",
+          "description": "Behandlung: hat sie gewirkt."
         }
       }
     },
@@ -1176,6 +1206,14 @@
         "notes": {
           "name": "Notizen",
           "description": "Freie Notizen."
+        },
+        "repeat_weeks": {
+          "name": "Wiederholen alle (Wochen)",
+          "description": "Satzweise Aussaat: erledigt, dieselbe Aufgabe kommt nach so vielen Wochen wieder."
+        },
+        "repeat_until": {
+          "name": "Wiederholen bis",
+          "description": "Letzter Tag der satzweisen Aussaat."
         }
       }
     },
@@ -1222,6 +1260,14 @@
         "notes": {
           "name": "Notizen",
           "description": "Freie Notizen."
+        },
+        "repeat_weeks": {
+          "name": "Wiederholen alle (Wochen)",
+          "description": "Satzweise Aussaat: erledigt, dieselbe Aufgabe kommt nach so vielen Wochen wieder."
+        },
+        "repeat_until": {
+          "name": "Wiederholen bis",
+          "description": "Letzter Tag der satzweisen Aussaat."
         }
       }
     },
@@ -1336,6 +1382,10 @@
         "notes": {
           "name": "Notizen",
           "description": "Freie Notizen."
+        },
+        "from_planting_id": {
+          "name": "Von Pflanze",
+          "description": "Eigenes Saatgut: ID der Mutterpflanze."
         }
       }
     },
@@ -1382,6 +1432,10 @@
         "notes": {
           "name": "Notizen",
           "description": "Freie Notizen."
+        },
+        "from_planting_id": {
+          "name": "Von Pflanze",
+          "description": "Eigenes Saatgut: ID der Mutterpflanze."
         }
       }
     },

@@ -302,6 +302,20 @@
         "overhead": "From above (sprinklers)",
         "valve": "Automatic valve"
       }
+    },
+    "severity": {
+      "options": {
+        "few": "a few",
+        "spread": "spread",
+        "heavy": "infestation"
+      }
+    },
+    "worked": {
+      "options": {
+        "yes": "yes",
+        "partly": "partly",
+        "no": "no"
+      }
     }
   },
   "services": {
@@ -1000,6 +1014,14 @@
         "revenue": {
           "name": "Revenue",
           "description": "Recorded as an income linked to the event."
+        },
+        "severity": {
+          "name": "How bad",
+          "description": "Pest or disease (the problem event): few, spread, heavy."
+        },
+        "worked": {
+          "name": "Did it work",
+          "description": "Treatment: did it work."
         }
       }
     },
@@ -1070,6 +1092,14 @@
         "notes": {
           "name": "Notes",
           "description": "Free notes."
+        },
+        "severity": {
+          "name": "How bad",
+          "description": "Pest or disease (the problem event): few, spread, heavy."
+        },
+        "worked": {
+          "name": "Did it work",
+          "description": "Treatment: did it work."
         }
       }
     },
@@ -1176,6 +1206,14 @@
         "notes": {
           "name": "Notes",
           "description": "Free notes."
+        },
+        "repeat_weeks": {
+          "name": "Repeat every (weeks)",
+          "description": "Succession sowing: done, the same task comes back this many weeks later."
+        },
+        "repeat_until": {
+          "name": "Repeat until",
+          "description": "Last day of the succession."
         }
       }
     },
@@ -1222,6 +1260,14 @@
         "notes": {
           "name": "Notes",
           "description": "Free notes."
+        },
+        "repeat_weeks": {
+          "name": "Repeat every (weeks)",
+          "description": "Succession sowing: done, the same task comes back this many weeks later."
+        },
+        "repeat_until": {
+          "name": "Repeat until",
+          "description": "Last day of the succession."
         }
       }
     },
@@ -1336,6 +1382,10 @@
         "notes": {
           "name": "Notes",
           "description": "Free notes."
+        },
+        "from_planting_id": {
+          "name": "From plant",
+          "description": "Own seeds: ID of the mother plant."
         }
       }
     },
@@ -1382,6 +1432,10 @@
         "notes": {
           "name": "Notes",
           "description": "Free notes."
+        },
+        "from_planting_id": {
+          "name": "From plant",
+          "description": "Own seeds: ID of the mother plant."
         }
       }
     },

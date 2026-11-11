@@ -302,6 +302,20 @@
         "overhead": "Por aspersión",
         "valve": "Válvula automática"
       }
+    },
+    "severity": {
+      "options": {
+        "few": "pocos",
+        "spread": "extendido",
+        "heavy": "infestación"
+      }
+    },
+    "worked": {
+      "options": {
+        "yes": "sí",
+        "partly": "en parte",
+        "no": "no"
+      }
     }
   },
   "services": {
@@ -1000,6 +1014,14 @@
         "revenue": {
           "name": "Ingreso",
           "description": "Se registra como ingreso vinculado al evento."
+        },
+        "severity": {
+          "name": "Gravedad",
+          "description": "Plaga o enfermedad (evento problema): pocos, extendido, infestación."
+        },
+        "worked": {
+          "name": "Funcionó",
+          "description": "Tratamiento: funcionó."
         }
       }
     },
@@ -1070,6 +1092,14 @@
         "notes": {
           "name": "Notas",
           "description": "Notas libres."
+        },
+        "severity": {
+          "name": "Gravedad",
+          "description": "Plaga o enfermedad (evento problema): pocos, extendido, infestación."
+        },
+        "worked": {
+          "name": "Funcionó",
+          "description": "Tratamiento: funcionó."
         }
       }
     },
@@ -1176,6 +1206,14 @@
         "notes": {
           "name": "Notas",
           "description": "Notas libres."
+        },
+        "repeat_weeks": {
+          "name": "Repetir cada (semanas)",
+          "description": "Siembra escalonada: hecha, la misma tarea vuelve tras estas semanas."
+        },
+        "repeat_until": {
+          "name": "Repetir hasta",
+          "description": "Último día de la siembra escalonada."
         }
       }
     },
@@ -1222,6 +1260,14 @@
         "notes": {
           "name": "Notas",
           "description": "Notas libres."
+        },
+        "repeat_weeks": {
+          "name": "Repetir cada (semanas)",
+          "description": "Siembra escalonada: hecha, la misma tarea vuelve tras estas semanas."
+        },
+        "repeat_until": {
+          "name": "Repetir hasta",
+          "description": "Último día de la siembra escalonada."
         }
       }
     },
@@ -1336,6 +1382,10 @@
         "notes": {
           "name": "Notas",
           "description": "Notas libres."
+        },
+        "from_planting_id": {
+          "name": "De la planta",
+          "description": "Semillas propias: ID de la planta madre."
         }
       }
     },
@@ -1382,6 +1432,10 @@
         "notes": {
           "name": "Notas",
           "description": "Notas libres."
+        },
+        "from_planting_id": {
+          "name": "De la planta",
+          "description": "Semillas propias: ID de la planta madre."
         }
       }
     },

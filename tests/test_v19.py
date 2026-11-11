@@ -153,3 +153,55 @@ def test_climate_figures() -> None:
         "soil_temperature_6cm",
     )
     assert soil_days(soil) == {"2026-04-20": {"mean": 12.0, "min": 9.0}}
+
+
+async def test_succession_own_seeds_and_pests(hass: HomeAssistant) -> None:
+    entry = await _setup(hass)
+    data = entry.runtime_data.data
+    lot = (await _call(hass, "add_seed_lot", {"species": "Lactuca sativa", "variety": "Gentilina"}))["id"]
+    task = (
+        await _call(
+            hass,
+            "add_task",
+            {
+                "kind": "sowing",
+                "due_on": "2026-03-02",
+                "seed_ids": [lot],
+                "repeat_weeks": 3,
+                "repeat_until": "2026-04-10",
+            },
+        )
+    )["id"]
+    await _call(hass, "complete_task", {"id": task, "done_on": "2026-03-04"})
+    follow = [t for t in data.tasks.values() if not t.done_on]
+    assert len(follow) == 1 and follow[0].due_on == "2026-03-25" and follow[0].seed_ids == [lot]
+    await _call(hass, "complete_task", {"id": follow[0].id, "done_on": "2026-03-25"})
+    # 15 April would be after the end of the succession: no more.
+    assert not [t for t in data.tasks.values() if not t.done_on]
+
+    planting = (await _call(hass, "add_planting", {"name": "Pomodoro", "species": "Solanum lycopersicum"}))[
+        "id"
+    ]
+    own = (
+        await _call(
+            hass,
+            "add_seed_lot",
+            {"species": "Solanum lycopersicum", "year": 2026, "from_planting_id": planting},
+        )
+    )["id"]
+    assert data.seeds[own].from_planting_id == planting
+
+    problem = (
+        await _call(
+            hass,
+            "add_event",
+            {"kind": "problem", "planting_id": planting, "product": "Afidi", "severity": "spread"},
+        )
+    )["id"]
+    treatment = (
+        await _call(
+            hass, "add_event", {"kind": "treatment", "planting_id": planting, "product": "Sapone molle"}
+        )
+    )["id"]
+    await _call(hass, "update_event", {"id": treatment, "worked": "partly"})
+    assert data.events[problem].severity == "spread" and data.events[treatment].worked == "partly"
