@@ -292,6 +292,16 @@
         "metric": "Metrisch (°C, mm, m, kg, l)",
         "imperial": "Imperiaal (°F, in, ft, lb, gal)"
       }
+    },
+    "watering_mode": {
+      "options": {
+        "none": "Geen water (alleen regen)",
+        "can": "Gieter",
+        "hose": "Slang",
+        "drip": "Druppelirrigatie",
+        "overhead": "Van bovenaf (sproeiers)",
+        "valve": "Automatische klep"
+      }
     }
   },
   "services": {
@@ -338,6 +348,10 @@
         "soil_ec_entity": {
           "name": "Bodem-EC-sensor",
           "description": "Geleidbaarheidssensor van deze zone (bijvoorbeeld een Ecowitt WH52)."
+        },
+        "watering": {
+          "name": "Hoe het water krijgt",
+          "description": "Alleen regen, gieter, slang, druppel, van bovenaf of automatische klep; leeg = zoals de zone erboven."
         }
       }
     },
@@ -388,6 +402,10 @@
         "soil_ec_entity": {
           "name": "Bodem-EC-sensor",
           "description": "Geleidbaarheidssensor van deze zone (bijvoorbeeld een Ecowitt WH52)."
+        },
+        "watering": {
+          "name": "Hoe het water krijgt",
+          "description": "Alleen regen, gieter, slang, druppel, van bovenaf of automatische klep; leeg = zoals de zone erboven."
         }
       }
     },
@@ -524,6 +542,10 @@
         "row_to": {
           "name": "Einde van de rij",
           "description": "Een rij planten: het andere uiteinde als [lengtegraad, breedtegraad]; de positie is het begin van de rij."
+        },
+        "watering": {
+          "name": "Hoe het water krijgt",
+          "description": "Alleen regen, gieter, slang, druppel, van bovenaf of automatische klep; leeg = zoals de zone erboven."
         }
       }
     },
@@ -654,6 +676,10 @@
         "row_to": {
           "name": "Einde van de rij",
           "description": "Een rij planten: het andere uiteinde als [lengtegraad, breedtegraad]; de positie is het begin van de rij."
+        },
+        "watering": {
+          "name": "Hoe het water krijgt",
+          "description": "Alleen regen, gieter, slang, druppel, van bovenaf of automatische klep; leeg = zoals de zone erboven."
         }
       }
     },
@@ -1464,6 +1490,8 @@
     "better_on": "beter op {date}",
     "notification_compost": "♻️ {zone}: compost omzetten ({days} dagen sinds de vorige keer)",
     "notification_tool": "🔧 {tool}: onderhoud nodig",
-    "notification_water": "🪴 Water geven: {plants}"
+    "notification_water": "🪴 Water geven: {plants}",
+    "notification_dry_zones": "💧 Vandaag water geven: {zones}",
+    "notification_young": "🌳 {plant}: al {days} dagen geen water"
   }
 }

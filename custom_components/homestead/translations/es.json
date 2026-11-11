@@ -292,6 +292,16 @@
         "metric": "Métrico (°C, mm, m, kg, l)",
         "imperial": "Imperial (°F, in, ft, lb, gal)"
       }
+    },
+    "watering_mode": {
+      "options": {
+        "none": "Sin riego (solo lluvia)",
+        "can": "Regadera",
+        "hose": "Manguera",
+        "drip": "Goteo",
+        "overhead": "Por aspersión",
+        "valve": "Válvula automática"
+      }
     }
   },
   "services": {
@@ -338,6 +348,10 @@
         "soil_ec_entity": {
           "name": "Sensor de CE del suelo",
           "description": "Sensor de conductividad eléctrica de esta zona (por ejemplo un Ecowitt WH52)."
+        },
+        "watering": {
+          "name": "Cómo se riega",
+          "description": "Solo lluvia, regadera, manguera, goteo, por aspersión o válvula automática; vacío = como la zona superior."
         }
       }
     },
@@ -388,6 +402,10 @@
         "soil_ec_entity": {
           "name": "Sensor de CE del suelo",
           "description": "Sensor de conductividad eléctrica de esta zona (por ejemplo un Ecowitt WH52)."
+        },
+        "watering": {
+          "name": "Cómo se riega",
+          "description": "Solo lluvia, regadera, manguera, goteo, por aspersión o válvula automática; vacío = como la zona superior."
         }
       }
     },
@@ -524,6 +542,10 @@
         "row_to": {
           "name": "Final de la hilera",
           "description": "Una hilera de plantas: el otro extremo como [longitud, latitud]; la posición es el inicio de la hilera."
+        },
+        "watering": {
+          "name": "Cómo se riega",
+          "description": "Solo lluvia, regadera, manguera, goteo, por aspersión o válvula automática; vacío = como la zona superior."
         }
       }
     },
@@ -654,6 +676,10 @@
         "row_to": {
           "name": "Final de la hilera",
           "description": "Una hilera de plantas: el otro extremo como [longitud, latitud]; la posición es el inicio de la hilera."
+        },
+        "watering": {
+          "name": "Cómo se riega",
+          "description": "Solo lluvia, regadera, manguera, goteo, por aspersión o válvula automática; vacío = como la zona superior."
         }
       }
     },
@@ -1464,6 +1490,8 @@
     "better_on": "mejor el {date}",
     "notification_compost": "♻️ {zone}: voltear el compost ({days} días desde la última vez)",
     "notification_tool": "🔧 {tool}: mantenimiento pendiente",
-    "notification_water": "🪴 Por regar: {plants}"
+    "notification_water": "🪴 Por regar: {plants}",
+    "notification_dry_zones": "💧 Para regar hoy: {zones}",
+    "notification_young": "🌳 {plant}: sin agua desde hace {days} días"
   }
 }

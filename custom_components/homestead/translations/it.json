@@ -292,6 +292,16 @@
         "metric": "Metrico (°C, mm, m, kg, l)",
         "imperial": "Imperiale (°F, in, ft, lb, gal)"
       }
+    },
+    "watering_mode": {
+      "options": {
+        "none": "Non bagnata (solo pioggia)",
+        "can": "Annaffiatoio",
+        "hose": "Tubo a mano",
+        "drip": "Goccia",
+        "overhead": "Dall'alto (irrigatori)",
+        "valve": "Valvola automatica"
+      }
     }
   },
   "services": {
@@ -338,6 +348,10 @@
         "soil_ec_entity": {
           "name": "Sensore EC suolo",
           "description": "Sensore di conducibilità elettrica di questa zona (per esempio un Ecowitt WH52)."
+        },
+        "watering": {
+          "name": "Come si bagna",
+          "description": "Solo pioggia, annaffiatoio, tubo, goccia, dall'alto o valvola automatica; vuoto = come la zona sopra."
         }
       }
     },
@@ -388,6 +402,10 @@
         "soil_ec_entity": {
           "name": "Sensore EC suolo",
           "description": "Sensore di conducibilità elettrica di questa zona (per esempio un Ecowitt WH52)."
+        },
+        "watering": {
+          "name": "Come si bagna",
+          "description": "Solo pioggia, annaffiatoio, tubo, goccia, dall'alto o valvola automatica; vuoto = come la zona sopra."
         }
       }
     },
@@ -524,6 +542,10 @@
         "row_to": {
           "name": "Fine della fila",
           "description": "Una fila di piante: l'altra estremità come [longitudine, latitudine]; la posizione è l'inizio della fila."
+        },
+        "watering": {
+          "name": "Come si bagna",
+          "description": "Solo pioggia, annaffiatoio, tubo, goccia, dall'alto o valvola automatica; vuoto = come la zona sopra."
         }
       }
     },
@@ -654,6 +676,10 @@
         "row_to": {
           "name": "Fine della fila",
           "description": "Una fila di piante: l'altra estremità come [longitudine, latitudine]; la posizione è l'inizio della fila."
+        },
+        "watering": {
+          "name": "Come si bagna",
+          "description": "Solo pioggia, annaffiatoio, tubo, goccia, dall'alto o valvola automatica; vuoto = come la zona sopra."
         }
       }
     },
@@ -1464,6 +1490,8 @@
     "better_on": "meglio il {date}",
     "notification_compost": "♻️ {zone}: rivoltare il compost ({days} giorni dall'ultima volta)",
     "notification_tool": "🔧 {tool}: manutenzione da fare",
-    "notification_water": "🪴 Da annaffiare: {plants}"
+    "notification_water": "🪴 Da annaffiare: {plants}",
+    "notification_dry_zones": "💧 Da annaffiare oggi: {zones}",
+    "notification_young": "🌳 {plant}: niente acqua da {days} giorni"
   }
 }

@@ -292,6 +292,16 @@
         "metric": "Metrisch (°C, mm, m, kg, l)",
         "imperial": "Imperial (°F, in, ft, lb, gal)"
       }
+    },
+    "watering_mode": {
+      "options": {
+        "none": "Nicht bewässert (nur Regen)",
+        "can": "Gießkanne",
+        "hose": "Schlauch",
+        "drip": "Tropfbewässerung",
+        "overhead": "Von oben (Regner)",
+        "valve": "Automatisches Ventil"
+      }
     }
   },
   "services": {
@@ -338,6 +348,10 @@
         "soil_ec_entity": {
           "name": "Boden-EC-Sensor",
           "description": "Leitfähigkeitssensor dieser Zone (zum Beispiel ein Ecowitt WH52)."
+        },
+        "watering": {
+          "name": "Bewässerung",
+          "description": "Nur Regen, Gießkanne, Schlauch, Tropf, von oben oder automatisches Ventil; leer = wie die übergeordnete Zone."
         }
       }
     },
@@ -388,6 +402,10 @@
         "soil_ec_entity": {
           "name": "Boden-EC-Sensor",
           "description": "Leitfähigkeitssensor dieser Zone (zum Beispiel ein Ecowitt WH52)."
+        },
+        "watering": {
+          "name": "Bewässerung",
+          "description": "Nur Regen, Gießkanne, Schlauch, Tropf, von oben oder automatisches Ventil; leer = wie die übergeordnete Zone."
         }
       }
     },
@@ -524,6 +542,10 @@
         "row_to": {
           "name": "Reihenende",
           "description": "Eine Pflanzenreihe: das andere Ende als [Längengrad, Breitengrad]; die Position ist der Reihenanfang."
+        },
+        "watering": {
+          "name": "Bewässerung",
+          "description": "Nur Regen, Gießkanne, Schlauch, Tropf, von oben oder automatisches Ventil; leer = wie die übergeordnete Zone."
         }
       }
     },
@@ -654,6 +676,10 @@
         "row_to": {
           "name": "Reihenende",
           "description": "Eine Pflanzenreihe: das andere Ende als [Längengrad, Breitengrad]; die Position ist der Reihenanfang."
+        },
+        "watering": {
+          "name": "Bewässerung",
+          "description": "Nur Regen, Gießkanne, Schlauch, Tropf, von oben oder automatisches Ventil; leer = wie die übergeordnete Zone."
         }
       }
     },
@@ -1464,6 +1490,8 @@
     "better_on": "besser am {date}",
     "notification_compost": "♻️ {zone}: Kompost umsetzen ({days} Tage seit dem letzten Mal)",
     "notification_tool": "🔧 {tool}: Wartung fällig",
-    "notification_water": "🪴 Zu gießen: {plants}"
+    "notification_water": "🪴 Zu gießen: {plants}",
+    "notification_dry_zones": "💧 Heute gießen: {zones}",
+    "notification_young": "🌳 {plant}: seit {days} Tagen kein Wasser"
   }
 }

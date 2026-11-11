@@ -6,7 +6,7 @@ const ZONE_KINDS = ["vegetable_garden", "orchard", "flower_bed", "greenhouse", "
 
 const TEXT = {};
 // Metric or imperial: set from the integration options (auto = as Home Assistant). Data stays metric.
-const UNITS = { imperial: false };
+const UNITS = { imperial: false, comma: false };
 // Panel texts, one file per language in i18n/ (English as fallback), loaded before the first render.
 const VERSION = new URL(import.meta.url).search;
 async function loadTexts(lang) {
@@ -102,6 +102,8 @@ const QUANTITY_UNITS = {
 const IMPERIAL_UNITS = { harvest: ["lb", "oz", "pieces", "gal", "kg", "l"], foraging: ["lb", "oz", "pieces", "gal", "kg", "l"] };
 // Kinds with a "product" field, and its label.
 const PRODUCT_LABEL = { fertilizing: "product", treatment: "product", foraging: "what", wood_cutting: "essence", flock_in: "breed", animal_care: "feedOrCare" };
+const WATERING_MODES = ["none", "can", "hose", "drip", "overhead", "valve"];
+const WATERING_ICONS = { none: "🚫", can: "🪣", hose: "🧵", drip: "💧", overhead: "🌦️", valve: "🤖" };
 const POLLINATION_RANGE_M = 50;
 const MALE_WORDS = ["male", "maschio", "mâle", "männlich", "macho", "mannelijk", "tomuri", "matua", "chieftain"];
 // Fruit trees that set little fruit with their own pollen: another variety nearby is needed, except the self-fertile ones listed.
@@ -233,6 +235,22 @@ const STYLE = `
   .repeat-name { flex: 1; display: grid; }
   .care { border: 1px solid var(--divider-color); border-radius: 10px; padding: 6px 10px; display: grid; gap: 6px; }
   .care legend { font-weight: 700; padding: 0 4px; }
+  .today-box { border: 1px solid var(--divider-color); border-radius: 12px; padding: 10px 12px; margin: 8px 0; display: flex; flex-direction: column; gap: 8px; }
+  .today-box h3 { margin: 0; }
+  .today-group { display: flex; flex-direction: column; gap: 2px; }
+  .today-row { display: flex; align-items: center; gap: 8px; min-height: 40px; background: none; border: none; border-bottom: 1px solid var(--divider-color); border-radius: 0; text-align: left; padding: 4px 0; color: inherit; font: inherit; }
+  .today-row .main { flex: 1; }
+  .water-chip { border-radius: 12px; padding: 2px 10px; font-size: 12px; font-weight: 700; white-space: nowrap; background: #e7f2e8; color: #1f4d26; }
+  .water-chip.water { background: #e3eefb; color: #1f4f8a; }
+  .water-chip.soon { background: #fff1dc; color: #7a4a00; }
+  .water-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .water-tiles > div { display: flex; flex-direction: column; padding: 6px 8px; border-radius: 8px; background: var(--secondary-background-color, #f4f5f2); }
+  .water-bars { display: flex; align-items: flex-end; gap: 2px; height: 80px; border-bottom: 1px solid var(--divider-color); }
+  .water-day { flex: 1; display: flex; gap: 1px; align-items: flex-end; height: 100%; }
+  .water-day.future { opacity: .45; }
+  .water-day i { flex: 1; border-radius: 2px 2px 0 0; min-height: 1px; }
+  .water-day i.rain { background: #3f7fbf; }
+  .water-day i.et { background: #e08a2c; }
   .plan-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
   .plan-wrap { border: 1px solid var(--divider-color); border-radius: 12px; overflow: hidden; background: #fbfbf8; margin: 8px 0; }
   svg.plan { display: block; width: 100%; height: min(62vh, 560px); touch-action: none; user-select: none; }
@@ -1179,6 +1197,7 @@ class HomesteadPanel extends HTMLElement {
       fertilize_weeks: values.fertilize_weeks ? Number(values.fertilize_weeks) : null,
       moisture_entity: values.moisture_entity || null,
       moisture_min: values.moisture_min ? Number(values.moisture_min) : null,
+      watering: values.watering || null,
       notes: values.notes?.trim() || null,
     };
     if (this._form.id) {
@@ -1212,6 +1231,7 @@ class HomesteadPanel extends HTMLElement {
       species: this._zoneForm.species || [],
       notes: values.notes?.trim() || null,
       ...Object.fromEntries(SOIL_SENSOR_FIELDS.map(([, attr]) => [attr, values[attr] || null])),
+      watering: values.watering || null,
     };
     const id = this._zoneForm.id;
     if (id) {
@@ -1399,6 +1419,7 @@ class HomesteadPanel extends HTMLElement {
 
   _render() {
     if (!this._aside) return;
+    UNITS.comma = this._decimalComma();
     this._tabsEl.replaceChildren(this._renderTabs());
     this._renderBanner();
     this._showMessage(this._message.text, this._message.error);
@@ -1866,6 +1887,7 @@ class HomesteadPanel extends HTMLElement {
         h("div", { className: "row" }, kind, quantity),
         this._datesFields(f),
         this._selectField(f, "zone_id", this._zoneOptions()),
+        this._waterSelect(f, this.t("wmLikeZone")),
         (careEl = this._careFields(f)),
         rotationEl,
         f.id ? this._selectField(f, "status", ["active", "dead", "removed"].map((s) => [s, this.t(s)])) : null,
@@ -3023,6 +3045,7 @@ class HomesteadPanel extends HTMLElement {
       this._lastBackupBox(),
       this._weatherStrip(),
       ...this._soilLines(),
+      this._todayBox(),
       this._alertsBox(),
       this._todoBox(soon, null, h("button", { type: "button", onclick: () => this._openTask({ kind: "note", due_on: today() }) }, this.t("addTask"))),
       later ? h("button", { type: "button", className: "link todo-later", onclick: () => this._setTab("calendar") }, this.t("todoLater", { count: later })) : null,
@@ -3776,6 +3799,159 @@ class HomesteadPanel extends HTMLElement {
     this._zoneTap = { id, latlng };
     this._syncMap();
     this._render();
+  }
+
+  // ---------- water ----------
+
+  _waterSelect(form, inherit) {
+    return this._selectField(form, "watering", [["", inherit], ...WATERING_MODES.map((m) => [m, `${WATERING_ICONS[m]} ${this.t(`wm_${m}`)}`])]);
+  }
+
+  /** "✨ Today in the garden": what the weather and the sensors say, nothing to fill in. */
+  _todayBox() {
+    const water = this._outlook?.water;
+    if (!water) return null;
+    const zones = Object.entries(water.zones || {})
+      .map(([id, b]) => ({ zone: this._zone(id), b }))
+      .filter((x) => x.zone)
+      .sort((a, b) => b.b.deficit_mm - a.b.deficit_mm);
+    const young = (water.young || []).map((t) => ({ t, p: this._planting(t.planting_id) })).filter((x) => x.p);
+    const parts = [...this._climateLines()];
+    if (!zones.length && !young.length && !parts.length) return null;
+    const chip = (verdict) => h("span", { className: `water-chip ${verdict}` }, this.t(`water_${verdict}`));
+    const thirsty = young.filter((x) => x.t.verdict === "water");
+    return h(
+      "div",
+      { className: "today-box" },
+      h("h3", {}, `✨ ${this.t("todayTitle")}`),
+      zones.length
+        ? h(
+            "div",
+            { className: "today-group" },
+            h("strong", {}, `💧 ${this.t("waterTitle")}`),
+            zones.map(({ zone, b }) =>
+              h(
+                "button",
+                { type: "button", className: "today-row", onclick: () => this._selectZone(zone.id) },
+                h("span", { className: "main" }, `${ZONE_ICONS[zone.kind] || "📍"} ${zone.name}`),
+                h("span", { className: "sub" }, b.soil != null ? this.t("waterSoil", { value: Math.round(b.soil) }) : b.deficit_mm ? `−${rainText(b.deficit_mm)}` : this.t("waterEven")),
+                chip(b.verdict),
+              ),
+            ),
+          )
+        : null,
+      young.length
+        ? h(
+            "div",
+            { className: "today-group" },
+            h("strong", {}, `🌳 ${this.t("youngTitle")}`),
+            young.map(({ t, p }) =>
+              h(
+                "button",
+                { type: "button", className: "today-row", onclick: () => this._select(p.id) },
+                h("span", { className: "main" }, `${PLANT_ICONS[p.plant_type] || "🌳"} ${p.name}`),
+                h("span", { className: "sub" }, this.t("youngDry", { days: t.dry_days })),
+                chip(t.verdict),
+              ),
+            ),
+            thirsty.length
+              ? h(
+                  "button",
+                  {
+                    type: "button",
+                    className: "primary",
+                    onclick: async () => {
+                      let count = 0;
+                      for (const { p } of thirsty) if (await this._call("add_event", { kind: "watering", planting_id: p.id, done_on: today() })) count++;
+                      this._showMessage(`✓ ${this.t("wateredDone", { count })}`);
+                    },
+                  },
+                  `💧 ${this.t("youngWatered", { count: thirsty.length })}`,
+                )
+              : null,
+          )
+        : null,
+      parts.length ? h("div", { className: "today-group" }, parts) : null,
+    );
+  }
+
+  /** Filled in by block 3 (cold hours, degree days, daylight). */
+  _climateLines() {
+    return [];
+  }
+
+  /** Zone card: rain against evaporation, what is missing, and one tap to log the watering. */
+  _waterBox(zone) {
+    const top = this._topZone(zone.id);
+    const b = this._outlook?.water?.zones?.[top];
+    const days = this._outlook?.water?.days || [];
+    const mode = this._zoneWatering(zone.id);
+    if (mode === "none") return h("p", { className: "hint" }, `🚫 ${this.t("wm_none")}`);
+    if (!b) return null;
+    const now = today();
+    const shown = days.filter((d) => d.date >= addDays(now, -14) && d.date <= addDays(now, 3));
+    const max = Math.max(1, ...shown.map((d) => Math.max(d.rain_mm || 0, d.et0_mm || 0)));
+    const bars = h(
+      "div",
+      { className: "water-bars", "aria-hidden": "true" },
+      shown.map((d) =>
+        h(
+          "div",
+          { className: `water-day${d.date >= now ? " future" : ""}`, title: `${this._date(d.date, false)}: ${rainText(d.rain_mm || 0)} / ${rainText(d.et0_mm || 0)}` },
+          h("i", { className: "rain", style: `height:${((d.rain_mm || 0) / max) * 100}%` }),
+          h("i", { className: "et", style: `height:${((d.et0_mm || 0) / max) * 100}%` }),
+        ),
+      ),
+    );
+    const litres = b.deficit_mm;
+    return h(
+      "div",
+      { className: "seasons water-box" },
+      h("h3", {}, `💧 ${this.t("waterBalance")} `, h("span", { className: `water-chip ${b.verdict}` }, this.t(`water_${b.verdict}`))),
+      h(
+        "div",
+        { className: "water-tiles" },
+        h("div", {}, h("span", { className: "sub" }, this.t("waterRain")), h("strong", {}, rainText(b.rain_mm))),
+        h("div", {}, h("span", { className: "sub" }, this.t("waterEt")), h("strong", {}, rainText(b.et0_mm))),
+        h("div", {}, h("span", { className: "sub" }, this.t("waterMissing")), h("strong", {}, b.deficit_mm ? `−${rainText(b.deficit_mm)}` : "0")),
+      ),
+      bars,
+      h("div", { className: "sub" }, this.t("waterBarsHint")),
+      b.soil != null ? h("div", {}, `🌱 ${this.t("waterSoil", { value: Math.round(b.soil) })}`) : null,
+      litres >= 1 && b.verdict !== "ok" ? h("div", {}, this.t("waterLitres", { value: UNITS.imperial ? `${(litres * 0.0245).toFixed(2)} gal/ft²` : `${Math.round(litres)} l/m²` })) : null,
+      b.rain_next_mm >= 1 ? h("div", { className: "sub" }, this.t("waterComing", { value: rainText(b.rain_next_mm) })) : null,
+      b.watered ? h("div", { className: "sub" }, this.t("waterLast", { date: this._date(b.watered) })) : null,
+      h(
+        "button",
+        {
+          type: "button",
+          className: "primary",
+          onclick: async () => {
+            if (await this._call("add_event", { kind: "watering", zone_id: zone.id, done_on: today() })) this._showMessage(`✓ ${this.t("waterLogged", { name: zone.name })}`);
+          },
+        },
+        `💧 ${this.t("waterLog")}`,
+      ),
+    );
+  }
+
+  _topZone(zoneId) {
+    let z = this._zone(zoneId);
+    const seen = new Set();
+    while (z?.parent_id && this._zone(z.parent_id) && !seen.has(z.id)) {
+      seen.add(z.id);
+      z = this._zone(z.parent_id);
+    }
+    return z?.id;
+  }
+
+  _zoneWatering(zoneId) {
+    const seen = new Set();
+    for (let z = this._zone(zoneId); z && !seen.has(z.id); z = this._zone(z.parent_id)) {
+      seen.add(z.id);
+      if (z.watering) return z.watering;
+    }
+    return null;
   }
 
   // ---------- zone in plan ----------
@@ -8414,6 +8590,7 @@ class HomesteadPanel extends HTMLElement {
     const first = ["compost", "coop"].includes(z.kind);
     return [
       z.id && this._zoneHasSoil(z.id) ? this._soilLine(z.id) : null,
+      z.id && !["compost", "coop", "indoor", "woodland"].includes(z.kind) ? this._waterBox(z) : null,
       first ? box : null,
       h(
         "form",
@@ -8427,6 +8604,7 @@ class HomesteadPanel extends HTMLElement {
           this._selectField(z, "parent_id", this._zoneOptions(exclude)),
         ),
         essences,
+        ["compost", "coop", "indoor"].includes(z.kind) ? null : this._waterSelect(z, this.t(z.parent_id ? "wmInherit" : "wmUnset")),
         ["compost", "coop"].includes(z.kind) ? null : this._zoneSoilFields(z),
         this._notes(z),
         area ? h("div", { className: "hint" }, `${this.t("surface")}: ${area}`) : null,
@@ -8742,9 +8920,10 @@ function toCelsius(value) {
 
 function rainText(mm) {
   if (mm == null) return "";
-  if (!UNITS.imperial) return `${Math.round(mm * 10) / 10} mm`;
+  const text = (value) => (UNITS.comma ? String(value).replace(".", ",") : String(value));
+  if (!UNITS.imperial) return `${text(Math.round(mm * 10) / 10)} mm`;
   const inches = mm / 25.4;
-  return `${inches < 1 ? inches.toFixed(2) : inches.toFixed(1)} in`;
+  return `${text(inches < 1 ? inches.toFixed(2) : inches.toFixed(1))} in`;
 }
 
 function lengthText(cm) {

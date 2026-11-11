@@ -292,6 +292,16 @@
         "metric": "Metric (°C, mm, m, kg, l)",
         "imperial": "Imperial (°F, in, ft, lb, gal)"
       }
+    },
+    "watering_mode": {
+      "options": {
+        "none": "Not watered (rain only)",
+        "can": "Watering can",
+        "hose": "Hose",
+        "drip": "Drip",
+        "overhead": "From above (sprinklers)",
+        "valve": "Automatic valve"
+      }
     }
   },
   "services": {
@@ -338,6 +348,10 @@
         "soil_ec_entity": {
           "name": "Soil EC sensor",
           "description": "Electrical conductivity sensor of this zone (an Ecowitt WH52, for example)."
+        },
+        "watering": {
+          "name": "How it is watered",
+          "description": "Rain only, watering can, hose, drip, from above or an automatic valve; empty = as the zone above."
         }
       }
     },
@@ -388,6 +402,10 @@
         "soil_ec_entity": {
           "name": "Soil EC sensor",
           "description": "Electrical conductivity sensor of this zone (an Ecowitt WH52, for example)."
+        },
+        "watering": {
+          "name": "How it is watered",
+          "description": "Rain only, watering can, hose, drip, from above or an automatic valve; empty = as the zone above."
         }
       }
     },
@@ -524,6 +542,10 @@
         "row_to": {
           "name": "Row end",
           "description": "A row of plants: the other end as [longitude, latitude]; the position is where the row starts."
+        },
+        "watering": {
+          "name": "How it is watered",
+          "description": "Rain only, watering can, hose, drip, from above or an automatic valve; empty = as the zone above."
         }
       }
     },
@@ -654,6 +676,10 @@
         "row_to": {
           "name": "Row end",
           "description": "A row of plants: the other end as [longitude, latitude]; the position is where the row starts."
+        },
+        "watering": {
+          "name": "How it is watered",
+          "description": "Rain only, watering can, hose, drip, from above or an automatic valve; empty = as the zone above."
         }
       }
     },
@@ -1464,6 +1490,8 @@
     "better_on": "better on {date}",
     "notification_compost": "♻️ {zone}: turn the compost ({days} days since last time)",
     "notification_tool": "🔧 {tool}: service due",
-    "notification_water": "🪴 To water: {plants}"
+    "notification_water": "🪴 To water: {plants}",
+    "notification_dry_zones": "💧 To water today: {zones}",
+    "notification_young": "🌳 {plant}: no water for {days} days"
   }
 }

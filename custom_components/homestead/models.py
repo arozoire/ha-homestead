@@ -189,6 +189,15 @@ class HarvestUnit(StrEnum):
     GALLON = "gal"
 
 
+class WateringMode(StrEnum):
+    NONE = "none"  # rain only: old trees, meadow
+    CAN = "can"
+    HOSE = "hose"
+    DRIP = "drip"
+    OVERHEAD = "overhead"  # sprinklers: wet leaves
+    VALVE = "valve"  # automatic valve
+
+
 class ToolStatus(StrEnum):
     OK = "ok"
     NEEDS_SERVICE = "needs_service"
@@ -233,6 +242,7 @@ class Zone(_Record):
     soil_moisture_entity: str | None = None
     soil_temperature_entity: str | None = None
     soil_ec_entity: str | None = None
+    watering: str | None = None  # WateringMode; None = as the parent zone
 
 
 def clean_species(value: Any) -> list[dict[str, Any]]:
@@ -287,6 +297,7 @@ class Planting(_Record):
     longitude: float | None = None
     # A row of plants (a group): the other end, [longitude, latitude]; the position is where it starts.
     row_to: list[float] | None = None
+    watering: str | None = None  # WateringMode; None = as its zone
     status: str = PlantingStatus.ACTIVE
     moon_phase: str | None = None
     sown_moon_phase: str | None = None

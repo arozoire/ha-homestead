@@ -292,6 +292,16 @@
         "metric": "Métrique (°C, mm, m, kg, l)",
         "imperial": "Impérial (°F, in, ft, lb, gal)"
       }
+    },
+    "watering_mode": {
+      "options": {
+        "none": "Non arrosé (pluie seule)",
+        "can": "Arrosoir",
+        "hose": "Tuyau",
+        "drip": "Goutte-à-goutte",
+        "overhead": "Par aspersion",
+        "valve": "Vanne automatique"
+      }
     }
   },
   "services": {
@@ -338,6 +348,10 @@
         "soil_ec_entity": {
           "name": "Capteur EC du sol",
           "description": "Capteur de conductivité électrique de cette zone (un Ecowitt WH52, par exemple)."
+        },
+        "watering": {
+          "name": "Comment c'est arrosé",
+          "description": "Pluie seule, arrosoir, tuyau, goutte-à-goutte, par aspersion ou vanne automatique ; vide = comme la zone au-dessus."
         }
       }
     },
@@ -388,6 +402,10 @@
         "soil_ec_entity": {
           "name": "Capteur EC du sol",
           "description": "Capteur de conductivité électrique de cette zone (un Ecowitt WH52, par exemple)."
+        },
+        "watering": {
+          "name": "Comment c'est arrosé",
+          "description": "Pluie seule, arrosoir, tuyau, goutte-à-goutte, par aspersion ou vanne automatique ; vide = comme la zone au-dessus."
         }
       }
     },
@@ -524,6 +542,10 @@
         "row_to": {
           "name": "Fin du rang",
           "description": "Un rang de plantes : l'autre extrémité en [longitude, latitude] ; la position est le début du rang."
+        },
+        "watering": {
+          "name": "Comment c'est arrosé",
+          "description": "Pluie seule, arrosoir, tuyau, goutte-à-goutte, par aspersion ou vanne automatique ; vide = comme la zone au-dessus."
         }
       }
     },
@@ -654,6 +676,10 @@
         "row_to": {
           "name": "Fin du rang",
           "description": "Un rang de plantes : l'autre extrémité en [longitude, latitude] ; la position est le début du rang."
+        },
+        "watering": {
+          "name": "Comment c'est arrosé",
+          "description": "Pluie seule, arrosoir, tuyau, goutte-à-goutte, par aspersion ou vanne automatique ; vide = comme la zone au-dessus."
         }
       }
     },
@@ -1464,6 +1490,8 @@
     "better_on": "mieux le {date}",
     "notification_compost": "♻️ {zone} : retourner le compost ({days} jours depuis la dernière fois)",
     "notification_tool": "🔧 {tool} : entretien à faire",
-    "notification_water": "🪴 À arroser : {plants}"
+    "notification_water": "🪴 À arroser : {plants}",
+    "notification_dry_zones": "💧 À arroser aujourd'hui : {zones}",
+    "notification_young": "🌳 {plant} : pas d'eau depuis {days} jours"
   }
 }

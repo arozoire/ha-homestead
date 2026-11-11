@@ -37,7 +37,7 @@ from .const import (
     SIGNAL_OUTLOOK_UPDATED,
 )
 from .crops import crop_traits, full_table, load_cropgraph, load_defaults
-from .models import is_indoor
+from .models import is_indoor, zone_soil_sensors
 from .notify import async_send
 from .outlook import (
     YOUNG_DAYS,
@@ -54,6 +54,7 @@ from .outlook import (
 )
 from .store import HomesteadStore
 from .units import IMPERIAL, METRIC, resolve_units, temperature_text
+from .water import parse_water_days, young_trees, zones_balance
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -70,6 +71,7 @@ FORECAST_DAILY = (
     "wind_speed_10m_max,wind_gusts_10m_max,weather_code"
 )
 ARCHIVE_DAILY = "temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code"
+WATER_DAILY = "precipitation_sum,et0_fao_evapotranspiration"
 
 
 async def async_crop_defaults(hass: HomeAssistant) -> dict[str, dict[str, Any]]:
@@ -111,6 +113,45 @@ async def _open_meteo(hass: HomeAssistant, url: str, params: dict[str, Any]) -> 
     async with session.get(url, params=query, timeout=aiohttp.ClientTimeout(total=30)) as response:
         response.raise_for_status()
         return parse_open_meteo_daily(await response.json())
+
+
+async def async_fetch_water(hass: HomeAssistant, options: dict[str, Any]) -> list[dict[str, Any]]:
+    """Rain and evapotranspiration of the last two weeks and the next week (Open-Meteo only)."""
+    if not options.get(CONF_OPEN_METEO, True):
+        return []
+    session = async_get_clientsession(hass)
+    query = {
+        "latitude": hass.config.latitude,
+        "longitude": hass.config.longitude,
+        "timezone": "auto",
+        "daily": WATER_DAILY,
+        "past_days": 14,
+        "forecast_days": 7,
+    }
+    try:
+        async with session.get(
+            FORECAST_API, params=query, timeout=aiohttp.ClientTimeout(total=30)
+        ) as response:
+            response.raise_for_status()
+            return parse_water_days(await response.json())
+    except Exception as err:  # noqa: BLE001 - no balance this time, the rest of the outlook still works
+        _LOGGER.debug("Open-Meteo water balance failed: %s", err)
+        return []
+
+
+def _zone_moisture(hass: HomeAssistant, data: Any) -> dict[str, float]:
+    """Soil moisture now of each zone with its own (or a parent's) moisture sensor."""
+    out = {}
+    for zone in data.zones.values():
+        entity = zone_soil_sensors(data, zone.id).get("moisture")
+        state = hass.states.get(entity) if entity else None
+        try:
+            out[zone.id] = float(state.state) if state else None
+        except ValueError:
+            continue
+        if out[zone.id] is None:
+            del out[zone.id]
+    return out
 
 
 async def _forecast_from_entity(hass: HomeAssistant, entity_id: str) -> list[dict[str, Any]]:
@@ -229,6 +270,8 @@ class Outlook:
         self.source: str | None = None
         self.alerts: list[dict[str, Any]] = []
         self.advice: dict[str, dict[str, Any]] = {}
+        self.water_days: list[dict[str, Any]] = []
+        self.water: dict[str, Any] = {}
         self.climate: dict[str, Any] = {}
         self.updated: str | None = None
         self._notified: list[str] = []
@@ -280,6 +323,13 @@ class Outlook:
             verdict = advice(task.kind, self.forecast, task.due_on, tender_plant)
             if verdict is not None:
                 self.advice[task.id] = verdict
+        today = dt_util.now().date()
+        data = self.store.data
+        self.water = {
+            "days": self.water_days,
+            "zones": zones_balance(data, self.water_days, today, _zone_moisture(self.hass, data)),
+            "young": young_trees(data, self.water_days, today),
+        }
 
     def async_listen(self) -> Callable[[], None]:
         """Re-evaluate when plantings or tasks change; returns the unsubscribe."""
@@ -309,6 +359,7 @@ class Outlook:
         self.forecast, self.source = await async_fetch_forecast(self.hass, self.options)
         today = dt_util.now().date().isoformat()
         self.forecast = [d for d in self.forecast if d["date"] >= today]
+        self.water_days = await async_fetch_water(self.hass, self.options)
         await self._async_evaluate()
         if history or self._stale():
             self.climate = await async_history(self.hass, self.options, self.thresholds)
@@ -371,6 +422,7 @@ class Outlook:
             "source": self.source,
             "alerts": self.alerts,
             "advice": self.advice,
+            "water": self.water,
             "climate": self.climate,
             "thresholds": vars(self.thresholds),
             "updated": self.updated,

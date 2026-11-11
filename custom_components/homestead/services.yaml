@@ -50,6 +50,17 @@ add_zone:
       selector:
         entity:
           domain: sensor
+    watering:
+      selector:
+        select:
+          translation_key: watering_mode
+          options:
+            - none
+            - can
+            - hose
+            - drip
+            - overhead
+            - valve
 
 update_zone:
   fields:
@@ -106,6 +117,17 @@ update_zone:
       selector:
         entity:
           domain: sensor
+    watering:
+      selector:
+        select:
+          translation_key: watering_mode
+          options:
+            - none
+            - can
+            - hose
+            - drip
+            - overhead
+            - valve
 
 delete_zone:
   fields:
@@ -229,6 +251,17 @@ add_planting:
       example: "[7.68612, 45.07031]"
       selector:
         object:
+    watering:
+      selector:
+        select:
+          translation_key: watering_mode
+          options:
+            - none
+            - can
+            - hose
+            - drip
+            - overhead
+            - valve
     price:
       selector:
         number:
@@ -401,6 +434,17 @@ update_planting:
       example: "[7.68612, 45.07031]"
       selector:
         object:
+    watering:
+      selector:
+        select:
+          translation_key: watering_mode
+          options:
+            - none
+            - can
+            - hose
+            - drip
+            - overhead
+            - valve
     status:
       selector:
         select:

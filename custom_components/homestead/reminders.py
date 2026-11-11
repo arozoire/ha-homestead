@@ -68,12 +68,23 @@ async def async_send_reminders(hass: HomeAssistant, store: HomesteadStore, servi
         key=lambda t: t.name,
     )
     thirsty = watering_due(store.data, now, _moisture(hass, store))
-    if not services or not (due or late or compost or tools or thirsty):
+    outlook = get_outlook(hass)
+    water = outlook.water if outlook else {}
+    dry_zones = [
+        store.data.zones[z]
+        for z, b in (water.get("zones") or {}).items()
+        if b["verdict"] == "water" and z in store.data.zones
+    ]
+    dry_trees = [
+        (store.data.plantings[t["planting_id"]], t["dry_days"])
+        for t in water.get("young") or []
+        if t["verdict"] == "water" and t["planting_id"] in store.data.plantings
+    ]
+    if not services or not (due or late or compost or tools or thirsty or dry_zones or dry_trees):
         return 0
     kinds = await async_kind_names(hass)
     texts = await _texts(hass)
     title = texts.get("notification_title", "Garden")
-    outlook = get_outlook(hass)
 
     def text(task) -> str:
         weather = advice_text(outlook.advice.get(task.id) if outlook else None, texts)
@@ -113,6 +124,27 @@ async def async_send_reminders(hass: HomeAssistant, store: HomesteadStore, servi
                     "{plants}", ", ".join(p.name for p in thirsty)
                 ),
                 "data": {"url": PANEL_URL, "clickAction": PANEL_URL, "tag": f"{DOMAIN}-water"},
+            }
+        )
+    if dry_zones or dry_trees:
+        lines = []
+        if dry_zones:
+            lines.append(
+                texts.get("notification_dry_zones", "💧 To water today: {zones}").replace(
+                    "{zones}", ", ".join(z.name for z in dry_zones)
+                )
+            )
+        for planting, days in dry_trees:
+            lines.append(
+                texts.get("notification_young", "🌳 {plant}: no water for {days} days")
+                .replace("{plant}", planting.name)
+                .replace("{days}", str(days))
+            )
+        messages.append(
+            {
+                "title": title,
+                "message": "\n".join(lines),
+                "data": {"url": PANEL_URL, "clickAction": PANEL_URL, "tag": f"{DOMAIN}-dry"},
             }
         )
     for tool in tools:
