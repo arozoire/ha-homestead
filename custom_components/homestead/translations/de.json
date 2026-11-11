@@ -520,6 +520,10 @@
         "notes": {
           "name": "Notizen",
           "description": "Freie Notizen."
+        },
+        "row_to": {
+          "name": "Reihenende",
+          "description": "Eine Pflanzenreihe: das andere Ende als [Längengrad, Breitengrad]; die Position ist der Reihenanfang."
         }
       }
     },
@@ -646,6 +650,10 @@
         "notes": {
           "name": "Notizen",
           "description": "Freie Notizen."
+        },
+        "row_to": {
+          "name": "Reihenende",
+          "description": "Eine Pflanzenreihe: das andere Ende als [Längengrad, Breitengrad]; die Position ist der Reihenanfang."
         }
       }
     },

@@ -520,6 +520,10 @@
         "notes": {
           "name": "Notas",
           "description": "Notas libres."
+        },
+        "row_to": {
+          "name": "Final de la hilera",
+          "description": "Una hilera de plantas: el otro extremo como [longitud, latitud]; la posición es el inicio de la hilera."
         }
       }
     },
@@ -646,6 +650,10 @@
         "notes": {
           "name": "Notas",
           "description": "Notas libres."
+        },
+        "row_to": {
+          "name": "Final de la hilera",
+          "description": "Una hilera de plantas: el otro extremo como [longitud, latitud]; la posición es el inicio de la hilera."
         }
       }
     },

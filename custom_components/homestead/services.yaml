@@ -225,6 +225,10 @@ add_planting:
           max: 180
           step: any
           mode: box
+    row_to:
+      example: "[7.68612, 45.07031]"
+      selector:
+        object:
     price:
       selector:
         number:
@@ -393,6 +397,10 @@ update_planting:
           max: 180
           step: any
           mode: box
+    row_to:
+      example: "[7.68612, 45.07031]"
+      selector:
+        object:
     status:
       selector:
         select:

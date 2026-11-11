@@ -109,6 +109,7 @@ ADD_PLANTING_SCHEMA = vol.Schema(
         vol.Optional("zone_id"): _opt_str,
         vol.Optional("latitude"): vol.Any(None, cv.latitude),
         vol.Optional("longitude"): vol.Any(None, cv.longitude),
+        vol.Optional("row_to"): vol.Any(None, vol.All([vol.Coerce(float)], vol.Length(min=2, max=2))),
         vol.Optional("seed_lot_id"): _opt_str,
         vol.Optional("sown_count"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1))),
         vol.Optional("germinated_on"): _opt_date,

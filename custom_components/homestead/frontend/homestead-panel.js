@@ -102,6 +102,19 @@ const QUANTITY_UNITS = {
 const IMPERIAL_UNITS = { harvest: ["lb", "oz", "pieces", "gal", "kg", "l"], foraging: ["lb", "oz", "pieces", "gal", "kg", "l"] };
 // Kinds with a "product" field, and its label.
 const PRODUCT_LABEL = { fertilizing: "product", treatment: "product", foraging: "what", wood_cutting: "essence", flock_in: "breed", animal_care: "feedOrCare" };
+const POLLINATION_RANGE_M = 50;
+const MALE_WORDS = ["male", "maschio", "mâle", "männlich", "macho", "mannelijk", "tomuri", "matua", "chieftain"];
+// Fruit trees that set little fruit with their own pollen: another variety nearby is needed, except the self-fertile ones listed.
+const POLLINATION = {
+  "prunus avium": { partners: ["prunus avium"], self: ["lapins", "stella", "sunburst", "sweetheart", "skeena", "celeste", "santina", "sunset", "black star"] },
+  "malus domestica": { partners: ["malus"], self: [] },
+  "pyrus communis": { partners: ["pyrus"], self: ["conference"] },
+  "prunus dulcis": { partners: ["prunus dulcis"], self: ["tuono", "lauranne", "guara", "soleta", "belona", "independence", "avijor"] },
+  "corylus avellana": { partners: ["corylus"], self: [] },
+  "actinidia deliciosa": { partners: ["actinidia"], dioecious: true, self: [] },
+  "actinidia chinensis": { partners: ["actinidia"], dioecious: true, self: [] },
+  "actinidia arguta": { partners: ["actinidia"], dioecious: true, self: ["issai"] },
+};
 const PLANT_ICONS = { tree: "🌳", fruit_tree: "🍎", shrub: "🍃", vine: "🍇", vegetable: "🥕", herb: "🌿", flower: "🌸", houseplant: "🪴", other: "🌱" };
 // Years seeds usually keep germinating well, by botanical family (default 3).
 const SEED_VIABILITY = {
@@ -220,6 +233,34 @@ const STYLE = `
   .repeat-name { flex: 1; display: grid; }
   .care { border: 1px solid var(--divider-color); border-radius: 10px; padding: 6px 10px; display: grid; gap: 6px; }
   .care legend { font-weight: 700; padding: 0 4px; }
+  .plan-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .plan-wrap { border: 1px solid var(--divider-color); border-radius: 12px; overflow: hidden; background: #fbfbf8; margin: 8px 0; }
+  svg.plan { display: block; width: 100%; height: min(62vh, 560px); touch-action: none; user-select: none; }
+  svg.plan.placing { cursor: crosshair; }
+  .plan-grid { fill: none; stroke: #e6e9e2; stroke-width: 1; vector-effect: non-scaling-stroke; }
+  .plan-grid.major { stroke: #cfd5c8; }
+  .plan-zone { fill: rgba(122, 163, 90, .12); stroke: #3a7d44; stroke-width: 2.5; vector-effect: non-scaling-stroke; }
+  .plan-bed { fill: rgba(122, 163, 90, .22); stroke: #7aa35a; stroke-width: 1.5; stroke-dasharray: 5 4; vector-effect: non-scaling-stroke; }
+  .plan-bed.new { fill: rgba(255, 166, 0, .18); stroke: #c77700; }
+  .plan-side, .plan-label { fill: #1f2420; font-weight: 700; paint-order: stroke; stroke: #fbfbf8; stroke-width: 3px; vector-effect: non-scaling-stroke; }
+  .plan-plant { cursor: grab; }
+  .plan-dot { fill: #fff; stroke: #3a7d44; stroke-width: 2; vector-effect: non-scaling-stroke; }
+  .plan-plant.selected .plan-dot { stroke: #f9a825; stroke-width: 4; }
+  .plan-reach { fill: rgba(58, 125, 68, .07); stroke: #3a7d44; stroke-opacity: .45; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+  .plan-row { stroke: #6a8f2a; stroke-width: 5; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+  .plan-bad { stroke: #c0392b; stroke-width: 2; stroke-dasharray: 5 3; vector-effect: non-scaling-stroke; }
+  .plan-bad-text { fill: #8f2b17; font-weight: 700; paint-order: stroke; stroke: #fff; stroke-width: 3px; vector-effect: non-scaling-stroke; }
+  .plan-measure { stroke: #5b6358; stroke-width: 1.5; stroke-dasharray: 3 2; vector-effect: non-scaling-stroke; }
+  .plan-zoom { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .plan-zoom button { min-width: 44px; min-height: 40px; }
+  .plan-bar { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .plan-tools { display: flex; gap: 6px; flex-wrap: wrap; }
+  .plan-tools button { flex: 1 1 100px; min-height: 44px; }
+  .plan-info { display: flex; flex-direction: column; gap: 2px; padding: 8px; border: 1px solid var(--divider-color); border-radius: 10px; }
+  .plan-sides { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .seg { display: flex; border: 1px solid var(--divider-color); border-radius: 10px; overflow: hidden; }
+  .seg button { flex: 1; border: none; border-radius: 0; min-height: 40px; }
+  .seg button.on { background: var(--homestead-accent, #3a7d44); color: #fff; font-weight: 700; }
   .sow-button { flex: none; border-radius: 20px; font-weight: 700; align-self: center; }
   .seed-filters input[type=search] { flex: 1 1 140px; min-width: 0; }
   .bulk-bar { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px; margin: 6px 0; border-radius: 10px; background: var(--secondary-background-color, #eef0ec); }
@@ -688,6 +729,7 @@ class HomesteadPanel extends HTMLElement {
       .addTo(this._map);
     L.circleMarker([latitude, longitude], { radius: 5, color: "#2196f3", interactive: false }).addTo(this._map);
     this._zoneLayer = L.layerGroup().addTo(this._map);
+    this._rowLayer = L.layerGroup().addTo(this._map);
     this._previewLayer = L.layerGroup().addTo(this._map);
     this._map.on("click", (ev) => this._mapClick(ev.latlng));
     new ResizeObserver(() => this._map.invalidateSize()).observe(this._mapWrap);
@@ -836,7 +878,8 @@ class HomesteadPanel extends HTMLElement {
     const candidates = [...this._data.zones, ...extra].filter(
       (z) => z.geometry && containsPoint(z.geometry, lng, lat),
     );
-    candidates.sort((a, b) => (a.area_m2 ?? Infinity) - (b.area_m2 ?? Infinity));
+    const area = (z) => z.area_m2 ?? polygonArea(z.geometry) ?? Infinity;
+    candidates.sort((a, b) => area(a) - area(b));
     return candidates[0]?.id ?? null;
   }
 
@@ -885,6 +928,11 @@ class HomesteadPanel extends HTMLElement {
 
   _syncMarkers() {
     const seen = new Set();
+    this._rowLayer?.clearLayers();
+    for (const p of this._data.plantings) {
+      if (p.row_to && hasPosition(p) && p.status === "active")
+        L.polyline([[p.latitude, p.longitude], [p.row_to[1], p.row_to[0]]], { color: "#6a8f2a", weight: 4, interactive: false }).addTo(this._rowLayer);
+    }
     for (const p of this._data.plantings) {
       if (!hasPosition(p) || (!this._showGone() && p.status !== "active" && p.id !== this._selected)) continue;
       seen.add(p.id);
@@ -973,6 +1021,7 @@ class HomesteadPanel extends HTMLElement {
   _setTab(tab) {
     if (tab === "expenses" && this._tab !== "expenses") this._expenseYear = undefined;
     if (tab !== "photos") this._planDraft = null;
+    this._plan = null;
     if (tab === "plantings" || tab === "zones") this._mapTab = tab;
     this._tab = tab;
     this._close();
@@ -1065,7 +1114,7 @@ class HomesteadPanel extends HTMLElement {
     this._newPlantingAt(latlng);
   }
 
-  _newPlantingAt(latlng, zoneId = this._zoneAt(latlng.lat, latlng.lng)) {
+  _newPlantingAt(latlng, zoneId = this._zoneAt(latlng.lat, latlng.lng), extra = {}) {
     this._clearSelection();
     this._showMessage("");
     this._tab = "plantings";
@@ -1081,6 +1130,7 @@ class HomesteadPanel extends HTMLElement {
       plant_type: ZONE_PLANT_TYPE[this._zone(zoneId)?.kind] || null,
       latitude: latlng.lat,
       longitude: latlng.lng,
+      ...extra,
     };
     this._syncMap();
     this._render();
@@ -1142,6 +1192,7 @@ class HomesteadPanel extends HTMLElement {
       }
       if (values.price) data.price = Number(values.price);
       if (values.supplier?.trim()) data.supplier = values.supplier.trim();
+      if (this._form.row_to) data.row_to = this._form.row_to;
       const result = await this._call("add_planting", data);
       if (result) this._saved(data.name);
     }
@@ -1366,6 +1417,7 @@ class HomesteadPanel extends HTMLElement {
     else if (this._transplantForm) content = this._renderTransplantForm();
     else if (this._zoneTap) content = this._renderZoneTap();
     else if (this._shot) content = this._renderShot();
+    else if (this._plan) content = this._renderPlan();
     else {
       const back = h("button", { type: "button", className: "back", onclick: () => this._setTab("more") }, `‹ ${this.t("tabMore")}`);
       const lists = {
@@ -1383,7 +1435,7 @@ class HomesteadPanel extends HTMLElement {
       content = (lists[this._tab] || lists.diary)();
     }
     // The map only where it is used: plantings and zones, and their cards.
-    const wide = !(["plantings", "zones"].includes(this._tab) || this._form || this._zoneForm);
+    const wide = !!(this._plan && !this._form && !this._zoneForm) || !(["plantings", "zones"].includes(this._tab) || this._form || this._zoneForm);
     this._calendarOn = this._tab === "calendar" && content[0] === this._calWrap;
     this._content.replaceChildren(...content.filter(Boolean));
     if (this._calendarOn) this._renderCalendar();
@@ -1849,6 +1901,7 @@ class HomesteadPanel extends HTMLElement {
       f.id ? this._plantingActions(f) : null,
       f.id ? this._plantingExpenses(f) : null,
       f.id ? (this._cropEl = h("div", {}, this._cropBox(f))) : null,
+      f.id && this._pollination(f) ? h("p", { className: this._pollination(f).startsWith("⚠️") ? "alert-line" : "hint" }, this._pollination(f)) : null,
       f.id ? this._careNotes(f) : null,
       f.id ? this._photoHistoryBox(f.id) : null,
       f.id ? (this._seasonsEl = h("div", {}, this._seasonsBox(f))) : null,
@@ -3725,6 +3778,551 @@ class HomesteadPanel extends HTMLElement {
     this._render();
   }
 
+  // ---------- zone in plan ----------
+
+  /** A flat frame in metres around the zone: x to the east, y to the south (as SVG). */
+  _planFrame(zone) {
+    const ring = zone.geometry.coordinates[0];
+    const lons = ring.map((c) => c[0]);
+    const lats = ring.map((c) => c[1]);
+    const lon0 = (Math.min(...lons) + Math.max(...lons)) / 2;
+    const lat0 = (Math.min(...lats) + Math.max(...lats)) / 2;
+    const kx = 111320 * Math.cos((lat0 * Math.PI) / 180);
+    const ky = 110540;
+    return {
+      xy: (lon, lat) => [(lon - lon0) * kx, (lat0 - lat) * ky],
+      lonlat: (x, y) => [round(lon0 + x / kx), round(lat0 - y / ky)],
+    };
+  }
+
+  _openPlan(zoneId) {
+    const zone = this._zone(zoneId);
+    if (!zone?.geometry) {
+      this._showMessage(this.t("planNoShape"), true);
+      return;
+    }
+    this._clearSelection();
+    this._showMessage("");
+    this._plan = { zoneId, view: null, mode: null, kind: "one", pick: "", spacing: null, rowStart: null, selected: null, bed: null };
+    this._syncMap();
+    this._render();
+  }
+
+  /** Plants of the zone and of the zones inside it, with a position, in metres. */
+  _planPlants(zoneId, frame) {
+    const inside = new Set([zoneId, ...this._zoneDescendants(zoneId)]);
+    return this._data.plantings
+      .filter((p) => p.status === "active" && hasPosition(p) && inside.has(p.zone_id))
+      .map((p) => {
+        const [x, y] = frame.xy(p.longitude, p.latitude);
+        const end = p.row_to ? frame.xy(p.row_to[0], p.row_to[1]) : null;
+        const spacing = this._crop(p.species)?.spacing_cm;
+        return { p, x, y, end, r: spacing ? spacing / 200 : null };
+      });
+  }
+
+  /** Pairs closer than 1 m whose crops harm each other (CropGraph "bad" companions). */
+  _badPairs(items) {
+    const out = [];
+    for (let i = 0; i < items.length; i++) {
+      for (let j = i + 1; j < items.length; j++) {
+        const a = items[i];
+        const b = items[j];
+        const d = itemDistance(a, b);
+        if (d > 1) continue;
+        const ka = this._cropKey(a.p.species);
+        const kb = this._cropKey(b.p.species);
+        if (!ka || !kb || ka === kb) continue;
+        if (this._crop(a.p.species)?.bad?.includes(kb) || this._crop(b.p.species)?.bad?.includes(ka)) out.push({ a, b, d });
+      }
+    }
+    return out;
+  }
+
+  _metres(m, digits = 2) {
+    return UNITS.imperial ? `${(m * 3.28084).toFixed(1)} ft` : `${m.toFixed(digits).replace(".", this._decimalComma() ? "," : ".")} m`;
+  }
+
+  _decimalComma() {
+    return (0.5).toLocaleString(this._lang()).includes(",");
+  }
+
+  /** A length typed by the user (m or ft) back to metres. */
+  _toMetres(value) {
+    const n = Number(String(value).replace(",", "."));
+    return Number.isFinite(n) ? (UNITS.imperial ? n / 3.28084 : n) : NaN;
+  }
+
+  _fromMetres(m) {
+    return Math.round((UNITS.imperial ? m * 3.28084 : m) * 100) / 100;
+  }
+
+  _renderPlan() {
+    const plan = this._plan;
+    const zone = this._zone(plan.zoneId);
+    if (!zone?.geometry) {
+      this._plan = null;
+      return this._renderZoneList();
+    }
+    const frame = this._planFrame(zone);
+    const outline = zone.geometry.coordinates[0].slice(0, -1).map(([lon, lat]) => frame.xy(lon, lat));
+    const xs = outline.map((p) => p[0]);
+    const ys = outline.map((p) => p[1]);
+    const bounds = { x: Math.min(...xs), y: Math.min(...ys), w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) };
+    plan.view ??= { x: bounds.x - 1, y: bounds.y - 1, w: bounds.w + 2, h: bounds.h + 2 };
+    const items = this._planPlants(zone.id, frame);
+    const beds = [...this._zoneDescendants(zone.id)].map((id) => this._zone(id)).filter((z) => z?.geometry);
+    const bad = this._badPairs(items);
+    const svg = this._planSvg(zone, frame, outline, items, beds, bad);
+    const area = formatArea(zone.area_m2 ?? polygonArea(zone.geometry));
+    return [
+      h(
+        "div",
+        { className: "plan-head" },
+        h("button", { type: "button", className: "back", onclick: () => ((this._plan = null), this._selectZone(zone.id)) }, `‹ ${zone.name}`),
+        h("span", { className: "sub" }, [`${this._metres(bounds.w, 1)} × ${this._metres(bounds.h, 1)}`, area, this.t("planCount", { count: items.length })].filter(Boolean).join(" · ")),
+      ),
+      h("div", { className: "plan-wrap" }, svg),
+      h(
+        "div",
+        { className: "plan-zoom" },
+        h("button", { type: "button", "aria-label": this.t("planZoomIn"), onclick: () => this._planZoom(0.6) }, "＋"),
+        h("button", { type: "button", "aria-label": this.t("planZoomOut"), onclick: () => this._planZoom(1 / 0.6) }, "－"),
+        h("button", { type: "button", onclick: () => ((plan.view = null), this._render()) }, this.t("planFit")),
+        h("span", { className: "sub" }, this.t("planGrid", { step: this._metres(this._planStep(), this._planStep() < 1 ? 1 : 0) })),
+      ),
+      this._planBar(zone, frame, outline, items, beds, bad),
+    ];
+  }
+
+  _planStep() {
+    const w = this._plan.view.w;
+    return w > 40 ? 5 : w > 8 ? 1 : 0.1;
+  }
+
+  _planZoom(factor) {
+    const v = this._plan.view;
+    const cx = v.x + v.w / 2;
+    const cy = v.y + v.h / 2;
+    const w = Math.min(Math.max(v.w * factor, 0.6), 400);
+    const k = w / v.w;
+    this._plan.view = { x: cx - (v.w * k) / 2, y: cy - (v.h * k) / 2, w: v.w * k, h: v.h * k };
+    this._render();
+  }
+
+  _planSvg(zone, frame, outline, items, beds, bad) {
+    const NS = "http://www.w3.org/2000/svg";
+    const s = (tag, attrs = {}, ...children) => {
+      const el = document.createElementNS(NS, tag);
+      for (const [k, v] of Object.entries(attrs)) if (v !== null && v !== undefined) el.setAttribute(k, v);
+      el.append(...children.flat().filter(Boolean));
+      return el;
+    };
+    const plan = this._plan;
+    const v = plan.view;
+    const unit = v.w / 60; // about one "pixel" of the drawing, for text and dots
+    const step = this._planStep();
+    const grid = [];
+    const lines = (from, to, every) => {
+      const out = [];
+      for (let t = Math.ceil(from / every) * every; t <= to; t += every) out.push(t);
+      return out;
+    };
+    let minor = "";
+    let major = "";
+    // The drawing keeps its proportions in a box of another shape: the grid covers well beyond the view.
+    const g = { x: v.x - v.w * 2, y: v.y - v.h * 2, w: v.w * 5, h: v.h * 5 };
+    for (const x of lines(g.x, g.x + g.w, step)) (Math.abs(x - Math.round(x)) < 1e-6 && step < 1 ? (major += `M${x} ${g.y}V${g.y + g.h}`) : (minor += `M${x} ${g.y}V${g.y + g.h}`));
+    for (const y of lines(g.y, g.y + g.h, step)) (Math.abs(y - Math.round(y)) < 1e-6 && step < 1 ? (major += `M${g.x} ${y}H${g.x + g.w}`) : (minor += `M${g.x} ${y}H${g.x + g.w}`));
+    grid.push(s("path", { d: minor, class: "plan-grid" }), s("path", { d: major, class: "plan-grid major" }));
+    const pts = (list) => list.map((p) => p.join(",")).join(" ");
+    const sides = outline.map((p, i) => {
+      const q = outline[(i + 1) % outline.length];
+      const len = Math.hypot(q[0] - p[0], q[1] - p[1]);
+      return s("text", { x: (p[0] + q[0]) / 2, y: (p[1] + q[1]) / 2, class: "plan-side", "font-size": unit * 2.2, "text-anchor": "middle" }, this._metres(len));
+    });
+    const bedEls = beds.map((b) => {
+      const ring = b.geometry.coordinates[0].slice(0, -1).map(([lon, lat]) => frame.xy(lon, lat));
+      const cx = ring.reduce((a, p) => a + p[0], 0) / ring.length;
+      const top = Math.min(...ring.map((p) => p[1]));
+      return s("g", {}, s("polygon", { points: pts(ring), class: "plan-bed" }), s("text", { x: cx, y: top + unit * 2.6, class: "plan-label", "font-size": unit * 2, "text-anchor": "middle" }, b.name));
+    });
+    const badEls = bad.map(({ a, b, d }) =>
+      s("g", {}, s("line", { x1: a.x, y1: a.y, x2: b.x, y2: b.y, class: "plan-bad" }), s("text", { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 - unit, class: "plan-bad-text", "font-size": unit * 2, "text-anchor": "middle" }, `${Math.round(d * 100)} cm`)),
+    );
+    const plantEls = items.map((it) => {
+      const selected = plan.selected === it.p.id;
+      const icon = PLANT_ICONS[it.p.plant_type] || "🌱";
+      return s(
+        "g",
+        { "data-id": it.p.id, class: `plan-plant${selected ? " selected" : ""}`, transform: `translate(${it.x} ${it.y})` },
+        it.end ? s("line", { x1: 0, y1: 0, x2: it.end[0] - it.x, y2: it.end[1] - it.y, class: "plan-row" }) : null,
+        it.r ? s("circle", { r: it.r, class: "plan-reach" }) : null,
+        s("circle", { r: unit * 1.6, class: "plan-dot" }),
+        s("text", { y: unit * 0.8, "font-size": unit * 2.2, "text-anchor": "middle" }, icon),
+        it.p.kind === "group" && it.p.quantity > 1 ? s("text", { x: unit * 2, y: -unit * 1.4, "font-size": unit * 1.8, class: "plan-label" }, `×${it.p.quantity}`) : null,
+      );
+    });
+    const preview = s("g", { class: "plan-preview" });
+    const svg = s(
+      "svg",
+      { viewBox: `${v.x} ${v.y} ${v.w} ${v.h}`, class: `plan${plan.mode ? " placing" : ""}`, role: "img", "aria-label": this.t("planAria", { name: zone.name }) },
+      grid,
+      s("polygon", { points: pts(outline), class: "plan-zone" }),
+      bedEls,
+      sides,
+      badEls,
+      plantEls,
+      preview,
+    );
+    this._planPointer(svg, frame, items, preview, unit);
+    return svg;
+  }
+
+  /** Drag the background to pan, a plant to move it (snapped to the grid); tap to place or to pick. */
+  _planPointer(svg, frame, items, preview, unit) {
+    const plan = this._plan;
+    const toLocal = (ev) => {
+      const pt = svg.createSVGPoint();
+      pt.x = ev.clientX;
+      pt.y = ev.clientY;
+      const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+      return [p.x, p.y];
+    };
+    const snap = (value) => {
+      const step = this._planStep() < 1 ? 0.1 : 0.5;
+      return Math.round(value / step) * step;
+    };
+    let drag = null;
+    svg.addEventListener("pointerdown", (ev) => {
+      const target = ev.target.closest?.("[data-id]");
+      const [x, y] = toLocal(ev);
+      drag = { id: target?.dataset.id || null, el: target, x0: x, y0: y, cx: ev.clientX, cy: ev.clientY, moved: false, view: { ...plan.view } };
+      svg.setPointerCapture(ev.pointerId);
+    });
+    svg.addEventListener("pointermove", (ev) => {
+      if (!drag) return;
+      if (Math.hypot(ev.clientX - drag.cx, ev.clientY - drag.cy) > 4) drag.moved = true;
+      if (!drag.moved) return;
+      if (drag.id && !plan.mode) {
+        const [x, y] = toLocal(ev);
+        const it = items.find((i) => i.p.id === drag.id);
+        drag.to = [snap(it.x + x - drag.x0), snap(it.y + y - drag.y0)];
+        drag.el.setAttribute("transform", `translate(${drag.to[0]} ${drag.to[1]})`);
+        this._planNearest(preview, drag.to, it, items, unit);
+      } else {
+        const rect = svg.getBoundingClientRect();
+        const k = drag.view.w / rect.width;
+        plan.view = { ...drag.view, x: drag.view.x - (ev.clientX - drag.cx) * k, y: drag.view.y - (ev.clientY - drag.cy) * k };
+        svg.setAttribute("viewBox", `${plan.view.x} ${plan.view.y} ${plan.view.w} ${plan.view.h}`);
+      }
+    });
+    const end = async (ev) => {
+      const d = drag;
+      drag = null;
+      if (!d) return;
+      if (d.moved && d.id && d.to && !plan.mode) {
+        const [lon, lat] = frame.lonlat(d.to[0], d.to[1]);
+        const it = items.find((i) => i.p.id === d.id);
+        const data = { id: d.id, latitude: lat, longitude: lon };
+        if (it.end) {
+          const [elon, elat] = frame.lonlat(it.end[0] + d.to[0] - it.x, it.end[1] + d.to[1] - it.y);
+          data.row_to = [elon, elat];
+        }
+        plan.selected = d.id;
+        await this._call("update_planting", data);
+        return;
+      }
+      if (d.moved) {
+        this._render();
+        return;
+      }
+      if (plan.mode) await this._planTap(frame, [snap(d.x0), snap(d.y0)]);
+      else {
+        plan.selected = d.id;
+        this._render();
+      }
+    };
+    svg.addEventListener("pointerup", end);
+    svg.addEventListener("pointercancel", () => (drag = null));
+    svg.addEventListener(
+      "wheel",
+      (ev) => {
+        ev.preventDefault();
+        this._planZoom(ev.deltaY > 0 ? 1.2 : 1 / 1.2);
+      },
+      { passive: false },
+    );
+  }
+
+  /** While dragging: a line to the nearest plant, red when closer than both want. */
+  _planNearest(preview, [x, y], it, items, unit) {
+    const NS = "http://www.w3.org/2000/svg";
+    preview.replaceChildren();
+    const others = items.filter((o) => o !== it).map((o) => ({ o, d: Math.hypot(o.x - x, o.y - y) }));
+    if (!others.length) return;
+    const { o, d } = others.sort((a, b) => a.d - b.d)[0];
+    const need = it.r && o.r ? it.r + o.r : 0;
+    const line = document.createElementNS(NS, "line");
+    Object.entries({ x1: x, y1: y, x2: o.x, y2: o.y, class: need && d < need ? "plan-bad" : "plan-measure" }).forEach(([k, v]) => line.setAttribute(k, v));
+    const text = document.createElementNS(NS, "text");
+    Object.entries({ x: (x + o.x) / 2, y: (y + o.y) / 2 - unit, "font-size": unit * 2.2, "text-anchor": "middle", class: need && d < need ? "plan-bad-text" : "plan-label" }).forEach(([k, v]) => text.setAttribute(k, v));
+    text.textContent = `${Math.round(d * 100)} cm`;
+    preview.append(line, text);
+  }
+
+  /** The zone (or a zone inside it) under a point of the plan: the deepest one. */
+  _planZoneAt(frame, x, y) {
+    const [lon, lat] = frame.lonlat(x, y);
+    return this._zoneAt(lat, lon) || this._plan.zoneId;
+  }
+
+  async _planTap(frame, [x, y]) {
+    const plan = this._plan;
+    const [lon, lat] = frame.lonlat(x, y);
+    const zoneId = this._planZoneAt(frame, x, y);
+    const spacing = (plan.spacing || 30) / 100;
+    if (plan.kind === "one") {
+      if (plan.pick) {
+        plan.selected = plan.pick;
+        plan.mode = null;
+        await this._call("update_planting", { id: plan.pick, latitude: lat, longitude: lon });
+        return;
+      }
+      this._newPlantingAt({ lat, lng: lon }, zoneId);
+      return;
+    }
+    if (plan.kind === "row") {
+      if (!plan.rowStart) {
+        plan.rowStart = [x, y];
+        this._render();
+        return;
+      }
+      const [x0, y0] = plan.rowStart;
+      plan.rowStart = null;
+      const length = Math.hypot(x - x0, y - y0);
+      const [lon0, lat0] = frame.lonlat(x0, y0);
+      const quantity = Math.max(1, Math.floor(length / spacing) + 1);
+      this._newPlantingAt({ lat: lat0, lng: lon0 }, this._planZoneAt(frame, x0, y0), { kind: "group", quantity, row_to: [lon, lat] });
+      return;
+    }
+    // Fill: as many as fit in the bed, staggered rows (quincunx).
+    const bed = this._zone(zoneId);
+    const ring = bed.geometry.coordinates[0].slice(0, -1).map(([lo, la]) => frame.xy(lo, la));
+    const count = quincunxCount(ring, spacing);
+    const cx = ring.reduce((a, p) => a + p[0], 0) / ring.length;
+    const cy = ring.reduce((a, p) => a + p[1], 0) / ring.length;
+    const [clon, clat] = frame.lonlat(cx, cy);
+    this._newPlantingAt({ lat: clat, lng: clon }, zoneId, { kind: "group", quantity: Math.max(count, 1) });
+    this._showMessage(this.t("planFits", { count, spacing: `${Math.round(spacing * 100)} cm`, name: bed.name }));
+  }
+
+  _planBar(zone, frame, outline, items, beds, bad) {
+    const plan = this._plan;
+    const set = (patch) => {
+      Object.assign(plan, patch);
+      this._render();
+    };
+    if (plan.mode === "plant") {
+      const inside = new Set([zone.id, ...this._zoneDescendants(zone.id)]);
+      const unplaced = this._data.plantings.filter((p) => p.status === "active" && inside.has(p.zone_id) && !hasPosition(p));
+      const kinds = [
+        ["one", this.t("planOne")],
+        ["row", this.t("planRow")],
+        ["fill", this.t("planFill")],
+      ];
+      const hint = plan.kind === "one" ? this.t("planTapOne") : plan.kind === "row" ? (plan.rowStart ? this.t("planTapRowEnd") : this.t("planTapRowStart")) : this.t("planTapFill");
+      return h(
+        "div",
+        { className: "plan-bar" },
+        h("div", { className: "seg" }, kinds.map(([k, label]) => h("button", { type: "button", className: plan.kind === k ? "on" : "", onclick: () => set({ kind: k, rowStart: null }) }, label))),
+        plan.kind === "one" && unplaced.length
+          ? h(
+              "label",
+              {},
+              this.t("planPick"),
+              h(
+                "select",
+                { onchange: (ev) => (plan.pick = ev.target.value) },
+                h("option", { value: "" }, this.t("planNew")),
+                unplaced.map((p) => h("option", { value: p.id, selected: plan.pick === p.id }, p.name)),
+              ),
+            )
+          : null,
+        plan.kind !== "one"
+          ? h("label", {}, this.t("planSpacing"), h("input", { type: "number", min: 5, max: 500, step: 5, value: plan.spacing || 30, inputMode: "numeric", onchange: (ev) => (plan.spacing = Number(ev.target.value) || 30) }), h("span", { className: "hint" }, "cm"))
+          : null,
+        h("p", { className: "hint" }, `👆 ${hint}`),
+        h("button", { type: "button", onclick: () => set({ mode: null, rowStart: null }) }, this.t("cancel")),
+      );
+    }
+    if (plan.mode === "sides") return this._planSides(zone, frame, outline);
+    if (plan.mode === "bed") return this._planBed(zone, frame, outline);
+    const sel = items.find((i) => i.p.id === plan.selected);
+    const info = sel ? this._planInfo(sel, items, bad) : null;
+    return h(
+      "div",
+      { className: "plan-bar" },
+      info,
+      h(
+        "div",
+        { className: "plan-tools" },
+        h("button", { type: "button", onclick: () => set({ mode: "sides", selected: null }) }, `📏 ${this.t("planSides")}`),
+        h("button", { type: "button", onclick: () => set({ mode: "bed", selected: null, bed: { name: "", w: "", l: "", a: "", b: "" } }) }, `▦ ${this.t("planBed")}`),
+        h("button", { type: "button", className: "primary", onclick: () => set({ mode: "plant", selected: null }) }, `🌱 ${this.t("planPlant")}`),
+      ),
+      bad.length
+        ? h("div", { className: "alert-line" }, `🤝 ${this.t("badNeighbours")}: ${bad.map(({ a, b, d }) => this.t("badPair", { a: a.p.name, b: b.p.name, dist: `${Math.round(d * 100)} cm` })).join(" · ")}`)
+        : items.length > 1
+          ? h("p", { className: "hint" }, this.t("noBadNeighbours"))
+          : null,
+      h("p", { className: "hint" }, this.t("planHint")),
+    );
+  }
+
+  _planInfo(sel, items, bad) {
+    const near = items
+      .filter((o) => o !== sel)
+      .map((o) => ({ o, d: Math.hypot(o.x - sel.x, o.y - sel.y) }))
+      .sort((a, b) => a.d - b.d)[0];
+    const need = near && sel.r && near.o.r ? sel.r + near.o.r : 0;
+    const mine = bad.filter(({ a, b }) => a === sel || b === sel);
+    return h(
+      "div",
+      { className: "plan-info" },
+      h("strong", {}, sel.p.name),
+      sel.r ? h("span", { className: "sub" }, this.t("planReach", { value: `${Math.round(sel.r * 200)} cm` })) : null,
+      near
+        ? h("span", { className: need && near.d < need ? "sub warn" : "sub" }, this.t(need && near.d < need ? "planTooClose" : "planNearest", { dist: `${Math.round(near.d * 100)} cm`, name: near.o.p.name, need: `${Math.round(need * 100)} cm` }))
+        : null,
+      mine.length ? h("span", { className: "sub warn" }, `🤝 ${mine.map(({ a, b }) => (a === sel ? b : a).p.name).join(", ")}`) : null,
+      h("div", { className: "row" }, h("button", { type: "button", onclick: () => this._select(sel.p.id) }, this.t("planOpenCard")), h("button", { type: "button", onclick: () => ((this._plan.selected = null), this._render()) }, "✕")),
+    );
+  }
+
+  /** The real lengths of the sides: the end point of a side moves along it. */
+  _planSides(zone, frame, outline) {
+    const pts = outline.map((p) => [...p]);
+    const inputs = pts.map((p, i) => {
+      const q = pts[(i + 1) % pts.length];
+      return h("input", { type: "text", inputMode: "decimal", value: String(this._fromMetres(Math.hypot(q[0] - p[0], q[1] - p[1]))).replace(".", this._decimalComma() ? "," : ".") });
+    });
+    const save = async () => {
+      inputs.forEach((input, i) => {
+        const want = this._toMetres(input.value);
+        const p = pts[i];
+        const j = (i + 1) % pts.length;
+        const q = pts[j];
+        const len = Math.hypot(q[0] - p[0], q[1] - p[1]);
+        if (!(want > 0) || !len || Math.abs(want - len) < 0.005 || (i === pts.length - 1 && j === 0)) return;
+        pts[j] = [p[0] + ((q[0] - p[0]) * want) / len, p[1] + ((q[1] - p[1]) * want) / len];
+      });
+      const ring = pts.map(([x, y]) => frame.lonlat(x, y));
+      ring.push(ring[0]);
+      this._plan.view = null;
+      this._plan.mode = null;
+      await this._call("update_zone", { id: zone.id, geometry: { type: "Polygon", coordinates: [ring] } });
+    };
+    return h(
+      "div",
+      { className: "plan-bar" },
+      h("strong", {}, `📏 ${this.t("planSides")}`),
+      h("p", { className: "hint" }, this.t("planSidesHint")),
+      h("div", { className: "plan-sides" }, inputs.map((input, i) => h("label", {}, this.t("planSide", { n: i + 1 }), input, h("span", { className: "hint" }, UNITS.imperial ? "ft" : "m")))),
+      h("div", { className: "row" }, h("button", { type: "button", className: "primary", onclick: save }, this.t("save")), h("button", { type: "button", onclick: () => ((this._plan.mode = null), this._render()) }, this.t("cancel"))),
+    );
+  }
+
+  /** A rectangular bed inside the zone, measured from its corner along its longest side. */
+  _planBed(zone, frame, outline) {
+    let best = 0;
+    let angle = 0;
+    outline.forEach((p, i) => {
+      const q = outline[(i + 1) % outline.length];
+      const len = Math.hypot(q[0] - p[0], q[1] - p[1]);
+      if (len > best) {
+        best = len;
+        angle = Math.atan2(q[1] - p[1], q[0] - p[0]);
+      }
+    });
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    const uv = outline.map(([x, y]) => [x * cos + y * sin, -x * sin + y * cos]);
+    const umin = Math.min(...uv.map((p) => p[0]));
+    const vmin = Math.min(...uv.map((p) => p[1]));
+    const back = ([u, v]) => [u * cos - v * sin, u * sin + v * cos];
+    const b = this._plan.bed;
+    const field = (key, label) => h("label", {}, label, h("input", { type: "text", inputMode: key === "name" ? "text" : "decimal", value: b[key], oninput: (ev) => ((b[key] = ev.target.value), preview()) }), key === "name" ? null : h("span", { className: "hint" }, UNITS.imperial ? "ft" : "m"));
+    const corners = () => {
+      const [w, l, da, db] = [b.w, b.l, b.a || "0", b.b || "0"].map((v) => this._toMetres(v));
+      if (!(w > 0) || !(l > 0) || !Number.isFinite(da) || !Number.isFinite(db)) return null;
+      const u0 = umin + da;
+      const v0 = vmin + db;
+      return [[u0, v0], [u0 + w, v0], [u0 + w, v0 + l], [u0, v0 + l]].map(back);
+    };
+    const preview = () => {
+      const g = this.shadowRoot.querySelector(".plan-preview");
+      if (!g) return;
+      g.replaceChildren();
+      const c = corners();
+      if (!c) return;
+      const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+      poly.setAttribute("points", c.map((p) => p.join(",")).join(" "));
+      poly.setAttribute("class", "plan-bed new");
+      g.append(poly);
+    };
+    setTimeout(preview, 0);
+    const save = async () => {
+      const c = corners();
+      if (!c || !b.name.trim()) {
+        this._showMessage(this.t("planBedMissing"), true);
+        return;
+      }
+      const ring = c.map(([x, y]) => frame.lonlat(x, y));
+      ring.push(ring[0]);
+      this._plan.mode = null;
+      await this._call("add_zone", { name: b.name.trim(), parent_id: zone.id, kind: zone.kind || null, geometry: { type: "Polygon", coordinates: [ring] } });
+    };
+    return h(
+      "div",
+      { className: "plan-bar" },
+      h("strong", {}, `▦ ${this.t("planBed")}`),
+      h("p", { className: "hint" }, this.t("planBedHint", { side: this._metres(best) })),
+      field("name", this.t("name")),
+      h("div", { className: "row" }, field("w", this.t("planBedW")), field("l", this.t("planBedL"))),
+      h("div", { className: "row" }, field("a", this.t("planBedA")), field("b", this.t("planBedB"))),
+      h("div", { className: "row" }, h("button", { type: "button", className: "primary", onclick: save }, this.t("save")), h("button", { type: "button", onclick: () => ((this._plan.mode = null), this._render()) }, this.t("cancel"))),
+    );
+  }
+
+  /** Fruit trees that need another variety nearby: a warning only when the variety is known. */
+  _pollination(planting) {
+    const key = this._cropKey(planting.species);
+    const rule = POLLINATION[key];
+    if (!rule || !hasPosition(planting) || planting.status !== "active") return null;
+    const variety = (planting.variety || "").toLowerCase();
+    const near = (p) => {
+      const dy = (p.latitude - planting.latitude) * 110540;
+      const dx = (p.longitude - planting.longitude) * 111320 * Math.cos((planting.latitude * Math.PI) / 180);
+      return Math.hypot(dx, dy);
+    };
+    const others = this._data.plantings
+      .filter((p) => p.id !== planting.id && p.status === "active" && hasPosition(p) && rule.partners.some((k) => this._cropKey(p.species).startsWith(k)))
+      .map((p) => ({ p, d: near(p) }))
+      .filter(({ d }) => d <= POLLINATION_RANGE_M)
+      .sort((a, b) => a.d - b.d);
+    if (rule.dioecious) {
+      if (!variety || MALE_WORDS.some((w) => variety.includes(w)) || rule.self.some((v) => variety.includes(v))) return null;
+      const male = others.find(({ p }) => MALE_WORDS.some((w) => (p.variety || "").toLowerCase().includes(w)));
+      return male ? this.t("pollOk", { name: male.p.name, dist: this._metres(male.d, 0) }) : `⚠️ ${this.t("pollMale")}`;
+    }
+    if (!variety) return null;
+    if (rule.self.some((v) => variety.includes(v))) return this.t("pollSelf");
+    const partner = others.find(({ p }) => (p.variety || "").toLowerCase() !== variety);
+    if (partner) return this.t("pollOk", { name: partner.p.name, dist: this._metres(partner.d, 0) });
+    return `⚠️ ${this.t("pollNeed", { range: this._metres(POLLINATION_RANGE_M, 0), self: rule.self.slice(0, 3).map(capitalize).join(", ") || "—" })}`;
+  }
+
   _renderZoneTap() {
     const { id, latlng } = this._zoneTap;
     const zone = this._zone(id);
@@ -3763,6 +4361,7 @@ class HomesteadPanel extends HTMLElement {
           { className: "row" },
           h("button", { type: "button", onclick: () => this._newEvent({ zone_id: id }, { zone_id: id }) }, `+ ${this.t("quickEvent")}`),
           h("button", { type: "button", onclick: () => this._selectZone(id) }, this.t("zoneCard")),
+          zone.geometry ? h("button", { type: "button", onclick: () => this._openPlan(id) }, `📐 ${this.t("planOpen")}`) : null,
           h("button", { type: "button", onclick: () => this._close() }, "✕"),
         ),
       ),
@@ -7842,6 +8441,7 @@ class HomesteadPanel extends HTMLElement {
               "div",
               { className: "row" },
               h("button", { type: "button", onclick: () => this._startDrawing(z) }, this.t(z.geometry ? "redraw" : "draw")),
+              z.geometry ? h("button", { type: "button", className: "primary", onclick: () => this._openPlan(z.id) }, `📐 ${this.t("planOpen")}`) : null,
               h("button", { type: "button", className: "danger", onclick: () => this._deleteZone() }, this.t("delete")),
             )
           : null,
@@ -8081,6 +8681,44 @@ function polygonArea(geometry) {
 
 function rad(deg) {
   return (deg * Math.PI) / 180;
+}
+
+/** Metres between two plants of the plan; a row counts from its nearest point. */
+function itemDistance(a, b) {
+  const toSegment = ([px, py], s) => {
+    if (!s.end) return Math.hypot(px - s.x, py - s.y);
+    const [dx, dy] = [s.end[0] - s.x, s.end[1] - s.y];
+    const t = Math.max(0, Math.min(1, ((px - s.x) * dx + (py - s.y) * dy) / (dx * dx + dy * dy || 1)));
+    return Math.hypot(px - (s.x + t * dx), py - (s.y + t * dy));
+  };
+  if (!a.end && !b.end) return Math.hypot(a.x - b.x, a.y - b.y);
+  const points = (s) => (s.end ? [[s.x, s.y], s.end] : [[s.x, s.y]]);
+  return Math.min(...points(a).map((p) => toSegment(p, b)), ...points(b).map((p) => toSegment(p, a)));
+}
+
+/** How many plants fit in a polygon (metres) at a spacing, in staggered rows. */
+function quincunxCount(ring, spacing) {
+  const xs = ring.map((p) => p[0]);
+  const ys = ring.map((p) => p[1]);
+  const dy = (spacing * Math.sqrt(3)) / 2;
+  let count = 0;
+  let row = 0;
+  for (let y = Math.min(...ys) + spacing / 2; y <= Math.max(...ys) - spacing / 2 + 1e-9; y += dy, row++) {
+    for (let x = Math.min(...xs) + spacing / 2 + (row % 2 ? spacing / 2 : 0); x <= Math.max(...xs) - spacing / 2 + 1e-9; x += spacing) {
+      if (pointInRing([x, y], ring)) count++;
+    }
+  }
+  return count;
+}
+
+function pointInRing([x, y], ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, yi] = ring[i];
+    const [xj, yj] = ring[j];
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
 }
 
 function formatArea(m2) {

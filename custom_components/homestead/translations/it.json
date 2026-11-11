@@ -520,6 +520,10 @@
         "notes": {
           "name": "Note",
           "description": "Note libere."
+        },
+        "row_to": {
+          "name": "Fine della fila",
+          "description": "Una fila di piante: l'altra estremità come [longitudine, latitudine]; la posizione è l'inizio della fila."
         }
       }
     },
@@ -646,6 +650,10 @@
         "notes": {
           "name": "Note",
           "description": "Note libere."
+        },
+        "row_to": {
+          "name": "Fine della fila",
+          "description": "Una fila di piante: l'altra estremità come [longitudine, latitudine]; la posizione è l'inizio della fila."
         }
       }
     },

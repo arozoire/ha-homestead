@@ -520,6 +520,10 @@
         "notes": {
           "name": "Notities",
           "description": "Vrije notities."
+        },
+        "row_to": {
+          "name": "Einde van de rij",
+          "description": "Een rij planten: het andere uiteinde als [lengtegraad, breedtegraad]; de positie is het begin van de rij."
         }
       }
     },
@@ -646,6 +650,10 @@
         "notes": {
           "name": "Notities",
           "description": "Vrije notities."
+        },
+        "row_to": {
+          "name": "Einde van de rij",
+          "description": "Een rij planten: het andere uiteinde als [lengtegraad, breedtegraad]; de positie is het begin van de rij."
         }
       }
     },

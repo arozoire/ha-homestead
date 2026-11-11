@@ -520,6 +520,10 @@
         "notes": {
           "name": "Notes",
           "description": "Notes libres."
+        },
+        "row_to": {
+          "name": "Fin du rang",
+          "description": "Un rang de plantes : l'autre extrémité en [longitude, latitude] ; la position est le début du rang."
         }
       }
     },
@@ -646,6 +650,10 @@
         "notes": {
           "name": "Notes",
           "description": "Notes libres."
+        },
+        "row_to": {
+          "name": "Fin du rang",
+          "description": "Un rang de plantes : l'autre extrémité en [longitude, latitude] ; la position est le début du rang."
         }
       }
     },

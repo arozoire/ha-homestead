@@ -520,6 +520,10 @@
         "notes": {
           "name": "Notes",
           "description": "Free notes."
+        },
+        "row_to": {
+          "name": "Row end",
+          "description": "A row of plants: the other end as [longitude, latitude]; the position is where the row starts."
         }
       }
     },
@@ -646,6 +650,10 @@
         "notes": {
           "name": "Notes",
           "description": "Free notes."
+        },
+        "row_to": {
+          "name": "Row end",
+          "description": "A row of plants: the other end as [longitude, latitude]; the position is where the row starts."
         }
       }
     },

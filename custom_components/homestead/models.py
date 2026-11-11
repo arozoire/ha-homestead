@@ -285,6 +285,8 @@ class Planting(_Record):
     zone_id: str | None = None
     latitude: float | None = None
     longitude: float | None = None
+    # A row of plants (a group): the other end, [longitude, latitude]; the position is where it starts.
+    row_to: list[float] | None = None
     status: str = PlantingStatus.ACTIVE
     moon_phase: str | None = None
     sown_moon_phase: str | None = None
