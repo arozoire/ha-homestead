@@ -235,6 +235,12 @@ const STYLE = `
   .repeat-name { flex: 1; display: grid; }
   .care { border: 1px solid var(--divider-color); border-radius: 10px; padding: 6px 10px; display: grid; gap: 6px; }
   .care legend { font-weight: 700; padding: 0 4px; }
+  .po-grid { display: grid; grid-template-columns: minmax(0, 1fr) 48px 48px; gap: 4px 6px; align-items: center; text-align: center; }
+  .po-grid > span:nth-child(3n + 1) { text-align: left; }
+  .sub.ok { color: #1f5e24; }
+  .chill-line { display: flex; flex-direction: column; gap: 4px; margin: 6px 0; }
+  .chill-bar { height: 8px; border-radius: 4px; background: var(--secondary-background-color, #eef0ec); overflow: hidden; }
+  .chill-bar i { display: block; height: 8px; background: #3f7fbf; }
   .today-box { border: 1px solid var(--divider-color); border-radius: 12px; padding: 10px 12px; margin: 8px 0; display: flex; flex-direction: column; gap: 8px; }
   .today-box h3 { margin: 0; }
   .today-group { display: flex; flex-direction: column; gap: 2px; }
@@ -1923,6 +1929,7 @@ class HomesteadPanel extends HTMLElement {
       f.id ? this._plantingActions(f) : null,
       f.id ? this._plantingExpenses(f) : null,
       f.id ? (this._cropEl = h("div", {}, this._cropBox(f))) : null,
+      f.id ? this._chillLine(f) : null,
       f.id && this._pollination(f) ? h("p", { className: this._pollination(f).startsWith("⚠️") ? "alert-line" : "hint" }, this._pollination(f)) : null,
       f.id ? this._careNotes(f) : null,
       f.id ? this._photoHistoryBox(f.id) : null,
@@ -3809,8 +3816,8 @@ class HomesteadPanel extends HTMLElement {
 
   /** "✨ Today in the garden": what the weather and the sensors say, nothing to fill in. */
   _todayBox() {
-    const water = this._outlook?.water;
-    if (!water) return null;
+    if (!this._outlook) return null;
+    const water = this._outlook.water || {};
     const zones = Object.entries(water.zones || {})
       .map(([id, b]) => ({ zone: this._zone(id), b }))
       .filter((x) => x.zone)
@@ -3875,9 +3882,105 @@ class HomesteadPanel extends HTMLElement {
     );
   }
 
-  /** Filled in by block 3 (cold hours, degree days, daylight). */
+  /** "✨ Today": cold hours, degree days, daylight, and what can go out now. */
   _climateLines() {
-    return [];
+    const out = [];
+    const chill = this._outlook?.chill;
+    if (chill?.hours != null) out.push(h("div", {}, `🍑 ${this.t("chillLine", { hours: chill.hours.toLocaleString(this._lang()) })}`));
+    const gdd = this._outlook?.gdd;
+    const month = new Date().getMonth() + 1;
+    if (gdd?.today && month >= 3 && month <= 10) {
+      const last = gdd.years?.[String(new Date().getFullYear() - 1)];
+      out.push(h("div", {}, `🌡️ ${this.t("gddLine", { value: gdd.today.toLocaleString(this._lang()) })}${last != null ? ` · ${this.t("gddLast", { value: last.toLocaleString(this._lang()) })}` : ""}`));
+    }
+    const light = this._daylight();
+    if (light) out.push(h("div", {}, `☀️ ${light}`));
+    const rows = this._plantOutRows();
+    if (rows.length) out.push(this._plantOutTable(rows));
+    return out;
+  }
+
+  _daylight(day = today()) {
+    const lat = this._hass.config.latitude;
+    if (lat == null) return "";
+    const len = dayLength(lat, day);
+    const delta = Math.round((dayLength(lat, addDays(day, 1)) - len) * 60);
+    const text = this.t("daylight", { hours: Math.floor(len), minutes: String(Math.round((len % 1) * 60)).padStart(2, "0"), delta: `${delta >= 0 ? "+" : "−"}${Math.abs(delta)}` });
+    // Long-day onions start their bulb above about 14 hours of light.
+    const onions = this._data.plantings.some((p) => p.status === "active" && this._cropKey(p.species) === "allium cepa") || this._data.seeds.some((s) => !s.finished && this._cropKey(s.species) === "allium cepa");
+    if (!onions || len >= 14) return text;
+    for (let i = 1; i <= 45; i++) {
+      if (dayLength(lat, addDays(day, i)) >= 14) return `${text} · 🧅 ${this.t("onionDays", { date: this._date(addDays(day, i), false) })}`;
+    }
+    return text;
+  }
+
+  /** Lots to sow outdoors and seedlings to plant out this month, against soil, nights and season. */
+  _plantOutRows() {
+    const month = new Date().getMonth() + 1;
+    const rows = [];
+    const seen = new Set();
+    const add = (name, species, key) => {
+      const ckey = this._cropKey(species);
+      if (!ckey || seen.has(ckey + key)) return;
+      const crop = this._crop(species);
+      if (!crop || !this._inMonth(crop, [key], month)) return;
+      seen.add(ckey + key);
+      rows.push({ name, crop });
+    };
+    for (const lot of this._data.seeds) if (!lot.finished) add(this._seedName(lot), lot.species, "sow_outdoor");
+    for (const p of this._data.plantings) if (p.status === "active" && p.germinated_on && this._inNursery(p)) add(p.name, p.species, "plant_out");
+    return rows.slice(0, 8).map((r) => ({ ...r, ...this._plantOutCheck(r.crop) }));
+  }
+
+  _plantOutCheck(crop) {
+    const forecast = this._outlook?.forecast || [];
+    const tender = crop.warm || (crop.hardiness_c ?? -5) > 0;
+    const limit = tender ? 10 : 2;
+    const soilNow = this._soilNow().temperature?.value ?? this._outlook?.soil_forecast?.[today()]?.mean ?? null;
+    const soilOk = crop.min_soil_c == null || soilNow == null ? null : soilNow >= crop.min_soil_c;
+    const week = forecast.slice(0, 7).filter((d) => d.t_min != null);
+    const nightsOk = week.length ? week.every((d) => d.t_min >= limit) : null;
+    let verdict;
+    if (soilOk === false) verdict = this.t("poSoil", { now: this._number(this._degValue(soilNow)), min: this._number(this._degValue(crop.min_soil_c)) });
+    else if (nightsOk === false) {
+      const from = forecast.findIndex((d, i) => forecast.slice(i, i + 4).every((x) => x.t_min != null && x.t_min >= limit) && forecast.slice(i, i + 4).length === 4);
+      verdict = from > 0 ? this.t("poFrom", { date: this._date(forecast[from].date, false) }) : this.t("poWait");
+    } else verdict = this.t("poYes");
+    return { soilOk, nightsOk, ok: soilOk !== false && nightsOk !== false, verdict };
+  }
+
+  _plantOutTable(rows) {
+    const mark = (v) => (v == null ? "–" : v ? "✅" : "⚠️");
+    return h(
+      "div",
+      { className: "today-group" },
+      h("strong", {}, `🌱 ${this.t("poTitle")}`),
+      h(
+        "div",
+        { className: "po-grid" },
+        h("span", { className: "sub" }), h("span", { className: "sub" }, this.t("poSoilCol")), h("span", { className: "sub" }, this.t("poNightCol")),
+        rows.flatMap((r) => [
+          h("span", {}, r.name, h("br"), h("span", { className: `sub ${r.ok ? "ok" : "warn"}` }, r.verdict)),
+          h("span", {}, mark(r.soilOk)),
+          h("span", {}, mark(r.nightsOk)),
+        ]),
+      ),
+    );
+  }
+
+  /** Fruit tree card: cold hours of this winter against what the species needs. */
+  _chillLine(planting) {
+    const chill = this._outlook?.chill;
+    const need = chill?.needs?.[this._cropKey(planting.species)];
+    if (chill?.hours == null || !need || planting.status !== "active") return null;
+    const pct = Math.min(100, Math.round((chill.hours / need) * 100));
+    return h(
+      "div",
+      { className: "chill-line" },
+      h("span", {}, `🍑 ${this.t("chillTree", { hours: chill.hours, need })}`),
+      h("div", { className: "chill-bar" }, h("i", { style: `width:${pct}%` })),
+    );
   }
 
   /** Zone card: rain against evaporation, what is missing, and one tap to log the watering. */
@@ -8916,6 +9019,16 @@ function deg(celsius) {
 /** A temperature typed by the user, back to °C (to the half degree). */
 function toCelsius(value) {
   return UNITS.imperial ? Math.round(((value - 32) * 5) / 9 * 2) / 2 : value;
+}
+
+/** Hours of daylight at a latitude on a day (sunrise to sunset, with refraction). */
+function dayLength(lat, iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  const doy = Math.round((Date.UTC(y, m - 1, d) - Date.UTC(y, 0, 0)) / 86400000);
+  const rad = Math.PI / 180;
+  const decl = 23.44 * Math.sin(((2 * Math.PI) / 365) * (doy - 81));
+  const cosH = (Math.sin(-0.833 * rad) - Math.sin(lat * rad) * Math.sin(decl * rad)) / (Math.cos(lat * rad) * Math.cos(decl * rad));
+  return (2 * Math.acos(Math.max(-1, Math.min(1, cosH)))) / rad / 15;
 }
 
 function rainText(mm) {

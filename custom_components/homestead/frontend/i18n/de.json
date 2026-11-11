@@ -772,5 +772,18 @@
  "waterComing": "Regen bis morgen erwartet: {value}",
  "waterLast": "Zuletzt gegossen: {date}",
  "waterLog": "Gegossen",
- "waterLogged": "✓ Bewässerung von {name} im Tagebuch"
+ "waterLogged": "✓ Bewässerung von {name} im Tagebuch",
+ "chillLine": "Kältestunden seit 1. November: {hours}",
+ "gddLine": "Gradtage seit Januar: {value}",
+ "gddLast": "letztes Jahr bis heute {value}",
+ "daylight": "Tageslicht {hours} h {minutes} · {delta} min pro Tag",
+ "onionDays": "ab {date} über 14 h: Langtagzwiebeln bilden Knollen",
+ "poTitle": "Kann es nach draußen?",
+ "poSoilCol": "Boden",
+ "poNightCol": "Nächte",
+ "poSoil": "Boden bei {now}°, braucht {min}°",
+ "poFrom": "besser ab {date}",
+ "poWait": "warten: kalte Nächte",
+ "poYes": "ja, jetzt",
+ "chillTree": "Kältestunden seit November: {hours} von ~{need}"
 }

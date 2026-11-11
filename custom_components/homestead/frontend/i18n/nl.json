@@ -772,5 +772,18 @@
  "waterComing": "Regen verwacht tot morgen: {value}",
  "waterLast": "Laatst water gegeven: {date}",
  "waterLog": "Water gegeven",
- "waterLogged": "✓ Water geven van {name} in het dagboek"
+ "waterLogged": "✓ Water geven van {name} in het dagboek",
+ "chillLine": "Kou-uren sinds 1 november: {hours}",
+ "gddLine": "Graaddagen sinds januari: {value}",
+ "gddLast": "vorig jaar tot vandaag {value}",
+ "daylight": "Daglicht {hours} u {minutes} · {delta} min per dag",
+ "onionDays": "vanaf {date} meer dan 14 u: langedag-uien vormen de bol",
+ "poTitle": "Kan het naar buiten?",
+ "poSoilCol": "bodem",
+ "poNightCol": "nachten",
+ "poSoil": "bodem {now}°, wil {min}°",
+ "poFrom": "beter vanaf {date}",
+ "poWait": "wachten: koude nachten",
+ "poYes": "ja, nu",
+ "chillTree": "Kou-uren sinds november: {hours} van ~{need}"
 }

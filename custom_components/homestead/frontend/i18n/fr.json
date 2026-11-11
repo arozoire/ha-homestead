@@ -772,5 +772,18 @@
  "waterComing": "Pluie prévue d'ici demain : {value}",
  "waterLast": "Dernier arrosage : {date}",
  "waterLog": "Arrosé",
- "waterLogged": "✓ Arrosage de {name} dans le journal"
+ "waterLogged": "✓ Arrosage de {name} dans le journal",
+ "chillLine": "Heures de froid depuis le 1er novembre : {hours}",
+ "gddLine": "Degrés-jours depuis janvier : {value}",
+ "gddLast": "l'an dernier à ce jour {value}",
+ "daylight": "Lumière {hours} h {minutes} · {delta} min par jour",
+ "onionDays": "à partir du {date} plus de 14 h : les oignons de jours longs bulbent",
+ "poTitle": "Peut-on planter dehors ?",
+ "poSoilCol": "sol",
+ "poNightCol": "nuits",
+ "poSoil": "sol à {now}°, il en faut {min}°",
+ "poFrom": "plutôt à partir du {date}",
+ "poWait": "attendez : nuits froides",
+ "poYes": "oui, maintenant",
+ "chillTree": "Heures de froid depuis novembre : {hours} sur ~{need}"
 }

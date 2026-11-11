@@ -772,5 +772,18 @@
  "waterComing": "Pioggia prevista entro domani: {value}",
  "waterLast": "Ultima annaffiatura: {date}",
  "waterLog": "Annaffiato",
- "waterLogged": "✓ Annaffiatura di {name} nel diario"
+ "waterLogged": "✓ Annaffiatura di {name} nel diario",
+ "chillLine": "Ore di freddo dal 1° novembre: {hours}",
+ "gddLine": "Gradi-giorno da gennaio: {value}",
+ "gddLast": "l'anno scorso a oggi {value}",
+ "daylight": "Luce {hours} h {minutes} · {delta} min al giorno",
+ "onionDays": "dal {date} oltre 14 h: le cipolle a giorno lungo fanno il bulbo",
+ "poTitle": "Si può piantare fuori?",
+ "poSoilCol": "suolo",
+ "poNightCol": "notti",
+ "poSoil": "suolo a {now}°, ne vuole {min}°",
+ "poFrom": "meglio dal {date}",
+ "poWait": "aspetta: notti fredde",
+ "poYes": "sì, adesso",
+ "chillTree": "Ore di freddo da novembre: {hours} di ~{need}"
 }

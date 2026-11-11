@@ -28,13 +28,20 @@ SKIPPED_ZONES = {ZoneKind.INDOOR, ZoneKind.COMPOST, ZoneKind.COOP, ZoneKind.WOOD
 def parse_water_days(raw: dict[str, Any]) -> list[dict[str, Any]]:
     """Open-Meteo ``daily`` with ``precipitation_sum`` and ``et0_fao_evapotranspiration``."""
     daily = raw.get("daily") or {}
-    rain = daily.get("precipitation_sum") or []
-    et0 = daily.get("et0_fao_evapotranspiration") or []
+    columns = {
+        "rain_mm": "precipitation_sum",
+        "et0_mm": "et0_fao_evapotranspiration",
+        "t_max": "temperature_2m_max",
+        "t_min": "temperature_2m_min",
+    }
     days = []
     for i, day in enumerate(daily.get("time") or []):
-        r = rain[i] if i < len(rain) else None
-        e = et0[i] if i < len(et0) else None
-        days.append({"date": day, "rain_mm": _num(r), "et0_mm": _num(e)})
+        row: dict[str, Any] = {"date": day}
+        for key, column in columns.items():
+            values = daily.get(column) or []
+            if column in daily or key in ("rain_mm", "et0_mm"):
+                row[key] = _num(values[i]) if i < len(values) else None
+        days.append(row)
     return days
 
 

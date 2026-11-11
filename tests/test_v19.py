@@ -104,3 +104,52 @@ def test_zones_and_young_trees() -> None:
     assert trees["pero"]["dry_days"] == 5 and trees["pero"]["verdict"] == "ok"
     assert trees["pero"]["until"] == "2027-11-02"
     assert young_trees(data, days, date(2026, 12, 1)) == []  # not in winter
+
+
+def test_climate_figures() -> None:
+    from datetime import date
+
+    from custom_components.homestead.climate import (
+        chill_hours,
+        chill_start,
+        gdd_by_year,
+        gdd_on,
+        gdd_today,
+        parse_hourly,
+        soil_days,
+    )
+
+    days = [
+        {"date": "2025-01-01", "t_min": 2, "t_max": 8},  # mean 5: nothing
+        {"date": "2025-01-02", "t_min": 12, "t_max": 22},  # mean 17: +7
+        {"date": "2025-01-04", "t_min": 14, "t_max": 20},  # mean 17: +7 (the 3rd is missing)
+        {"date": "2026-01-01", "t_min": 10, "t_max": 20},  # +5
+    ]
+    series = gdd_by_year(days)
+    assert series["2025"] == [0, 7, 7, 14]
+    assert gdd_on(series, date(2025, 1, 3)) == 7
+    assert gdd_on(series, date(2025, 2, 1)) is None
+    recent = [
+        {"date": "2026-01-02", "t_min": 15, "t_max": 25},
+        {"date": "2026-01-03", "t_min": 15, "t_max": 25},
+    ]
+    assert gdd_today(series, recent, date(2026, 1, 3)) == 15  # 5 + 10, today not yet
+
+    assert chill_start(date(2026, 11, 11)) == date(2026, 11, 1)
+    assert chill_start(date(2027, 2, 3)) == date(2026, 11, 1)
+    assert chill_start(date(2026, 7, 1)) is None
+    raw = {
+        "hourly": {
+            "time": ["2026-10-31T23:00", "2026-11-01T00:00", "2026-11-01T01:00", "2026-11-01T02:00"],
+            "temperature_2m": [3.0, 3.0, 8.5, None],
+        }
+    }
+    hours = parse_hourly(raw, "temperature_2m")
+    assert len(hours) == 3
+    assert chill_hours(hours + hours, date(2026, 11, 1), "2026-11-02T00:00") == 1  # October and doubles out
+
+    soil = parse_hourly(
+        {"hourly": {"time": ["2026-04-20T06:00", "2026-04-20T15:00"], "soil_temperature_6cm": [9.0, 15.0]}},
+        "soil_temperature_6cm",
+    )
+    assert soil_days(soil) == {"2026-04-20": {"mean": 12.0, "min": 9.0}}

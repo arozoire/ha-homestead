@@ -772,5 +772,18 @@
  "waterComing": "Rain expected by tomorrow: {value}",
  "waterLast": "Last watering: {date}",
  "waterLog": "Watered",
- "waterLogged": "✓ Watering of {name} in the diary"
+ "waterLogged": "✓ Watering of {name} in the diary",
+ "chillLine": "Cold hours since 1 November: {hours}",
+ "gddLine": "Degree days since January: {value}",
+ "gddLast": "last year by today {value}",
+ "daylight": "Daylight {hours} h {minutes} · {delta} min a day",
+ "onionDays": "from {date} over 14 h: long-day onions start their bulb",
+ "poTitle": "Can it go out?",
+ "poSoilCol": "soil",
+ "poNightCol": "nights",
+ "poSoil": "soil at {now}°, it wants {min}°",
+ "poFrom": "better from {date}",
+ "poWait": "wait: cold nights",
+ "poYes": "yes, now",
+ "chillTree": "Cold hours since November: {hours} of ~{need}"
 }

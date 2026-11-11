@@ -772,5 +772,18 @@
  "waterComing": "Lluvia prevista hasta mañana: {value}",
  "waterLast": "Último riego: {date}",
  "waterLog": "Regado",
- "waterLogged": "✓ Riego de {name} en el diario"
+ "waterLogged": "✓ Riego de {name} en el diario",
+ "chillLine": "Horas de frío desde el 1 de noviembre: {hours}",
+ "gddLine": "Grados-día desde enero: {value}",
+ "gddLast": "el año pasado a esta fecha {value}",
+ "daylight": "Luz {hours} h {minutes} · {delta} min al día",
+ "onionDays": "desde el {date} más de 14 h: las cebollas de día largo forman el bulbo",
+ "poTitle": "¿Se puede plantar fuera?",
+ "poSoilCol": "suelo",
+ "poNightCol": "noches",
+ "poSoil": "suelo a {now}°, necesita {min}°",
+ "poFrom": "mejor desde el {date}",
+ "poWait": "espera: noches frías",
+ "poYes": "sí, ahora",
+ "chillTree": "Horas de frío desde noviembre: {hours} de ~{need}"
 }
