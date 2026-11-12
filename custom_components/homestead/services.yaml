@@ -42,14 +42,17 @@ add_zone:
       selector:
         entity:
           domain: sensor
+          multiple: true
     soil_temperature_entity:
       selector:
         entity:
           domain: sensor
+          multiple: true
     soil_ec_entity:
       selector:
         entity:
           domain: sensor
+          multiple: true
     watering:
       selector:
         select:
@@ -109,14 +112,17 @@ update_zone:
       selector:
         entity:
           domain: sensor
+          multiple: true
     soil_temperature_entity:
       selector:
         entity:
           domain: sensor
+          multiple: true
     soil_ec_entity:
       selector:
         entity:
           domain: sensor
+          multiple: true
     watering:
       selector:
         select:
@@ -289,6 +295,7 @@ add_planting:
       selector:
         entity:
           domain: sensor
+          multiple: true
     moisture_min:
       selector:
         number:
@@ -474,6 +481,7 @@ update_planting:
       selector:
         entity:
           domain: sensor
+          multiple: true
     moisture_min:
       selector:
         number:

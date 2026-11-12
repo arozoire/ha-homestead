@@ -14,7 +14,7 @@
     "step": {
       "init": {
         "title": "Tiempo para el diario",
-        "description": "Cada evento del diario guarda el tiempo de la semana anterior (y de los 3 días siguientes para tratamientos y siembras). Elige tus sensores; lo que falte llega de Open-Meteo (gratis, sin cuenta). Recordatorios: las actividades previstas para hoy se envían a los teléfonos elegidos a la hora elegida; al tocar una se abre el formulario del diario ya rellenado. Alertas: helada por debajo de la rusticidad de cada planta, ola de calor (días calurosos y noches cálidas varios días seguidos, cuando las plantas ya no se recuperan de noche), calor extremo. La previsión viene de la entidad del tiempo elegida, si no de Open-Meteo.",
+        "description": "Cada evento del diario guarda el tiempo de la semana anterior (y de los 3 días siguientes para tratamientos y siembras). Elige tus sensores; lo que falte llega de Open-Meteo (gratis, sin cuenta). Recordatorios: las actividades previstas para hoy se envían a los teléfonos elegidos a la hora elegida; al tocar una se abre el formulario del diario ya rellenado. Alertas: helada por debajo de la rusticidad de cada planta, ola de calor (días calurosos y noches cálidas varios días seguidos, cuando las plantas ya no se recuperan de noche), calor extremo. La previsión viene de la entidad del tiempo elegida, si no de Open-Meteo. Cada campo admite varios sensores del mismo tipo: sus valores se promedian (de la temperatura se guardan la mínima y la máxima de todos).",
         "data": {
           "temperature_sensor": "Temperatura exterior",
           "humidity_sensor": "Humedad exterior",
@@ -352,16 +352,16 @@
           "description": "Notas libres."
         },
         "soil_moisture_entity": {
-          "name": "Sensor de humedad del suelo",
-          "description": "Sensor de esta zona; sustituye al general de las opciones."
+          "name": "Sensores de humedad del suelo",
+          "description": "Sensor de esta zona; sustituye al general de las opciones. Uno o varios: promediados."
         },
         "soil_temperature_entity": {
-          "name": "Sensor de temperatura del suelo",
-          "description": "Sensor de esta zona; sustituye al general de las opciones."
+          "name": "Sensores de temperatura del suelo",
+          "description": "Sensor de esta zona; sustituye al general de las opciones. Uno o varios: promediados."
         },
         "soil_ec_entity": {
-          "name": "Sensor de CE del suelo",
-          "description": "Sensor de conductividad eléctrica de esta zona (por ejemplo un Ecowitt WH52)."
+          "name": "Sensores CE del suelo",
+          "description": "Sensor de conductividad eléctrica de esta zona (por ejemplo un Ecowitt WH52). Uno o varios: promediados."
         },
         "watering": {
           "name": "Cómo se riega",
@@ -406,16 +406,16 @@
           "description": "Notas libres."
         },
         "soil_moisture_entity": {
-          "name": "Sensor de humedad del suelo",
-          "description": "Sensor de esta zona; sustituye al general de las opciones."
+          "name": "Sensores de humedad del suelo",
+          "description": "Sensor de esta zona; sustituye al general de las opciones. Uno o varios: promediados."
         },
         "soil_temperature_entity": {
-          "name": "Sensor de temperatura del suelo",
-          "description": "Sensor de esta zona; sustituye al general de las opciones."
+          "name": "Sensores de temperatura del suelo",
+          "description": "Sensor de esta zona; sustituye al general de las opciones. Uno o varios: promediados."
         },
         "soil_ec_entity": {
-          "name": "Sensor de CE del suelo",
-          "description": "Sensor de conductividad eléctrica de esta zona (por ejemplo un Ecowitt WH52)."
+          "name": "Sensores CE del suelo",
+          "description": "Sensor de conductividad eléctrica de esta zona (por ejemplo un Ecowitt WH52). Uno o varios: promediados."
         },
         "watering": {
           "name": "Cómo se riega",
@@ -538,8 +538,8 @@
           "description": "Plantas de interior: de marzo a septiembre."
         },
         "moisture_entity": {
-          "name": "Sensor de humedad del sustrato",
-          "description": "Opcional: regar cuando baje del umbral."
+          "name": "Sensores de humedad del suelo",
+          "description": "Opcional: regar cuando baje del umbral. Uno o varios: promediados."
         },
         "moisture_min": {
           "name": "Regar por debajo de (%)",
@@ -672,8 +672,8 @@
           "description": "Plantas de interior: de marzo a septiembre."
         },
         "moisture_entity": {
-          "name": "Sensor de humedad del sustrato",
-          "description": "Opcional: regar cuando baje del umbral."
+          "name": "Sensores de humedad del suelo",
+          "description": "Opcional: regar cuando baje del umbral. Uno o varios: promediados."
         },
         "moisture_min": {
           "name": "Regar por debajo de (%)",

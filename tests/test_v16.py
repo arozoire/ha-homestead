@@ -28,4 +28,4 @@ async def test_soil_sensors_for_the_panel(hass: HomeAssistant, hass_ws_client) -
     ws = await hass_ws_client(hass)
     await ws.send_json({"id": 1, "type": "homestead/soil"})
     result = (await ws.receive_json())["result"]
-    assert result == {"moisture": "sensor.wh52_moisture", "temperature": SOIL_T, "ec": SOIL_EC}
+    assert result == {"moisture": ["sensor.wh52_moisture"], "temperature": [SOIL_T], "ec": [SOIL_EC]}

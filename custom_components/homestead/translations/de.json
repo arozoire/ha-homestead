@@ -14,7 +14,7 @@
     "step": {
       "init": {
         "title": "Wetter für das Tagebuch",
-        "description": "Jeder Tagebucheintrag speichert das Wetter der Woche davor (und der 3 Tage danach bei Behandlungen und Aussaaten). Wähle deine Sensoren; was fehlt, kommt von Open-Meteo (kostenlos, ohne Konto). Erinnerungen: die für heute geplanten Aufgaben werden zur gewählten Uhrzeit an die gewählten Telefone gesendet; ein Tipp darauf öffnet das ausgefüllte Tagebuchformular. Warnungen: Frost unter der Winterhärte jeder Pflanze, Hitzewelle (heiße Tage und warme Nächte mehrere Tage hintereinander, wenn sich die Pflanzen nachts nicht mehr erholen), extreme Hitze. Die Vorhersage kommt von der gewählten Wetter-Entität, sonst von Open-Meteo.",
+        "description": "Jeder Tagebucheintrag speichert das Wetter der Woche davor (und der 3 Tage danach bei Behandlungen und Aussaaten). Wähle deine Sensoren; was fehlt, kommt von Open-Meteo (kostenlos, ohne Konto). Erinnerungen: die für heute geplanten Aufgaben werden zur gewählten Uhrzeit an die gewählten Telefone gesendet; ein Tipp darauf öffnet das ausgefüllte Tagebuchformular. Warnungen: Frost unter der Winterhärte jeder Pflanze, Hitzewelle (heiße Tage und warme Nächte mehrere Tage hintereinander, wenn sich die Pflanzen nachts nicht mehr erholen), extreme Hitze. Die Vorhersage kommt von der gewählten Wetter-Entität, sonst von Open-Meteo. Jedes Feld nimmt mehrere Sensoren derselben Art: ihre Werte werden gemittelt (bei der Temperatur bleiben Minimum und Maximum aller erhalten).",
         "data": {
           "temperature_sensor": "Außentemperatur",
           "humidity_sensor": "Außenluftfeuchte",
@@ -352,16 +352,16 @@
           "description": "Freie Notizen."
         },
         "soil_moisture_entity": {
-          "name": "Bodenfeuchtesensor",
-          "description": "Sensor dieser Zone; ersetzt den allgemeinen aus den Optionen."
+          "name": "Bodenfeuchtesensoren",
+          "description": "Sensor dieser Zone; ersetzt den allgemeinen aus den Optionen. Einer oder mehrere: gemittelt."
         },
         "soil_temperature_entity": {
-          "name": "Bodentemperatursensor",
-          "description": "Sensor dieser Zone; ersetzt den allgemeinen aus den Optionen."
+          "name": "Bodentemperatursensoren",
+          "description": "Sensor dieser Zone; ersetzt den allgemeinen aus den Optionen. Einer oder mehrere: gemittelt."
         },
         "soil_ec_entity": {
-          "name": "Boden-EC-Sensor",
-          "description": "Leitfähigkeitssensor dieser Zone (zum Beispiel ein Ecowitt WH52)."
+          "name": "Boden-EC-Sensoren",
+          "description": "Leitfähigkeitssensor dieser Zone (zum Beispiel ein Ecowitt WH52). Einer oder mehrere: gemittelt."
         },
         "watering": {
           "name": "Bewässerung",
@@ -406,16 +406,16 @@
           "description": "Freie Notizen."
         },
         "soil_moisture_entity": {
-          "name": "Bodenfeuchtesensor",
-          "description": "Sensor dieser Zone; ersetzt den allgemeinen aus den Optionen."
+          "name": "Bodenfeuchtesensoren",
+          "description": "Sensor dieser Zone; ersetzt den allgemeinen aus den Optionen. Einer oder mehrere: gemittelt."
         },
         "soil_temperature_entity": {
-          "name": "Bodentemperatursensor",
-          "description": "Sensor dieser Zone; ersetzt den allgemeinen aus den Optionen."
+          "name": "Bodentemperatursensoren",
+          "description": "Sensor dieser Zone; ersetzt den allgemeinen aus den Optionen. Einer oder mehrere: gemittelt."
         },
         "soil_ec_entity": {
-          "name": "Boden-EC-Sensor",
-          "description": "Leitfähigkeitssensor dieser Zone (zum Beispiel ein Ecowitt WH52)."
+          "name": "Boden-EC-Sensoren",
+          "description": "Leitfähigkeitssensor dieser Zone (zum Beispiel ein Ecowitt WH52). Einer oder mehrere: gemittelt."
         },
         "watering": {
           "name": "Bewässerung",
@@ -538,8 +538,8 @@
           "description": "Zimmerpflanzen: von März bis September."
         },
         "moisture_entity": {
-          "name": "Bodenfeuchtesensor",
-          "description": "Optional: gießen, wenn der Wert unter die Schwelle fällt."
+          "name": "Bodenfeuchtesensoren",
+          "description": "Optional: gießen, wenn der Wert unter die Schwelle fällt. Einer oder mehrere: gemittelt."
         },
         "moisture_min": {
           "name": "Gießen unter (%)",
@@ -672,8 +672,8 @@
           "description": "Zimmerpflanzen: von März bis September."
         },
         "moisture_entity": {
-          "name": "Bodenfeuchtesensor",
-          "description": "Optional: gießen, wenn der Wert unter die Schwelle fällt."
+          "name": "Bodenfeuchtesensoren",
+          "description": "Optional: gießen, wenn der Wert unter die Schwelle fällt. Einer oder mehrere: gemittelt."
         },
         "moisture_min": {
           "name": "Gießen unter (%)",

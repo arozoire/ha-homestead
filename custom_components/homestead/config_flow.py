@@ -42,6 +42,7 @@ from .const import (
     DEFAULT_NOTIFY_TIME,
     DOMAIN,
 )
+from .models import entity_list
 from .units import IMPERIAL, UNIT_CHOICES, c_to_f, f_to_c, resolve_units
 
 SENSORS = {
@@ -97,12 +98,20 @@ class HomesteadOptionsFlow(OptionsFlow):
         imperial = resolve_units(self.hass, dict(self.config_entry.options)) == IMPERIAL
         if user_input is not None:
             data = dict(user_input)
+            for key in SENSORS:
+                if key in data:
+                    data[key] = entity_list(data[key])
+                    if not data[key]:
+                        del data[key]
             if imperial:
                 for key in HEAT_FIELDS:
                     if data.get(key) is not None:
                         data[key] = round(f_to_c(data[key]) * 2) / 2
             return self.async_create_entry(data=data)
         shown = dict(self.config_entry.options)
+        for key in SENSORS:
+            if shown.get(key):
+                shown[key] = entity_list(shown[key])  # one id before 0.19.1
         if imperial:
             for key in HEAT_FIELDS:
                 if shown.get(key) is not None:
@@ -115,10 +124,11 @@ class HomesteadOptionsFlow(OptionsFlow):
         schema = vol.Schema(
             {
                 **{
+                    # Several sensors of the same kind are averaged (two thermometers, a probe per bed…).
                     vol.Optional(key): EntitySelector(
-                        EntitySelectorConfig(domain="sensor", device_class=device_class)
+                        EntitySelectorConfig(domain="sensor", device_class=device_class, multiple=True)
                         if device_class
-                        else EntitySelectorConfig(domain="sensor")
+                        else EntitySelectorConfig(domain="sensor", multiple=True)
                     )
                     for key, device_class in SENSORS.items()
                 },

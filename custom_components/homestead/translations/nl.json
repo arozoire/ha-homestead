@@ -14,7 +14,7 @@
     "step": {
       "init": {
         "title": "Weer voor het logboek",
-        "description": "Elke logboekgebeurtenis bewaart het weer van de week ervoor (en van de 3 dagen erna bij behandelingen en zaaien). Kies je sensoren; wat ontbreekt komt van Open-Meteo (gratis, zonder account). Herinneringen: de activiteiten voor vandaag worden op het gekozen tijdstip naar de gekozen telefoons gestuurd; tikken opent het logboekformulier al ingevuld. Waarschuwingen: vorst onder de winterhardheid van elke plant, hittegolf (hete dagen en warme nachten meerdere dagen achter elkaar, als planten 's nachts niet meer herstellen), extreme hitte. De verwachting komt van de gekozen weerentiteit, anders van Open-Meteo.",
+        "description": "Elke logboekgebeurtenis bewaart het weer van de week ervoor (en van de 3 dagen erna bij behandelingen en zaaien). Kies je sensoren; wat ontbreekt komt van Open-Meteo (gratis, zonder account). Herinneringen: de activiteiten voor vandaag worden op het gekozen tijdstip naar de gekozen telefoons gestuurd; tikken opent het logboekformulier al ingevuld. Waarschuwingen: vorst onder de winterhardheid van elke plant, hittegolf (hete dagen en warme nachten meerdere dagen achter elkaar, als planten 's nachts niet meer herstellen), extreme hitte. De verwachting komt van de gekozen weerentiteit, anders van Open-Meteo. Elk veld accepteert meerdere sensoren van hetzelfde soort: hun waarden worden gemiddeld (van de temperatuur blijven het laagste en hoogste van allemaal bewaard).",
         "data": {
           "temperature_sensor": "Buitentemperatuur",
           "humidity_sensor": "Luchtvochtigheid buiten",
@@ -352,16 +352,16 @@
           "description": "Vrije notities."
         },
         "soil_moisture_entity": {
-          "name": "Bodemvochtsensor",
-          "description": "Sensor van deze zone; vervangt de algemene uit de opties."
+          "name": "Bodemvochtsensoren",
+          "description": "Sensor van deze zone; vervangt de algemene uit de opties. Eén of meer: gemiddeld."
         },
         "soil_temperature_entity": {
-          "name": "Bodemtemperatuursensor",
-          "description": "Sensor van deze zone; vervangt de algemene uit de opties."
+          "name": "Bodemtemperatuursensoren",
+          "description": "Sensor van deze zone; vervangt de algemene uit de opties. Eén of meer: gemiddeld."
         },
         "soil_ec_entity": {
-          "name": "Bodem-EC-sensor",
-          "description": "Geleidbaarheidssensor van deze zone (bijvoorbeeld een Ecowitt WH52)."
+          "name": "Bodem-EC-sensoren",
+          "description": "Geleidbaarheidssensor van deze zone (bijvoorbeeld een Ecowitt WH52). Eén of meer: gemiddeld."
         },
         "watering": {
           "name": "Hoe het water krijgt",
@@ -406,16 +406,16 @@
           "description": "Vrije notities."
         },
         "soil_moisture_entity": {
-          "name": "Bodemvochtsensor",
-          "description": "Sensor van deze zone; vervangt de algemene uit de opties."
+          "name": "Bodemvochtsensoren",
+          "description": "Sensor van deze zone; vervangt de algemene uit de opties. Eén of meer: gemiddeld."
         },
         "soil_temperature_entity": {
-          "name": "Bodemtemperatuursensor",
-          "description": "Sensor van deze zone; vervangt de algemene uit de opties."
+          "name": "Bodemtemperatuursensoren",
+          "description": "Sensor van deze zone; vervangt de algemene uit de opties. Eén of meer: gemiddeld."
         },
         "soil_ec_entity": {
-          "name": "Bodem-EC-sensor",
-          "description": "Geleidbaarheidssensor van deze zone (bijvoorbeeld een Ecowitt WH52)."
+          "name": "Bodem-EC-sensoren",
+          "description": "Geleidbaarheidssensor van deze zone (bijvoorbeeld een Ecowitt WH52). Eén of meer: gemiddeld."
         },
         "watering": {
           "name": "Hoe het water krijgt",
@@ -538,8 +538,8 @@
           "description": "Kamerplanten: van maart tot september."
         },
         "moisture_entity": {
-          "name": "Vochtsensor potgrond",
-          "description": "Optioneel: water geven als de waarde onder de drempel komt."
+          "name": "Bodemvochtsensoren",
+          "description": "Optioneel: water geven als de waarde onder de drempel komt. Eén of meer: gemiddeld."
         },
         "moisture_min": {
           "name": "Water geven onder (%)",
@@ -672,8 +672,8 @@
           "description": "Kamerplanten: van maart tot september."
         },
         "moisture_entity": {
-          "name": "Vochtsensor potgrond",
-          "description": "Optioneel: water geven als de waarde onder de drempel komt."
+          "name": "Bodemvochtsensoren",
+          "description": "Optioneel: water geven als de waarde onder de drempel komt. Eén of meer: gemiddeld."
         },
         "moisture_min": {
           "name": "Water geven onder (%)",

@@ -29,7 +29,7 @@ from .const import (
 )
 from .crops import GENUS_TYPES
 from .forecast import async_crop_defaults, get_outlook
-from .models import HomesteadData, Photo
+from .models import HomesteadData, Photo, entity_list
 from .photos import MAX_PHOTO_BYTES, delete_all, image_type, photo_dir, photo_roots, write_photo
 from .species import SourcesUnavailable, combine, search_local, search_remote
 from .store import get_store
@@ -323,4 +323,4 @@ def ws_soil_sensors(
     entries = hass.config_entries.async_entries(DOMAIN)
     options = entries[0].options if entries else {}
     keys = {"moisture": CONF_SOIL, "temperature": CONF_SOIL_TEMP, "ec": CONF_SOIL_EC}
-    connection.send_result(msg["id"], {name: options.get(key) for name, key in keys.items()})
+    connection.send_result(msg["id"], {name: entity_list(options.get(key)) for name, key in keys.items()})

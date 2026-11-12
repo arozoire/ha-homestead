@@ -250,15 +250,34 @@ class Zone(_Record):
     species: list[dict[str, Any]] = field(default_factory=list)
     notes: str | None = None
 
+    # Soil sensors of this zone (a WH52 in the bed): they win over the general ones in the options.
+    # Lists: several probes in the same bed are averaged (a single id from before 0.19.1 is read too).
+    soil_moisture_entity: list[str] = field(default_factory=list)
+    soil_temperature_entity: list[str] = field(default_factory=list)
+    soil_ec_entity: list[str] = field(default_factory=list)
+    watering: str | None = None  # WateringMode; None = as the parent zone
+
     def __post_init__(self) -> None:
         self.area_m2 = polygon_area_m2(self.geometry)
         self.species = clean_species(self.species)
+        for attr in SOIL_SENSOR_FIELDS.values():
+            setattr(self, attr, entity_list(getattr(self, attr)))
 
-    # Soil sensors of this zone (a WH52 in the bed): they win over the general ones in the options.
-    soil_moisture_entity: str | None = None
-    soil_temperature_entity: str | None = None
-    soil_ec_entity: str | None = None
-    watering: str | None = None  # WateringMode; None = as the parent zone
+
+def entity_list(value: Any) -> list[str]:
+    """Entity ids as a list without blanks or duplicates: a single id (older data) or a list."""
+    items = [value] if isinstance(value, str) else value if isinstance(value, list | tuple) else []
+    out: list[str] = []
+    for item in items:
+        if isinstance(item, str) and item.strip() and item.strip() not in out:
+            out.append(item.strip())
+    return out
+
+
+def mean_reading(entities: list[str], readings: dict[str, float] | None) -> float | None:
+    """Average of the sensors that answer, or None."""
+    values = [readings[e] for e in entities if readings and readings.get(e) is not None]
+    return round(sum(values) / len(values), 1) if values else None
 
 
 def clean_species(value: Any) -> list[dict[str, Any]]:
@@ -327,12 +346,13 @@ class Planting(_Record):
     # or water when a soil moisture sensor reads below the threshold.
     water_days: int | None = None
     fertilize_weeks: int | None = None
-    moisture_entity: str | None = None
+    moisture_entity: list[str] = field(default_factory=list)  # soil moisture sensors (averaged)
     moisture_min: float | None = None
     care: str | None = None  # the user's own care notes (pruning, feeding, quirks…)
     notes: str | None = None
 
     def __post_init__(self) -> None:
+        self.moisture_entity = entity_list(self.moisture_entity)
         if self.planted_on and not self.moon_phase:
             self.moon_phase = moon_phase(date.fromisoformat(self.planted_on))
         if self.sown_on and not self.sown_moon_phase:
@@ -714,9 +734,9 @@ SOIL_SENSOR_FIELDS = {
 }
 
 
-def zone_soil_sensors(data: HomesteadData, zone_id: str | None) -> dict[str, str]:
-    """Soil sensors of a zone, each one taken from the closest zone (itself, then its parents) that has it."""
-    found: dict[str, str] = {}
+def zone_soil_sensors(data: HomesteadData, zone_id: str | None) -> dict[str, list[str]]:
+    """Soil sensors of a zone, each kind from the closest zone (itself, then its parents) that has it."""
+    found: dict[str, list[str]] = {}
     seen: set[str] = set()
     while zone_id and zone_id not in seen and (zone := data.zones.get(zone_id)):
         for name, attr in SOIL_SENSOR_FIELDS.items():
@@ -751,7 +771,7 @@ def watering_due(
     for p in data.active_plantings():
         if not is_indoor(data, p):
             continue
-        reading = (moisture or {}).get(p.moisture_entity or "")
+        reading = mean_reading(p.moisture_entity, moisture)
         if reading is not None:
             if reading < (p.moisture_min or DEFAULT_MOISTURE_MIN):
                 due.append(p)

@@ -108,17 +108,20 @@ def parse_ha_forecast(items: list[dict[str, Any]], units: dict[str, str]) -> lis
 
 def daily_from_statistics(temps: list[dict], rains: list[dict]) -> dict[str, dict[str, Any]]:
     """Recorder daily long-term statistics (``min``/``max``, rain ``change``), rows with a local
-    ``date`` already set → days by date."""
-    days: dict[str, dict[str, Any]] = {}
+    ``date`` already set → days by date. Rows of several sensors on the same day are averaged."""
+    by_day: dict[str, dict[str, list[float]]] = {}
     for row in temps:
         if (key := row.get("date")) and row.get("min") is not None:
-            days.setdefault(key, {"date": key})
-            days[key].update(t_min=round(row["min"], 1), t_max=round(row.get("max") or row["min"], 1))
+            day = by_day.setdefault(key, {})
+            day.setdefault("t_min", []).append(row["min"])
+            day.setdefault("t_max", []).append(row.get("max") or row["min"])
     for row in rains:
         if (key := row.get("date")) and row.get("change") is not None:
-            days.setdefault(key, {"date": key})
-            days[key]["rain_mm"] = round(max(row["change"], 0), 1)
-    return days
+            by_day.setdefault(key, {}).setdefault("rain_mm", []).append(max(row["change"], 0))
+    return {
+        key: {"date": key, **{name: round(sum(v) / len(v), 1) for name, v in values.items()}}
+        for key, values in by_day.items()
+    }
 
 
 def merge_days(primary: dict[str, dict], fallback: list[dict]) -> list[dict[str, Any]]:

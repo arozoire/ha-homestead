@@ -400,6 +400,11 @@ const STYLE = `
   .weather { color: var(--secondary-text-color); }
   .seasons { margin-top: 16px; display: grid; gap: 8px; }
   .care-notes { margin-top: 12px; }
+  .sensor-field { display: grid; gap: 4px; }
+  .sensor-label { font-size: 13px; color: var(--secondary-text-color); }
+  .sensor-pick { display: grid; gap: 2px; max-height: 180px; overflow-y: auto; border: 1px solid var(--divider-color); border-radius: 8px; padding: 4px 8px; }
+  .sensor-option { display: flex; align-items: center; gap: 8px; min-height: 36px; font-size: 14px; }
+  .sensor-option input { width: 20px; height: 20px; flex: none; }
   .care-notes summary { cursor: pointer; color: var(--secondary-text-color); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .care-notes[open] { display: grid; gap: 8px; }
   .care-notes textarea { width: 100%; box-sizing: border-box; font: inherit; }
@@ -1231,7 +1236,7 @@ class HomesteadPanel extends HTMLElement {
       zone_id: values.zone_id || null,
       water_days: values.water_days ? Number(values.water_days) : null,
       fertilize_weeks: values.fertilize_weeks ? Number(values.fertilize_weeks) : null,
-      moisture_entity: values.moisture_entity || null,
+      moisture_entity: new FormData(ev.target).getAll("moisture_entity"),
       moisture_min: values.moisture_min ? Number(values.moisture_min) : null,
       watering: values.watering || null,
       notes: values.notes?.trim() || null,
@@ -1266,7 +1271,7 @@ class HomesteadPanel extends HTMLElement {
       parent_id: values.parent_id || null,
       species: this._zoneForm.species || [],
       notes: values.notes?.trim() || null,
-      ...Object.fromEntries(SOIL_SENSOR_FIELDS.map(([, attr]) => [attr, values[attr] || null])),
+      ...Object.fromEntries(SOIL_SENSOR_FIELDS.map(([, attr]) => [attr, new FormData(ev.target).getAll(attr)])),
       watering: values.watering || null,
     };
     const id = this._zoneForm.id;
@@ -1927,6 +1932,7 @@ class HomesteadPanel extends HTMLElement {
         this._selectField(f, "zone_id", this._zoneOptions()),
         this._waterSelect(f, this.t("wmLikeZone")),
         (careEl = this._careFields(f)),
+        this._moistureFields(f),
         rotationEl,
         f.id ? this._selectField(f, "status", ["active", "dead", "removed"].map((s) => [s, this.t(s)])) : null,
         f.id
@@ -3691,24 +3697,29 @@ class HomesteadPanel extends HTMLElement {
     const seen = new Set();
     for (let z = this._zone(zoneId); z && !seen.has(z.id); z = this._zone(z.parent_id)) {
       seen.add(z.id);
-      for (const [name, attr] of SOIL_SENSOR_FIELDS) if (!own[name] && z[attr]) own[name] = z[attr];
+      for (const [name, attr] of SOIL_SENSOR_FIELDS) if (!own[name] && sensorIds(z[attr]).length) own[name] = sensorIds(z[attr]);
     }
     return { ...out, ...own };
   }
 
   _zoneHasSoil(zoneId) {
     const z = this._zone(zoneId);
-    return !!z && SOIL_SENSOR_FIELDS.some(([, attr]) => z[attr]);
+    return !!z && SOIL_SENSOR_FIELDS.some(([, attr]) => sensorIds(z[attr]).length);
   }
 
   _soilNow(zoneId = null, ownOnly = false) {
-    const read = (id) => {
-      const state = id && this._hass.states[id];
-      const value = state ? Number(state.state) : NaN;
-      if (!Number.isFinite(value)) return null;
-      const unit = state.attributes?.unit_of_measurement || "";
-      // Temperatures in °C inside the panel, whatever the sensor reports.
-      return unit === "°F" ? { value: ((value - 32) * 5) / 9, unit: "°C" } : { value, unit };
+    // Several sensors of a kind: their average. Temperatures in °C inside the panel, whatever the sensor reports.
+    const read = (ids) => {
+      const values = sensorIds(ids)
+        .map((id) => this._hass.states[id])
+        .filter((state) => state && Number.isFinite(Number(state.state)))
+        .map((state) => {
+          const value = Number(state.state);
+          const unit = state.attributes?.unit_of_measurement || "";
+          return unit === "°F" ? { value: ((value - 32) * 5) / 9, unit: "°C" } : { value, unit };
+        });
+      if (!values.length) return null;
+      return { value: values.reduce((a, v) => a + v.value, 0) / values.length, unit: values[0].unit, count: values.length };
     };
     const sensors = this._soilSensorsFor(zoneId, ownOnly);
     return { temperature: read(sensors.temperature), moisture: read(sensors.moisture), ec: read(sensors.ec) };
@@ -4127,19 +4138,30 @@ class HomesteadPanel extends HTMLElement {
       .filter((x) => x.zone)
       .sort((a, b) => b.b.deficit_mm - a.b.deficit_mm);
     const young = (water.young || []).map((t) => ({ t, p: this._planting(t.planting_id) })).filter((x) => x.p);
+    const youngIds = new Set(young.map((x) => x.p.id));
+    const pots = (water.plants || []).map((t) => ({ t, p: this._planting(t.planting_id) })).filter((x) => x.p && !youngIds.has(x.p.id));
     const parts = [...this._climateLines(), ...this._pestLines()];
-    if (!zones.length && !young.length && !parts.length) return null;
+    if (!zones.length && !young.length && !pots.length && !parts.length) return null;
     const chip = (verdict) => h("span", { className: `water-chip ${verdict}` }, this.t(`water_${verdict}`));
     const thirsty = young.filter((x) => x.t.verdict === "water");
     return h(
       "div",
       { className: "today-box" },
       h("h3", {}, `✨ ${this.t("todayTitle")}`),
-      zones.length
+      zones.length || pots.length
         ? h(
             "div",
             { className: "today-group" },
             h("strong", {}, `💧 ${this.t("waterTitle")}`),
+            pots.map(({ t, p }) =>
+              h(
+                "button",
+                { type: "button", className: "today-row", onclick: () => this._select(p.id) },
+                h("span", { className: "main" }, `${PLANT_ICONS[p.plant_type] || "🪴"} ${p.name}`),
+                h("span", { className: "sub" }, this.t("waterSoil", { value: Math.round(t.moisture) })),
+                chip(t.verdict),
+              ),
+            ),
             zones.map(({ zone, b }) =>
               h(
                 "button",
@@ -4161,7 +4183,7 @@ class HomesteadPanel extends HTMLElement {
                 "button",
                 { type: "button", className: "today-row", onclick: () => this._select(p.id) },
                 h("span", { className: "main" }, `${PLANT_ICONS[p.plant_type] || "🌳"} ${p.name}`),
-                h("span", { className: "sub" }, this.t("youngDry", { days: t.dry_days })),
+                h("span", { className: "sub" }, t.moisture != null ? this.t("waterSoil", { value: Math.round(t.moisture) }) : this.t("youngDry", { days: t.dry_days })),
                 chip(t.verdict),
               ),
             ),
@@ -5034,9 +5056,13 @@ class HomesteadPanel extends HTMLElement {
   }
 
   _moistureOf(planting) {
-    const state = planting.moisture_entity && this._hass.states[planting.moisture_entity];
-    const value = state ? Number(state.state) : NaN;
-    return Number.isFinite(value) ? value : null;
+    return this._meanState(sensorIds(planting.moisture_entity));
+  }
+
+  /** Average of the sensors that answer, or null. */
+  _meanState(ids) {
+    const values = ids.map((id) => Number(this._hass.states[id]?.state)).filter(Number.isFinite);
+    return values.length ? values.reduce((a, b) => a + b, 0) / values.length : null;
   }
 
   /** Next watering day of a houseplant (today or earlier when due), or null without a plan. */
@@ -5178,9 +5204,6 @@ class HomesteadPanel extends HTMLElement {
 
   /** Planting form: watering plan, only for plants in an indoor zone. */
   _careFields(f) {
-    const sensors = Object.entries(this._hass.states)
-      .filter(([id, st]) => id.startsWith("sensor.") && st.attributes?.device_class === "moisture")
-      .map(([id, st]) => [id, st.attributes.friendly_name || id]);
     const succulent = ["opuntia", "echeveria", "aloe", "crassula", "haworthia", "sansevieria", "dracaena", "zamioculcas", "kalanchoe", "mammillaria", "euphorbia"];
     const guess = succulent.includes(this._cropKey(f.species).split(" ")[0]) ? 20 : 7;
     return h(
@@ -5193,15 +5216,22 @@ class HomesteadPanel extends HTMLElement {
         this._field(f, "water_days", { type: "number", min: 1, max: 365, step: 1, inputMode: "numeric", placeholder: String(guess) }),
         this._field(f, "fertilize_weeks", { type: "number", min: 1, max: 52, step: 1, inputMode: "numeric", placeholder: "4" }),
       ),
-      sensors.length
-        ? h(
-            "div",
-            { className: "row" },
-            this._selectField(f, "moisture_entity", [["", "—"], ...sensors]),
-            this._field(f, "moisture_min", { type: "number", min: 0, max: 100, step: 1, placeholder: "20" }),
-          )
-        : null,
       h("p", { className: "hint" }, this.t("careHint")),
+    );
+  }
+
+  /** Planting form: its own soil moisture sensors (a pot, a young tree, a houseplant), averaged. */
+  _moistureFields(f) {
+    const sensors = Object.entries(this._hass.states).filter(([id, st]) => id.startsWith("sensor.") && st.attributes?.device_class === "moisture");
+    const own = sensorIds(f.moisture_entity).length;
+    if (!sensors.length && !own) return null;
+    return h(
+      "details",
+      { className: "care-notes", open: own > 0 },
+      h("summary", {}, `💧 ${this.t("plantMoisture")}${own ? ` · ${own}` : ""}`),
+      this._sensorPicker("moisture_entity", sensors, f.moisture_entity),
+      this._field(f, "moisture_min", { type: "number", min: 0, max: 100, step: 1, placeholder: "20" }),
+      h("p", { className: "hint" }, this.t("plantMoistureHint")),
     );
   }
 
@@ -8971,6 +9001,25 @@ class HomesteadPanel extends HTMLElement {
     this.shadowRoot.append(overlay);
   }
 
+  /** Checkboxes for one or more sensors (they are averaged); the chosen ones first. */
+  _sensorPicker(name, candidates, chosen) {
+    const ids = sensorIds(chosen);
+    const label = (id) => {
+      const st = this._hass.states[id];
+      const unit = st?.attributes?.unit_of_measurement;
+      const value = st && Number.isFinite(Number(st.state)) ? ` · ${st.state}${unit ? ` ${unit}` : ""}` : "";
+      return `${st?.attributes?.friendly_name || id}${value}`;
+    };
+    const others = candidates.map(([id]) => id).filter((id) => !ids.includes(id)).sort((a, b) => label(a).localeCompare(label(b)));
+    const all = [...ids, ...others];
+    if (!all.length) return h("p", { className: "hint" }, this.t("noSensors"));
+    return h(
+      "div",
+      { className: "sensor-pick" },
+      all.map((id) => h("label", { className: "sensor-option" }, h("input", { type: "checkbox", name, value: id, checked: ids.includes(id) }), h("span", {}, label(id)))),
+    );
+  }
+
   /** Soil sensors of the zone (a WH52 in the bed), folded: empty = the zone above or the general ones. */
   _zoneSoilFields(z) {
     const sensors = Object.entries(this._hass.states).filter(([id]) => id.startsWith("sensor."));
@@ -8981,22 +9030,9 @@ class HomesteadPanel extends HTMLElement {
     };
     const select = (name, attr) => {
       const matching = sensors.filter(fits[name]);
-      const list = (matching.length ? matching : sensors).filter(([id]) => id !== z[attr]);
-      const label = ([id, st]) => `${st.attributes?.friendly_name || id}${st.attributes?.unit_of_measurement ? ` (${st.attributes.unit_of_measurement})` : ""}`;
-      const current = z[attr] ? [[z[attr], this._hass.states[z[attr]] || { attributes: {} }]] : [];
-      return h(
-        "label",
-        {},
-        this.t(attr),
-        h(
-          "select",
-          { name: attr },
-          h("option", { value: "" }, this.t("soilInherited")),
-          [...current, ...list.sort((a, b) => label(a).localeCompare(label(b)))].map((entry) => h("option", { value: entry[0], selected: entry[0] === z[attr] }, label(entry))),
-        ),
-      );
+      return h("div", { className: "sensor-field" }, h("span", { className: "sensor-label" }, this.t(attr)), this._sensorPicker(attr, matching.length ? matching : sensors, z[attr]));
     };
-    const own = SOIL_SENSOR_FIELDS.filter(([, attr]) => z[attr]).length;
+    const own = SOIL_SENSOR_FIELDS.filter(([, attr]) => sensorIds(z[attr]).length).length;
     return h(
       "details",
       { className: "care-notes", open: own > 0 },
@@ -9139,6 +9175,11 @@ function parseCsv(text) {
   }
   if (cell || row.length) rows.push([...row, cell]);
   return rows;
+}
+
+/** Sensor ids as a list: one id (older data) or several. */
+function sensorIds(value) {
+  return (Array.isArray(value) ? value : value ? [value] : []).filter(Boolean);
 }
 
 function csvCell(value) {

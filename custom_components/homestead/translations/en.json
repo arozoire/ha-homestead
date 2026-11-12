@@ -14,7 +14,7 @@
     "step": {
       "init": {
         "title": "Weather for the diary",
-        "description": "Each diary event records the weather of the week before it (and of the 3 days after for treatments and sowings). Choose your sensors; anything missing comes from Open-Meteo (free, no account). Reminders: planned activities due today are sent to the chosen phones at the chosen time; tapping one opens the diary form already filled in. Alerts: frost below each plant's hardiness, heatwave (hot days and warm nights for some days in a row, when plants no longer recover at night), extreme heat. The forecast comes from the chosen weather entity, else from Open-Meteo.",
+        "description": "Each diary event records the weather of the week before it (and of the 3 days after for treatments and sowings). Choose your sensors; anything missing comes from Open-Meteo (free, no account). Reminders: planned activities due today are sent to the chosen phones at the chosen time; tapping one opens the diary form already filled in. Alerts: frost below each plant's hardiness, heatwave (hot days and warm nights for some days in a row, when plants no longer recover at night), extreme heat. The forecast comes from the chosen weather entity, else from Open-Meteo. Each sensor field accepts several sensors of the same kind: their values are averaged (the lowest and highest temperature are kept).",
         "data": {
           "temperature_sensor": "Outdoor temperature",
           "humidity_sensor": "Outdoor humidity",
@@ -352,16 +352,16 @@
           "description": "Free notes."
         },
         "soil_moisture_entity": {
-          "name": "Soil moisture sensor",
-          "description": "Sensor of this zone; wins over the general one in the options."
+          "name": "Soil moisture sensors",
+          "description": "Sensor of this zone; wins over the general one in the options. One or more: averaged."
         },
         "soil_temperature_entity": {
-          "name": "Soil temperature sensor",
-          "description": "Sensor of this zone; wins over the general one in the options."
+          "name": "Soil temperature sensors",
+          "description": "Sensor of this zone; wins over the general one in the options. One or more: averaged."
         },
         "soil_ec_entity": {
-          "name": "Soil EC sensor",
-          "description": "Electrical conductivity sensor of this zone (an Ecowitt WH52, for example)."
+          "name": "Soil EC sensors",
+          "description": "Electrical conductivity sensor of this zone (an Ecowitt WH52, for example). One or more: averaged."
         },
         "watering": {
           "name": "How it is watered",
@@ -406,16 +406,16 @@
           "description": "Free notes."
         },
         "soil_moisture_entity": {
-          "name": "Soil moisture sensor",
-          "description": "Sensor of this zone; wins over the general one in the options."
+          "name": "Soil moisture sensors",
+          "description": "Sensor of this zone; wins over the general one in the options. One or more: averaged."
         },
         "soil_temperature_entity": {
-          "name": "Soil temperature sensor",
-          "description": "Sensor of this zone; wins over the general one in the options."
+          "name": "Soil temperature sensors",
+          "description": "Sensor of this zone; wins over the general one in the options. One or more: averaged."
         },
         "soil_ec_entity": {
-          "name": "Soil EC sensor",
-          "description": "Electrical conductivity sensor of this zone (an Ecowitt WH52, for example)."
+          "name": "Soil EC sensors",
+          "description": "Electrical conductivity sensor of this zone (an Ecowitt WH52, for example). One or more: averaged."
         },
         "watering": {
           "name": "How it is watered",
@@ -538,8 +538,8 @@
           "description": "Houseplants: from March to September."
         },
         "moisture_entity": {
-          "name": "Soil moisture sensor",
-          "description": "Optional: water when it reads below the threshold."
+          "name": "Soil moisture sensors",
+          "description": "Optional: water when it reads below the threshold. One or more: averaged."
         },
         "moisture_min": {
           "name": "Water below (%)",
@@ -672,8 +672,8 @@
           "description": "Houseplants: from March to September."
         },
         "moisture_entity": {
-          "name": "Soil moisture sensor",
-          "description": "Optional: water when it reads below the threshold."
+          "name": "Soil moisture sensors",
+          "description": "Optional: water when it reads below the threshold. One or more: averaged."
         },
         "moisture_min": {
           "name": "Water below (%)",

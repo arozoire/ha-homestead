@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import date, timedelta
 from typing import Any
 
-from .models import HomesteadData, PlantType, WateringMode, ZoneKind, zone_kind
+from .models import HomesteadData, PlantType, WateringMode, ZoneKind, mean_reading, zone_kind
 
 WINDOW_DAYS = 7
 DEFICIT_WATER = 15.0  # mm: water today
@@ -124,8 +124,28 @@ def zones_balance(
     return out
 
 
-def young_trees(data: HomesteadData, days: list[dict[str, Any]], today: date) -> list[dict[str, Any]]:
-    """Trees, shrubs and vines planted out less than two years ago, in the growing season."""
+def sensor_plants(data: HomesteadData, readings: dict[str, float]) -> list[dict[str, Any]]:
+    """Outdoor plants with their own soil moisture sensors (a pot, a young tree): the average against
+    their threshold. Houseplants have their own watering round."""
+    out = []
+    for p in data.active_plantings():
+        if not p.moisture_entity or zone_kind(data, p.zone_id) == ZoneKind.INDOOR:
+            continue
+        value = mean_reading(p.moisture_entity, readings)
+        if value is None:
+            continue
+        low = p.moisture_min if p.moisture_min is not None else SOIL_DRY
+        out.append(
+            {"planting_id": p.id, "moisture": value, "min": low, "verdict": "water" if value < low else "ok"}
+        )
+    return sorted(out, key=lambda t: t["moisture"])
+
+
+def young_trees(
+    data: HomesteadData, days: list[dict[str, Any]], today: date, readings: dict[str, float] | None = None
+) -> list[dict[str, Any]]:
+    """Trees, shrubs and vines planted out less than two years ago, in the growing season
+    (their own moisture sensors, when they have some, decide)."""
     if today.month not in YOUNG_MONTHS:
         return []
     out = []
@@ -150,6 +170,13 @@ def young_trees(data: HomesteadData, days: list[dict[str, Any]], today: date) ->
             last.append(watered.isoformat())
         since = date.fromisoformat(max(last))
         dry = (today - since).days
+        moisture = mean_reading(p.moisture_entity, readings)
+        if moisture is not None:
+            verdict = (
+                "water" if moisture < (p.moisture_min if p.moisture_min is not None else SOIL_DRY) else "ok"
+            )
+        else:
+            verdict = "water" if dry >= YOUNG_DRY_DAYS and rain_next < RAIN_COMING else "ok"
         out.append(
             {
                 "planting_id": p.id,
@@ -158,7 +185,8 @@ def young_trees(data: HomesteadData, days: list[dict[str, Any]], today: date) ->
                 "dry_days": dry,
                 "since": since.isoformat(),
                 "mode": p.watering or zone_mode(data, p.zone_id),
-                "verdict": "water" if dry >= YOUNG_DRY_DAYS and rain_next < RAIN_COMING else "ok",
+                "moisture": moisture,
+                "verdict": verdict,
             }
         )
     return sorted(out, key=lambda t: -t["dry_days"])

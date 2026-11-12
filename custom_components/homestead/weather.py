@@ -25,7 +25,7 @@ from .const import (
     CONF_SOIL_TEMP,
     CONF_TEMPERATURE,
 )
-from .models import NO_WEATHER_KINDS, is_indoor, zone_soil_sensors
+from .models import NO_WEATHER_KINDS, entity_list, is_indoor, zone_soil_sensors
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -69,31 +69,39 @@ def _avg(values: list[float]) -> float | None:
 
 
 def summarize_statistics(
-    rows: dict[str, list[dict]], sensors: dict[str, str], hours: float
+    rows: dict[str, list[dict]], sensors: dict[str, Any], hours: float
 ) -> dict[str, Any]:
-    """Weekly values from hourly long-term statistics rows, per configured sensor."""
+    """Weekly values from hourly long-term statistics rows, per configured sensor (one id or several:
+    several are averaged, temperature extremes are the lowest and highest of all)."""
     out: dict[str, Any] = {}
 
-    def usable(entity_id: str | None, key: str) -> list[dict]:
-        found = [r for r in rows.get(entity_id or "", []) if r.get(key) is not None]
-        return found if len(found) >= hours * MIN_COVERAGE else []
+    def usable(key_name: str, key: str) -> list[list[dict]]:
+        series = []
+        for entity_id in entity_list(sensors.get(key_name)):
+            found = [r for r in rows.get(entity_id, []) if r.get(key) is not None]
+            if len(found) >= hours * MIN_COVERAGE:
+                series.append(found)
+        return series
 
-    if temp := usable(sensors.get(CONF_TEMPERATURE), "mean"):
-        out["t_mean"] = _avg([r["mean"] for r in temp])
-        out["t_min"] = round(min(r.get("min", r["mean"]) for r in temp), 1)
-        out["t_max"] = round(max(r.get("max", r["mean"]) for r in temp), 1)
-    if hum := usable(sensors.get(CONF_HUMIDITY), "mean"):
-        out["rh_mean"] = _avg([r["mean"] for r in hum])
-    if soil := usable(sensors.get(CONF_SOIL), "mean"):
-        out["soil_mean"] = _avg([r["mean"] for r in soil])
-    if soil_t := usable(sensors.get(CONF_SOIL_TEMP), "mean"):
-        out["soil_t_mean"] = _avg([r["mean"] for r in soil_t])
-        out["soil_t_min"] = round(min(r.get("min", r["mean"]) for r in soil_t), 1)
-        out["soil_t_max"] = round(max(r.get("max", r["mean"]) for r in soil_t), 1)
-    if ec := usable(sensors.get(CONF_SOIL_EC), "mean"):
-        out["ec_mean"] = round(sum(r["mean"] for r in ec) / len(ec))
-    if rain := usable(sensors.get(CONF_RAIN), "change"):
-        out["rain_mm"] = round(sum(max(r["change"], 0) for r in rain), 1)
+    def mean(series: list[list[dict]]) -> float | None:
+        return _avg([_avg([r["mean"] for r in s]) for s in series])
+
+    if temp := usable(CONF_TEMPERATURE, "mean"):
+        out["t_mean"] = mean(temp)
+        out["t_min"] = round(min(r.get("min", r["mean"]) for s in temp for r in s), 1)
+        out["t_max"] = round(max(r.get("max", r["mean"]) for s in temp for r in s), 1)
+    if hum := usable(CONF_HUMIDITY, "mean"):
+        out["rh_mean"] = mean(hum)
+    if soil := usable(CONF_SOIL, "mean"):
+        out["soil_mean"] = mean(soil)
+    if soil_t := usable(CONF_SOIL_TEMP, "mean"):
+        out["soil_t_mean"] = mean(soil_t)
+        out["soil_t_min"] = round(min(r.get("min", r["mean"]) for s in soil_t for r in s), 1)
+        out["soil_t_max"] = round(max(r.get("max", r["mean"]) for s in soil_t for r in s), 1)
+    if ec := usable(CONF_SOIL_EC, "mean"):
+        out["ec_mean"] = round(mean(ec))
+    if rain := usable(CONF_RAIN, "change"):
+        out["rain_mm"] = _avg([round(sum(max(r["change"], 0) for r in s), 1) for s in rain])
     return out
 
 
@@ -164,9 +172,9 @@ async def async_snapshot(
         return None
     last = min(end, today)
     sensors = {
-        key: options[key]
+        key: entity_list(options.get(key))
         for key in (CONF_TEMPERATURE, CONF_HUMIDITY, CONF_RAIN, CONF_SOIL, CONF_SOIL_TEMP, CONF_SOIL_EC)
-        if options.get(key)
+        if entity_list(options.get(key))
     }
     start_dt = dt_util.as_utc(datetime.combine(start, time.min, dt_util.get_default_time_zone()))
     end_dt = dt_util.as_utc(
@@ -177,7 +185,7 @@ async def async_snapshot(
     result: dict[str, Any] = {}
     sources = []
     try:
-        rows = await _sensor_statistics(hass, set(sensors.values()), start_dt, end_dt)
+        rows = await _sensor_statistics(hass, {e for ids in sensors.values() for e in ids}, start_dt, end_dt)
         result = summarize_statistics(rows, sensors, hours)
     except Exception as err:  # noqa: BLE001 - a broken recorder must not break the diary
         _LOGGER.debug("Statistics for the weather snapshot failed: %s", err)

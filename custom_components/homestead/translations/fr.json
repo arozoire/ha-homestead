@@ -14,7 +14,7 @@
     "step": {
       "init": {
         "title": "Météo pour le journal",
-        "description": "Chaque événement du journal enregistre la météo de la semaine précédente (et des 3 jours suivants pour les traitements et les semis). Choisissez vos capteurs ; ce qui manque vient d'Open-Meteo (gratuit, sans compte). Rappels : les activités prévues aujourd'hui sont envoyées aux téléphones choisis à l'heure choisie ; en touchant l'une d'elles, le formulaire du journal s'ouvre déjà rempli. Alertes : gel sous la rusticité de chaque plante, canicule (jours chauds et nuits chaudes plusieurs jours de suite, quand les plantes ne récupèrent plus la nuit), chaleur extrême. Les prévisions viennent de l'entité météo choisie, sinon d'Open-Meteo.",
+        "description": "Chaque événement du journal enregistre la météo de la semaine précédente (et des 3 jours suivants pour les traitements et les semis). Choisissez vos capteurs ; ce qui manque vient d'Open-Meteo (gratuit, sans compte). Rappels : les activités prévues aujourd'hui sont envoyées aux téléphones choisis à l'heure choisie ; en touchant l'une d'elles, le formulaire du journal s'ouvre déjà rempli. Alertes : gel sous la rusticité de chaque plante, canicule (jours chauds et nuits chaudes plusieurs jours de suite, quand les plantes ne récupèrent plus la nuit), chaleur extrême. Les prévisions viennent de l'entité météo choisie, sinon d'Open-Meteo. Chaque champ accepte plusieurs capteurs du même type : leurs valeurs sont moyennées (pour la température, le minimum et le maximum de tous sont gardés).",
         "data": {
           "temperature_sensor": "Température extérieure",
           "humidity_sensor": "Humidité extérieure",
@@ -352,16 +352,16 @@
           "description": "Notes libres."
         },
         "soil_moisture_entity": {
-          "name": "Capteur d'humidité du sol",
-          "description": "Capteur de cette zone ; il remplace le capteur général des options."
+          "name": "Capteurs d'humidité du sol",
+          "description": "Capteur de cette zone ; il remplace le capteur général des options. Un ou plusieurs : moyennés."
         },
         "soil_temperature_entity": {
-          "name": "Capteur de température du sol",
-          "description": "Capteur de cette zone ; il remplace le capteur général des options."
+          "name": "Capteurs de température du sol",
+          "description": "Capteur de cette zone ; il remplace le capteur général des options. Un ou plusieurs : moyennés."
         },
         "soil_ec_entity": {
-          "name": "Capteur EC du sol",
-          "description": "Capteur de conductivité électrique de cette zone (un Ecowitt WH52, par exemple)."
+          "name": "Capteurs EC du sol",
+          "description": "Capteur de conductivité électrique de cette zone (un Ecowitt WH52, par exemple). Un ou plusieurs : moyennés."
         },
         "watering": {
           "name": "Comment c'est arrosé",
@@ -406,16 +406,16 @@
           "description": "Notes libres."
         },
         "soil_moisture_entity": {
-          "name": "Capteur d'humidité du sol",
-          "description": "Capteur de cette zone ; il remplace le capteur général des options."
+          "name": "Capteurs d'humidité du sol",
+          "description": "Capteur de cette zone ; il remplace le capteur général des options. Un ou plusieurs : moyennés."
         },
         "soil_temperature_entity": {
-          "name": "Capteur de température du sol",
-          "description": "Capteur de cette zone ; il remplace le capteur général des options."
+          "name": "Capteurs de température du sol",
+          "description": "Capteur de cette zone ; il remplace le capteur général des options. Un ou plusieurs : moyennés."
         },
         "soil_ec_entity": {
-          "name": "Capteur EC du sol",
-          "description": "Capteur de conductivité électrique de cette zone (un Ecowitt WH52, par exemple)."
+          "name": "Capteurs EC du sol",
+          "description": "Capteur de conductivité électrique de cette zone (un Ecowitt WH52, par exemple). Un ou plusieurs : moyennés."
         },
         "watering": {
           "name": "Comment c'est arrosé",
@@ -538,8 +538,8 @@
           "description": "Plantes d'intérieur : de mars à septembre."
         },
         "moisture_entity": {
-          "name": "Capteur d'humidité du terreau",
-          "description": "Facultatif : arroser quand il descend sous le seuil."
+          "name": "Capteurs d'humidité du sol",
+          "description": "Facultatif : arroser quand il descend sous le seuil. Un ou plusieurs : moyennés."
         },
         "moisture_min": {
           "name": "Arroser sous (%)",
@@ -672,8 +672,8 @@
           "description": "Plantes d'intérieur : de mars à septembre."
         },
         "moisture_entity": {
-          "name": "Capteur d'humidité du terreau",
-          "description": "Facultatif : arroser quand il descend sous le seuil."
+          "name": "Capteurs d'humidité du sol",
+          "description": "Facultatif : arroser quand il descend sous le seuil. Un ou plusieurs : moyennés."
         },
         "moisture_min": {
           "name": "Arroser sous (%)",

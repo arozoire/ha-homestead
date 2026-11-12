@@ -10,7 +10,7 @@
 | "A diary of pruning, treatments, sowing, harvests" | Diary events per plant or zone, with photos, moon phase and a weather snapshot (own sensors, else Open-Meteo) |
 | "Remind me to treat / prune / sow" | Tasks (also yearly) in the HA to-do and calendar, morning phone notifications with a ✔ Done button, weather check and best nearby day |
 | "Frost or heatwave alert for my plants" | Alerts per plant from the forecast and the plant's hardiness, on the phone |
-| "When should I water?" | Water balance per zone (rain − evapotranspiration, or a soil moisture sensor), young trees followed for two years |
+| "When should I water?" | Water balance per zone (rain − evapotranspiration, or the zone's soil moisture sensors), sensors on single pots, young trees followed for two years |
 | "Track seeds / what to sow now" | Seed lots with age warnings, sowing calendar set on the garden's own frost dates, rotation advice |
 | "Garden costs and harvest yields" | Expenses and sales, harvest quantities, yearly balance, multi-year analysis per crop |
 | "Firewood, compost, hens, houseplants" | Woodland zones and firewood stock, compost bins with turning reminders, hen house with egg counts, indoor plants with watering rounds |
@@ -24,7 +24,7 @@
 | 2. Add | *Settings → Devices & services → Add integration → HA Homestead*. A **Garden** item appears in the sidebar. |
 | 3. Zones | *Map → Zones → + New zone*: tap the corners of the vegetable garden, orchard, beds on the satellite map, *Done*, name and type. |
 | 4. Plants | *Map → Plantings → + New planting*: tap the spot, type name and species (online search for the scientific name). Type, crop calendar and alerts follow from the species. |
-| 5. Settings (optional) | *Configure* (or ⚙️ in the panel): weather and soil sensors (else Open-Meteo is used), the phones for reminders (`notify.mobile_app_…`) and the time, the weather entity, metric or imperial units. |
+| 5. Settings (optional) | *Configure* (or ⚙️ in the panel): weather and soil sensors, one or more of each kind, averaged (else Open-Meteo is used), the phones for reminders (`notify.mobile_app_…`) and the time, the weather entity, metric or imperial units. |
 | 6. Daily use | *Diary → + Event* (or the quick buttons) for what was done; a task for what is planned. |
 
 Entities created, all under one *HA Homestead* device: `sensor.ha_homestead_plantings`, `sensor.ha_homestead_expenses_this_year`, `sensor.ha_homestead_tools_needing_service`, `sensor.ha_homestead_weather_alerts`, `todo.ha_homestead_garden_tasks`, `calendar.ha_homestead_garden`. No areas, floors or labels are created. Panel languages: English, Italian, French, German, Spanish, Dutch.

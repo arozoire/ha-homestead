@@ -79,7 +79,8 @@ ADD_ZONE_SCHEMA = vol.Schema(
             [vol.Any(cv.string, {vol.Required("name"): cv.string, vol.Optional("taxon_id"): _opt_str})],
         ),
         vol.Optional("notes"): _opt_str,
-        **{vol.Optional(attr): vol.Any(None, cv.entity_id) for attr in SOIL_SENSOR_FIELDS.values()},
+        # One entity id or several (averaged).
+        **{vol.Optional(attr): vol.Any(None, cv.entity_ids) for attr in SOIL_SENSOR_FIELDS.values()},
         vol.Optional("watering"): vol.Any(None, vol.In([m.value for m in WateringMode])),
     }
 )
@@ -121,7 +122,7 @@ ADD_PLANTING_SCHEMA = vol.Schema(
         vol.Optional("germinated_count"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0))),
         vol.Optional("water_days"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=365))),
         vol.Optional("fertilize_weeks"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=52))),
-        vol.Optional("moisture_entity"): vol.Any(None, cv.entity_id),
+        vol.Optional("moisture_entity"): vol.Any(None, cv.entity_ids),
         vol.Optional("moisture_min"): vol.Any(None, vol.All(vol.Coerce(float), vol.Range(min=0, max=100))),
         vol.Optional("price"): vol.Any(None, _positive),
         vol.Optional("care"): _opt_str,

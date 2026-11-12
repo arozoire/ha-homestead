@@ -38,7 +38,7 @@ from .const import (
     SIGNAL_OUTLOOK_UPDATED,
 )
 from .crops import crop_traits, full_table, load_cropgraph, load_defaults
-from .models import is_indoor, zone_soil_sensors
+from .models import entity_list, is_indoor, mean_reading, zone_soil_sensors
 from .notify import async_send
 from .outlook import (
     YOUNG_DAYS,
@@ -55,7 +55,7 @@ from .outlook import (
 )
 from .store import HomesteadStore
 from .units import IMPERIAL, METRIC, resolve_units, temperature_text
-from .water import parse_water_days, young_trees, zones_balance
+from .water import parse_water_days, sensor_plants, young_trees, zones_balance
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -186,14 +186,21 @@ def _zone_moisture(hass: HomeAssistant, data: Any) -> dict[str, float]:
     """Soil moisture now of each zone with its own (or a parent's) moisture sensor."""
     out = {}
     for zone in data.zones.values():
-        entity = zone_soil_sensors(data, zone.id).get("moisture")
-        state = hass.states.get(entity) if entity else None
-        try:
-            out[zone.id] = float(state.state) if state else None
-        except ValueError:
-            continue
-        if out[zone.id] is None:
-            del out[zone.id]
+        entities = zone_soil_sensors(data, zone.id).get("moisture") or []
+        if (value := mean_reading(entities, sensor_readings(hass, entities))) is not None:
+            out[zone.id] = value
+    return out
+
+
+def sensor_readings(hass: HomeAssistant, entities: list[str]) -> dict[str, float]:
+    """Numeric states of these sensors (unavailable or unknown ones left out)."""
+    out = {}
+    for entity_id in entities:
+        if state := hass.states.get(entity_id):
+            try:
+                out[entity_id] = float(state.state)
+            except ValueError:
+                continue
     return out
 
 
@@ -235,8 +242,8 @@ async def async_fetch_forecast(hass: HomeAssistant, options: dict[str, Any]) -> 
 async def _sensor_days(
     hass: HomeAssistant, options: dict[str, Any], start: date, end: date
 ) -> dict[str, dict]:
-    temp, rain = options.get(CONF_TEMPERATURE), options.get(CONF_RAIN)
-    ids = {i for i in (temp, rain) if i}
+    temp, rain = entity_list(options.get(CONF_TEMPERATURE)), entity_list(options.get(CONF_RAIN))
+    ids = {*temp, *rain}
     if "recorder" not in hass.config.components or not ids:
         return {}
     from homeassistant.components.recorder import get_instance  # noqa: PLC0415
@@ -264,7 +271,7 @@ async def _sensor_days(
         return out
 
     return daily_from_statistics(
-        dated(rows.get(temp, [])) if temp else [], dated(rows.get(rain, [])) if rain else []
+        [r for e in temp for r in dated(rows.get(e, []))], [r for e in rain for r in dated(rows.get(e, []))]
     )
 
 
@@ -372,10 +379,12 @@ class Outlook:
                 self.advice[task.id] = verdict
         today = dt_util.now().date()
         data = self.store.data
+        readings = sensor_readings(self.hass, [e for p in data.plantings.values() for e in p.moisture_entity])
         self.water = {
             "days": self.water_days,
             "zones": zones_balance(data, self.water_days, today, _zone_moisture(self.hass, data)),
-            "young": young_trees(data, self.water_days, today),
+            "young": young_trees(data, self.water_days, today, readings),
+            "plants": sensor_plants(data, readings),
         }
         series = self.climate.get("gdd") or {}
         now_gdd = gdd_today(series, self.water_days, today)

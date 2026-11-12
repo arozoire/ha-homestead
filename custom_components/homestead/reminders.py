@@ -17,7 +17,7 @@ from homeassistant.helpers.translation import async_get_translations
 from homeassistant.util import dt as dt_util
 
 from .const import CONF_NOTIFY, CONF_NOTIFY_TIME, DEFAULT_NOTIFY_TIME, DOMAIN
-from .forecast import advice_text, get_outlook
+from .forecast import advice_text, get_outlook, sensor_readings
 from .labels import async_kind_names, summary
 from .models import COMPOST_TURN_DAYS, compost_due, watering_due
 from .notify import async_send
@@ -75,12 +75,18 @@ async def async_send_reminders(hass: HomeAssistant, store: HomesteadStore, servi
         for z, b in (water.get("zones") or {}).items()
         if b["verdict"] == "water" and z in store.data.zones
     ]
+    # Plants with their own moisture sensors (pots, young trees with a probe): by the reading.
+    dry_pots = [
+        store.data.plantings[t["planting_id"]]
+        for t in water.get("plants") or []
+        if t["verdict"] == "water" and t["planting_id"] in store.data.plantings
+    ]
     dry_trees = [
         (store.data.plantings[t["planting_id"]], t["dry_days"])
         for t in water.get("young") or []
-        if t["verdict"] == "water" and t["planting_id"] in store.data.plantings
+        if t["verdict"] == "water" and t.get("moisture") is None and t["planting_id"] in store.data.plantings
     ]
-    if not services or not (due or late or compost or tools or thirsty or dry_zones or dry_trees):
+    if not services or not (due or late or compost or tools or thirsty or dry_zones or dry_pots or dry_trees):
         return 0
     kinds = await async_kind_names(hass)
     texts = await _texts(hass)
@@ -126,12 +132,12 @@ async def async_send_reminders(hass: HomeAssistant, store: HomesteadStore, servi
                 "data": {"url": PANEL_URL, "clickAction": PANEL_URL, "tag": f"{DOMAIN}-water"},
             }
         )
-    if dry_zones or dry_trees:
+    if dry_zones or dry_pots or dry_trees:
         lines = []
-        if dry_zones:
+        if dry_zones or dry_pots:
             lines.append(
                 texts.get("notification_dry_zones", "💧 To water today: {zones}").replace(
-                    "{zones}", ", ".join(z.name for z in dry_zones)
+                    "{zones}", ", ".join([z.name for z in dry_zones] + [p.name for p in dry_pots])
                 )
             )
         for planting, days in dry_trees:
@@ -180,14 +186,8 @@ async def async_send_reminders(hass: HomeAssistant, store: HomesteadStore, servi
 
 def _moisture(hass: HomeAssistant, store: HomesteadStore) -> dict[str, float]:
     """Current readings of the soil moisture sensors linked to plantings."""
-    out = {}
-    for p in store.data.plantings.values():
-        if p.moisture_entity and (state := hass.states.get(p.moisture_entity)):
-            try:
-                out[p.moisture_entity] = float(state.state)
-            except ValueError:
-                continue  # unavailable or unknown: fall back to the interval
-    return out
+    # Unavailable or unknown sensors are left out: the interval is used instead.
+    return sensor_readings(hass, [e for p in store.data.plantings.values() for e in p.moisture_entity])
 
 
 def _parse_time(value: str | None) -> time:

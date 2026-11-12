@@ -37,7 +37,7 @@ def _garden() -> HomesteadData:
 
 def test_zone_sensors_from_the_zone_then_its_parents() -> None:
     data = _garden()
-    assert zone_soil_sensors(data, "aiuola") == {"ec": "sensor.aiuola_ec", "temperature": "sensor.orto_t"}
+    assert zone_soil_sensors(data, "aiuola") == {"ec": ["sensor.aiuola_ec"], "temperature": ["sensor.orto_t"]}
     assert zone_soil_sensors(data, "frutteto") == {}
     assert zone_soil_sensors(data, None) == {}
 
@@ -52,8 +52,8 @@ def test_event_uses_the_zone_sensors_over_the_general_ones() -> None:
     on_plant = Event(kind="watering", done_on="2026-11-01", planting_id="pom")
     assert _event_options(store, on_plant, general) == {
         CONF_SOIL: "sensor.general_m",
-        CONF_SOIL_TEMP: "sensor.orto_t",
-        CONF_SOIL_EC: "sensor.aiuola_ec",
+        CONF_SOIL_TEMP: ["sensor.orto_t"],
+        CONF_SOIL_EC: ["sensor.aiuola_ec"],
     }
     on_orchard = Event(kind="pruning", done_on="2026-11-01", zone_id="frutteto")
     assert _event_options(store, on_orchard, general) == general
@@ -66,7 +66,7 @@ def test_backup_keeps_zone_sensors_and_cleans_photo_lists() -> None:
         id="t", kind="photo", due_on="2026-11-01", zone_ids=["orto", "gone"], plan_id="nope"
     )
     back = read_backup(make_backup(data, "2026-11-09", "0.17.0"))
-    assert back.zones["orto"].soil_temperature_entity == "sensor.orto_t"
+    assert back.zones["orto"].soil_temperature_entity == ["sensor.orto_t"]
     assert back.photo_plans["p"].zone_ids == ["orto"]
     assert back.photo_plans["p"].planting_ids == ["pom"]
     assert back.tasks["t"].zone_ids == ["orto"]
@@ -87,7 +87,7 @@ async def test_zone_soil_sensors_by_service(hass: HomeAssistant) -> None:
     )
     store = entry.runtime_data
     zone = store.data.zones[out["id"]]
-    assert zone.soil_temperature_entity == "sensor.serra_t"
+    assert zone.soil_temperature_entity == ["sensor.serra_t"]
     await hass.services.async_call(
         DOMAIN,
         "update_zone",
@@ -95,7 +95,7 @@ async def test_zone_soil_sensors_by_service(hass: HomeAssistant) -> None:
         blocking=True,
         return_response=True,
     )
-    assert store.data.zones[zone.id].soil_temperature_entity is None
+    assert store.data.zones[zone.id].soil_temperature_entity == []
 
 
 async def test_backup_zip_with_photos(hass: HomeAssistant, tmp_path, hass_client, hass_ws_client) -> None:

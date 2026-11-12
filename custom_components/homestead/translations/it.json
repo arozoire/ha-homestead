@@ -14,7 +14,7 @@
     "step": {
       "init": {
         "title": "Meteo per il diario",
-        "description": "Ogni evento del diario registra il meteo della settimana prima (e dei 3 giorni dopo per trattamenti e semine). Scegli i tuoi sensori; quello che manca arriva da Open-Meteo (gratuito, senza account). Promemoria: le attività previste per oggi vengono inviate ai telefoni scelti all'ora scelta; toccandone una si apre il form del diario già compilato. Allerte: gelo sotto la rusticità di ogni pianta, ondata di calore (giorni caldi e notti calde per alcuni giorni di fila: di notte le piante non recuperano), caldo estremo. Le previsioni vengono dall'entità meteo scelta, altrimenti da Open-Meteo.",
+        "description": "Ogni evento del diario registra il meteo della settimana prima (e dei 3 giorni dopo per trattamenti e semine). Scegli i tuoi sensori; quello che manca arriva da Open-Meteo (gratuito, senza account). Promemoria: le attività previste per oggi vengono inviate ai telefoni scelti all'ora scelta; toccandone una si apre il form del diario già compilato. Allerte: gelo sotto la rusticità di ogni pianta, ondata di calore (giorni caldi e notti calde per alcuni giorni di fila: di notte le piante non recuperano), caldo estremo. Le previsioni vengono dall'entità meteo scelta, altrimenti da Open-Meteo. Ogni campo accetta più sensori dello stesso tipo: i valori vengono mediati (della temperatura si tengono anche la minima e la massima di tutti).",
         "data": {
           "temperature_sensor": "Temperatura esterna",
           "humidity_sensor": "Umidità esterna",
@@ -352,16 +352,16 @@
           "description": "Note libere."
         },
         "soil_moisture_entity": {
-          "name": "Sensore umidità suolo",
-          "description": "Sensore di questa zona; prevale su quello generale delle opzioni."
+          "name": "Sensori di umidità del suolo",
+          "description": "Sensore di questa zona; prevale su quello generale delle opzioni. Uno o più: mediati."
         },
         "soil_temperature_entity": {
-          "name": "Sensore temperatura suolo",
-          "description": "Sensore di questa zona; prevale su quello generale delle opzioni."
+          "name": "Sensori di temperatura del suolo",
+          "description": "Sensore di questa zona; prevale su quello generale delle opzioni. Uno o più: mediati."
         },
         "soil_ec_entity": {
-          "name": "Sensore EC suolo",
-          "description": "Sensore di conducibilità elettrica di questa zona (per esempio un Ecowitt WH52)."
+          "name": "Sensori EC del suolo",
+          "description": "Sensore di conducibilità elettrica di questa zona (per esempio un Ecowitt WH52). Uno o più: mediati."
         },
         "watering": {
           "name": "Come si bagna",
@@ -406,16 +406,16 @@
           "description": "Note libere."
         },
         "soil_moisture_entity": {
-          "name": "Sensore umidità suolo",
-          "description": "Sensore di questa zona; prevale su quello generale delle opzioni."
+          "name": "Sensori di umidità del suolo",
+          "description": "Sensore di questa zona; prevale su quello generale delle opzioni. Uno o più: mediati."
         },
         "soil_temperature_entity": {
-          "name": "Sensore temperatura suolo",
-          "description": "Sensore di questa zona; prevale su quello generale delle opzioni."
+          "name": "Sensori di temperatura del suolo",
+          "description": "Sensore di questa zona; prevale su quello generale delle opzioni. Uno o più: mediati."
         },
         "soil_ec_entity": {
-          "name": "Sensore EC suolo",
-          "description": "Sensore di conducibilità elettrica di questa zona (per esempio un Ecowitt WH52)."
+          "name": "Sensori EC del suolo",
+          "description": "Sensore di conducibilità elettrica di questa zona (per esempio un Ecowitt WH52). Uno o più: mediati."
         },
         "watering": {
           "name": "Come si bagna",
@@ -538,8 +538,8 @@
           "description": "Piante da interno: da marzo a settembre."
         },
         "moisture_entity": {
-          "name": "Sensore umidità terriccio",
-          "description": "Facoltativo: annaffia quando scende sotto la soglia."
+          "name": "Sensori di umidità del suolo",
+          "description": "Facoltativo: annaffia quando scende sotto la soglia. Uno o più: mediati."
         },
         "moisture_min": {
           "name": "Annaffia sotto (%)",
@@ -672,8 +672,8 @@
           "description": "Piante da interno: da marzo a settembre."
         },
         "moisture_entity": {
-          "name": "Sensore umidità terriccio",
-          "description": "Facoltativo: annaffia quando scende sotto la soglia."
+          "name": "Sensori di umidità del suolo",
+          "description": "Facoltativo: annaffia quando scende sotto la soglia. Uno o più: mediati."
         },
         "moisture_min": {
           "name": "Annaffia sotto (%)",
