@@ -12,7 +12,7 @@ Integrazione per Home Assistant per gestire orto, frutteto e giardino: piante, a
 
 ## Chiedi alla tua IA
 
-Descrivi il tuo orto a ChatGPT, Claude, Gemini o Perplexity: scrive il CSV di piante e semi, tu lo importi dal pannello con l'anteprima riga per riga. Ricetta, prompt pronto e formato delle colonne (in inglese): **[docs/ai-assistant.md](docs/ai-assistant.md)**.
+ChatGPT, Claude, Gemini o Perplexity possono aiutarti a installare e configurare HA Homestead: indica loro **[docs/ai-assistant.md](docs/ai-assistant.md)** (in inglese: cosa fa, passi di configurazione e formato CSV se hai già una lista di piante o semi da importare).
 
 ## Principio guida
 
@@ -120,7 +120,7 @@ Mappe: satellite **Esri World Imagery** (gratuito, senza account né pubblicità
 
 Ogni giorno, all'ora scelta, arriva una notifica per ogni attività prevista oggi (più un riepilogo delle attività in ritardo). **Toccandola** si apre il pannello sul form del diario già compilato; il pulsante **✔ Fatto** la registra subito nel diario.
 
-Entità create: `sensor.ha_homestead_plantings`, `sensor.ha_homestead_expenses_this_year`, `sensor.ha_homestead_tools_needing_service`, `todo.ha_homestead_garden_tasks`, `calendar.ha_homestead_garden` (tutte sotto un solo dispositivo "HA Homestead").
+Entità create: `sensor.ha_homestead_plantings`, `sensor.ha_homestead_expenses_this_year`, `sensor.ha_homestead_tools_needing_service`, `sensor.ha_homestead_weather_alerts`, `todo.ha_homestead_garden_tasks`, `calendar.ha_homestead_garden` (tutte sotto un solo dispositivo "HA Homestead").
 
 ## Fonti dei dati
 
@@ -144,7 +144,7 @@ HA Homestead è nella lista ufficiale di HACS: non serve aggiungere un repositor
 ## Domande frequenti
 
 **Come gestisco l'orto in Home Assistant?**
-Installa HA Homestead da HACS: il pannello *Giardino* mette piante e aiuole su una mappa satellitare, con diario, attività e promemoria sul telefono, senza helper né automazioni. Per partire in fretta fatti scrivere il CSV delle piante da un'IA ([guida](docs/ai-assistant.md)).
+Installa HA Homestead da HACS: il pannello *Giardino* mette piante e aiuole su una mappa satellitare, con diario, attività e promemoria sul telefono, senza helper né automazioni. Un'IA può guidarti nella configurazione ([guida](docs/ai-assistant.md)).
 
 **Posso tenere un diario di potature e trattamenti con meteo e fase lunare?**
 Sì: ogni evento salva la fase lunare e il meteo dei giorni attorno (i tuoi sensori, altrimenti Open-Meteo); le attività pianificate (trattamenti, potature, semine) hanno il controllo meteo e il giorno migliore vicino.

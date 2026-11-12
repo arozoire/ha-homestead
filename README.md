@@ -12,7 +12,7 @@ A Home Assistant integration to manage your vegetable garden, orchard and garden
 
 ## Ask your AI assistant
 
-Describe your garden to ChatGPT, Claude, Gemini or Perplexity: it writes the CSV of your plants and seeds, you import it from the panel with a row-by-row preview. Recipe, ready-made prompt and column format: **[docs/ai-assistant.md](docs/ai-assistant.md)**.
+ChatGPT, Claude, Gemini or Perplexity can help you install and configure HA Homestead: point them to **[docs/ai-assistant.md](docs/ai-assistant.md)** (what it does, setup steps, and the CSV format if you already have a list of plants or seeds to import).
 
 ## Guiding principle
 
@@ -120,7 +120,7 @@ Maps: **Esri World Imagery** satellite (free, no account or ads) and **OpenStree
 
 Every day at the chosen time a notification arrives for each task planned for today (plus a summary of overdue tasks). **Tapping** it opens the panel on the prefilled diary form; the **✔ Done** button records it in the diary right away.
 
-Entities created: `sensor.ha_homestead_plantings`, `sensor.ha_homestead_expenses_this_year`, `sensor.ha_homestead_tools_needing_service`, `todo.ha_homestead_garden_tasks`, `calendar.ha_homestead_garden` (all under a single "HA Homestead" device).
+Entities created: `sensor.ha_homestead_plantings`, `sensor.ha_homestead_expenses_this_year`, `sensor.ha_homestead_tools_needing_service`, `sensor.ha_homestead_weather_alerts`, `todo.ha_homestead_garden_tasks`, `calendar.ha_homestead_garden` (all under a single "HA Homestead" device).
 
 ## Data sources
 
@@ -144,7 +144,7 @@ HA Homestead is in the default HACS list: no custom repository needed.
 ## Common questions
 
 **How do I track my vegetable garden in Home Assistant?**
-Install HA Homestead from HACS. The *Garden* panel puts your plants and beds on a satellite map, with a diary, tasks and phone reminders; no helpers or automations to write. To start fast, let an AI assistant write the CSV of your plants ([guide](docs/ai-assistant.md)).
+Install HA Homestead from HACS. The *Garden* panel puts your plants and beds on a satellite map, with a diary, tasks and phone reminders; no helpers or automations to write. An AI assistant can guide you through the setup ([guide](docs/ai-assistant.md)).
 
 **Can I keep a diary of pruning, treatments and harvests with the weather and the moon phase?**
 Yes: every diary event stores the moon phase and a weather snapshot of the days around it (your sensors, else Open-Meteo). Planned treatments, pruning and sowing get a weather check and the best nearby day.
