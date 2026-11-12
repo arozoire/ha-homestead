@@ -8,13 +8,17 @@
 
 A Home Assistant integration to manage your vegetable garden, orchard and garden: plants, fruit trees, beds, a diary, expenses, tools, seeds, harvests and weather-aware advice.
 
-> Status: **v0.15** (see *What it does today*). Full specification in [SPEC.md](SPEC.md) (Italian).
+> Status: **v0.19** (see *What it does today*). Full specification in [SPEC.md](SPEC.md) (Italian).
+
+## Ask your AI assistant
+
+Describe your garden to ChatGPT, Claude, Gemini or Perplexity: it writes the CSV of your plants and seeds, you import it from the panel with a row-by-row preview. Recipe, ready-made prompt and column format: **[docs/ai-assistant.md](docs/ai-assistant.md)**.
 
 ## Guiding principle
 
-**Keep Home Assistant clean**: no areas created, few aggregated entities, clean removal (uninstalling the integration deletes its data).
+**Keep Home Assistant clean**: no areas created, few aggregated entities, clean removal (uninstalling deletes its data from HA; your photos stay in the media folder with a last backup).
 
-## What it does today (v0.13)
+## What it does today
 
 | Feature | How |
 |---|---|
@@ -129,21 +133,33 @@ Entities created: `sensor.ha_homestead_plantings`, `sensor.ha_homestead_expenses
 
 ## Installation
 
-### HACS (recommended)
+HA Homestead is in the default HACS list: no custom repository needed.
 
 [![Open your Home Assistant instance and open this repository in HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=arozoire&repository=ha-homestead&category=integration)
 
 1. In HACS, search for **HA Homestead** (or use the button above) and download it.
 2. Restart Home Assistant.
-3. *Settings → Devices & services → Add integration → HA Homestead*.
+3. *Settings → Devices & services → Add integration → HA Homestead*. A **Garden** item appears in the sidebar.
 
-### Custom repository (fallback)
+## Common questions
 
-If HA Homestead does not show up in the search (an older HACS, for example):
+**How do I track my vegetable garden in Home Assistant?**
+Install HA Homestead from HACS. The *Garden* panel puts your plants and beds on a satellite map, with a diary, tasks and phone reminders; no helpers or automations to write. To start fast, let an AI assistant write the CSV of your plants ([guide](docs/ai-assistant.md)).
 
-1. HACS → ⋮ menu → *Custom repositories* → `https://github.com/arozoire/ha-homestead`, category *Integration*.
-2. Download **HA Homestead** and restart Home Assistant.
-3. *Settings → Devices & services → Add integration → HA Homestead*.
+**Can I keep a diary of pruning, treatments and harvests with the weather and the moon phase?**
+Yes: every diary event stores the moon phase and a weather snapshot of the days around it (your sensors, else Open-Meteo). Planned treatments, pruning and sowing get a weather check and the best nearby day.
+
+**How do I manage fruit trees and an orchard in Home Assistant?**
+Draw the orchard as a zone, place each tree on the map. You get the crop sheet (pruning, flowering, harvest months), frost alerts by hardiness, cold hours for fruiting, pollinator checks and two years of watering follow-up after planting.
+
+**Can it track garden expenses and harvests?**
+Yes: expenses (plants, seeds, tools, services) and sales, harvests with quantities, a yearly balance and multi-year analysis per crop and zone.
+
+**Can I manage my seed collection and get sowing reminders?**
+Yes: seed lots with age warnings, *what to sow now* from the crop calendar set on your own frost dates, succession sowing and rotation advice per bed.
+
+**Where is my data, and how do I back it up?**
+In Home Assistant: `.storage/homestead.data` (part of the normal HA backups), photos in the media folder. *More → 💾 Export JSON* or *🗜️ Export with photos (.zip)*; *📂 Restore* takes either. No cloud account.
 
 ## Development
 

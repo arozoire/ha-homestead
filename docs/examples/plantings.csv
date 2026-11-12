@@ -1,0 +1,7 @@
+name;species;variety;plant_type;quantity;origin;sown_on;planted_on;age_years;zone;latitude;longitude;price;supplier;notes
+Apple tree by the well;Malus domestica;Renetta;fruit_tree;1;planted;;15/11/2024;3;Orchard;;;25,00;Local nursery;Rootstock M106
+Old cherry tree;Prunus avium;;fruit_tree;1;existing;;;30;Orchard;;;;;Was here when we bought the house
+Tomatoes;Solanum lycopersicum;Cuore di bue;vegetable;12;sown;01/03/2026;10/05/2026;;Vegetable garden;;;;;Staked
+Courgettes;Cucurbita pepo;Black Beauty;vegetable;4;planted;;12/05/2026;;Vegetable garden;;;6,00;Garden centre;
+Rosemary;Salvia rosmarinus;;herb;1;existing;;;;Vegetable garden;;;;;By the gate
+Raspberries;Rubus idaeus;Autumn Bliss;shrub;6;planted;;20/03/2025;;Orchard;;;18,00;Local nursery;
