@@ -831,5 +831,17 @@
  "reportPopup": "Il browser ha bloccato la finestra di stampa: permetti i popup per Home Assistant.",
  "noSensors": "Nessun sensore adatto in Home Assistant.",
  "plantMoisture": "Sensori di umidità di questa pianta",
- "plantMoistureHint": "Per un vaso, un albero giovane o una pianta da interno: più sensori vengono mediati. Sotto la soglia (25 % all'aperto se vuota, 20 % in casa) è tra quelle da annaffiare, anche nel promemoria del mattino."
+ "plantMoistureHint": "Per un vaso, un albero giovane o una pianta da interno: più sensori vengono mediati. Sotto la soglia (25 % all'aperto se vuota, 20 % in casa) è tra quelle da annaffiare, anche nel promemoria del mattino.",
+ "planTurnLeft": "Ruota a sinistra di 15°",
+ "planTurnRight": "Ruota a destra di 15°",
+ "planAlign": "Allinea",
+ "planNorth": "Nord in alto",
+ "planBedRect": "Rettangolo",
+ "planBedDraw": "Disegna",
+ "planBedDrawHint": "Tocca gli angoli dell'aiuola (finora {count}): si agganciano alla griglia e agli angoli della zona e delle altre aiuole.",
+ "planBedCorners": "Servono almeno 3 angoli.",
+ "planSplit": "Separa",
+ "planSplitOf": "su {count}",
+ "planSplitDo": "Dividi",
+ "planSplitDone": "{count} piante singole accanto a “{name}”: trascinale al loro posto."
 }

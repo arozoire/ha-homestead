@@ -831,5 +831,17 @@
  "reportPopup": "El navegador bloqueó la ventana de impresión: permite las ventanas emergentes para Home Assistant.",
  "noSensors": "Ningún sensor adecuado en Home Assistant.",
  "plantMoisture": "Sensores de humedad de esta planta",
- "plantMoistureHint": "Para una maceta, un árbol joven o una planta de interior: varios sensores se promedian. Por debajo del umbral (25 % al aire libre si está vacío, 20 % en casa) está entre las que regar, también en el recordatorio de la mañana."
+ "plantMoistureHint": "Para una maceta, un árbol joven o una planta de interior: varios sensores se promedian. Por debajo del umbral (25 % al aire libre si está vacío, 20 % en casa) está entre las que regar, también en el recordatorio de la mañana.",
+ "planTurnLeft": "Girar 15° a la izquierda",
+ "planTurnRight": "Girar 15° a la derecha",
+ "planAlign": "Alinear",
+ "planNorth": "Norte arriba",
+ "planBedRect": "Rectángulo",
+ "planBedDraw": "Dibujar",
+ "planBedDrawHint": "Toca las esquinas del bancal ({count} hasta ahora): se ajustan a la cuadrícula y a las esquinas de la zona y de los otros bancales.",
+ "planBedCorners": "Al menos 3 esquinas.",
+ "planSplit": "Separar",
+ "planSplitOf": "de {count}",
+ "planSplitDo": "Dividir",
+ "planSplitDone": "{count} plantas sueltas junto a «{name}»: arrástralas a su sitio."
 }

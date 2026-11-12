@@ -288,7 +288,9 @@ const STYLE = `
   .water-day i.rain { background: #3f7fbf; }
   .water-day i.et { background: #e08a2c; }
   .plan-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
-  .plan-wrap { border: 1px solid var(--divider-color); border-radius: 12px; overflow: hidden; background: #fbfbf8; margin: 8px 0; }
+  .plan-wrap { position: relative; border: 1px solid var(--divider-color); border-radius: 12px; overflow: hidden; background: #fbfbf8; margin: 8px 0; }
+  .plan-north { position: absolute; top: 8px; right: 8px; display: inline-flex; flex-direction: column; align-items: center; font-size: 12px; font-weight: 700; line-height: 1.1; color: #2e5a1e; pointer-events: none; width: 1.6em; text-align: center; }
+  .plan-draw-pt { fill: #fff; stroke: #c77700; stroke-width: 2; vector-effect: non-scaling-stroke; }
   svg.plan { display: block; width: 100%; height: min(62vh, 560px); touch-action: none; user-select: none; }
   svg.plan.placing { cursor: crosshair; }
   .plan-grid { fill: none; stroke: #e6e9e2; stroke-width: 1; vector-effect: non-scaling-stroke; }
@@ -4385,8 +4387,9 @@ class HomesteadPanel extends HTMLElement {
 
   // ---------- zone in plan ----------
 
-  /** A flat frame in metres around the zone: x to the east, y to the south (as SVG). */
-  _planFrame(zone) {
+  /** A flat frame in metres around the zone: x to the east, y to the south (as SVG), turned by the
+   *  angle chosen for this zone (0 = north up). */
+  _planFrame(zone, angle = this._planAngle(zone.id)) {
     const ring = zone.geometry.coordinates[0];
     const lons = ring.map((c) => c[0]);
     const lats = ring.map((c) => c[1]);
@@ -4394,10 +4397,65 @@ class HomesteadPanel extends HTMLElement {
     const lat0 = (Math.min(...lats) + Math.max(...lats)) / 2;
     const kx = 111320 * Math.cos((lat0 * Math.PI) / 180);
     const ky = 110540;
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
     return {
-      xy: (lon, lat) => [(lon - lon0) * kx, (lat0 - lat) * ky],
-      lonlat: (x, y) => [round(lon0 + x / kx), round(lat0 - y / ky)],
+      angle,
+      xy: (lon, lat) => {
+        const e = (lon - lon0) * kx;
+        const n = (lat0 - lat) * ky;
+        return [e * cos + n * sin, -e * sin + n * cos];
+      },
+      lonlat: (x, y) => {
+        const e = x * cos - y * sin;
+        const n = x * sin + y * cos;
+        return [round(lon0 + e / kx), round(lat0 - n / ky)];
+      },
     };
+  }
+
+  /** Rotation of the plan of a zone (radians), remembered on this device. */
+  _planAngle(zoneId) {
+    try {
+      return Number(JSON.parse(localStorage.getItem("homestead-plan-angle") || "{}")[zoneId]) || 0;
+    } catch {
+      return this._planAngles?.[zoneId] || 0;
+    }
+  }
+
+  _setPlanAngle(zoneId, angle) {
+    const turn = 2 * Math.PI;
+    const value = Math.abs(angle) < 1e-9 ? 0 : (((angle % turn) + turn + Math.PI) % turn) - Math.PI;
+    try {
+      const all = JSON.parse(localStorage.getItem("homestead-plan-angle") || "{}");
+      if (value) all[zoneId] = Math.round(value * 1e6) / 1e6;
+      else delete all[zoneId];
+      localStorage.setItem("homestead-plan-angle", JSON.stringify(all));
+    } catch {
+      // private window: the angle lasts until the page is closed
+    }
+    this._planAngles = { ...(this._planAngles || {}), [zoneId]: value };
+    this._plan.view = null;
+    this._render();
+  }
+
+  /** The angle that lays the longest side of the zone flat (never upside down). */
+  _planAlignAngle(zone) {
+    const frame = this._planFrame(zone, 0);
+    const pts = zone.geometry.coordinates[0].slice(0, -1).map(([lon, lat]) => frame.xy(lon, lat));
+    let best = 0;
+    let angle = 0;
+    pts.forEach((p, i) => {
+      const q = pts[(i + 1) % pts.length];
+      const len = Math.hypot(q[0] - p[0], q[1] - p[1]);
+      if (len > best) {
+        best = len;
+        angle = Math.atan2(q[1] - p[1], q[0] - p[0]);
+      }
+    });
+    if (angle > Math.PI / 2) angle -= Math.PI;
+    if (angle <= -Math.PI / 2) angle += Math.PI;
+    return angle;
   }
 
   _openPlan(zoneId) {
@@ -4487,10 +4545,14 @@ class HomesteadPanel extends HTMLElement {
         h("button", { type: "button", className: "back", onclick: () => ((this._plan = null), this._selectZone(zone.id)) }, `‹ ${zone.name}`),
         h("span", { className: "sub" }, [`${this._metres(bounds.w, 1)} × ${this._metres(bounds.h, 1)}`, area, this.t("planCount", { count: items.length })].filter(Boolean).join(" · ")),
       ),
-      h("div", { className: "plan-wrap" }, svg),
+      h("div", { className: "plan-wrap" }, svg, h("span", { className: "plan-north", title: this.t("planNorth"), style: `transform: rotate(${(-frame.angle * 180) / Math.PI}deg)` }, "⬆N")),
       h(
         "div",
         { className: "plan-zoom" },
+        h("button", { type: "button", title: this.t("planTurnLeft"), "aria-label": this.t("planTurnLeft"), onclick: () => this._setPlanAngle(zone.id, frame.angle + Math.PI / 12) }, "↺"),
+        h("button", { type: "button", title: this.t("planTurnRight"), "aria-label": this.t("planTurnRight"), onclick: () => this._setPlanAngle(zone.id, frame.angle - Math.PI / 12) }, "↻"),
+        h("button", { type: "button", title: this.t("planAlign"), onclick: () => this._setPlanAngle(zone.id, this._planAlignAngle(zone)) }, `▭ ${this.t("planAlign")}`),
+        frame.angle ? h("button", { type: "button", title: this.t("planNorth"), onclick: () => this._setPlanAngle(zone.id, 0) }, "N") : null,
         h("button", { type: "button", "aria-label": this.t("planZoomIn"), onclick: () => this._planZoom(0.6) }, "＋"),
         h("button", { type: "button", "aria-label": this.t("planZoomOut"), onclick: () => this._planZoom(1 / 0.6) }, "－"),
         h("button", { type: "button", onclick: () => ((plan.view = null), this._render()) }, this.t("planFit")),
@@ -4569,6 +4631,16 @@ class HomesteadPanel extends HTMLElement {
       );
     });
     const preview = s("g", { class: "plan-preview" });
+    const drawPts = plan.mode === "bed" && plan.bed?.draw ? plan.bed.points : [];
+    const drawing = drawPts.length
+      ? s(
+          "g",
+          {},
+          s(drawPts.length > 2 ? "polygon" : "polyline", { points: pts(drawPts), class: "plan-bed new" }),
+          drawPts.slice(1).map((p, i) => s("text", { x: (p[0] + drawPts[i][0]) / 2, y: (p[1] + drawPts[i][1]) / 2 - unit, class: "plan-label", "font-size": unit * 2, "text-anchor": "middle" }, this._metres(Math.hypot(p[0] - drawPts[i][0], p[1] - drawPts[i][1])))),
+          drawPts.map((p) => s("circle", { cx: p[0], cy: p[1], r: unit * 0.8, class: "plan-draw-pt" })),
+        )
+      : null;
     const svg = s(
       "svg",
       { viewBox: `${v.x} ${v.y} ${v.w} ${v.h}`, class: `plan${plan.mode ? " placing" : ""}`, role: "img", "aria-label": this.t("planAria", { name: zone.name }) },
@@ -4578,6 +4650,7 @@ class HomesteadPanel extends HTMLElement {
       sides,
       badEls,
       plantEls,
+      drawing,
       preview,
     );
     this._planPointer(svg, frame, items, preview, unit);
@@ -4684,6 +4757,18 @@ class HomesteadPanel extends HTMLElement {
 
   async _planTap(frame, [x, y]) {
     const plan = this._plan;
+    if (plan.mode === "bed" && plan.bed?.draw) {
+      // A corner close to one of the zone or of another bed takes its exact place.
+      const zone = this._zone(plan.zoneId);
+      const corners = [zone, ...[...this._zoneDescendants(zone.id)].map((id) => this._zone(id))]
+        .filter((z) => z?.geometry)
+        .flatMap((z) => z.geometry.coordinates[0].slice(0, -1).map(([lon, lat]) => frame.xy(lon, lat)));
+      const reach = plan.view.w / 30;
+      const near = corners.map((c) => ({ c, d: Math.hypot(c[0] - x, c[1] - y) })).sort((a, b) => a.d - b.d)[0];
+      plan.bed.points.push(near && near.d < reach ? near.c : [x, y]);
+      this._render();
+      return;
+    }
     const [lon, lat] = frame.lonlat(x, y);
     const zoneId = this._planZoneAt(frame, x, y);
     const spacing = (plan.spacing || 30) / 100;
@@ -4764,7 +4849,7 @@ class HomesteadPanel extends HTMLElement {
     if (plan.mode === "sides") return this._planSides(zone, frame, outline);
     if (plan.mode === "bed") return this._planBed(zone, frame, outline);
     const sel = items.find((i) => i.p.id === plan.selected);
-    const info = sel ? this._planInfo(sel, items, bad) : null;
+    const info = sel ? this._planInfo(sel, items, bad, frame) : null;
     return h(
       "div",
       { className: "plan-bar" },
@@ -4785,7 +4870,7 @@ class HomesteadPanel extends HTMLElement {
     );
   }
 
-  _planInfo(sel, items, bad) {
+  _planInfo(sel, items, bad, frame) {
     const near = items
       .filter((o) => o !== sel)
       .map((o) => ({ o, d: Math.hypot(o.x - sel.x, o.y - sel.y) }))
@@ -4801,7 +4886,84 @@ class HomesteadPanel extends HTMLElement {
         ? h("span", { className: need && near.d < need ? "sub warn" : "sub" }, this.t(need && near.d < need ? "planTooClose" : "planNearest", { dist: `${Math.round(near.d * 100)} cm`, name: near.o.p.name, need: `${Math.round(need * 100)} cm` }))
         : null,
       mine.length ? h("span", { className: "sub warn" }, `🤝 ${mine.map(({ a, b }) => (a === sel ? b : a).p.name).join(", ")}`) : null,
+      sel.p.kind === "group" && sel.p.quantity > 1 ? this._planSplitRow(sel, frame) : null,
       h("div", { className: "row" }, h("button", { type: "button", onclick: () => this._select(sel.p.id) }, this.t("planOpenCard")), h("button", { type: "button", onclick: () => ((this._plan.selected = null), this._render()) }, "✕")),
+    );
+  }
+
+  /** "✂️ Take out [n] plants": single plants next to the group (along its row, if it has one). */
+  _planSplitRow(sel, frame) {
+    const q = sel.p.quantity;
+    const input = h("input", { type: "number", min: 1, max: q, step: 1, value: q, inputMode: "numeric", style: "width: 5em" });
+    return h(
+      "div",
+      { className: "row plan-split" },
+      h("span", {}, `✂️ ${this.t("planSplit")}`),
+      input,
+      h("span", { className: "sub" }, this.t("planSplitOf", { count: q })),
+      h("button", { type: "button", onclick: () => this._planSplit(sel, frame, Math.min(Math.max(Math.round(Number(input.value)) || 0, 1), q)) }, this.t("planSplitDo")),
+    );
+  }
+
+  async _planSplit(sel, frame, n) {
+    const p = sel.p;
+    const q = p.quantity;
+    const all = n >= q;
+    // Slots of the group: along its row, else a line to the right of it (its spacing or 30 cm).
+    const gap = sel.r ? sel.r * 2 : 0.3;
+    const slot = (k) =>
+      sel.end ? [sel.x + ((sel.end[0] - sel.x) * k) / (q - 1), sel.y + ((sel.end[1] - sel.y) * k) / (q - 1)] : [sel.x + gap * k, sel.y];
+    const left = q - n; // plants staying in the group (0 when all are taken out)
+    const firstNew = all ? 1 : left;
+    const copy = Object.fromEntries(
+      ["species", "taxon_id", "variety", "plant_type", "origin", "sown_on", "planted_on", "birth_year", "zone_id", "supplier", "seed_lot_id", "watering", "rootstock", "initial_form"]
+        .filter((key) => p[key] !== null && p[key] !== undefined && p[key] !== "")
+        .map((key) => [key, p[key]]),
+    );
+    const update = { id: p.id, kind: all || left === 1 ? "single" : "group", quantity: all ? 1 : left };
+    if (sel.end) {
+      const keep = all ? 0 : left - 1;
+      update.row_to = keep > 0 ? frame.lonlat(...slot(keep)) : null;
+    }
+    if (!(await this._call("update_planting", update))) return;
+    let made = 0;
+    for (let k = firstNew; k < q; k++) {
+      const [lon, lat] = frame.lonlat(...slot(sel.end ? k : k - firstNew + 1));
+      const number = k - firstNew + 2;
+      if (await this._call("add_planting", { ...copy, name: `${p.name} ${number}`, kind: "single", quantity: 1, latitude: lat, longitude: lon })) made++;
+    }
+    this._plan.selected = null;
+    this._showMessage(`✓ ${this.t("planSplitDone", { count: made, name: p.name })}`);
+  }
+
+  /** A bed of any shape: tap its corners on the plan (snapped to the grid and to existing corners). */
+  _planBedDraw(zone, frame, toggle) {
+    const b = this._plan.bed;
+    const pts = b.points;
+    const save = async () => {
+      if (pts.length < 3 || !b.name.trim()) {
+        this._showMessage(this.t(pts.length < 3 ? "planBedCorners" : "planBedMissing"), true);
+        return;
+      }
+      const ring = pts.map(([x, y]) => frame.lonlat(x, y));
+      ring.push(ring[0]);
+      this._plan.mode = null;
+      await this._call("add_zone", { name: b.name.trim(), parent_id: zone.id, kind: zone.kind || null, geometry: { type: "Polygon", coordinates: [ring] } });
+    };
+    return h(
+      "div",
+      { className: "plan-bar" },
+      h("strong", {}, `▦ ${this.t("planBed")}`),
+      toggle,
+      h("p", { className: "hint" }, `👆 ${this.t("planBedDrawHint", { count: pts.length })}`),
+      h("label", {}, this.t("name"), h("input", { type: "text", value: b.name, oninput: (ev) => (b.name = ev.target.value) })),
+      h(
+        "div",
+        { className: "row" },
+        h("button", { type: "button", className: "primary", disabled: pts.length < 3, onclick: save }, this.t("save")),
+        h("button", { type: "button", disabled: !pts.length, onclick: () => (pts.pop(), this._render()) }, this.t("undoPoint")),
+        h("button", { type: "button", onclick: () => ((this._plan.mode = null), this._render()) }, this.t("cancel")),
+      ),
     );
   }
 
@@ -4840,6 +5002,14 @@ class HomesteadPanel extends HTMLElement {
 
   /** A rectangular bed inside the zone, measured from its corner along its longest side. */
   _planBed(zone, frame, outline) {
+    const b0 = this._plan.bed;
+    const toggle = h(
+      "div",
+      { className: "seg" },
+      h("button", { type: "button", className: b0.draw ? "" : "on", onclick: () => ((b0.draw = false), this._render()) }, `▭ ${this.t("planBedRect")}`),
+      h("button", { type: "button", className: b0.draw ? "on" : "", onclick: () => ((b0.draw = true), (b0.points ||= []), this._render()) }, `✏️ ${this.t("planBedDraw")}`),
+    );
+    if (b0.draw) return this._planBedDraw(zone, frame, toggle);
     let best = 0;
     let angle = 0;
     outline.forEach((p, i) => {
@@ -4892,6 +5062,7 @@ class HomesteadPanel extends HTMLElement {
       "div",
       { className: "plan-bar" },
       h("strong", {}, `▦ ${this.t("planBed")}`),
+      toggle,
       h("p", { className: "hint" }, this.t("planBedHint", { side: this._metres(best) })),
       field("name", this.t("name")),
       h("div", { className: "row" }, field("w", this.t("planBedW")), field("l", this.t("planBedL"))),

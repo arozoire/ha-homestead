@@ -831,5 +831,17 @@
  "reportPopup": "Der Browser hat das Druckfenster blockiert: Pop-ups für Home Assistant erlauben.",
  "noSensors": "Kein passender Sensor in Home Assistant.",
  "plantMoisture": "Feuchtesensoren dieser Pflanze",
- "plantMoistureHint": "Für einen Topf, einen jungen Baum oder eine Zimmerpflanze: mehrere Sensoren werden gemittelt. Unter der Schwelle (draußen 25 % wenn leer, drinnen 20 %) steht sie auf der Gießliste, auch in der Morgenerinnerung."
+ "plantMoistureHint": "Für einen Topf, einen jungen Baum oder eine Zimmerpflanze: mehrere Sensoren werden gemittelt. Unter der Schwelle (draußen 25 % wenn leer, drinnen 20 %) steht sie auf der Gießliste, auch in der Morgenerinnerung.",
+ "planTurnLeft": "15° nach links drehen",
+ "planTurnRight": "15° nach rechts drehen",
+ "planAlign": "Ausrichten",
+ "planNorth": "Norden oben",
+ "planBedRect": "Rechteck",
+ "planBedDraw": "Zeichnen",
+ "planBedDrawHint": "Tippe die Ecken des Beets an (bisher {count}): sie rasten am Raster und an den Ecken der Zone und der anderen Beete ein.",
+ "planBedCorners": "Mindestens 3 Ecken.",
+ "planSplit": "Herausnehmen",
+ "planSplitOf": "von {count}",
+ "planSplitDo": "Teilen",
+ "planSplitDone": "{count} Einzelpflanzen neben „{name}“: zieh sie an ihren Platz."
 }

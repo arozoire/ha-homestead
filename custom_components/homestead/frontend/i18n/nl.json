@@ -831,5 +831,17 @@
  "reportPopup": "De browser blokkeerde het afdrukvenster: sta pop-ups toe voor Home Assistant.",
  "noSensors": "Geen geschikte sensor in Home Assistant.",
  "plantMoisture": "Vochtsensoren van deze plant",
- "plantMoistureHint": "Voor een pot, een jonge boom of een kamerplant: meerdere sensoren worden gemiddeld. Onder de drempel (buiten 25 % als leeg, binnen 20 %) staat hij op de gieterlijst, ook in de ochtendherinnering."
+ "plantMoistureHint": "Voor een pot, een jonge boom of een kamerplant: meerdere sensoren worden gemiddeld. Onder de drempel (buiten 25 % als leeg, binnen 20 %) staat hij op de gieterlijst, ook in de ochtendherinnering.",
+ "planTurnLeft": "15° naar links draaien",
+ "planTurnRight": "15° naar rechts draaien",
+ "planAlign": "Uitlijnen",
+ "planNorth": "Noorden boven",
+ "planBedRect": "Rechthoek",
+ "planBedDraw": "Tekenen",
+ "planBedDrawHint": "Tik de hoeken van het bed aan (tot nu toe {count}): ze klikken vast aan het raster en aan de hoeken van de zone en van de andere bedden.",
+ "planBedCorners": "Minstens 3 hoeken.",
+ "planSplit": "Haal eruit",
+ "planSplitOf": "van {count}",
+ "planSplitDo": "Splitsen",
+ "planSplitDone": "{count} losse planten naast ‘{name}’: sleep ze naar hun plek."
 }

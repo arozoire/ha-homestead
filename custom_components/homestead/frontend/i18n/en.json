@@ -831,5 +831,17 @@
  "reportPopup": "The browser blocked the print window: allow pop-ups for Home Assistant.",
  "noSensors": "No suitable sensor in Home Assistant.",
  "plantMoisture": "Moisture sensors of this plant",
- "plantMoistureHint": "For a pot, a young tree or a houseplant: several sensors are averaged. Below the threshold (25 % outdoors if empty, 20 % indoors) it is on the list to water, also in the morning reminder."
+ "plantMoistureHint": "For a pot, a young tree or a houseplant: several sensors are averaged. Below the threshold (25 % outdoors if empty, 20 % indoors) it is on the list to water, also in the morning reminder.",
+ "planTurnLeft": "Turn left 15°",
+ "planTurnRight": "Turn right 15°",
+ "planAlign": "Align",
+ "planNorth": "North up",
+ "planBedRect": "Rectangle",
+ "planBedDraw": "Draw",
+ "planBedDrawHint": "Tap the corners of the bed ({count} so far): they snap to the grid and to the corners of the zone and of the other beds.",
+ "planBedCorners": "At least 3 corners.",
+ "planSplit": "Take out",
+ "planSplitOf": "of {count}",
+ "planSplitDo": "Split",
+ "planSplitDone": "{count} single plants next to “{name}”: drag them into place."
 }

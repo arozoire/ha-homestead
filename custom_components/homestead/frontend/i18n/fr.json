@@ -831,5 +831,17 @@
  "reportPopup": "Le navigateur a bloqué la fenêtre d'impression : autorisez les pop-ups pour Home Assistant.",
  "noSensors": "Aucun capteur adapté dans Home Assistant.",
  "plantMoisture": "Capteurs d'humidité de cette plante",
- "plantMoistureHint": "Pour un pot, un jeune arbre ou une plante d'intérieur : plusieurs capteurs sont moyennés. Sous le seuil (25 % dehors si vide, 20 % à l'intérieur) elle est à arroser, aussi dans le rappel du matin."
+ "plantMoistureHint": "Pour un pot, un jeune arbre ou une plante d'intérieur : plusieurs capteurs sont moyennés. Sous le seuil (25 % dehors si vide, 20 % à l'intérieur) elle est à arroser, aussi dans le rappel du matin.",
+ "planTurnLeft": "Tourner de 15° à gauche",
+ "planTurnRight": "Tourner de 15° à droite",
+ "planAlign": "Aligner",
+ "planNorth": "Nord en haut",
+ "planBedRect": "Rectangle",
+ "planBedDraw": "Dessiner",
+ "planBedDrawHint": "Touchez les coins de la planche ({count} jusqu'ici) : ils s'accrochent à la grille et aux coins de la zone et des autres planches.",
+ "planBedCorners": "Au moins 3 coins.",
+ "planSplit": "Séparer",
+ "planSplitOf": "sur {count}",
+ "planSplitDo": "Diviser",
+ "planSplitDone": "{count} plantes seules à côté de « {name} » : faites-les glisser à leur place."
 }
