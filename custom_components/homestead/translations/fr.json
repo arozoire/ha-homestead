@@ -366,6 +366,18 @@
         "watering": {
           "name": "Comment c'est arrosé",
           "description": "Pluie seule, arrosoir, tuyau, goutte-à-goutte, par aspersion ou vanne automatique ; vide = comme la zone au-dessus."
+        },
+        "valve_entity": {
+          "name": "Vanne",
+          "description": "Vanne qui arrose cette zone ; chaque ouverture est enregistrée comme un arrosage."
+        },
+        "hose_here": {
+          "name": "Tuyau ici",
+          "description": "Pour les zones qui partagent une vanne avec un tuyau déplacé à la main : le tuyau est dans cette zone."
+        },
+        "flow_entity": {
+          "name": "Débitmètre",
+          "description": "Débitmètre de la vanne (débit ou volume total) ; chaque ouverture reçoit l'eau qu'elle a donnée."
         }
       }
     },
@@ -420,6 +432,18 @@
         "watering": {
           "name": "Comment c'est arrosé",
           "description": "Pluie seule, arrosoir, tuyau, goutte-à-goutte, par aspersion ou vanne automatique ; vide = comme la zone au-dessus."
+        },
+        "valve_entity": {
+          "name": "Vanne",
+          "description": "Vanne qui arrose cette zone ; chaque ouverture est enregistrée comme un arrosage."
+        },
+        "hose_here": {
+          "name": "Tuyau ici",
+          "description": "Pour les zones qui partagent une vanne avec un tuyau déplacé à la main : le tuyau est dans cette zone."
+        },
+        "flow_entity": {
+          "name": "Débitmètre",
+          "description": "Débitmètre de la vanne (débit ou volume total) ; chaque ouverture reçoit l'eau qu'elle a donnée."
         }
       }
     },
@@ -560,6 +584,14 @@
         "watering": {
           "name": "Comment c'est arrosé",
           "description": "Pluie seule, arrosoir, tuyau, goutte-à-goutte, par aspersion ou vanne automatique ; vide = comme la zone au-dessus."
+        },
+        "growth_start": {
+          "name": "Stade de croissance initial",
+          "description": "Stade de croissance (1 à 10) à la plantation : 1 depuis un semis, 2 ou 3 pour un repiquage."
+        },
+        "growth_days": {
+          "name": "Jours jusqu'à la taille adulte",
+          "description": "Jours depuis la plantation jusqu'à la taille adulte (stade 10)."
         }
       }
     },
@@ -694,6 +726,14 @@
         "watering": {
           "name": "Comment c'est arrosé",
           "description": "Pluie seule, arrosoir, tuyau, goutte-à-goutte, par aspersion ou vanne automatique ; vide = comme la zone au-dessus."
+        },
+        "growth_start": {
+          "name": "Stade de croissance initial",
+          "description": "Stade de croissance (1 à 10) à la plantation : 1 depuis un semis, 2 ou 3 pour un repiquage."
+        },
+        "growth_days": {
+          "name": "Jours jusqu'à la taille adulte",
+          "description": "Jours depuis la plantation jusqu'à la taille adulte (stade 10)."
         }
       }
     },
@@ -1518,6 +1558,30 @@
         "id": {
           "name": "ID",
           "description": "Id des données de culture."
+        }
+      }
+    },
+    "set_hose": {
+      "name": "Déplacer le tuyau",
+      "description": "Le tuyau d'une vanne partagée est maintenant dans cette zone.",
+      "fields": {
+        "zone_id": {
+          "name": "ID de zone",
+          "description": "Zone où se trouve maintenant le tuyau."
+        }
+      }
+    },
+    "set_growth": {
+      "name": "Régler la croissance",
+      "description": "Règle à la main le stade de croissance d'une plante ; elle continue de pousser à partir de là.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID de la plante."
+        },
+        "stage": {
+          "name": "Stade",
+          "description": "Stade de croissance, de 1 à 10 (10 = taille adulte)."
         }
       }
     }

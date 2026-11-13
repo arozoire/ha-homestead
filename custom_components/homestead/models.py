@@ -256,6 +256,13 @@ class Zone(_Record):
     soil_temperature_entity: list[str] = field(default_factory=list)
     soil_ec_entity: list[str] = field(default_factory=list)
     watering: str | None = None  # WateringMode; None = as the parent zone
+    # The valve that turns the water on, whatever the watering mode (drip, hose, sprinklers);
+    # every run is logged as a watering of the zone.
+    # Zones on the same valve with a hose moved by hand: only the one(s) with hose_here are watered.
+    valve_entity: str | None = None
+    hose_here: bool = True
+    # The valve's flow meter (a flow rate or a volume total): how much water each run gave.
+    flow_entity: str | None = None
 
     def __post_init__(self) -> None:
         self.area_m2 = polygon_area_m2(self.geometry)
@@ -350,6 +357,13 @@ class Planting(_Record):
     moisture_min: float | None = None
     care: str | None = None  # the user's own care notes (pruning, feeding, quirks…)
     notes: str | None = None
+    # Growth stage 1-10 (10 = full size). It starts at growth_start on the planting
+    # (or sowing) date and reaches 10 after growth_days; a stage set by hand (growth_set on
+    # growth_set_on) moves it and it keeps growing from there at the same pace.
+    growth_start: int | None = None
+    growth_days: int | None = None
+    growth_set: float | None = None
+    growth_set_on: str | None = None
 
     def __post_init__(self) -> None:
         self.moisture_entity = entity_list(self.moisture_entity)
@@ -402,6 +416,7 @@ class Event(_Record):
     moon_phase: str | None = None
     weather: dict[str, Any] | None = None
     notes: str | None = None
+    valve_minutes: float | None = None  # watering logged from a valve run: its length (minutes)
 
     def __post_init__(self) -> None:
         if not self.moon_phase:
@@ -782,3 +797,48 @@ def watering_due(
         if not since or (today - date.fromisoformat(since)).days >= interval:
             due.append(p)
     return sorted(due, key=lambda p: p.name)
+
+
+# ---------------------------------------------------------------- growth stages
+
+# Days from planting to full size when the planting does not say, by plant type.
+DEFAULT_GROWTH_DAYS: dict[str, int] = {
+    PlantType.VEGETABLE: 75,
+    PlantType.HERB: 60,
+    PlantType.FLOWER: 60,
+    PlantType.HOUSEPLANT: 365,
+    PlantType.VINE: 730,
+    PlantType.SHRUB: 730,
+    PlantType.FRUIT_TREE: 1460,
+    PlantType.TREE: 3650,
+}
+FALLBACK_GROWTH_DAYS = 90
+
+
+def growth_start_stage(planting: Planting) -> int:
+    """The stage a planting starts at: as set, else 1 from seed, 2 for a transplant, 10 if already there."""
+    if planting.growth_start:
+        return max(1, min(10, planting.growth_start))
+    if planting.origin == PlantingOrigin.EXISTING:
+        return 10
+    if planting.origin == PlantingOrigin.SOWN and not planting.planted_on:
+        return 1
+    return 2 if planting.origin == PlantingOrigin.PLANTED else 1
+
+
+def growth_days(planting: Planting) -> int:
+    return planting.growth_days or DEFAULT_GROWTH_DAYS.get(planting.plant_type or "", FALLBACK_GROWTH_DAYS)
+
+
+def growth_stage(planting: Planting, today: date) -> float:
+    """Growth stage 1-10 today (10 = full size), rounded to tenths."""
+    start = growth_start_stage(planting)
+    # stages per day; a planting that was already full grown and set back by hand grows like a seedling
+    rate = (10 - start if start < 10 else 9) / max(1, growth_days(planting))
+    if planting.growth_set is not None and planting.growth_set_on:
+        stage, since = float(planting.growth_set), planting.growth_set_on
+    else:
+        stage, since = float(start), planting.planted_on or planting.sown_on
+    if since:
+        stage += rate * max(0, (today - date.fromisoformat(since[:10])).days)
+    return round(max(1.0, min(10.0, stage)), 1)

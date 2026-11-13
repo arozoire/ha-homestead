@@ -366,6 +366,18 @@
         "watering": {
           "name": "Hoe het water krijgt",
           "description": "Alleen regen, gieter, slang, druppel, van bovenaf of automatische klep; leeg = zoals de zone erboven."
+        },
+        "valve_entity": {
+          "name": "Klep",
+          "description": "Klep die deze zone water geeft; elke beurt wordt als water geven vastgelegd."
+        },
+        "hose_here": {
+          "name": "Slang hier",
+          "description": "Voor zones die een klep delen met een slang die met de hand wordt verlegd: de slang ligt in deze zone."
+        },
+        "flow_entity": {
+          "name": "Debietmeter",
+          "description": "Debietmeter van de klep (debiet of totaal volume); elke beurt krijgt het water dat ze gaf."
         }
       }
     },
@@ -420,6 +432,18 @@
         "watering": {
           "name": "Hoe het water krijgt",
           "description": "Alleen regen, gieter, slang, druppel, van bovenaf of automatische klep; leeg = zoals de zone erboven."
+        },
+        "valve_entity": {
+          "name": "Klep",
+          "description": "Klep die deze zone water geeft; elke beurt wordt als water geven vastgelegd."
+        },
+        "hose_here": {
+          "name": "Slang hier",
+          "description": "Voor zones die een klep delen met een slang die met de hand wordt verlegd: de slang ligt in deze zone."
+        },
+        "flow_entity": {
+          "name": "Debietmeter",
+          "description": "Debietmeter van de klep (debiet of totaal volume); elke beurt krijgt het water dat ze gaf."
         }
       }
     },
@@ -560,6 +584,14 @@
         "watering": {
           "name": "Hoe het water krijgt",
           "description": "Alleen regen, gieter, slang, druppel, van bovenaf of automatische klep; leeg = zoals de zone erboven."
+        },
+        "growth_start": {
+          "name": "Begin-groeistadium",
+          "description": "Groeistadium (1 tot 10) bij het planten: 1 vanaf zaad, 2 of 3 voor een verplante plant."
+        },
+        "growth_days": {
+          "name": "Dagen tot volle grootte",
+          "description": "Dagen vanaf het planten tot volle grootte (stadium 10)."
         }
       }
     },
@@ -694,6 +726,14 @@
         "watering": {
           "name": "Hoe het water krijgt",
           "description": "Alleen regen, gieter, slang, druppel, van bovenaf of automatische klep; leeg = zoals de zone erboven."
+        },
+        "growth_start": {
+          "name": "Begin-groeistadium",
+          "description": "Groeistadium (1 tot 10) bij het planten: 1 vanaf zaad, 2 of 3 voor een verplante plant."
+        },
+        "growth_days": {
+          "name": "Dagen tot volle grootte",
+          "description": "Dagen vanaf het planten tot volle grootte (stadium 10)."
         }
       }
     },
@@ -1518,6 +1558,30 @@
         "id": {
           "name": "ID",
           "description": "Id van de teeltgegevens."
+        }
+      }
+    },
+    "set_hose": {
+      "name": "Slang verleggen",
+      "description": "De slang van een gedeelde klep ligt nu in deze zone.",
+      "fields": {
+        "zone_id": {
+          "name": "Zone-ID",
+          "description": "Zone waarin de slang nu ligt."
+        }
+      }
+    },
+    "set_growth": {
+      "name": "Groei instellen",
+      "description": "Stelt het groeistadium van een plant met de hand in; vanaf daar groeit hij verder.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID van de plant."
+        },
+        "stage": {
+          "name": "Stadium",
+          "description": "Groeistadium, 1 tot 10 (10 = volle grootte)."
         }
       }
     }

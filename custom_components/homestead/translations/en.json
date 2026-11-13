@@ -366,6 +366,18 @@
         "watering": {
           "name": "How it is watered",
           "description": "Rain only, watering can, hose, drip, from above or an automatic valve; empty = as the zone above."
+        },
+        "valve_entity": {
+          "name": "Valve",
+          "description": "Valve that waters this zone; each run is logged as a watering."
+        },
+        "hose_here": {
+          "name": "Hose here",
+          "description": "For zones that share a valve with a hose moved by hand: the hose is in this zone."
+        },
+        "flow_entity": {
+          "name": "Flow meter",
+          "description": "Flow meter of the valve (flow rate or volume total); each run gets the water it gave."
         }
       }
     },
@@ -420,6 +432,18 @@
         "watering": {
           "name": "How it is watered",
           "description": "Rain only, watering can, hose, drip, from above or an automatic valve; empty = as the zone above."
+        },
+        "valve_entity": {
+          "name": "Valve",
+          "description": "Valve that waters this zone; each run is logged as a watering."
+        },
+        "hose_here": {
+          "name": "Hose here",
+          "description": "For zones that share a valve with a hose moved by hand: the hose is in this zone."
+        },
+        "flow_entity": {
+          "name": "Flow meter",
+          "description": "Flow meter of the valve (flow rate or volume total); each run gets the water it gave."
         }
       }
     },
@@ -560,6 +584,14 @@
         "watering": {
           "name": "How it is watered",
           "description": "Rain only, watering can, hose, drip, from above or an automatic valve; empty = as the zone above."
+        },
+        "growth_start": {
+          "name": "Growth start stage",
+          "description": "Growth stage (1 to 10) when it went in: 1 from seed, 2 or 3 for a transplant."
+        },
+        "growth_days": {
+          "name": "Days to full size",
+          "description": "Days from planting until full size (stage 10)."
         }
       }
     },
@@ -694,6 +726,14 @@
         "watering": {
           "name": "How it is watered",
           "description": "Rain only, watering can, hose, drip, from above or an automatic valve; empty = as the zone above."
+        },
+        "growth_start": {
+          "name": "Growth start stage",
+          "description": "Growth stage (1 to 10) when it went in: 1 from seed, 2 or 3 for a transplant."
+        },
+        "growth_days": {
+          "name": "Days to full size",
+          "description": "Days from planting until full size (stage 10)."
         }
       }
     },
@@ -1518,6 +1558,30 @@
         "id": {
           "name": "ID",
           "description": "Crop data id."
+        }
+      }
+    },
+    "set_hose": {
+      "name": "Move hose",
+      "description": "The hose of a shared valve is now in this zone.",
+      "fields": {
+        "zone_id": {
+          "name": "Zone ID",
+          "description": "Zone the hose is in now."
+        }
+      }
+    },
+    "set_growth": {
+      "name": "Set growth",
+      "description": "Sets a planting's growth stage by hand; it keeps growing from there.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Planting ID."
+        },
+        "stage": {
+          "name": "Stage",
+          "description": "Growth stage, 1 to 10 (10 = full size)."
         }
       }
     }

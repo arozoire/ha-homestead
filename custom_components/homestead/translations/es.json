@@ -366,6 +366,18 @@
         "watering": {
           "name": "Cómo se riega",
           "description": "Solo lluvia, regadera, manguera, goteo, por aspersión o válvula automática; vacío = como la zona superior."
+        },
+        "valve_entity": {
+          "name": "Válvula",
+          "description": "Válvula que riega esta zona; cada apertura se registra como un riego."
+        },
+        "hose_here": {
+          "name": "Manguera aquí",
+          "description": "Para zonas que comparten una válvula con una manguera que se mueve a mano: la manguera está en esta zona."
+        },
+        "flow_entity": {
+          "name": "Caudalímetro",
+          "description": "Caudalímetro de la válvula (caudal o volumen total); cada apertura recibe el agua que dio."
         }
       }
     },
@@ -420,6 +432,18 @@
         "watering": {
           "name": "Cómo se riega",
           "description": "Solo lluvia, regadera, manguera, goteo, por aspersión o válvula automática; vacío = como la zona superior."
+        },
+        "valve_entity": {
+          "name": "Válvula",
+          "description": "Válvula que riega esta zona; cada apertura se registra como un riego."
+        },
+        "hose_here": {
+          "name": "Manguera aquí",
+          "description": "Para zonas que comparten una válvula con una manguera que se mueve a mano: la manguera está en esta zona."
+        },
+        "flow_entity": {
+          "name": "Caudalímetro",
+          "description": "Caudalímetro de la válvula (caudal o volumen total); cada apertura recibe el agua que dio."
         }
       }
     },
@@ -560,6 +584,14 @@
         "watering": {
           "name": "Cómo se riega",
           "description": "Solo lluvia, regadera, manguera, goteo, por aspersión o válvula automática; vacío = como la zona superior."
+        },
+        "growth_start": {
+          "name": "Etapa de crecimiento inicial",
+          "description": "Etapa de crecimiento (1 a 10) al plantar: 1 desde semilla, 2 o 3 para un trasplante."
+        },
+        "growth_days": {
+          "name": "Días hasta el tamaño adulto",
+          "description": "Días desde la plantación hasta el tamaño adulto (etapa 10)."
         }
       }
     },
@@ -694,6 +726,14 @@
         "watering": {
           "name": "Cómo se riega",
           "description": "Solo lluvia, regadera, manguera, goteo, por aspersión o válvula automática; vacío = como la zona superior."
+        },
+        "growth_start": {
+          "name": "Etapa de crecimiento inicial",
+          "description": "Etapa de crecimiento (1 a 10) al plantar: 1 desde semilla, 2 o 3 para un trasplante."
+        },
+        "growth_days": {
+          "name": "Días hasta el tamaño adulto",
+          "description": "Días desde la plantación hasta el tamaño adulto (etapa 10)."
         }
       }
     },
@@ -1518,6 +1558,30 @@
         "id": {
           "name": "ID",
           "description": "Id de los datos de cultivo."
+        }
+      }
+    },
+    "set_hose": {
+      "name": "Mover la manguera",
+      "description": "La manguera de una válvula compartida está ahora en esta zona.",
+      "fields": {
+        "zone_id": {
+          "name": "ID de zona",
+          "description": "Zona en la que está ahora la manguera."
+        }
+      }
+    },
+    "set_growth": {
+      "name": "Fijar el crecimiento",
+      "description": "Fija a mano la etapa de crecimiento de una planta; sigue creciendo desde ahí.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID de la planta."
+        },
+        "stage": {
+          "name": "Etapa",
+          "description": "Etapa de crecimiento, de 1 a 10 (10 = tamaño adulto)."
         }
       }
     }

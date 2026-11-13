@@ -29,7 +29,7 @@ from .const import (
 )
 from .crops import GENUS_TYPES
 from .forecast import async_crop_defaults, get_outlook
-from .models import HomesteadData, Photo, entity_list
+from .models import HomesteadData, Photo, entity_list, growth_stage
 from .photos import MAX_PHOTO_BYTES, delete_all, image_type, photo_dir, photo_roots, write_photo
 from .species import SourcesUnavailable, combine, search_local, search_remote
 from .store import get_store
@@ -111,6 +111,10 @@ def ws_subscribe(
     def send() -> None:
         store = get_store(hass)
         data = store.data.to_dict() if store else {}
+        if store:
+            # Today's growth stage of every planting (1-10), for the 3D plan
+            today = dt_util.now().date()
+            data["growth"] = {pid: growth_stage(p, today) for pid, p in store.data.plantings.items()}
         connection.send_message(websocket_api.event_message(msg_id, data))
 
     connection.subscriptions[msg_id] = async_dispatcher_connect(hass, SIGNAL_DATA_UPDATED, send)

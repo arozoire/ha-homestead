@@ -19,6 +19,7 @@ from .backup import make_backup, summary
 from .backup_zip import BackupZipImportView, BackupZipView, write_last_backup
 from .const import DOMAIN
 from .forecast import FORECAST_REFRESH, OUTLOOK, Outlook
+from .irrigation import async_setup_irrigation
 from .panel import async_register_panel, async_unregister_panel
 from .photos import PhotoThumbView, PhotoUploadView, PhotoView
 from .reminders import async_setup_reminders
@@ -62,6 +63,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: HomesteadConfigEntry) ->
     entry.async_on_unload(async_track_time_interval(hass, refresh_weather, WEATHER_REFRESH))
     entry.async_create_background_task(hass, refresh_weather(), f"{DOMAIN} weather refresh")
     entry.async_on_unload(async_setup_reminders(hass, store, dict(entry.options)))
+    # Valve runs are logged as waterings of the zones they feed
+    entry.async_on_unload(async_setup_irrigation(hass, store))
 
     async def photo_periods(_now: Any = None) -> None:
         # A new period of the photo plan opens its task just after midnight (and at start, if missed).

@@ -366,6 +366,18 @@
         "watering": {
           "name": "Bewässerung",
           "description": "Nur Regen, Gießkanne, Schlauch, Tropf, von oben oder automatisches Ventil; leer = wie die übergeordnete Zone."
+        },
+        "valve_entity": {
+          "name": "Ventil",
+          "description": "Ventil, das diese Zone bewässert; jeder Lauf wird als Gießen eingetragen."
+        },
+        "hose_here": {
+          "name": "Schlauch hier",
+          "description": "Für Zonen, die sich ein Ventil mit einem von Hand umgelegten Schlauch teilen: Der Schlauch liegt in dieser Zone."
+        },
+        "flow_entity": {
+          "name": "Durchflussmesser",
+          "description": "Durchflussmesser des Ventils (Durchfluss oder Gesamtmenge); jeder Lauf bekommt das Wasser, das er gegeben hat."
         }
       }
     },
@@ -420,6 +432,18 @@
         "watering": {
           "name": "Bewässerung",
           "description": "Nur Regen, Gießkanne, Schlauch, Tropf, von oben oder automatisches Ventil; leer = wie die übergeordnete Zone."
+        },
+        "valve_entity": {
+          "name": "Ventil",
+          "description": "Ventil, das diese Zone bewässert; jeder Lauf wird als Gießen eingetragen."
+        },
+        "hose_here": {
+          "name": "Schlauch hier",
+          "description": "Für Zonen, die sich ein Ventil mit einem von Hand umgelegten Schlauch teilen: Der Schlauch liegt in dieser Zone."
+        },
+        "flow_entity": {
+          "name": "Durchflussmesser",
+          "description": "Durchflussmesser des Ventils (Durchfluss oder Gesamtmenge); jeder Lauf bekommt das Wasser, das er gegeben hat."
         }
       }
     },
@@ -560,6 +584,14 @@
         "watering": {
           "name": "Bewässerung",
           "description": "Nur Regen, Gießkanne, Schlauch, Tropf, von oben oder automatisches Ventil; leer = wie die übergeordnete Zone."
+        },
+        "growth_start": {
+          "name": "Anfangs-Wachstumsstufe",
+          "description": "Wachstumsstufe (1 bis 10) beim Pflanzen: 1 aus Samen, 2 oder 3 bei einer umgepflanzten Pflanze."
+        },
+        "growth_days": {
+          "name": "Tage bis zur vollen Größe",
+          "description": "Tage vom Pflanzen bis zur vollen Größe (Stufe 10)."
         }
       }
     },
@@ -694,6 +726,14 @@
         "watering": {
           "name": "Bewässerung",
           "description": "Nur Regen, Gießkanne, Schlauch, Tropf, von oben oder automatisches Ventil; leer = wie die übergeordnete Zone."
+        },
+        "growth_start": {
+          "name": "Anfangs-Wachstumsstufe",
+          "description": "Wachstumsstufe (1 bis 10) beim Pflanzen: 1 aus Samen, 2 oder 3 bei einer umgepflanzten Pflanze."
+        },
+        "growth_days": {
+          "name": "Tage bis zur vollen Größe",
+          "description": "Tage vom Pflanzen bis zur vollen Größe (Stufe 10)."
         }
       }
     },
@@ -1518,6 +1558,30 @@
         "id": {
           "name": "ID",
           "description": "ID der Kulturdaten."
+        }
+      }
+    },
+    "set_hose": {
+      "name": "Schlauch umlegen",
+      "description": "Der Schlauch eines geteilten Ventils liegt jetzt in dieser Zone.",
+      "fields": {
+        "zone_id": {
+          "name": "Zonen-ID",
+          "description": "Zone, in der der Schlauch jetzt liegt."
+        }
+      }
+    },
+    "set_growth": {
+      "name": "Wachstum setzen",
+      "description": "Setzt die Wachstumsstufe einer Pflanze von Hand; von dort wächst sie weiter.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID der Pflanze."
+        },
+        "stage": {
+          "name": "Stufe",
+          "description": "Wachstumsstufe, 1 bis 10 (10 = volle Größe)."
         }
       }
     }

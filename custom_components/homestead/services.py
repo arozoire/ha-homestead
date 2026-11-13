@@ -82,6 +82,10 @@ ADD_ZONE_SCHEMA = vol.Schema(
         # One entity id or several (averaged).
         **{vol.Optional(attr): vol.Any(None, cv.entity_ids) for attr in SOIL_SENSOR_FIELDS.values()},
         vol.Optional("watering"): vol.Any(None, vol.In([m.value for m in WateringMode])),
+        # The valve that waters the zone, and where a hand-moved hose is
+        vol.Optional("valve_entity"): vol.Any(None, cv.entity_id),
+        vol.Optional("hose_here"): cv.boolean,
+        vol.Optional("flow_entity"): vol.Any(None, cv.entity_id),
     }
 )
 
@@ -127,6 +131,20 @@ ADD_PLANTING_SCHEMA = vol.Schema(
         vol.Optional("price"): vol.Any(None, _positive),
         vol.Optional("care"): _opt_str,
         vol.Optional("notes"): _opt_str,
+        # Growth
+        vol.Optional("growth_start"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=10))),
+        vol.Optional("growth_days"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=36500))),
+    }
+)
+
+# The hose of a shared valve is now in this zone (the other zones on the valve lose it)
+SET_HOSE_SCHEMA = vol.Schema({vol.Required("zone_id"): cv.string})
+
+# Set a planting's growth stage by hand; it keeps growing from there
+SET_GROWTH_SCHEMA = vol.Schema(
+    {
+        vol.Required("id"): cv.string,
+        vol.Required("stage"): vol.All(vol.Coerce(float), vol.Range(min=1, max=10)),
     }
 )
 
@@ -721,6 +739,29 @@ def async_register_services(hass: HomeAssistant) -> None:
         await store.async_save()
         return {"id": photo.id}
 
+    async def set_hose(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        zone_id = call.data["zone_id"]
+        _check_ref(store.data.zones, zone_id, "zone_id")
+        valve = store.data.zones[zone_id].valve_entity
+        for zone in store.data.zones.values():
+            if zone.id == zone_id:
+                zone.hose_here = True
+            elif valve and zone.valve_entity == valve:
+                zone.hose_here = False
+        await store.async_save()
+        return {"id": zone_id}
+
+    async def set_growth(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        planting_id = call.data["id"]
+        _check_ref(store.data.plantings, planting_id, "id")
+        planting = store.data.plantings[planting_id]
+        planting.growth_set = round(float(call.data["stage"]), 1)
+        planting.growth_set_on = dt_util.now().date().isoformat()
+        await store.async_save()
+        return {"id": planting_id, "stage": planting.growth_set}
+
     async def export(call: ServiceCall) -> ServiceResponse:
         return _store(hass).data.to_dict()
 
@@ -999,6 +1040,8 @@ def async_register_services(hass: HomeAssistant) -> None:
         ("set_crop_profile", set_crop_profile, SET_CROP_PROFILE_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_crop_profile", delete_crop_profile, ID_SCHEMA, SupportsResponse.OPTIONAL),
         ("add_event", add_event, ADD_EVENT_SCHEMA, SupportsResponse.OPTIONAL),
+        ("set_hose", set_hose, SET_HOSE_SCHEMA, SupportsResponse.OPTIONAL),
+        ("set_growth", set_growth, SET_GROWTH_SCHEMA, SupportsResponse.OPTIONAL),
         ("update_event", update_event, UPDATE_EVENT_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_event", delete_event, ID_SCHEMA, SupportsResponse.OPTIONAL),
         ("refresh_weather", refresh_weather, REFRESH_WEATHER_SCHEMA, SupportsResponse.OPTIONAL),

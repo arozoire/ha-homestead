@@ -366,6 +366,18 @@
         "watering": {
           "name": "Come si bagna",
           "description": "Solo pioggia, annaffiatoio, tubo, goccia, dall'alto o valvola automatica; vuoto = come la zona sopra."
+        },
+        "valve_entity": {
+          "name": "Valvola",
+          "description": "Valvola che irriga questa zona; ogni apertura viene registrata come annaffiatura."
+        },
+        "hose_here": {
+          "name": "Tubo qui",
+          "description": "Per zone che condividono una valvola con un tubo spostato a mano: il tubo è in questa zona."
+        },
+        "flow_entity": {
+          "name": "Contatore",
+          "description": "Contatore dell'acqua della valvola (portata o totale); ogni apertura riceve l'acqua erogata."
         }
       }
     },
@@ -420,6 +432,18 @@
         "watering": {
           "name": "Come si bagna",
           "description": "Solo pioggia, annaffiatoio, tubo, goccia, dall'alto o valvola automatica; vuoto = come la zona sopra."
+        },
+        "valve_entity": {
+          "name": "Valvola",
+          "description": "Valvola che irriga questa zona; ogni apertura viene registrata come annaffiatura."
+        },
+        "hose_here": {
+          "name": "Tubo qui",
+          "description": "Per zone che condividono una valvola con un tubo spostato a mano: il tubo è in questa zona."
+        },
+        "flow_entity": {
+          "name": "Contatore",
+          "description": "Contatore dell'acqua della valvola (portata o totale); ogni apertura riceve l'acqua erogata."
         }
       }
     },
@@ -560,6 +584,14 @@
         "watering": {
           "name": "Come si bagna",
           "description": "Solo pioggia, annaffiatoio, tubo, goccia, dall'alto o valvola automatica; vuoto = come la zona sopra."
+        },
+        "growth_start": {
+          "name": "Stadio di crescita iniziale",
+          "description": "Stadio di crescita (da 1 a 10) alla messa a dimora: 1 da seme, 2 o 3 per un trapianto."
+        },
+        "growth_days": {
+          "name": "Giorni fino alla piena grandezza",
+          "description": "Giorni dall'impianto fino alla piena grandezza (stadio 10)."
         }
       }
     },
@@ -694,6 +726,14 @@
         "watering": {
           "name": "Come si bagna",
           "description": "Solo pioggia, annaffiatoio, tubo, goccia, dall'alto o valvola automatica; vuoto = come la zona sopra."
+        },
+        "growth_start": {
+          "name": "Stadio di crescita iniziale",
+          "description": "Stadio di crescita (da 1 a 10) alla messa a dimora: 1 da seme, 2 o 3 per un trapianto."
+        },
+        "growth_days": {
+          "name": "Giorni fino alla piena grandezza",
+          "description": "Giorni dall'impianto fino alla piena grandezza (stadio 10)."
         }
       }
     },
@@ -1518,6 +1558,30 @@
         "id": {
           "name": "ID",
           "description": "Id dei dati colturali."
+        }
+      }
+    },
+    "set_hose": {
+      "name": "Sposta il tubo",
+      "description": "Il tubo di una valvola condivisa ora è in questa zona.",
+      "fields": {
+        "zone_id": {
+          "name": "ID zona",
+          "description": "Zona in cui si trova ora il tubo."
+        }
+      }
+    },
+    "set_growth": {
+      "name": "Imposta la crescita",
+      "description": "Imposta a mano lo stadio di crescita di una pianta; da lì continua a crescere.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID della pianta."
+        },
+        "stage": {
+          "name": "Stadio",
+          "description": "Stadio di crescita, da 1 a 10 (10 = piena grandezza)."
         }
       }
     }
