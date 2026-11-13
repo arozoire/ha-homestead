@@ -290,6 +290,7 @@ const STYLE = `
   .plan-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
   .plan-wrap { position: relative; border: 1px solid var(--divider-color); border-radius: 12px; overflow: hidden; background: #fbfbf8; margin: 8px 0; }
   .plan-north { position: absolute; top: 8px; right: 8px; display: inline-flex; flex-direction: column; align-items: center; font-size: 12px; font-weight: 700; line-height: 1.1; color: #2e5a1e; pointer-events: none; width: 1.6em; text-align: center; }
+  .plan-dot.new { stroke: #c77700; stroke-width: 3; stroke-dasharray: 4 3; vector-effect: non-scaling-stroke; }
   .plan-draw-pt { fill: #fff; stroke: #c77700; stroke-width: 2; vector-effect: non-scaling-stroke; }
   svg.plan { display: block; width: 100%; height: min(62vh, 560px); touch-action: none; user-select: none; }
   svg.plan.placing { cursor: crosshair; }
@@ -1467,7 +1468,7 @@ class HomesteadPanel extends HTMLElement {
     this._renderBanner();
     this._showMessage(this._message.text, this._message.error);
     let content;
-    if (this._form && !this._placing) content = this._renderForm();
+    if (this._form && !this._placing) content = this._plan && this._form.fromPlan ? [...this._renderPlan().slice(0, -1), ...this._renderForm()] : this._renderForm();
     else if (this._zoneForm && !this._drawing) content = this._renderZoneForm();
     else if (this._expenseForm) content = this._renderExpenseForm();
     else if (this._toolForm) content = this._renderToolForm();
@@ -1500,7 +1501,7 @@ class HomesteadPanel extends HTMLElement {
       content = (lists[this._tab] || lists.diary)();
     }
     // The map only where it is used: plantings and zones, and their cards.
-    const wide = !!(this._plan && !this._form && !this._zoneForm) || !(["plantings", "zones"].includes(this._tab) || this._form || this._zoneForm);
+    const wide = !!(this._plan && (!this._form || this._form.fromPlan) && !this._zoneForm) || !(["plantings", "zones"].includes(this._tab) || this._form || this._zoneForm);
     this._calendarOn = this._tab === "calendar" && content[0] === this._calWrap;
     this._content.replaceChildren(...content.filter(Boolean));
     if (this._calendarOn) this._renderCalendar();
@@ -1570,6 +1571,7 @@ class HomesteadPanel extends HTMLElement {
       ),
       this._renderBackup(),
       this._hass.user?.is_admin === false ? null : this._resetBox(),
+      h("p", { className: "hint panel-version" }, `HA Homestead ${new URLSearchParams(VERSION).get("v") || ""}`),
     ];
   }
 
@@ -4631,6 +4633,20 @@ class HomesteadPanel extends HTMLElement {
       );
     });
     const preview = s("g", { class: "plan-preview" });
+    const nf = this._form?.fromPlan && !this._form.id && hasPosition(this._form) ? this._form : null;
+    const newPlant = nf
+      ? (() => {
+          const [nx, ny] = frame.xy(nf.longitude, nf.latitude);
+          const end = nf.row_to ? frame.xy(nf.row_to[0], nf.row_to[1]) : null;
+          return s(
+            "g",
+            { class: "plan-plant selected", transform: `translate(${nx} ${ny})` },
+            end ? s("line", { x1: 0, y1: 0, x2: end[0] - nx, y2: end[1] - ny, class: "plan-row" }) : null,
+            s("circle", { r: unit * 1.6, class: "plan-dot new" }),
+            s("text", { y: unit * 0.8, "font-size": unit * 2.2, "text-anchor": "middle" }, PLANT_ICONS[nf.plant_type] || "🌱"),
+          );
+        })()
+      : null;
     const drawPts = plan.mode === "bed" && plan.bed?.draw ? plan.bed.points : [];
     const drawing = drawPts.length
       ? s(
@@ -4650,6 +4666,7 @@ class HomesteadPanel extends HTMLElement {
       sides,
       badEls,
       plantEls,
+      newPlant,
       drawing,
       preview,
     );
@@ -4757,6 +4774,25 @@ class HomesteadPanel extends HTMLElement {
 
   async _planTap(frame, [x, y]) {
     const plan = this._plan;
+    if (this._form?.fromPlan && !this._form.id) {
+      // The form of the new plant is open below: a tap moves it (a row keeps its length and direction).
+      const [lon, lat] = frame.lonlat(x, y);
+      const f = this._form;
+      if (f.row_to) {
+        const [x0, y0] = frame.xy(f.longitude, f.latitude);
+        const [x1, y1] = frame.xy(f.row_to[0], f.row_to[1]);
+        f.row_to = frame.lonlat(x + x1 - x0, y + y1 - y0);
+      }
+      Object.assign(f, { latitude: lat, longitude: lon });
+      // Only the drawing is redrawn: what was typed in the form stays.
+      const wrap = this._renderPlan().find((el) => el?.classList?.contains("plan-wrap"));
+      const old = this.shadowRoot.querySelector(".plan-wrap");
+      if (wrap && old) old.replaceWith(wrap);
+      const zoneSelect = this.shadowRoot.querySelector("form select[name=zone_id]");
+      if (zoneSelect) zoneSelect.value = this._planZoneAt(frame, x, y) || "";
+      this._positionEl && (this._positionEl.textContent = this._positionText());
+      return;
+    }
     if (plan.mode === "bed" && plan.bed?.draw) {
       // A corner close to one of the zone or of another bed takes its exact place.
       const zone = this._zone(plan.zoneId);
@@ -4779,7 +4815,7 @@ class HomesteadPanel extends HTMLElement {
         await this._call("update_planting", { id: plan.pick, latitude: lat, longitude: lon });
         return;
       }
-      this._newPlantingAt({ lat, lng: lon }, zoneId);
+      this._newPlantingAt({ lat, lng: lon }, zoneId, { fromPlan: true });
       return;
     }
     if (plan.kind === "row") {
@@ -4793,7 +4829,7 @@ class HomesteadPanel extends HTMLElement {
       const length = Math.hypot(x - x0, y - y0);
       const [lon0, lat0] = frame.lonlat(x0, y0);
       const quantity = Math.max(1, Math.floor(length / spacing) + 1);
-      this._newPlantingAt({ lat: lat0, lng: lon0 }, this._planZoneAt(frame, x0, y0), { kind: "group", quantity, row_to: [lon, lat] });
+      this._newPlantingAt({ lat: lat0, lng: lon0 }, this._planZoneAt(frame, x0, y0), { kind: "group", quantity, row_to: [lon, lat], fromPlan: true });
       return;
     }
     // Fill: as many as fit in the bed, staggered rows (quincunx).
@@ -4803,7 +4839,7 @@ class HomesteadPanel extends HTMLElement {
     const cx = ring.reduce((a, p) => a + p[0], 0) / ring.length;
     const cy = ring.reduce((a, p) => a + p[1], 0) / ring.length;
     const [clon, clat] = frame.lonlat(cx, cy);
-    this._newPlantingAt({ lat: clat, lng: clon }, zoneId, { kind: "group", quantity: Math.max(count, 1) });
+    this._newPlantingAt({ lat: clat, lng: clon }, zoneId, { kind: "group", quantity: Math.max(count, 1), fromPlan: true });
     this._showMessage(this.t("planFits", { count, spacing: `${Math.round(spacing * 100)} cm`, name: bed.name }));
   }
 
