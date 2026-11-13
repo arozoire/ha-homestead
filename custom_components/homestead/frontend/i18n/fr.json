@@ -843,5 +843,6 @@
  "planSplit": "Séparer",
  "planSplitOf": "sur {count}",
  "planSplitDo": "Diviser",
- "planSplitDone": "{count} plantes seules à côté de « {name} » : faites-les glisser à leur place."
+ "planSplitDone": "{count} plantes seules à côté de « {name} » : faites-les glisser à leur place.",
+ "planLegend": "Légende"
 }

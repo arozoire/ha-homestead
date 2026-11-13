@@ -104,6 +104,20 @@ const IMPERIAL_UNITS = { harvest: ["lb", "oz", "pieces", "gal", "kg", "l"], fora
 const PRODUCT_LABEL = { problem: "pestWhat", fertilizing: "product", treatment: "product", foraging: "what", wood_cutting: "essence", flock_in: "breed", animal_care: "feedOrCare" };
 // Rotation: the next family after the last one grown in a bed (leaves after fruits, roots after leaves…).
 const ROTATION_ORDER = ["Solanaceae", "Fabaceae", "Brassicaceae", "Cucurbitaceae", "Apiaceae", "Amaryllidaceae", "Asteraceae", "Amaranthaceae"];
+// Icon of a crop at a glance: "genus species" first, then the genus (keys as _cropKey writes them).
+const CROP_ICONS = {
+  "solanum lycopersicum": "🍅", "solanum tuberosum": "🥔", "solanum melongena": "🍆", "capsicum annuum": "🫑", capsicum: "🌶️",
+  "cucumis sativus": "🥒", "cucumis melo": "🍈", citrullus: "🍉", cucurbita: "🎃", daucus: "🥕",
+  "allium sativum": "🧄", allium: "🧅", lactuca: "🥬", cichorium: "🥬", spinacia: "🥬", beta: "🥬", valerianella: "🥬", eruca: "🥬",
+  "brassica oleracea": "🥦", brassica: "🥬", phaseolus: "🫘", vigna: "🫘", pisum: "🫛", vicia: "🫛", zea: "🌽", fragaria: "🍓",
+  ocimum: "🌿", petroselinum: "🌿", foeniculum: "🌿", anethum: "🌿", coriandrum: "🌿", apium: "🥬", pastinaca: "🥕", cynara: "🌿", asparagus: "🌱", salvia: "🌿", rosmarinus: "🌿", mentha: "🌿", thymus: "🌿", origanum: "🌿", lavandula: "🪻",
+  helianthus: "🌻", tulipa: "🌷", rosa: "🌹", hibiscus: "🌺",
+  malus: "🍎", pyrus: "🍐", "prunus persica": "🍑", "prunus armeniaca": "🍑", "prunus avium": "🍒", "prunus cerasus": "🍒", "prunus dulcis": "🌰",
+  "citrus limon": "🍋", citrus: "🍊", vitis: "🍇", olea: "🫒", actinidia: "🥝", vaccinium: "🫐", ribes: "🫐", rubus: "🫐",
+  corylus: "🌰", juglans: "🌰", castanea: "🌰", mangifera: "🥭", musa: "🍌", persea: "🥑", ananas: "🍍",
+};
+// Rings of the plan: one colour per group (species + variety + date), far apart from each other.
+const GROUP_COLORS = ["#d1495b", "#2e86de", "#f0a202", "#3a7d44", "#8e44ad", "#e67e22", "#16a085", "#c0392b", "#34495e", "#d35400", "#7f8c8d", "#b8860b"];
 const FAMILY_ICON = { Solanaceae: "🍅", Fabaceae: "🫛", Brassicaceae: "🥦", Cucurbitaceae: "🎃", Apiaceae: "🥕", Amaryllidaceae: "🧅", Asteraceae: "🥬", Amaranthaceae: "🌿" };
 const FAMILY_COLOR = { Solanaceae: "#f6d4cf", Fabaceae: "#d8ebcf", Brassicaceae: "#d6e4f3", Cucurbitaceae: "#f8e6c4", Apiaceae: "#f3dccb", Amaryllidaceae: "#e8dcf0", Asteraceae: "#dff0e6", Amaranthaceae: "#eee6cf" };
 const REPORT_CSS = `
@@ -290,6 +304,13 @@ const STYLE = `
   .plan-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
   .plan-wrap { position: relative; border: 1px solid var(--divider-color); border-radius: 12px; overflow: hidden; background: #fbfbf8; margin: 8px 0; }
   .plan-north { position: absolute; top: 8px; right: 8px; display: inline-flex; flex-direction: column; align-items: center; font-size: 12px; font-weight: 700; line-height: 1.1; color: #2e5a1e; pointer-events: none; width: 1.6em; text-align: center; }
+  .plan-plant.faded { opacity: 0.2; }
+  .plan-legend { display: grid; gap: 4px; margin: 6px 0; }
+  .plan-legend-row { display: flex; align-items: center; gap: 8px; min-height: 40px; text-align: left; background: none; border: 1px solid var(--divider-color); border-radius: 10px; padding: 2px 8px; color: inherit; font: inherit; }
+  .plan-legend-row.on { border-color: var(--primary-color); background: rgba(3, 169, 244, 0.08); }
+  .plan-legend-row .main { flex: 1; }
+  .plan-swatch { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; border: 3px solid; background: #fff; flex: none; }
+  .plan-zoom button.on { border-color: var(--primary-color); }
   .plan-dot.new { stroke: #c77700; stroke-width: 3; stroke-dasharray: 4 3; vector-effect: non-scaling-stroke; }
   .plan-draw-pt { fill: #fff; stroke: #c77700; stroke-width: 2; vector-effect: non-scaling-stroke; }
   svg.plan { display: block; width: 100%; height: min(62vh, 560px); touch-action: none; user-select: none; }
@@ -301,8 +322,8 @@ const STYLE = `
   .plan-bed.new { fill: rgba(255, 166, 0, .18); stroke: #c77700; }
   .plan-side, .plan-label { fill: #1f2420; font-weight: 700; paint-order: stroke; stroke: #fbfbf8; stroke-width: 3px; vector-effect: non-scaling-stroke; }
   .plan-plant { cursor: grab; }
-  .plan-dot { fill: #fff; stroke: #3a7d44; stroke-width: 2; vector-effect: non-scaling-stroke; }
-  .plan-plant.selected .plan-dot { stroke: #f9a825; stroke-width: 4; }
+  .plan-dot { fill: #fff; stroke: #3a7d44; stroke-width: 3; vector-effect: non-scaling-stroke; }
+  .plan-plant.selected .plan-dot { stroke: #f9a825 !important; stroke-width: 5; }
   .plan-reach { fill: rgba(58, 125, 68, .07); stroke: #3a7d44; stroke-opacity: .45; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
   .plan-row { stroke: #6a8f2a; stroke-width: 5; stroke-linecap: round; vector-effect: non-scaling-stroke; }
   .plan-bad { stroke: #c0392b; stroke-width: 2; stroke-dasharray: 5 3; vector-effect: non-scaling-stroke; }
@@ -1000,7 +1021,7 @@ class HomesteadPanel extends HTMLElement {
       seen.add(p.id);
       const selected = p.id === this._selected || (this._eventForm && p.id === this._eventForm.planting_id);
       const color = STATUS_COLOR[p.status] || STATUS_COLOR.active;
-      const emoji = PLANT_ICONS[p.plant_type];
+      const emoji = this._plantIcon(p, null);
       const icon = L.divIcon({
         className: "",
         html: emoji
@@ -1773,8 +1794,8 @@ class HomesteadPanel extends HTMLElement {
                   // Houseplants live in a room: no point on the map to ask for.
                   onclick: () => (hasPosition(p) || this._isIndoor(p) ? this._select(p.id) : this._startPlacing(p.id)),
                 },
-                PLANT_ICONS[p.plant_type]
-                  ? h("span", { className: "badge", style: `border-color:${STATUS_COLOR[p.status] || STATUS_COLOR.active}` }, PLANT_ICONS[p.plant_type])
+                this._plantIcon(p, null)
+                  ? h("span", { className: "badge", style: `border-color:${STATUS_COLOR[p.status] || STATUS_COLOR.active}` }, this._plantIcon(p, null))
                   : h("span", { className: "dot", style: `background:${STATUS_COLOR[p.status] || STATUS_COLOR.active}` }),
                 h(
                   "div",
@@ -3193,7 +3214,7 @@ class HomesteadPanel extends HTMLElement {
         return {
           key,
           planting: p,
-          icon: PLANT_ICONS[p.plant_type] || "🌱",
+          icon: this._plantIcon(p),
           name: `${p.name}${p.kind === "group" && p.quantity > 1 ? ` (${p.quantity})` : ""}`,
           where: p.zone_id ? this._zone(p.zone_id)?.name : "",
           search: [p.name, p.species, p.variety, p.zone_id && this._zone(p.zone_id)?.name].filter(Boolean).join(" ").toLowerCase(),
@@ -4161,7 +4182,7 @@ class HomesteadPanel extends HTMLElement {
               h(
                 "button",
                 { type: "button", className: "today-row", onclick: () => this._select(p.id) },
-                h("span", { className: "main" }, `${PLANT_ICONS[p.plant_type] || "🪴"} ${p.name}`),
+                h("span", { className: "main" }, `${this._plantIcon(p, "🪴")} ${p.name}`),
                 h("span", { className: "sub" }, this.t("waterSoil", { value: Math.round(t.moisture) })),
                 chip(t.verdict),
               ),
@@ -4186,7 +4207,7 @@ class HomesteadPanel extends HTMLElement {
               h(
                 "button",
                 { type: "button", className: "today-row", onclick: () => this._select(p.id) },
-                h("span", { className: "main" }, `${PLANT_ICONS[p.plant_type] || "🌳"} ${p.name}`),
+                h("span", { className: "main" }, `${this._plantIcon(p, "🌳")} ${p.name}`),
                 h("span", { className: "sub" }, t.moisture != null ? this.t("waterSoil", { value: Math.round(t.moisture) }) : this.t("youngDry", { days: t.dry_days })),
                 chip(t.verdict),
               ),
@@ -4555,13 +4576,47 @@ class HomesteadPanel extends HTMLElement {
         h("button", { type: "button", title: this.t("planTurnRight"), "aria-label": this.t("planTurnRight"), onclick: () => this._setPlanAngle(zone.id, frame.angle - Math.PI / 12) }, "↻"),
         h("button", { type: "button", title: this.t("planAlign"), onclick: () => this._setPlanAngle(zone.id, this._planAlignAngle(zone)) }, `▭ ${this.t("planAlign")}`),
         frame.angle ? h("button", { type: "button", title: this.t("planNorth"), onclick: () => this._setPlanAngle(zone.id, 0) }, "N") : null,
+        items.length ? h("button", { type: "button", className: plan.legend ? "on" : "", onclick: () => ((plan.legend = !plan.legend), plan.legend || (plan.highlight = null), this._render()) }, `🏷️ ${this.t("planLegend")}`) : null,
         h("button", { type: "button", "aria-label": this.t("planZoomIn"), onclick: () => this._planZoom(0.6) }, "＋"),
         h("button", { type: "button", "aria-label": this.t("planZoomOut"), onclick: () => this._planZoom(1 / 0.6) }, "－"),
         h("button", { type: "button", onclick: () => ((plan.view = null), this._render()) }, this.t("planFit")),
         h("span", { className: "sub" }, this.t("planGrid", { step: this._metres(this._planStep(), this._planStep() < 1 ? 1 : 0) })),
       ),
+      plan.legend && items.length ? this._planLegend(items) : null,
       this._planBar(zone, frame, outline, items, beds, bad),
     ];
+  }
+
+  /** Groups of the plan (same crop, variety and date), each with its colour, in a stable order. */
+  _planGroups(items) {
+    const groups = new Map();
+    const keys = [...new Set(items.map((it) => this._plantGroupKey(it.p)))].sort();
+    keys.forEach((key, i) => groups.set(key, { key, color: GROUP_COLORS[i % GROUP_COLORS.length], plants: [] }));
+    for (const it of items) groups.get(this._plantGroupKey(it.p)).plants.push(it.p);
+    return groups;
+  }
+
+  /** "🍅 Pomodoro · Cuore di bue · 15/05 ×4": tap a line to light up those plants. */
+  _planLegend(items) {
+    const plan = this._plan;
+    const rows = [...this._planGroups(items).values()].map((g) => {
+      const p = g.plants[0];
+      const name = (this._taxon(p.taxon_id)?.common_names?.[this._lang()] || p.name).replace(/\s+\d+$/, "");
+      const date = p.planted_on || p.sown_on;
+      const count = g.plants.reduce((n, x) => n + (x.kind === "group" ? x.quantity || 1 : 1), 0);
+      return h(
+        "button",
+        {
+          type: "button",
+          className: `plan-legend-row${plan.highlight === g.key ? " on" : ""}`,
+          onclick: () => ((plan.highlight = plan.highlight === g.key ? null : g.key), this._render()),
+        },
+        h("span", { className: "plan-swatch", style: `border-color:${g.color}` }, this._plantIcon(p)),
+        h("span", { className: "main" }, [name, p.variety].filter(Boolean).join(" · ")),
+        h("span", { className: "sub" }, [date ? this._date(date, false) : null, `×${count}`].filter(Boolean).join(" · ")),
+      );
+    });
+    return h("div", { className: "plan-legend" }, rows);
   }
 
   _planStep() {
@@ -4619,15 +4674,18 @@ class HomesteadPanel extends HTMLElement {
     const badEls = bad.map(({ a, b, d }) =>
       s("g", {}, s("line", { x1: a.x, y1: a.y, x2: b.x, y2: b.y, class: "plan-bad" }), s("text", { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 - unit, class: "plan-bad-text", "font-size": unit * 2, "text-anchor": "middle" }, `${Math.round(d * 100)} cm`)),
     );
+    const groups = this._planGroups(items);
     const plantEls = items.map((it) => {
       const selected = plan.selected === it.p.id;
-      const icon = PLANT_ICONS[it.p.plant_type] || "🌱";
+      const icon = this._plantIcon(it.p);
+      const key = this._plantGroupKey(it.p);
+      const faded = plan.highlight && plan.highlight !== key;
       return s(
         "g",
-        { "data-id": it.p.id, class: `plan-plant${selected ? " selected" : ""}`, transform: `translate(${it.x} ${it.y})` },
-        it.end ? s("line", { x1: 0, y1: 0, x2: it.end[0] - it.x, y2: it.end[1] - it.y, class: "plan-row" }) : null,
+        { "data-id": it.p.id, class: `plan-plant${selected ? " selected" : ""}${faded ? " faded" : ""}`, transform: `translate(${it.x} ${it.y})` },
+        it.end ? s("line", { x1: 0, y1: 0, x2: it.end[0] - it.x, y2: it.end[1] - it.y, class: "plan-row", style: `stroke:${groups.get(key)?.color}` }) : null,
         it.r ? s("circle", { r: it.r, class: "plan-reach" }) : null,
-        s("circle", { r: unit * 1.6, class: "plan-dot" }),
+        s("circle", { r: unit * 1.6, class: "plan-dot", style: `stroke:${groups.get(key)?.color}` }),
         s("text", { y: unit * 0.8, "font-size": unit * 2.2, "text-anchor": "middle" }, icon),
         it.p.kind === "group" && it.p.quantity > 1 ? s("text", { x: unit * 2, y: -unit * 1.4, "font-size": unit * 1.8, class: "plan-label" }, `×${it.p.quantity}`) : null,
       );
@@ -4643,7 +4701,7 @@ class HomesteadPanel extends HTMLElement {
             { class: "plan-plant selected", transform: `translate(${nx} ${ny})` },
             end ? s("line", { x1: 0, y1: 0, x2: end[0] - nx, y2: end[1] - ny, class: "plan-row" }) : null,
             s("circle", { r: unit * 1.6, class: "plan-dot new" }),
-            s("text", { y: unit * 0.8, "font-size": unit * 2.2, "text-anchor": "middle" }, PLANT_ICONS[nf.plant_type] || "🌱"),
+            s("text", { y: unit * 0.8, "font-size": unit * 2.2, "text-anchor": "middle" }, this._plantIcon(nf)),
           );
         })()
       : null;
@@ -5970,7 +6028,7 @@ class HomesteadPanel extends HTMLElement {
     const zone = this._zone(id);
     if (zone) return `🗺️ ${zone.name}`;
     const planting = this._planting(id);
-    if (planting) return `${PLANT_ICONS[planting.plant_type] || "🌱"} ${planting.name}`;
+    if (planting) return `${this._plantIcon(planting)} ${planting.name}`;
     const lot = this._data.seeds.find((x) => x.id === id);
     return lot ? `🌱 ${this._seedName(lot)}` : "?";
   }
@@ -6967,6 +7025,23 @@ class HomesteadPanel extends HTMLElement {
   // ---------- crop data ----------
 
   /** Same rule as crops.py: genus and species, hybrid sign ignored. */
+  /** Icon of a planting: its species or genus, then its family (vegetables), then its type. */
+  _plantIcon(p, fallback = "🌱") {
+    const key = this._cropKey(p.species);
+    const icon = CROP_ICONS[key] || CROP_ICONS[key.split(" ")[0]];
+    if (icon) return icon;
+    if (!p.plant_type || p.plant_type === "vegetable") {
+      const family = this._taxon(p.taxon_id)?.family || this._crop(p.species)?.family;
+      if (FAMILY_ICON[family]) return FAMILY_ICON[family];
+    }
+    return PLANT_ICONS[p.plant_type] || fallback;
+  }
+
+  /** Plants of the same crop put in at another date are another group (succession sowing). */
+  _plantGroupKey(p) {
+    return [this._cropKey(p.species) || p.name.toLowerCase(), (p.variety || "").toLowerCase(), p.planted_on || p.sown_on || ""].join("|");
+  }
+
   _cropKey(name) {
     return (name || "").toLowerCase().replace(/\s[x×]\s|×/g, " ").split(/\s+/).filter(Boolean).slice(0, 2).join(" ");
   }
@@ -7943,7 +8018,7 @@ class HomesteadPanel extends HTMLElement {
           legendKeys.add(key);
           return this._monthSegments(crop[key]).map(([from, to]) => ({ from, to, lane: key, color: CROP_COLOR[key], title: this.t(key) }));
         });
-        const label = `${PLANT_ICONS[p.plant_type] || "🌱"} ${p.name}${p.kind === "group" && p.quantity > 1 ? ` (${p.quantity})` : ""}`;
+        const label = `${this._plantIcon(p)} ${p.name}${p.kind === "group" && p.quantity > 1 ? ` (${p.quantity})` : ""}`;
         const pills = this._taskPills(openTasks.filter((t) => t.planting_id === p.id || t.planting_ids?.includes(p.id)), year);
         rows.push(this._bandRow(label, () => this._select(p.id), bands, pills, null, highlight && !highlight.has(p.id) ? " faded" : ""));
       }
@@ -8037,7 +8112,7 @@ class HomesteadPanel extends HTMLElement {
       rows.push(this._groupHeader(group, this.t("calEvents", { count: zoneEvents.length + plantRows.reduce((n, r) => n + r.list.length, 0) })));
       if (this._calClosed().has(group.id)) continue;
       if (zoneEvents.length) rows.push(this._bandRow(`🗺️ ${this.t("calWholeZone")}`, () => this._selectZone(group.zone.id), [], marks(zoneEvents)));
-      for (const { p, list } of plantRows) rows.push(this._bandRow(`${PLANT_ICONS[p.plant_type] || "🌱"} ${p.name}`, () => this._select(p.id), [], marks(list)));
+      for (const { p, list } of plantRows) rows.push(this._bandRow(`${this._plantIcon(p)} ${p.name}`, () => this._select(p.id), [], marks(list)));
     }
     return h(
       "div",

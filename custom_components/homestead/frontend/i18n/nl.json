@@ -843,5 +843,6 @@
  "planSplit": "Haal eruit",
  "planSplitOf": "van {count}",
  "planSplitDo": "Splitsen",
- "planSplitDone": "{count} losse planten naast ‘{name}’: sleep ze naar hun plek."
+ "planSplitDone": "{count} losse planten naast ‘{name}’: sleep ze naar hun plek.",
+ "planLegend": "Legenda"
 }

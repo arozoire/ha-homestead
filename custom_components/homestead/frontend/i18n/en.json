@@ -843,5 +843,6 @@
  "planSplit": "Take out",
  "planSplitOf": "of {count}",
  "planSplitDo": "Split",
- "planSplitDone": "{count} single plants next to “{name}”: drag them into place."
+ "planSplitDone": "{count} single plants next to “{name}”: drag them into place.",
+ "planLegend": "Legend"
 }

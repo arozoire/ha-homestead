@@ -843,5 +843,6 @@
  "planSplit": "Separar",
  "planSplitOf": "de {count}",
  "planSplitDo": "Dividir",
- "planSplitDone": "{count} plantas sueltas junto a «{name}»: arrástralas a su sitio."
+ "planSplitDone": "{count} plantas sueltas junto a «{name}»: arrástralas a su sitio.",
+ "planLegend": "Leyenda"
 }

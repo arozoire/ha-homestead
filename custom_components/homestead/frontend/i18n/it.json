@@ -843,5 +843,6 @@
  "planSplit": "Separa",
  "planSplitOf": "su {count}",
  "planSplitDo": "Dividi",
- "planSplitDone": "{count} piante singole accanto a “{name}”: trascinale al loro posto."
+ "planSplitDone": "{count} piante singole accanto a “{name}”: trascinale al loro posto.",
+ "planLegend": "Legenda"
 }
