@@ -299,8 +299,7 @@
         "can": "Gieter",
         "hose": "Slang",
         "drip": "Druppelirrigatie",
-        "overhead": "Van bovenaf (sproeiers)",
-        "valve": "Automatische klep"
+        "overhead": "Van bovenaf (sproeiers)"
       }
     },
     "severity": {

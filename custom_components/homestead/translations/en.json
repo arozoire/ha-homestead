@@ -299,8 +299,7 @@
         "can": "Watering can",
         "hose": "Hose",
         "drip": "Drip",
-        "overhead": "From above (sprinklers)",
-        "valve": "Automatic valve"
+        "overhead": "From above (sprinklers)"
       }
     },
     "severity": {

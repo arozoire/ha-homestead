@@ -211,7 +211,6 @@ class WateringMode(StrEnum):
     HOSE = "hose"
     DRIP = "drip"
     OVERHEAD = "overhead"  # sprinklers: wet leaves
-    VALVE = "valve"  # automatic valve
 
 
 class ToolStatus(StrEnum):
@@ -265,6 +264,8 @@ class Zone(_Record):
     flow_entity: str | None = None
 
     def __post_init__(self) -> None:
+        if self.watering == "valve":  # mode of 0.19 replaced by valve_entity (any mode can be on a valve)
+            self.watering = None
         self.area_m2 = polygon_area_m2(self.geometry)
         self.species = clean_species(self.species)
         for attr in SOIL_SENSOR_FIELDS.values():
@@ -367,6 +368,8 @@ class Planting(_Record):
 
     def __post_init__(self) -> None:
         self.moisture_entity = entity_list(self.moisture_entity)
+        if self.watering == "valve":
+            self.watering = None
         if self.planted_on and not self.moon_phase:
             self.moon_phase = moon_phase(date.fromisoformat(self.planted_on))
         if self.sown_on and not self.sown_moon_phase:
@@ -823,7 +826,8 @@ def growth_start_stage(planting: Planting) -> int:
         return 10
     if planting.origin == PlantingOrigin.SOWN and not planting.planted_on:
         return 1
-    return 2 if planting.origin == PlantingOrigin.PLANTED else 1
+    # planted, or sown and then transplanted
+    return 2 if planting.planted_on or planting.origin == PlantingOrigin.PLANTED else 1
 
 
 def growth_days(planting: Planting) -> int:

@@ -299,8 +299,7 @@
         "can": "Regadera",
         "hose": "Manguera",
         "drip": "Goteo",
-        "overhead": "Por aspersión",
-        "valve": "Válvula automática"
+        "overhead": "Por aspersión"
       }
     },
     "severity": {

@@ -63,7 +63,6 @@ add_zone:
             - hose
             - drip
             - overhead
-            - valve
     valve_entity:
       selector:
         entity:
@@ -145,7 +144,6 @@ update_zone:
             - hose
             - drip
             - overhead
-            - valve
     valve_entity:
       selector:
         entity:
@@ -291,7 +289,6 @@ add_planting:
             - hose
             - drip
             - overhead
-            - valve
     price:
       selector:
         number:
@@ -488,7 +485,6 @@ update_planting:
             - hose
             - drip
             - overhead
-            - valve
     status:
       selector:
         select:

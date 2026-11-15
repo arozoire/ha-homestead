@@ -299,8 +299,7 @@
         "can": "Annaffiatoio",
         "hose": "Tubo a mano",
         "drip": "Goccia",
-        "overhead": "Dall'alto (irrigatori)",
-        "valve": "Valvola automatica"
+        "overhead": "Dall'alto (irrigatori)"
       }
     },
     "severity": {

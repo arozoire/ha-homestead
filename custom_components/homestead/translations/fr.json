@@ -299,8 +299,7 @@
         "can": "Arrosoir",
         "hose": "Tuyau",
         "drip": "Goutte-à-goutte",
-        "overhead": "Par aspersion",
-        "valve": "Vanne automatique"
+        "overhead": "Par aspersion"
       }
     },
     "severity": {

@@ -116,6 +116,8 @@ const CROP_ICONS = {
   "citrus limon": "🍋", citrus: "🍊", vitis: "🍇", olea: "🫒", actinidia: "🥝", vaccinium: "🫐", ribes: "🫐", rubus: "🫐",
   corylus: "🌰", juglans: "🌰", castanea: "🌰", mangifera: "🥭", musa: "🍌", persea: "🥑", ananas: "🍍",
 };
+// Days from planting to full size when the planting does not say (same as models.DEFAULT_GROWTH_DAYS).
+const GROWTH_DAYS = { vegetable: 75, herb: 60, flower: 60, houseplant: 365, vine: 730, shrub: 730, fruit_tree: 1460, tree: 3650 };
 // Rings of the plan: one colour per group (species + variety + date), far apart from each other.
 const GROUP_COLORS = ["#d1495b", "#2e86de", "#f0a202", "#3a7d44", "#8e44ad", "#e67e22", "#16a085", "#c0392b", "#34495e", "#d35400", "#7f8c8d", "#b8860b"];
 const FAMILY_ICON = { Solanaceae: "🍅", Fabaceae: "🫛", Brassicaceae: "🥦", Cucurbitaceae: "🎃", Apiaceae: "🥕", Amaryllidaceae: "🧅", Asteraceae: "🥬", Amaranthaceae: "🌿" };
@@ -133,8 +135,8 @@ const REPORT_CSS = `
   .report-foot { margin-top: 18px; border-top: 1px solid #dfe3dc; padding-top: 6px; }
   @page { size: A4; margin: 14mm; }
 `;
-const WATERING_MODES = ["none", "can", "hose", "drip", "overhead", "valve"];
-const WATERING_ICONS = { none: "🚫", can: "🪣", hose: "🧵", drip: "💧", overhead: "🌦️", valve: "🤖" };
+const WATERING_MODES = ["none", "can", "hose", "drip", "overhead"];
+const WATERING_ICONS = { none: "🚫", can: "🪣", hose: "🧵", drip: "💧", overhead: "🌦️" };
 const POLLINATION_RANGE_M = 50;
 const MALE_WORDS = ["male", "maschio", "mâle", "männlich", "macho", "mannelijk", "tomuri", "matua", "chieftain"];
 // Fruit trees that set little fruit with their own pollen: another variety nearby is needed, except the self-fertile ones listed.
@@ -305,6 +307,10 @@ const STYLE = `
   .plan-wrap { position: relative; border: 1px solid var(--divider-color); border-radius: 12px; overflow: hidden; background: #fbfbf8; margin: 8px 0; }
   .plan-north { position: absolute; top: 8px; right: 8px; display: inline-flex; flex-direction: column; align-items: center; font-size: 12px; font-weight: 700; line-height: 1.1; color: #2e5a1e; pointer-events: none; width: 1.6em; text-align: center; }
   .plan-plant.faded { opacity: 0.2; }
+  .growth-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0; }
+  .growth-bar { flex: 1; min-width: 80px; height: 8px; border-radius: 4px; background: var(--divider-color); overflow: hidden; }
+  .growth-bar i { display: block; height: 100%; background: #3a7d44; }
+  .growth-line .row { flex-basis: 100%; }
   .plan-legend { display: grid; gap: 4px; margin: 6px 0; }
   .plan-legend-row { display: flex; align-items: center; gap: 8px; min-height: 40px; text-align: left; background: none; border: 1px solid var(--divider-color); border-radius: 10px; padding: 2px 8px; color: inherit; font: inherit; }
   .plan-legend-row.on { border-color: var(--primary-color); background: rgba(3, 169, 244, 0.08); }
@@ -889,6 +895,7 @@ class HomesteadPanel extends HTMLElement {
           photos: data.photos || [],
           events: data.events || [],
           tasks: data.tasks || [],
+          growth: data.growth || {},
         };
         this._loaded = !!data.plantings;
         this._syncMap();
@@ -1264,6 +1271,8 @@ class HomesteadPanel extends HTMLElement {
       moisture_min: values.moisture_min ? Number(values.moisture_min) : null,
       watering: values.watering || null,
       notes: values.notes?.trim() || null,
+      growth_days: values.growth_days ? Number(values.growth_days) : null,
+      growth_start: values.growth_start ? Number(values.growth_start) : null,
     };
     if (this._form.id) {
       data.status = values.status;
@@ -1297,6 +1306,8 @@ class HomesteadPanel extends HTMLElement {
       notes: values.notes?.trim() || null,
       ...Object.fromEntries(SOIL_SENSOR_FIELDS.map(([, attr]) => [attr, new FormData(ev.target).getAll(attr)])),
       watering: values.watering || null,
+      valve_entity: values.valve_entity || null,
+      flow_entity: values.flow_entity || null,
     };
     const id = this._zoneForm.id;
     if (id) {
@@ -1958,6 +1969,7 @@ class HomesteadPanel extends HTMLElement {
         this._waterSelect(f, this.t("wmLikeZone")),
         (careEl = this._careFields(f)),
         this._moistureFields(f),
+        this._growthFields(f),
         rotationEl,
         f.id ? this._selectField(f, "status", ["active", "dead", "removed"].map((s) => [s, this.t(s)])) : null,
         f.id
@@ -1993,6 +2005,7 @@ class HomesteadPanel extends HTMLElement {
       f.id ? this._plantingExpenses(f) : null,
       f.id ? (this._cropEl = h("div", {}, this._cropBox(f))) : null,
       f.id ? this._chillLine(f) : null,
+      f.id ? this._growthLine(f) : null,
       f.id ? this._pestBox(f) : null,
       f.id ? this._lineageBox(f) : null,
       f.id && this._pollination(f) ? h("p", { className: this._pollination(f).startsWith("⚠️") ? "alert-line" : "hint" }, this._pollination(f)) : null,
@@ -4321,6 +4334,109 @@ class HomesteadPanel extends HTMLElement {
   }
 
   /** Fruit tree card: cold hours of this winter against what the species needs. */
+  // ----- valves (a zone's water switched on by a valve or a switch) and growth stages -----
+
+  /** Zone form: the valve that turns its water on and its flow meter (any watering mode). */
+  _zoneValveFields(z) {
+    const states = Object.entries(this._hass.states);
+    const label = ([id, st]) => st?.attributes?.friendly_name || id;
+    const valves = states.filter(([id]) => id.startsWith("valve.") || id.startsWith("switch."));
+    const flowUnits = /(\/(min|h|s|d)$)|^(L|l|mL|m³|ft³|gal|CCF)$/;
+    const meters = states.filter(([id, st]) => id.startsWith("sensor.") && flowUnits.test(st.attributes?.unit_of_measurement || ""));
+    const options = (list, current) => {
+      const known = list.map(([id, st]) => [id, label([id, st])]).sort((a, b) => a[1].localeCompare(b[1]));
+      if (current && !known.some(([id]) => id === current)) known.unshift([current, current]);
+      return [["", "—"], ...known];
+    };
+    return h(
+      "details",
+      { className: "care-notes", open: !!z.valve_entity },
+      h("summary", {}, `🚰 ${this.t("valveTitle")}${z.valve_entity ? ` · ${label([z.valve_entity, this._hass.states[z.valve_entity]])}` : ""}`),
+      h("p", { className: "hint" }, this.t("valveHint")),
+      this._selectField(z, "valve_entity", options(valves, z.valve_entity)),
+      this._selectField(z, "flow_entity", options(meters, z.flow_entity)),
+    );
+  }
+
+  /** Zone card: the valve now, and where the hose is when several zones share it. */
+  _valveLine(z) {
+    const st = this._hass.states[z.valve_entity];
+    const open = ["open", "opening", "on"].includes(st?.state);
+    const shared = this._data.zones.filter((o) => o.valve_entity === z.valve_entity);
+    const name = st?.attributes?.friendly_name || z.valve_entity;
+    const hose =
+      shared.length > 1
+        ? z.hose_here !== false
+          ? h("span", { className: "sub" }, `🧵 ${this.t("hoseHere")}`)
+          : h(
+              "button",
+              {
+                type: "button",
+                onclick: async () => {
+                  if (await this._call("set_hose", { zone_id: z.id })) this._showMessage(`✓ ${this.t("hoseMoved", { name: z.name })}`);
+                },
+              },
+              `🧵 ${this.t("hoseMove")}`,
+            )
+        : null;
+    return h(
+      "div",
+      { className: "soil-now valve-line" },
+      `🚰 ${name} · ${open ? this.t("valveOpen") : this.t("valveClosed")}`,
+      shared.length > 1 ? h("span", { className: "sub" }, ` · ${this.t("valveShared", { names: shared.filter((o) => o.id !== z.id).map((o) => o.name).join(", ") })}`) : null,
+      hose ? h("div", {}, hose) : null,
+    );
+  }
+
+  /** Planting form: how long it takes to full size and where it starts (empty = automatic). */
+  _growthFields(f) {
+    const days = GROWTH_DAYS[f.plant_type] || 90;
+    return h(
+      "details",
+      { className: "care-notes", open: !!(f.growth_days || f.growth_start) },
+      h("summary", {}, `📈 ${this.t("growthTitle")}`),
+      h(
+        "div",
+        { className: "row" },
+        this._field(f, "growth_days", { type: "number", min: 1, max: 36500, step: 1, inputMode: "numeric", placeholder: String(days) }),
+        this._selectField(f, "growth_start", [["", this.t("growthAuto")], ...Array.from({ length: 10 }, (_, i) => [String(i + 1), String(i + 1)])]),
+      ),
+      h("p", { className: "hint" }, this.t("growthHint")),
+    );
+  }
+
+  /** Plant card: today's growth stage (computed by the integration), and a hand correction. */
+  _growthLine(p) {
+    const stage = this._data.growth?.[p.id];
+    if (stage == null || p.status !== "active") return null;
+    const input = h("input", { type: "number", min: 1, max: 10, step: 0.5, value: String(stage), inputMode: "decimal", style: "width: 5em" });
+    const fix = h(
+      "div",
+      { className: "row", hidden: true },
+      input,
+      h(
+        "button",
+        {
+          type: "button",
+          className: "primary",
+          onclick: async () => {
+            const value = Number(String(input.value).replace(",", "."));
+            if (value >= 1 && value <= 10 && (await this._call("set_growth", { id: p.id, stage: value }))) this._showMessage(`✓ ${this.t("growthSaved", { name: p.name })}`);
+          },
+        },
+        this.t("save"),
+      ),
+    );
+    return h(
+      "div",
+      { className: "growth-line" },
+      h("span", {}, `📈 ${this.t("growthStage", { value: this._number(stage) })}`),
+      h("span", { className: "growth-bar", "aria-hidden": "true" }, h("i", { style: `width:${stage * 10}%` })),
+      h("button", { type: "button", className: "link", onclick: () => (fix.hidden = !fix.hidden) }, `✏️ ${this.t("growthFix")}`),
+      fix,
+    );
+  }
+
   _chillLine(planting) {
     const chill = this._outlook?.chill;
     const need = chill?.needs?.[this._cropKey(planting.species)];
@@ -9338,6 +9454,7 @@ class HomesteadPanel extends HTMLElement {
     const first = ["compost", "coop"].includes(z.kind);
     return [
       z.id && this._zoneHasSoil(z.id) ? this._soilLine(z.id) : null,
+      z.id && z.valve_entity ? this._valveLine(z) : null,
       z.id && !["compost", "coop", "indoor", "woodland"].includes(z.kind) ? this._waterBox(z) : null,
       first ? box : null,
       h(
@@ -9354,6 +9471,7 @@ class HomesteadPanel extends HTMLElement {
         essences,
         ["compost", "coop", "indoor"].includes(z.kind) ? null : this._waterSelect(z, this.t(z.parent_id ? "wmInherit" : "wmUnset")),
         ["compost", "coop"].includes(z.kind) ? null : this._zoneSoilFields(z),
+        ["compost", "coop", "woodland"].includes(z.kind) ? null : this._zoneValveFields(z),
         this._notes(z),
         area ? h("div", { className: "hint" }, `${this.t("surface")}: ${area}`) : null,
         h(

@@ -299,8 +299,7 @@
         "can": "Gießkanne",
         "hose": "Schlauch",
         "drip": "Tropfbewässerung",
-        "overhead": "Von oben (Regner)",
-        "valve": "Automatisches Ventil"
+        "overhead": "Von oben (Regner)"
       }
     },
     "severity": {
