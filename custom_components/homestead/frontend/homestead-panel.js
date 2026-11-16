@@ -485,6 +485,7 @@ const STYLE = `
   .history-cell { padding: 0; border: 2px solid transparent; border-radius: 6px; overflow: hidden; position: relative; background: var(--secondary-background-color, #eee); aspect-ratio: 4 / 3; }
   .history-cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .history-cell span { position: absolute; right: 2px; bottom: 1px; font-size: 10px; color: #fff; text-shadow: 0 0 3px #000; }
+  .history-more { position: absolute; left: 2px; top: 1px; font-size: 11px; color: #fff; background: rgba(0, 0, 0, .55); border-radius: 8px; padding: 0 5px; }
   .history-cell.picked { border-color: var(--homestead-accent, #3a7d44); }
   .history-empty { aspect-ratio: 4 / 3; border: 1px dashed var(--divider-color); border-radius: 6px; }
   .compare-stage { position: relative; max-width: 92vw; max-height: 70vh; }
@@ -6350,7 +6351,11 @@ class HomesteadPanel extends HTMLElement {
           lost ? `⚠️ ${this.t("shotLost", { date: this._date(event.done_on) })}` : done ? (event ? `✓ ${this._date(event.done_on)}` : this.t("shotSkipped")) : last ? this.t("shotLast", { date: this._date(last.taken_on) }) : this.t("shotFirst"),
         ),
       ),
-      editing ? null : done && !lost ? null : h("button", { type: "button", className: "primary", onclick: () => this._openShot(t, id, lost ? event.id : null) }, `📸 ${this.t(lost ? "shotRetry" : "shotTake")}`),
+      editing
+        ? null
+        : done && !lost
+          ? this._shotRedoButton(t, id, event)
+          : h("button", { type: "button", className: "primary", onclick: () => this._openShot(t, id, { emptyEvent: lost ? event.id : null }) }, `📸 ${this.t(lost ? "shotRetry" : "shotTake")}`),
     );
   }
 
@@ -9207,11 +9212,35 @@ class HomesteadPanel extends HTMLElement {
 
   // ----- the shot: live camera with the last photo over it -----
 
-  _openShot(task, item, emptyEvent = null) {
+  /** The camera for a zone or plant: from the photo round (task), or on its own (an extra photo, a redo). */
+  _openShot(task, item, { emptyEvent = null, replace = null } = {}) {
     this._clearSelection();
     this._showMessage("");
-    this._shot = { task_id: task.id, item, emptyEvent };
+    this._shot = { task_id: task?.id || null, item, emptyEvent, replace };
     this._render();
+  }
+
+  /** 🔁 on a zone of the round already photographed: take it again, the new picture replaces that one. */
+  _shotRedoButton(t, id, event) {
+    const photo = event && this._planPhotos(id).find((p) => p.event_id === event.id);
+    if (!photo) return null;
+    return h("button", { type: "button", title: this.t("shotRedo"), "aria-label": this.t("shotRedo"), onclick: () => this._openShot(t, id, { replace: photo }) }, "🔁");
+  }
+
+  /** The picture to line up with: the last one, or for a redo the last one before the picture being replaced. */
+  _shotGhost(shot) {
+    if (!shot.replace) return this._lastPlanPhoto(shot.item);
+    const others = this._planPhotos(shot.item).filter((p) => p.id !== shot.replace.id);
+    return others.filter((p) => p.taken_on <= shot.replace.taken_on).at(-1) || others.at(-1) || null;
+  }
+
+  /** Out of the camera: the round goes on to the next zone, a photo taken on its own goes back to its card. */
+  _leaveShot(shot, task) {
+    const message = this._message;
+    if (shot.task_id) this._nextShot(task, shot.item);
+    else if (this._zone(shot.item)) this._selectZone(shot.item);
+    else this._select(shot.item);
+    this._showMessage(message.text, message.error);
   }
 
   _stopCamera() {
@@ -9224,7 +9253,7 @@ class HomesteadPanel extends HTMLElement {
     // Drawn once per shot: a redraw would restart the camera.
     if (this._shotView?.shot === shot) return this._shotView.els;
     const task = this._data.tasks.find((t) => t.id === shot.task_id);
-    const last = this._lastPlanPhoto(shot.item);
+    const last = this._shotGhost(shot);
     let ghost = 0.45;
     try {
       ghost = Number(localStorage.getItem("homestead-ghost") ?? 0.45);
@@ -9301,10 +9330,23 @@ class HomesteadPanel extends HTMLElement {
     const skip = async () => {
       if (await this._call("complete_task", { id: shot.task_id, items: [shot.item] })) this._nextShot(task, shot.item);
     };
+    const back = shot.task_id
+      ? h("button", { type: "button", className: "back", onclick: () => this._setTab("diary") }, `‹ ${this.t("tabDiary")}`)
+      : h("button", { type: "button", className: "back", onclick: () => this._leaveShot({ ...shot, task_id: null }, null) }, `‹ ${this._itemName(shot.item)}`);
     const els = [
-      h("button", { type: "button", className: "back", onclick: () => this._setTab("diary") }, `‹ ${this.t("tabDiary")}`),
+      back,
       h("h2", {}, `📸 ${this._itemName(shot.item)}`),
-      h("p", { className: "sub" }, [task ? this._taskWhen(task) : null, last ? this.t("shotCompare", { date: this._date(last.taken_on) }) : this.t("shotFirst")].filter(Boolean).join(" · ")),
+      h(
+        "p",
+        { className: "sub" },
+        [
+          task ? this._taskWhen(task) : null,
+          shot.replace ? this.t("shotReplaces", { date: this._date(shot.replace.taken_on) }) : null,
+          last ? this.t("shotCompare", { date: this._date(last.taken_on) }) : this.t("shotFirst"),
+        ]
+          .filter(Boolean)
+          .join(" · "),
+      ),
       stage,
       status,
       last ? h("label", { className: "row", style: "align-items:center;gap:8px" }, this.t("shotGhost"), slider) : null,
@@ -9313,7 +9355,7 @@ class HomesteadPanel extends HTMLElement {
         { className: "shot-buttons" },
         h("button", { type: "button", onclick: () => gallery.click() }, `🖼️ ${this.t("shotGallery")}`),
         h("button", { type: "button", className: "shutter", "aria-label": this.t("shotTake"), onclick: capture }),
-        h("button", { type: "button", onclick: skip }, this.t("shotSkip")),
+        shot.task_id && !shot.replace ? h("button", { type: "button", onclick: skip }, this.t("shotSkip")) : h("span"),
       ),
       h("button", { type: "button", onclick: () => phoneCamera.click() }, `📷 ${this.t("shotPhoneCamera")}`),
       h("p", { className: "hint", style: "white-space:normal" }, this.t("shotHint")),
@@ -9354,9 +9396,18 @@ class HomesteadPanel extends HTMLElement {
       return;
     }
     if (shot.emptyEvent) await this._call("delete_event", { id: shot.emptyEvent });
-    if (task && !task.done_on && !(task.done_ids || []).includes(shot.item)) await this._call("complete_task", { id: task.id, items: [shot.item] });
+    // A redo: the new picture is safe, the one it replaces goes (with its file).
+    if (shot.replace && shot.replace.event_id !== result.id) await this._call("delete_event", { id: shot.replace.event_id });
+    // A photo on its own still counts for the round when this zone is waiting in an open photo list.
+    const open = task || this._openPhotoTask(shot.item);
+    if (open && !open.done_on && !(open.done_ids || []).includes(shot.item)) await this._call("complete_task", { id: open.id, items: [shot.item] });
     this._showMessage(`✓ ${this.t("shotSaved", { name: this._itemName(shot.item) })}`);
-    this._nextShot(task, shot.item);
+    this._leaveShot(shot, task);
+  }
+
+  /** The open photo-round task that still waits for this zone or plant, if any. */
+  _openPhotoTask(item) {
+    return this._data.tasks.find((t) => t.plan_id && !t.done_on && t.due_on <= today() && this._listItems(t).includes(item) && !(t.done_ids || []).includes(item)) || null;
   }
 
   /** After a shot (or a skip): the next zone or plant of the list still to do, else back to the diary. */
@@ -9377,7 +9428,8 @@ class HomesteadPanel extends HTMLElement {
     const photos = this._planPhotos(target);
     const plan = this._photoPlan();
     const inPlan = plan && [...(plan.zone_ids || []), ...(plan.planting_ids || [])].includes(target);
-    if (!photos.length && !inPlan) return null;
+    const takeNow = h("button", { type: "button", onclick: () => this._openShot(null, target) }, `📸 ${this.t("shotNow")}`);
+    if (!photos.length && !inPlan) return h("div", { className: "row" }, takeNow);
     // Columns: the plan periods; a photo far from all of them (an older plan) gets a column for its month.
     const monthName = (m) => new Intl.DateTimeFormat(this._lang(), { month: "short" }).format(new Date(2026, Number(m) - 1, 15));
     const periods = plan && !plan.every_weeks ? plan.periods : [];
@@ -9400,10 +9452,20 @@ class HomesteadPanel extends HTMLElement {
       return i >= 0 ? i : columns.findIndex((c) => c.month === photo.taken_on.slice(5, 7));
     };
     const years = [...new Set(photos.map((p) => p.taken_on.slice(0, 4)))].sort().reverse();
+    // A cell can hold several pictures (an extra photo, a redo kept by hand): the round's one first.
+    const roundDays = this._data.tasks
+      .filter((t) => t.plan_id && [...(t.zone_ids || []), ...(t.planting_ids || [])].includes(target))
+      .map((t) => [t.due_on, t.done_on && t.done_on > (t.due_until || t.due_on) ? t.done_on : t.due_until || t.due_on]);
+    const fromRound = (photo) => roundDays.some(([a, b]) => a <= photo.taken_on && photo.taken_on <= b);
     const grid = new Map();
-    for (const photo of photos) grid.set(`${photo.taken_on.slice(0, 4)}:${cellOf(photo)}`, photo);
+    for (const photo of photos) {
+      const key = `${photo.taken_on.slice(0, 4)}:${cellOf(photo)}`;
+      grid.set(key, [...(grid.get(key) || []), photo]);
+    }
+    for (const cell of grid.values()) cell.sort((a, b) => fromRound(b) - fromRound(a) || a.taken_on.localeCompare(b.taken_on));
     const compare = this._comparePick?.target === target ? this._comparePick : null;
-    const thumb = (photo) => {
+    const thumb = (cell) => {
+      const photo = cell[0];
       const img = h("img", { alt: this._date(photo.taken_on), loading: "lazy" });
       this._photoUrl(photo.id, true).then((url) => (img.src = url));
       return h(
@@ -9413,7 +9475,7 @@ class HomesteadPanel extends HTMLElement {
           className: `history-cell${compare?.ids.includes(photo.id) ? " picked" : ""}`,
           title: this._date(photo.taken_on),
           onclick: () => {
-            if (!compare) return this._showPlanPhoto(photo);
+            if (!compare) return this._showPlanPhoto(photo, cell, target);
             compare.ids = compare.ids.includes(photo.id) ? compare.ids.filter((x) => x !== photo.id) : [...compare.ids, photo.id].slice(-2);
             if (compare.ids.length === 2) {
               const [a, b] = compare.ids.map((id) => photos.find((p) => p.id === id)).sort((x, y) => x.taken_on.localeCompare(y.taken_on));
@@ -9425,6 +9487,7 @@ class HomesteadPanel extends HTMLElement {
         },
         img,
         h("span", {}, this._date(photo.taken_on, false)),
+        cell.length > 1 ? h("b", { className: "history-more" }, `+${cell.length - 1}`) : null,
       );
     };
     return h(
@@ -9443,10 +9506,12 @@ class HomesteadPanel extends HTMLElement {
             ]),
           )
         : h("p", { className: "hint" }, this.t("photoHistoryEmpty")),
-      photos.length > 1
-        ? h(
-            "div",
-            { className: "row" },
+      h(
+        "div",
+        { className: "row" },
+        takeNow,
+        photos.length > 1
+          ? [
             h(
               "button",
               {
@@ -9460,24 +9525,59 @@ class HomesteadPanel extends HTMLElement {
               compare ? this.t("photoComparePick") : `↔ ${this.t("photoCompare")}`,
             ),
             h("button", { type: "button", onclick: () => this._playTimelapse(photos) }, `▶ ${this.t("photoTimelapse")}`),
-          )
-        : null,
+          ]
+          : null,
+      ),
     );
   }
 
-  _showPlanPhoto(photo) {
-    const img = h("img", { alt: this._date(photo.taken_on) });
-    const link = h("a", { download: `${photo.taken_on}.jpg`, target: "_blank" }, `⬇ ${this.t("photoOriginal")}`);
-    this._photoUrl(photo.id).then((url) => {
-      img.src = url;
-      link.href = url;
-    });
+  /** One picture of the history, with the others of its cell (‹ ›), redo and delete. */
+  _showPlanPhoto(photo, cell = [photo], target = null) {
+    let i = Math.max(0, cell.findIndex((p) => p.id === photo.id));
+    const img = h("img", { alt: "" });
+    const label = h("span", {});
+    const link = h("a", { target: "_blank" }, `⬇ ${this.t("photoOriginal")}`);
+    const show = () => {
+      const current = cell[i];
+      img.alt = this._date(current.taken_on);
+      label.textContent = cell.length > 1 ? `${this._date(current.taken_on)} (${i + 1}/${cell.length})` : this._date(current.taken_on);
+      link.download = `${current.taken_on}.jpg`;
+      this._photoUrl(current.id).then((url) => {
+        img.src = url;
+        link.href = url;
+      });
+    };
+    const step = (d) => {
+      i = (i + d + cell.length) % cell.length;
+      show();
+    };
+    const close = () => overlay.remove();
+    const redo = () => {
+      close();
+      this._openShot(null, target, { replace: cell[i] });
+    };
+    const remove = async () => {
+      if (!confirm(this.t("confirmDeletePhoto"))) return;
+      // The photo event exists only for its picture: it goes with it.
+      if (await this._call("delete_event", { id: cell[i].event_id })) close();
+    };
     const overlay = h(
       "div",
-      { className: "lightbox", onclick: (ev) => ev.target === overlay && overlay.remove() },
+      { className: "lightbox", onclick: (ev) => ev.target === overlay && close() },
       img,
-      h("div", { className: "row" }, h("span", {}, this._date(photo.taken_on)), link, h("button", { type: "button", onclick: () => overlay.remove() }, this.t("close"))),
+      h(
+        "div",
+        { className: "row" },
+        cell.length > 1 ? h("button", { type: "button", "aria-label": "‹", onclick: () => step(-1) }, "‹") : null,
+        label,
+        cell.length > 1 ? h("button", { type: "button", "aria-label": "›", onclick: () => step(1) }, "›") : null,
+        link,
+        target ? h("button", { type: "button", onclick: redo }, `🔁 ${this.t("shotRedo")}`) : null,
+        target ? h("button", { type: "button", className: "danger", onclick: remove }, this.t("delete")) : null,
+        h("button", { type: "button", onclick: close }, this.t("close")),
+      ),
     );
+    show();
     this.shadowRoot.append(overlay);
   }
 

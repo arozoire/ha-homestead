@@ -877,5 +877,8 @@
  "shotHeic": "HEIC/HEIF-Foto: Browser können es nicht anzeigen. Stell die Handykamera auf JPEG (Maximale Kompatibilität) und nimm es neu auf.",
  "shotTooBig": "Foto zu groß (über 64 MB)",
  "shotFailed": "Foto nicht gespeichert, die Zone bleibt offen: {error}",
- "shotEmpty": "Die Kamera hat ein leeres Bild geliefert: warte eine Sekunde, bis das Bild erscheint, oder nimm 📷 Handykamera."
+ "shotEmpty": "Die Kamera hat ein leeres Bild geliefert: warte eine Sekunde, bis das Bild erscheint, oder nimm 📷 Handykamera.",
+ "shotRedo": "Neu aufnehmen",
+ "shotNow": "Foto jetzt",
+ "shotReplaces": "ersetzt das vom {date}"
 }

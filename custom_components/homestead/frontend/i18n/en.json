@@ -877,5 +877,8 @@
  "shotHeic": "HEIC/HEIF picture: browsers cannot show it. Set the phone camera to JPEG (Most compatible) and take it again.",
  "shotTooBig": "picture too large (over 64 MB)",
  "shotFailed": "Photo not saved, the zone stays to do: {error}",
- "shotEmpty": "The camera gave an empty picture: wait a second for the image to appear, or use 📷 Phone camera."
+ "shotEmpty": "The camera gave an empty picture: wait a second for the image to appear, or use 📷 Phone camera.",
+ "shotRedo": "Redo",
+ "shotNow": "Photo now",
+ "shotReplaces": "replaces the one of {date}"
 }

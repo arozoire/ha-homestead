@@ -877,5 +877,8 @@
  "shotHeic": "HEIC/HEIF-foto: browsers kunnen hem niet tonen. Zet de camera van de telefoon op JPEG (Meest compatibel) en maak hem opnieuw.",
  "shotTooBig": "foto te groot (meer dan 64 MB)",
  "shotFailed": "Foto niet opgeslagen, de zone blijft te doen: {error}",
- "shotEmpty": "De camera gaf een leeg beeld: wacht een seconde tot het beeld verschijnt, of gebruik 📷 Telefooncamera."
+ "shotEmpty": "De camera gaf een leeg beeld: wacht een seconde tot het beeld verschijnt, of gebruik 📷 Telefooncamera.",
+ "shotRedo": "Opnieuw",
+ "shotNow": "Foto nu",
+ "shotReplaces": "vervangt die van {date}"
 }
