@@ -48,6 +48,7 @@ from .models import (
     Worked,
     Zone,
     ZoneKind,
+    merge_plantings,
     new_id,
 )
 from .photos import delete_photo_files, photo_dir
@@ -119,6 +120,8 @@ ADD_PLANTING_SCHEMA = vol.Schema(
         vol.Optional("latitude"): vol.Any(None, cv.latitude),
         vol.Optional("longitude"): vol.Any(None, cv.longitude),
         vol.Optional("row_to"): vol.Any(None, vol.All([vol.Coerce(float)], vol.Length(min=2, max=2))),
+        # A group placed plant by plant: one [longitude, latitude] per plant
+        vol.Optional("positions"): vol.Any(None, [vol.All([vol.Coerce(float)], vol.Length(min=2, max=2))]),
         vol.Optional("watering"): vol.Any(None, vol.In([m.value for m in WateringMode])),
         vol.Optional("seed_lot_id"): _opt_str,
         vol.Optional("sown_count"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1))),
@@ -135,6 +138,11 @@ ADD_PLANTING_SCHEMA = vol.Schema(
         vol.Optional("growth_start"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=10))),
         vol.Optional("growth_days"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=36500))),
     }
+)
+
+# Plants of the same crop split by mistake: back into one group (the first id)
+MERGE_PLANTINGS_SCHEMA = vol.Schema(
+    {vol.Required("id"): cv.string, vol.Required("ids"): vol.All(cv.ensure_list, [cv.string])}
 )
 
 # The hose of a shared valve is now in this zone (the other zones on the valve lose it)
@@ -752,6 +760,16 @@ def async_register_services(hass: HomeAssistant) -> None:
         await store.async_save()
         return {"id": zone_id}
 
+    async def merge_plantings_service(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        target_id = call.data["id"]
+        _check_ref(store.data.plantings, target_id, "id")
+        for other in call.data["ids"]:
+            _check_ref(store.data.plantings, other, "ids")
+        planting = merge_plantings(store.data, target_id, call.data["ids"])
+        await store.async_save()
+        return {"id": planting.id, "quantity": planting.quantity}
+
     async def set_growth(call: ServiceCall) -> ServiceResponse:
         store = _store(hass)
         planting_id = call.data["id"]
@@ -1042,6 +1060,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         ("add_event", add_event, ADD_EVENT_SCHEMA, SupportsResponse.OPTIONAL),
         ("set_hose", set_hose, SET_HOSE_SCHEMA, SupportsResponse.OPTIONAL),
         ("set_growth", set_growth, SET_GROWTH_SCHEMA, SupportsResponse.OPTIONAL),
+        ("merge_plantings", merge_plantings_service, MERGE_PLANTINGS_SCHEMA, SupportsResponse.OPTIONAL),
         ("update_event", update_event, UPDATE_EVENT_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_event", delete_event, ID_SCHEMA, SupportsResponse.OPTIONAL),
         ("refresh_weather", refresh_weather, REFRESH_WEATHER_SCHEMA, SupportsResponse.OPTIONAL),

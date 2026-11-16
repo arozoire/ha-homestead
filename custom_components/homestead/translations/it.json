@@ -364,7 +364,7 @@
         },
         "watering": {
           "name": "Come si bagna",
-          "description": "Solo pioggia, annaffiatoio, tubo, goccia, dall'alto o valvola automatica; vuoto = come la zona sopra."
+          "description": "Solo pioggia, annaffiatoio, tubo, goccia o dall'alto; vuoto = come la zona sopra. La valvola che apre l'acqua è un'impostazione a parte."
         },
         "valve_entity": {
           "name": "Valvola",
@@ -430,7 +430,7 @@
         },
         "watering": {
           "name": "Come si bagna",
-          "description": "Solo pioggia, annaffiatoio, tubo, goccia, dall'alto o valvola automatica; vuoto = come la zona sopra."
+          "description": "Solo pioggia, annaffiatoio, tubo, goccia o dall'alto; vuoto = come la zona sopra. La valvola che apre l'acqua è un'impostazione a parte."
         },
         "valve_entity": {
           "name": "Valvola",
@@ -580,9 +580,13 @@
           "name": "Fine della fila",
           "description": "Una fila di piante: l'altra estremità come [longitudine, latitudine]; la posizione è l'inizio della fila."
         },
+        "positions": {
+          "name": "Piante del gruppo",
+          "description": "Un gruppo posizionato pianta per pianta: un [longitudine, latitudine] per pianta. Il gruppo resta una sola pianta per il diario."
+        },
         "watering": {
           "name": "Come si bagna",
-          "description": "Solo pioggia, annaffiatoio, tubo, goccia, dall'alto o valvola automatica; vuoto = come la zona sopra."
+          "description": "Solo pioggia, annaffiatoio, tubo, goccia o dall'alto; vuoto = come la zona sopra. La valvola si imposta sulla zona."
         },
         "growth_start": {
           "name": "Stadio di crescita iniziale",
@@ -722,9 +726,13 @@
           "name": "Fine della fila",
           "description": "Una fila di piante: l'altra estremità come [longitudine, latitudine]; la posizione è l'inizio della fila."
         },
+        "positions": {
+          "name": "Piante del gruppo",
+          "description": "Un gruppo posizionato pianta per pianta: un [longitudine, latitudine] per pianta. Il gruppo resta una sola pianta per il diario."
+        },
         "watering": {
           "name": "Come si bagna",
-          "description": "Solo pioggia, annaffiatoio, tubo, goccia, dall'alto o valvola automatica; vuoto = come la zona sopra."
+          "description": "Solo pioggia, annaffiatoio, tubo, goccia o dall'alto; vuoto = come la zona sopra. La valvola si imposta sulla zona."
         },
         "growth_start": {
           "name": "Stadio di crescita iniziale",
@@ -1581,6 +1589,20 @@
         "stage": {
           "name": "Stadio",
           "description": "Stadio di crescita, da 1 a 10 (10 = piena grandezza)."
+        }
+      }
+    },
+    "merge_plantings": {
+      "name": "Riunisci piante",
+      "description": "Piante della stessa coltura divise per errore tornano un solo gruppo: le quantità si sommano, ogni pianta resta al suo posto e diario, foto e spese passano al gruppo.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "La pianta che resta (il gruppo)."
+        },
+        "ids": {
+          "name": "Altre",
+          "description": "Le piante riunite in essa."
         }
       }
     }

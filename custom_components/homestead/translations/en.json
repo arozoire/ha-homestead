@@ -364,7 +364,7 @@
         },
         "watering": {
           "name": "How it is watered",
-          "description": "Rain only, watering can, hose, drip, from above or an automatic valve; empty = as the zone above."
+          "description": "Rain only, watering can, hose, drip or from above; empty = as the zone above. The valve that turns the water on is its own setting."
         },
         "valve_entity": {
           "name": "Valve",
@@ -430,7 +430,7 @@
         },
         "watering": {
           "name": "How it is watered",
-          "description": "Rain only, watering can, hose, drip, from above or an automatic valve; empty = as the zone above."
+          "description": "Rain only, watering can, hose, drip or from above; empty = as the zone above. The valve that turns the water on is its own setting."
         },
         "valve_entity": {
           "name": "Valve",
@@ -580,9 +580,13 @@
           "name": "Row end",
           "description": "A row of plants: the other end as [longitude, latitude]; the position is where the row starts."
         },
+        "positions": {
+          "name": "Plants of the group",
+          "description": "A group placed plant by plant: one [longitude, latitude] per plant. The group stays one planting for the diary."
+        },
         "watering": {
           "name": "How it is watered",
-          "description": "Rain only, watering can, hose, drip, from above or an automatic valve; empty = as the zone above."
+          "description": "Rain only, watering can, hose, drip or from above; empty = as the zone above. A valve is set on the zone."
         },
         "growth_start": {
           "name": "Growth start stage",
@@ -722,9 +726,13 @@
           "name": "Row end",
           "description": "A row of plants: the other end as [longitude, latitude]; the position is where the row starts."
         },
+        "positions": {
+          "name": "Plants of the group",
+          "description": "A group placed plant by plant: one [longitude, latitude] per plant. The group stays one planting for the diary."
+        },
         "watering": {
           "name": "How it is watered",
-          "description": "Rain only, watering can, hose, drip, from above or an automatic valve; empty = as the zone above."
+          "description": "Rain only, watering can, hose, drip or from above; empty = as the zone above. A valve is set on the zone."
         },
         "growth_start": {
           "name": "Growth start stage",
@@ -1581,6 +1589,20 @@
         "stage": {
           "name": "Stage",
           "description": "Growth stage, 1 to 10 (10 = full size)."
+        }
+      }
+    },
+    "merge_plantings": {
+      "name": "Merge plantings",
+      "description": "Plants of the same crop split by mistake go back into one group: quantities add up, every plant keeps its place, and their diary, photos and expenses move to the group.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "The planting that stays (the group)."
+        },
+        "ids": {
+          "name": "Others",
+          "description": "The plantings merged into it."
         }
       }
     }

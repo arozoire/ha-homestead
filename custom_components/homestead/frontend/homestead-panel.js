@@ -1022,6 +1022,10 @@ class HomesteadPanel extends HTMLElement {
     for (const p of this._data.plantings) {
       if (p.row_to && hasPosition(p) && p.status === "active")
         L.polyline([[p.latitude, p.longitude], [p.row_to[1], p.row_to[0]]], { color: "#6a8f2a", weight: 4, interactive: false }).addTo(this._rowLayer);
+      // The plants of a group placed one by one: small dots around the group's marker.
+      if (p.positions?.length && p.status === "active")
+        for (const [lon, lat] of p.positions.slice(1, p.quantity || undefined))
+          L.circleMarker([lat, lon], { radius: 4, color: "#3a7d44", weight: 2, fillColor: "#fff", fillOpacity: 1, interactive: false }).addTo(this._rowLayer);
     }
     for (const p of this._data.plantings) {
       if (!hasPosition(p) || (!this._showGone() && p.status !== "active" && p.id !== this._selected)) continue;
@@ -4615,11 +4619,19 @@ class HomesteadPanel extends HTMLElement {
     const inside = new Set([zoneId, ...this._zoneDescendants(zoneId)]);
     return this._data.plantings
       .filter((p) => p.status === "active" && hasPosition(p) && inside.has(p.zone_id))
-      .map((p) => {
+      .flatMap((p) => {
+        const spacing = this._crop(p.species)?.spacing_cm;
+        const r = spacing ? spacing / 200 : null;
+        // A group placed plant by plant: one dot per plant, still one planting.
+        if (p.kind === "group" && p.positions?.length) {
+          return p.positions.slice(0, p.quantity || p.positions.length).map(([lon, lat], pos) => {
+            const [x, y] = frame.xy(lon, lat);
+            return { p, x, y, end: null, r, pos };
+          });
+        }
         const [x, y] = frame.xy(p.longitude, p.latitude);
         const end = p.row_to ? frame.xy(p.row_to[0], p.row_to[1]) : null;
-        const spacing = this._crop(p.species)?.spacing_cm;
-        return { p, x, y, end, r: spacing ? spacing / 200 : null };
+        return [{ p, x, y, end, r }];
       });
   }
 
@@ -4798,12 +4810,12 @@ class HomesteadPanel extends HTMLElement {
       const faded = plan.highlight && plan.highlight !== key;
       return s(
         "g",
-        { "data-id": it.p.id, class: `plan-plant${selected ? " selected" : ""}${faded ? " faded" : ""}`, transform: `translate(${it.x} ${it.y})` },
+        { "data-id": it.p.id, "data-pos": it.pos ?? null, class: `plan-plant${selected ? " selected" : ""}${faded ? " faded" : ""}`, transform: `translate(${it.x} ${it.y})` },
         it.end ? s("line", { x1: 0, y1: 0, x2: it.end[0] - it.x, y2: it.end[1] - it.y, class: "plan-row", style: `stroke:${groups.get(key)?.color}` }) : null,
         it.r ? s("circle", { r: it.r, class: "plan-reach" }) : null,
         s("circle", { r: unit * 1.6, class: "plan-dot", style: `stroke:${groups.get(key)?.color}` }),
         s("text", { y: unit * 0.8, "font-size": unit * 2.2, "text-anchor": "middle" }, icon),
-        it.p.kind === "group" && it.p.quantity > 1 ? s("text", { x: unit * 2, y: -unit * 1.4, "font-size": unit * 1.8, class: "plan-label" }, `×${it.p.quantity}`) : null,
+        it.p.kind === "group" && it.p.quantity > 1 && it.pos == null ? s("text", { x: unit * 2, y: -unit * 1.4, "font-size": unit * 1.8, class: "plan-label" }, `×${it.p.quantity}`) : null,
       );
     });
     const preview = s("g", { class: "plan-preview" });
@@ -4866,7 +4878,8 @@ class HomesteadPanel extends HTMLElement {
     svg.addEventListener("pointerdown", (ev) => {
       const target = ev.target.closest?.("[data-id]");
       const [x, y] = toLocal(ev);
-      drag = { id: target?.dataset.id || null, el: target, x0: x, y0: y, cx: ev.clientX, cy: ev.clientY, moved: false, view: { ...plan.view } };
+      const pos = target?.dataset.pos;
+      drag = { id: target?.dataset.id || null, pos: pos === undefined || pos === "" ? null : Number(pos), el: target, x0: x, y0: y, cx: ev.clientX, cy: ev.clientY, moved: false, view: { ...plan.view } };
       svg.setPointerCapture(ev.pointerId);
     });
     svg.addEventListener("pointermove", (ev) => {
@@ -4875,7 +4888,7 @@ class HomesteadPanel extends HTMLElement {
       if (!drag.moved) return;
       if (drag.id && !plan.mode) {
         const [x, y] = toLocal(ev);
-        const it = items.find((i) => i.p.id === drag.id);
+        const it = items.find((i) => i.p.id === drag.id && (i.pos ?? null) === drag.pos);
         drag.to = [snap(it.x + x - drag.x0), snap(it.y + y - drag.y0)];
         drag.el.setAttribute("transform", `translate(${drag.to[0]} ${drag.to[1]})`);
         this._planNearest(preview, drag.to, it, items, unit);
@@ -4892,7 +4905,15 @@ class HomesteadPanel extends HTMLElement {
       if (!d) return;
       if (d.moved && d.id && d.to && !plan.mode) {
         const [lon, lat] = frame.lonlat(d.to[0], d.to[1]);
-        const it = items.find((i) => i.p.id === d.id);
+        const it = items.find((i) => i.p.id === d.id && (i.pos ?? null) === d.pos);
+        if (d.pos != null) {
+          // One plant of a group: only its own spot moves; the group's point follows the first plant.
+          const positions = it.p.positions.map((xy) => [...xy]);
+          positions[d.pos] = [lon, lat];
+          plan.selected = d.id;
+          await this._call("update_planting", { id: d.id, positions, longitude: positions[0][0], latitude: positions[0][1] });
+          return;
+        }
         const data = { id: d.id, latitude: lat, longitude: lon };
         if (it.end) {
           const [elon, elat] = frame.lonlat(it.end[0] + d.to[0] - it.x, it.end[1] + d.to[1] - it.y);
@@ -5096,54 +5117,79 @@ class HomesteadPanel extends HTMLElement {
         ? h("span", { className: need && near.d < need ? "sub warn" : "sub" }, this.t(need && near.d < need ? "planTooClose" : "planNearest", { dist: `${Math.round(near.d * 100)} cm`, name: near.o.p.name, need: `${Math.round(need * 100)} cm` }))
         : null,
       mine.length ? h("span", { className: "sub warn" }, `🤝 ${mine.map(({ a, b }) => (a === sel ? b : a).p.name).join(", ")}`) : null,
-      sel.p.kind === "group" && sel.p.quantity > 1 ? this._planSplitRow(sel, frame) : null,
+      sel.p.kind === "group" && sel.p.quantity > 1 ? this._planPlaceRow(sel, frame, items) : null,
+      this._planMergeRow(sel),
       h("div", { className: "row" }, h("button", { type: "button", onclick: () => this._select(sel.p.id) }, this.t("planOpenCard")), h("button", { type: "button", onclick: () => ((this._plan.selected = null), this._render()) }, "✕")),
     );
   }
 
-  /** "✂️ Take out [n] plants": single plants next to the group (along its row, if it has one). */
-  _planSplitRow(sel, frame) {
-    const q = sel.p.quantity;
-    const input = h("input", { type: "number", min: 1, max: q, step: 1, value: q, inputMode: "numeric", style: "width: 5em" });
+  /** A group stays one planting (one harvest, one treatment for all), but its plants can each get a spot. */
+  _planPlaceRow(sel, frame, items) {
+    const p = sel.p;
+    const placed = p.positions?.length || 0;
+    const missing = Math.max(0, p.quantity - placed);
+    const buttons = [];
+    if (!placed) buttons.push(h("button", { type: "button", onclick: () => this._planPlace(sel, frame, items) }, `✂️ ${this.t("planPlaceEach")}`));
+    if (placed && missing) buttons.push(h("button", { type: "button", onclick: () => this._planPlace(sel, frame, items) }, `＋ ${this.t("planPlaceMissing", { count: missing })}`));
+    if (placed)
+      buttons.push(
+        h(
+          "button",
+          { type: "button", onclick: async () => (await this._call("update_planting", { id: p.id, positions: [] })) && this._showMessage(`✓ ${this.t("planPlaceCleared", { name: p.name })}`) },
+          `⤺ ${this.t("planPlaceClear")}`,
+        ),
+      );
+    return h("div", { className: "row plan-split" }, h("span", { className: "sub" }, placed ? this.t("planPlaced", { placed, count: p.quantity }) : this.t("planGroupOne", { count: p.quantity })), ...buttons);
+  }
+
+  /** Spots for the plants of a group: along its row, else in a line from its point (spacing or 30 cm). */
+  async _planPlace(sel, frame, items) {
+    const p = sel.p;
+    const q = p.quantity;
+    const gap = sel.r ? sel.r * 2 : 0.3;
+    const current = (p.positions || []).map((xy) => [...xy]);
+    let spots;
+    if (!current.length) {
+      const slot = (k) => (sel.end ? [sel.x + ((sel.end[0] - sel.x) * k) / (q - 1), sel.y + ((sel.end[1] - sel.y) * k) / (q - 1)] : [sel.x + gap * k, sel.y]);
+      spots = Array.from({ length: q }, (_, k) => frame.lonlat(...slot(k)));
+    } else {
+      const mine = items.filter((i) => i.p.id === p.id);
+      const last = mine[mine.length - 1] || sel;
+      spots = [...current, ...Array.from({ length: q - current.length }, (_, k) => frame.lonlat(last.x + gap * (k + 1), last.y))];
+    }
+    const data = { id: p.id, positions: spots, longitude: spots[0][0], latitude: spots[0][1] };
+    if (!current.length) data.row_to = null;
+    this._plan.selected = p.id;
+    if (await this._call("update_planting", data)) this._showMessage(`✓ ${this.t("planPlaceDone", { count: q, name: p.name })}`);
+  }
+
+  /** Plants of one group split by mistake (same crop, variety and date in this zone): one tap merges them back. */
+  _planMergeRow(sel) {
+    const key = this._plantGroupKey(sel.p);
+    const top = this._topZone(sel.p.zone_id);
+    const same = this._data.plantings.filter((o) => o.status === "active" && this._plantGroupKey(o) === key && this._topZone(o.zone_id) === top);
+    if (same.length < 2) return null;
+    const plain = (o) => !/\s\d+$/.test(o.name);
+    const byName = [...same].sort((x, y) => x.name.localeCompare(y.name, undefined, { numeric: true }));
+    const target = byName.find((o) => o.kind === "group" && plain(o)) || byName.find(plain) || byName.find((o) => o.kind === "group") || byName[0];
+    const others = same.filter((o) => o.id !== target.id).map((o) => o.id);
+    const total = same.reduce((n, o) => n + (o.kind === "group" ? o.quantity || 1 : 1), 0);
     return h(
       "div",
       { className: "row plan-split" },
-      h("span", {}, `✂️ ${this.t("planSplit")}`),
-      input,
-      h("span", { className: "sub" }, this.t("planSplitOf", { count: q })),
-      h("button", { type: "button", onclick: () => this._planSplit(sel, frame, Math.min(Math.max(Math.round(Number(input.value)) || 0, 1), q)) }, this.t("planSplitDo")),
+      h("span", { className: "sub" }, this.t("planMergeHint", { count: same.length, name: target.name })),
+      h(
+        "button",
+        {
+          type: "button",
+          onclick: async () => {
+            this._plan.selected = target.id;
+            if (await this._call("merge_plantings", { id: target.id, ids: others })) this._showMessage(`✓ ${this.t("planMergeDone", { name: target.name, count: total })}`);
+          },
+        },
+        `🔗 ${this.t("planMerge")}`,
+      ),
     );
-  }
-
-  async _planSplit(sel, frame, n) {
-    const p = sel.p;
-    const q = p.quantity;
-    const all = n >= q;
-    // Slots of the group: along its row, else a line to the right of it (its spacing or 30 cm).
-    const gap = sel.r ? sel.r * 2 : 0.3;
-    const slot = (k) =>
-      sel.end ? [sel.x + ((sel.end[0] - sel.x) * k) / (q - 1), sel.y + ((sel.end[1] - sel.y) * k) / (q - 1)] : [sel.x + gap * k, sel.y];
-    const left = q - n; // plants staying in the group (0 when all are taken out)
-    const firstNew = all ? 1 : left;
-    const copy = Object.fromEntries(
-      ["species", "taxon_id", "variety", "plant_type", "origin", "sown_on", "planted_on", "birth_year", "zone_id", "supplier", "seed_lot_id", "watering", "rootstock", "initial_form"]
-        .filter((key) => p[key] !== null && p[key] !== undefined && p[key] !== "")
-        .map((key) => [key, p[key]]),
-    );
-    const update = { id: p.id, kind: all || left === 1 ? "single" : "group", quantity: all ? 1 : left };
-    if (sel.end) {
-      const keep = all ? 0 : left - 1;
-      update.row_to = keep > 0 ? frame.lonlat(...slot(keep)) : null;
-    }
-    if (!(await this._call("update_planting", update))) return;
-    let made = 0;
-    for (let k = firstNew; k < q; k++) {
-      const [lon, lat] = frame.lonlat(...slot(sel.end ? k : k - firstNew + 1));
-      const number = k - firstNew + 2;
-      if (await this._call("add_planting", { ...copy, name: `${p.name} ${number}`, kind: "single", quantity: 1, latitude: lat, longitude: lon })) made++;
-    }
-    this._plan.selected = null;
-    this._showMessage(`✓ ${this.t("planSplitDone", { count: made, name: p.name })}`);
   }
 
   /** A bed of any shape: tap its corners on the plan (snapped to the grid and to existing corners). */

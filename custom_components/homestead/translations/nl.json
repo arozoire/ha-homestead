@@ -364,7 +364,7 @@
         },
         "watering": {
           "name": "Hoe het water krijgt",
-          "description": "Alleen regen, gieter, slang, druppel, van bovenaf of automatische klep; leeg = zoals de zone erboven."
+          "description": "Alleen regen, gieter, slang, druppel of van bovenaf; leeg = zoals de zone erboven. De klep die het water opent is een aparte instelling."
         },
         "valve_entity": {
           "name": "Klep",
@@ -430,7 +430,7 @@
         },
         "watering": {
           "name": "Hoe het water krijgt",
-          "description": "Alleen regen, gieter, slang, druppel, van bovenaf of automatische klep; leeg = zoals de zone erboven."
+          "description": "Alleen regen, gieter, slang, druppel of van bovenaf; leeg = zoals de zone erboven. De klep die het water opent is een aparte instelling."
         },
         "valve_entity": {
           "name": "Klep",
@@ -580,9 +580,13 @@
           "name": "Einde van de rij",
           "description": "Een rij planten: het andere uiteinde als [lengtegraad, breedtegraad]; de positie is het begin van de rij."
         },
+        "positions": {
+          "name": "Planten van de groep",
+          "description": "Een groep plant voor plant geplaatst: één [lengtegraad, breedtegraad] per plant. De groep blijft één beplanting voor het dagboek."
+        },
         "watering": {
           "name": "Hoe het water krijgt",
-          "description": "Alleen regen, gieter, slang, druppel, van bovenaf of automatische klep; leeg = zoals de zone erboven."
+          "description": "Alleen regen, gieter, slang, druppel of van bovenaf; leeg = zoals de zone erboven. De klep stel je in op de zone."
         },
         "growth_start": {
           "name": "Begin-groeistadium",
@@ -722,9 +726,13 @@
           "name": "Einde van de rij",
           "description": "Een rij planten: het andere uiteinde als [lengtegraad, breedtegraad]; de positie is het begin van de rij."
         },
+        "positions": {
+          "name": "Planten van de groep",
+          "description": "Een groep plant voor plant geplaatst: één [lengtegraad, breedtegraad] per plant. De groep blijft één beplanting voor het dagboek."
+        },
         "watering": {
           "name": "Hoe het water krijgt",
-          "description": "Alleen regen, gieter, slang, druppel, van bovenaf of automatische klep; leeg = zoals de zone erboven."
+          "description": "Alleen regen, gieter, slang, druppel of van bovenaf; leeg = zoals de zone erboven. De klep stel je in op de zone."
         },
         "growth_start": {
           "name": "Begin-groeistadium",
@@ -1581,6 +1589,20 @@
         "stage": {
           "name": "Stadium",
           "description": "Groeistadium, 1 tot 10 (10 = volle grootte)."
+        }
+      }
+    },
+    "merge_plantings": {
+      "name": "Beplantingen samenvoegen",
+      "description": "Per ongeluk gesplitste planten van hetzelfde gewas worden weer één groep: aantallen tellen op, elke plant houdt zijn plek, en dagboek, foto's en uitgaven gaan naar de groep.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "De beplanting die blijft (de groep)."
+        },
+        "ids": {
+          "name": "Andere",
+          "description": "De beplantingen die erin opgaan."
         }
       }
     }

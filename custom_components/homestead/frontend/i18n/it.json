@@ -839,10 +839,6 @@
  "planBedDraw": "Disegna",
  "planBedDrawHint": "Tocca gli angoli dell'aiuola (finora {count}): si agganciano alla griglia e agli angoli della zona e delle altre aiuole.",
  "planBedCorners": "Servono almeno 3 angoli.",
- "planSplit": "Separa",
- "planSplitOf": "su {count}",
- "planSplitDo": "Dividi",
- "planSplitDone": "{count} piante singole accanto a “{name}”: trascinale al loro posto.",
  "planLegend": "Legenda",
  "valveTitle": "Valvola e contatore",
  "valveHint": "La valvola (o l'interruttore) che apre l'acqua di questa zona, con qualsiasi modo di annaffiare: ogni apertura diventa un'annaffiatura con la durata, e con l'acqua usata se c'è un contatore.",
@@ -861,5 +857,15 @@
  "growthHint": "Stadio da 1 a 10 (10 = pianta adulta). Vuoto: secondo il tipo di pianta, partendo da 1 da seme, 2 trapiantata, 10 se c'era già.",
  "growthStage": "Crescita: {value}/10",
  "growthFix": "Correggi",
- "growthSaved": "Crescita di {name} corretta."
+ "growthSaved": "Crescita di {name} corretta.",
+ "planPlaceEach": "Posizionale una per una",
+ "planPlaceMissing": "Posiziona le altre {count}",
+ "planPlaceClear": "Torna a un punto solo",
+ "planPlaceCleared": "{name}: di nuovo in un punto solo.",
+ "planPlaced": "{placed} su {count} posizionate · una sola pianta per il diario",
+ "planGroupOne": "Gruppo di {count}: una sola pianta per il diario",
+ "planPlaceDone": "{count} piante di {name} in fila: trascina ognuna al suo posto.",
+ "planMerge": "Riunisci nel gruppo",
+ "planMergeHint": "{count} piante della stessa coltura e data: possono tornare un solo gruppo ({name}).",
+ "planMergeDone": "{name}: di nuovo un gruppo di {count}."
 }

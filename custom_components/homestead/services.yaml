@@ -279,6 +279,10 @@ add_planting:
       example: "[7.68612, 45.07031]"
       selector:
         object:
+    positions:
+      example: "[[7.68612, 45.07031], [7.68615, 45.07031]]"
+      selector:
+        object:
     watering:
       selector:
         select:
@@ -473,6 +477,10 @@ update_planting:
           mode: box
     row_to:
       example: "[7.68612, 45.07031]"
+      selector:
+        object:
+    positions:
+      example: "[[7.68612, 45.07031], [7.68615, 45.07031]]"
       selector:
         object:
     watering:
@@ -1600,3 +1608,15 @@ set_growth:
           max: 10
           step: 0.5
           mode: slider
+
+merge_plantings:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+    ids:
+      required: true
+      selector:
+        text:
+          multiple: true

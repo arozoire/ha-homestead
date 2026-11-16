@@ -364,7 +364,7 @@
         },
         "watering": {
           "name": "Cómo se riega",
-          "description": "Solo lluvia, regadera, manguera, goteo, por aspersión o válvula automática; vacío = como la zona superior."
+          "description": "Solo lluvia, regadera, manguera, goteo o por aspersión; vacío = como la zona superior. La válvula que abre el agua es un ajuste aparte."
         },
         "valve_entity": {
           "name": "Válvula",
@@ -430,7 +430,7 @@
         },
         "watering": {
           "name": "Cómo se riega",
-          "description": "Solo lluvia, regadera, manguera, goteo, por aspersión o válvula automática; vacío = como la zona superior."
+          "description": "Solo lluvia, regadera, manguera, goteo o por aspersión; vacío = como la zona superior. La válvula que abre el agua es un ajuste aparte."
         },
         "valve_entity": {
           "name": "Válvula",
@@ -580,9 +580,13 @@
           "name": "Final de la hilera",
           "description": "Una hilera de plantas: el otro extremo como [longitud, latitud]; la posición es el inicio de la hilera."
         },
+        "positions": {
+          "name": "Plantas del grupo",
+          "description": "Un grupo colocado planta por planta: un [longitud, latitud] por planta. El grupo sigue siendo una sola plantación para el diario."
+        },
         "watering": {
           "name": "Cómo se riega",
-          "description": "Solo lluvia, regadera, manguera, goteo, por aspersión o válvula automática; vacío = como la zona superior."
+          "description": "Solo lluvia, regadera, manguera, goteo o por aspersión; vacío = como la zona superior. La válvula se ajusta en la zona."
         },
         "growth_start": {
           "name": "Etapa de crecimiento inicial",
@@ -722,9 +726,13 @@
           "name": "Final de la hilera",
           "description": "Una hilera de plantas: el otro extremo como [longitud, latitud]; la posición es el inicio de la hilera."
         },
+        "positions": {
+          "name": "Plantas del grupo",
+          "description": "Un grupo colocado planta por planta: un [longitud, latitud] por planta. El grupo sigue siendo una sola plantación para el diario."
+        },
         "watering": {
           "name": "Cómo se riega",
-          "description": "Solo lluvia, regadera, manguera, goteo, por aspersión o válvula automática; vacío = como la zona superior."
+          "description": "Solo lluvia, regadera, manguera, goteo o por aspersión; vacío = como la zona superior. La válvula se ajusta en la zona."
         },
         "growth_start": {
           "name": "Etapa de crecimiento inicial",
@@ -1581,6 +1589,20 @@
         "stage": {
           "name": "Etapa",
           "description": "Etapa de crecimiento, de 1 a 10 (10 = tamaño adulto)."
+        }
+      }
+    },
+    "merge_plantings": {
+      "name": "Unir plantaciones",
+      "description": "Plantas del mismo cultivo separadas por error vuelven a ser un solo grupo: las cantidades se suman, cada planta conserva su sitio, y su diario, fotos y gastos pasan al grupo.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "La plantación que queda (el grupo)."
+        },
+        "ids": {
+          "name": "Otras",
+          "description": "Las plantaciones unidas a ella."
         }
       }
     }

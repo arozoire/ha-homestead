@@ -839,10 +839,6 @@
  "planBedDraw": "Dessiner",
  "planBedDrawHint": "Touchez les coins de la planche ({count} jusqu'ici) : ils s'accrochent à la grille et aux coins de la zone et des autres planches.",
  "planBedCorners": "Au moins 3 coins.",
- "planSplit": "Séparer",
- "planSplitOf": "sur {count}",
- "planSplitDo": "Diviser",
- "planSplitDone": "{count} plantes seules à côté de « {name} » : faites-les glisser à leur place.",
  "planLegend": "Légende",
  "valveTitle": "Vanne et compteur",
  "valveHint": "La vanne (ou l'interrupteur) qui ouvre l'eau de cette zone, quel que soit le mode d'arrosage : chaque ouverture devient un arrosage avec sa durée, et l'eau utilisée s'il y a un compteur.",
@@ -861,5 +857,15 @@
  "growthHint": "Stade de 1 à 10 (10 = taille adulte). Vide : selon le type de plante, à partir de 1 en semis, 2 repiquée, 10 si elle était déjà là.",
  "growthStage": "Croissance : {value}/10",
  "growthFix": "Corriger",
- "growthSaved": "Croissance de {name} corrigée."
+ "growthSaved": "Croissance de {name} corrigée.",
+ "planPlaceEach": "Les placer une par une",
+ "planPlaceMissing": "Placer les {count} autres",
+ "planPlaceClear": "Revenir à un seul point",
+ "planPlaceCleared": "{name} : de nouveau en un seul point.",
+ "planPlaced": "{placed} sur {count} placées · une seule plantation pour le journal",
+ "planGroupOne": "Groupe de {count} : une seule plantation pour le journal",
+ "planPlaceDone": "{count} plantes de {name} en ligne : faites glisser chacune à sa place.",
+ "planMerge": "Regrouper",
+ "planMergeHint": "{count} plantations de la même culture et date : elles peuvent redevenir un seul groupe ({name}).",
+ "planMergeDone": "{name} : de nouveau un groupe de {count}."
 }

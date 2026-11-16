@@ -364,7 +364,7 @@
         },
         "watering": {
           "name": "Bewässerung",
-          "description": "Nur Regen, Gießkanne, Schlauch, Tropf, von oben oder automatisches Ventil; leer = wie die übergeordnete Zone."
+          "description": "Nur Regen, Gießkanne, Schlauch, Tropf oder von oben; leer = wie die übergeordnete Zone. Das Ventil, das das Wasser öffnet, ist eine eigene Einstellung."
         },
         "valve_entity": {
           "name": "Ventil",
@@ -430,7 +430,7 @@
         },
         "watering": {
           "name": "Bewässerung",
-          "description": "Nur Regen, Gießkanne, Schlauch, Tropf, von oben oder automatisches Ventil; leer = wie die übergeordnete Zone."
+          "description": "Nur Regen, Gießkanne, Schlauch, Tropf oder von oben; leer = wie die übergeordnete Zone. Das Ventil, das das Wasser öffnet, ist eine eigene Einstellung."
         },
         "valve_entity": {
           "name": "Ventil",
@@ -580,9 +580,13 @@
           "name": "Reihenende",
           "description": "Eine Pflanzenreihe: das andere Ende als [Längengrad, Breitengrad]; die Position ist der Reihenanfang."
         },
+        "positions": {
+          "name": "Pflanzen der Gruppe",
+          "description": "Eine Gruppe, Pflanze für Pflanze platziert: ein [Längengrad, Breitengrad] pro Pflanze. Die Gruppe bleibt eine einzige Pflanzung für das Tagebuch."
+        },
         "watering": {
           "name": "Bewässerung",
-          "description": "Nur Regen, Gießkanne, Schlauch, Tropf, von oben oder automatisches Ventil; leer = wie die übergeordnete Zone."
+          "description": "Nur Regen, Gießkanne, Schlauch, Tropf oder von oben; leer = wie die übergeordnete Zone. Das Ventil wird an der Zone eingestellt."
         },
         "growth_start": {
           "name": "Anfangs-Wachstumsstufe",
@@ -722,9 +726,13 @@
           "name": "Reihenende",
           "description": "Eine Pflanzenreihe: das andere Ende als [Längengrad, Breitengrad]; die Position ist der Reihenanfang."
         },
+        "positions": {
+          "name": "Pflanzen der Gruppe",
+          "description": "Eine Gruppe, Pflanze für Pflanze platziert: ein [Längengrad, Breitengrad] pro Pflanze. Die Gruppe bleibt eine einzige Pflanzung für das Tagebuch."
+        },
         "watering": {
           "name": "Bewässerung",
-          "description": "Nur Regen, Gießkanne, Schlauch, Tropf, von oben oder automatisches Ventil; leer = wie die übergeordnete Zone."
+          "description": "Nur Regen, Gießkanne, Schlauch, Tropf oder von oben; leer = wie die übergeordnete Zone. Das Ventil wird an der Zone eingestellt."
         },
         "growth_start": {
           "name": "Anfangs-Wachstumsstufe",
@@ -1581,6 +1589,20 @@
         "stage": {
           "name": "Stufe",
           "description": "Wachstumsstufe, 1 bis 10 (10 = volle Größe)."
+        }
+      }
+    },
+    "merge_plantings": {
+      "name": "Pflanzungen zusammenführen",
+      "description": "Versehentlich getrennte Pflanzen derselben Kultur werden wieder eine Gruppe: Mengen werden addiert, jede Pflanze behält ihren Platz, Tagebuch, Fotos und Ausgaben gehen an die Gruppe.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Die Pflanzung, die bleibt (die Gruppe)."
+        },
+        "ids": {
+          "name": "Andere",
+          "description": "Die Pflanzungen, die darin aufgehen."
         }
       }
     }

@@ -340,6 +340,9 @@ class Planting(_Record):
     longitude: float | None = None
     # A row of plants (a group): the other end, [longitude, latitude]; the position is where it starts.
     row_to: list[float] | None = None
+    # A group placed plant by plant on the plan: one [longitude, latitude] per plant. The group stays one
+    # planting for the diary (harvests, treatments, waterings), only its plants have their own place.
+    positions: list[list[float]] = field(default_factory=list)
     watering: str | None = None  # WateringMode; None = as its zone
     status: str = PlantingStatus.ACTIVE
     moon_phase: str | None = None
@@ -368,6 +371,7 @@ class Planting(_Record):
 
     def __post_init__(self) -> None:
         self.moisture_entity = entity_list(self.moisture_entity)
+        self.positions = clean_positions(self.positions)
         if self.watering == "valve":
             self.watering = None
         if self.planted_on and not self.moon_phase:
@@ -846,3 +850,60 @@ def growth_stage(planting: Planting, today: date) -> float:
     if since:
         stage += rate * max(0, (today - date.fromisoformat(since[:10])).days)
     return round(max(1.0, min(10.0, stage)), 1)
+
+
+# ---------------------------------------------------------------- plants of a group
+
+
+def clean_positions(value: Any) -> list[list[float]]:
+    """[longitude, latitude] pairs only, rounded like the panel (1e-7)."""
+    out = []
+    for item in value if isinstance(value, list | tuple) else []:
+        if (
+            isinstance(item, list | tuple)
+            and len(item) == 2
+            and all(isinstance(v, int | float) and not isinstance(v, bool) for v in item)
+            and -180 <= item[0] <= 180
+            and -90 <= item[1] <= 90
+        ):
+            out.append([round(float(item[0]), 7), round(float(item[1]), 7)])
+    return out
+
+
+def _spots(planting: Planting) -> list[list[float]]:
+    if planting.positions:
+        return [list(p) for p in planting.positions]
+    if planting.latitude is not None and planting.longitude is not None:
+        return [[planting.longitude, planting.latitude]]
+    return []
+
+
+def merge_plantings(data: HomesteadData, target_id: str, other_ids: list[str]) -> Planting:
+    """Plants split by mistake go back into one group: quantities add up, every plant keeps its place
+    (positions), and the diary, photos, expenses, tasks and seeds of the others now point to the group."""
+    target = data.plantings[target_id]
+    others = [data.plantings[i] for i in dict.fromkeys(other_ids) if i != target_id and i in data.plantings]
+    if not others:
+        return target
+    positions = _spots(target)
+    quantity = target.quantity if target.kind == PlantingKind.GROUP else 1
+    for other in others:
+        positions += _spots(other)
+        quantity += other.quantity if other.kind == PlantingKind.GROUP else 1
+    gone = {o.id for o in others}
+    for name in _COLLECTIONS:
+        for record in getattr(data, name).values():
+            for attr in ("planting_id", "from_planting_id"):
+                if getattr(record, attr, None) in gone:
+                    setattr(record, attr, target_id)
+            for attr in ("planting_ids", "done_ids"):
+                values = getattr(record, attr, None)
+                if isinstance(values, list) and gone & set(values):
+                    setattr(record, attr, list(dict.fromkeys(target_id if v in gone else v for v in values)))
+    for other in others:
+        del data.plantings[other.id]
+    target.kind = PlantingKind.GROUP
+    target.quantity = quantity
+    target.positions = clean_positions(positions)
+    target.row_to = None
+    return target

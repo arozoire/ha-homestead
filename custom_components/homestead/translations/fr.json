@@ -364,7 +364,7 @@
         },
         "watering": {
           "name": "Comment c'est arrosé",
-          "description": "Pluie seule, arrosoir, tuyau, goutte-à-goutte, par aspersion ou vanne automatique ; vide = comme la zone au-dessus."
+          "description": "Pluie seule, arrosoir, tuyau, goutte-à-goutte ou par aspersion ; vide = comme la zone au-dessus. La vanne qui ouvre l'eau est un réglage à part."
         },
         "valve_entity": {
           "name": "Vanne",
@@ -430,7 +430,7 @@
         },
         "watering": {
           "name": "Comment c'est arrosé",
-          "description": "Pluie seule, arrosoir, tuyau, goutte-à-goutte, par aspersion ou vanne automatique ; vide = comme la zone au-dessus."
+          "description": "Pluie seule, arrosoir, tuyau, goutte-à-goutte ou par aspersion ; vide = comme la zone au-dessus. La vanne qui ouvre l'eau est un réglage à part."
         },
         "valve_entity": {
           "name": "Vanne",
@@ -580,9 +580,13 @@
           "name": "Fin du rang",
           "description": "Un rang de plantes : l'autre extrémité en [longitude, latitude] ; la position est le début du rang."
         },
+        "positions": {
+          "name": "Plantes du groupe",
+          "description": "Un groupe placé plante par plante : un [longitude, latitude] par plante. Le groupe reste une seule plantation pour le journal."
+        },
         "watering": {
           "name": "Comment c'est arrosé",
-          "description": "Pluie seule, arrosoir, tuyau, goutte-à-goutte, par aspersion ou vanne automatique ; vide = comme la zone au-dessus."
+          "description": "Pluie seule, arrosoir, tuyau, goutte-à-goutte ou par aspersion ; vide = comme la zone au-dessus. La vanne se règle sur la zone."
         },
         "growth_start": {
           "name": "Stade de croissance initial",
@@ -722,9 +726,13 @@
           "name": "Fin du rang",
           "description": "Un rang de plantes : l'autre extrémité en [longitude, latitude] ; la position est le début du rang."
         },
+        "positions": {
+          "name": "Plantes du groupe",
+          "description": "Un groupe placé plante par plante : un [longitude, latitude] par plante. Le groupe reste une seule plantation pour le journal."
+        },
         "watering": {
           "name": "Comment c'est arrosé",
-          "description": "Pluie seule, arrosoir, tuyau, goutte-à-goutte, par aspersion ou vanne automatique ; vide = comme la zone au-dessus."
+          "description": "Pluie seule, arrosoir, tuyau, goutte-à-goutte ou par aspersion ; vide = comme la zone au-dessus. La vanne se règle sur la zone."
         },
         "growth_start": {
           "name": "Stade de croissance initial",
@@ -1581,6 +1589,20 @@
         "stage": {
           "name": "Stade",
           "description": "Stade de croissance, de 1 à 10 (10 = taille adulte)."
+        }
+      }
+    },
+    "merge_plantings": {
+      "name": "Regrouper des plantations",
+      "description": "Des plantes d'une même culture séparées par erreur redeviennent un seul groupe : les quantités s'additionnent, chaque plante garde sa place, et leur journal, leurs photos et dépenses passent au groupe.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "La plantation qui reste (le groupe)."
+        },
+        "ids": {
+          "name": "Autres",
+          "description": "Les plantations regroupées dedans."
         }
       }
     }

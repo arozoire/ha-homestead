@@ -839,10 +839,6 @@
  "planBedDraw": "Tekenen",
  "planBedDrawHint": "Tik de hoeken van het bed aan (tot nu toe {count}): ze klikken vast aan het raster en aan de hoeken van de zone en van de andere bedden.",
  "planBedCorners": "Minstens 3 hoeken.",
- "planSplit": "Haal eruit",
- "planSplitOf": "van {count}",
- "planSplitDo": "Splitsen",
- "planSplitDone": "{count} losse planten naast ‘{name}’: sleep ze naar hun plek.",
  "planLegend": "Legenda",
  "valveTitle": "Klep en watermeter",
  "valveHint": "De klep (of schakelaar) die het water van deze zone opent, hoe er ook wordt bewaterd: elke opening wordt een bewatering met de duur, en met het verbruikte water als er een meter is.",
@@ -861,5 +857,15 @@
  "growthHint": "Stadium 1 tot 10 (10 = volgroeid). Leeg: volgens het planttype, vanaf 1 uit zaad, 2 verplant, 10 als hij er al stond.",
  "growthStage": "Groei: {value}/10",
  "growthFix": "Corrigeren",
- "growthSaved": "Groei van {name} gecorrigeerd."
+ "growthSaved": "Groei van {name} gecorrigeerd.",
+ "planPlaceEach": "Eén voor één plaatsen",
+ "planPlaceMissing": "De andere {count} plaatsen",
+ "planPlaceClear": "Terug naar één punt",
+ "planPlaceCleared": "{name}: weer op één punt.",
+ "planPlaced": "{placed} van {count} geplaatst · één beplanting voor het dagboek",
+ "planGroupOne": "Groep van {count}: één beplanting voor het dagboek",
+ "planPlaceDone": "{count} planten van {name} op een rij: sleep ze elk naar hun plek.",
+ "planMerge": "Weer één groep",
+ "planMergeHint": "{count} beplantingen van hetzelfde gewas en dezelfde datum: ze kunnen weer één groep zijn ({name}).",
+ "planMergeDone": "{name}: weer een groep van {count}."
 }

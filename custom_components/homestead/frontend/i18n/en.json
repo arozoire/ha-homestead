@@ -839,10 +839,6 @@
  "planBedDraw": "Draw",
  "planBedDrawHint": "Tap the corners of the bed ({count} so far): they snap to the grid and to the corners of the zone and of the other beds.",
  "planBedCorners": "At least 3 corners.",
- "planSplit": "Take out",
- "planSplitOf": "of {count}",
- "planSplitDo": "Split",
- "planSplitDone": "{count} single plants next to “{name}”: drag them into place.",
  "planLegend": "Legend",
  "valveTitle": "Valve and flow meter",
  "valveHint": "The valve (or switch) that turns this zone's water on, whatever the watering mode: every run is logged as a watering with its length, and with the water used if there is a flow meter.",
@@ -861,5 +857,15 @@
  "growthHint": "Stage 1 to 10 (10 = full size). Empty: from the plant type, starting at 1 from seed, 2 transplanted, 10 if it was already there.",
  "growthStage": "Growth: {value}/10",
  "growthFix": "Correct",
- "growthSaved": "Growth of {name} corrected."
+ "growthSaved": "Growth of {name} corrected.",
+ "planPlaceEach": "Place them one by one",
+ "planPlaceMissing": "Place the other {count}",
+ "planPlaceClear": "Back to one point",
+ "planPlaceCleared": "{name}: back to one point.",
+ "planPlaced": "{placed} of {count} placed · one planting for the diary",
+ "planGroupOne": "Group of {count}: one planting for the diary",
+ "planPlaceDone": "{count} plants of {name} in line: drag each one to its place.",
+ "planMerge": "Merge back into one group",
+ "planMergeHint": "{count} plantings of the same crop and date: they can be one group again ({name}).",
+ "planMergeDone": "{name}: one group of {count} again."
 }

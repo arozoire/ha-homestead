@@ -839,10 +839,6 @@
  "planBedDraw": "Dibujar",
  "planBedDrawHint": "Toca las esquinas del bancal ({count} hasta ahora): se ajustan a la cuadrícula y a las esquinas de la zona y de los otros bancales.",
  "planBedCorners": "Al menos 3 esquinas.",
- "planSplit": "Separar",
- "planSplitOf": "de {count}",
- "planSplitDo": "Dividir",
- "planSplitDone": "{count} plantas sueltas junto a «{name}»: arrástralas a su sitio.",
  "planLegend": "Leyenda",
  "valveTitle": "Válvula y contador",
  "valveHint": "La válvula (o el interruptor) que abre el agua de esta zona, sea cual sea el modo de riego: cada apertura se anota como riego con su duración, y con el agua usada si hay contador.",
@@ -861,5 +857,15 @@
  "growthHint": "Etapa de 1 a 10 (10 = tamaño adulto). Vacío: según el tipo de planta, empezando en 1 desde semilla, 2 trasplantada, 10 si ya estaba.",
  "growthStage": "Crecimiento: {value}/10",
  "growthFix": "Corregir",
- "growthSaved": "Crecimiento de {name} corregido."
+ "growthSaved": "Crecimiento de {name} corregido.",
+ "planPlaceEach": "Colocarlas una a una",
+ "planPlaceMissing": "Colocar las otras {count}",
+ "planPlaceClear": "Volver a un solo punto",
+ "planPlaceCleared": "{name}: de nuevo en un solo punto.",
+ "planPlaced": "{placed} de {count} colocadas · una sola plantación para el diario",
+ "planGroupOne": "Grupo de {count}: una sola plantación para el diario",
+ "planPlaceDone": "{count} plantas de {name} en fila: arrastra cada una a su sitio.",
+ "planMerge": "Volver a un grupo",
+ "planMergeHint": "{count} plantaciones del mismo cultivo y fecha: pueden volver a ser un solo grupo ({name}).",
+ "planMergeDone": "{name}: de nuevo un grupo de {count}."
 }
