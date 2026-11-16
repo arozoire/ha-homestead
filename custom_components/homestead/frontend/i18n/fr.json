@@ -876,5 +876,6 @@
  "shotRetry": "La refaire",
  "shotHeic": "Photo HEIC/HEIF : les navigateurs ne l'affichent pas. Réglez l'appareil photo du téléphone en JPEG (Le plus compatible) et refaites-la.",
  "shotTooBig": "photo trop grande (plus de 64 Mo)",
- "shotFailed": "Photo non enregistrée, la zone reste à faire : {error}"
+ "shotFailed": "Photo non enregistrée, la zone reste à faire : {error}",
+ "shotEmpty": "L'appareil photo a donné une image vide : attendez une seconde que l'image apparaisse, ou utilisez 📷 Appareil photo du téléphone."
 }

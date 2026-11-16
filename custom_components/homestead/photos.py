@@ -5,6 +5,7 @@ folder chosen in the options (a NAS added in Settings → System → Storage, fo
 
 from __future__ import annotations
 
+import logging
 import shutil
 from http import HTTPStatus
 from pathlib import Path
@@ -16,6 +17,8 @@ from homeassistant.core import HomeAssistant
 from .const import CONF_PHOTO_MEDIA, DOMAIN
 from .models import Photo
 from .store import get_store
+
+_LOGGER = logging.getLogger(__name__)
 
 MAX_PHOTO_BYTES = 3 * 1024 * 1024
 MAX_ORIGINAL_BYTES = 64 * 1024 * 1024
@@ -150,11 +153,17 @@ class PhotoUploadView(HomeAssistantView):
             while chunk := await part.read_chunk():
                 content += chunk
                 if len(content) > limit:
+                    _LOGGER.warning("Photo upload refused: %s larger than %d MB", part.name, limit // 2**20)
                     return web.Response(status=HTTPStatus.REQUEST_ENTITY_TOO_LARGE)
             fields[part.name or ""] = bytes(content)
         event = store.data.events.get(fields.get("event_id", b"").decode(errors="ignore"))
         kind = image_type(fields.get("file", b""))
         if event is None or kind is None:
+            _LOGGER.warning(
+                "Photo upload refused: %s (%d bytes received)",
+                "unknown diary event" if event is None else "not a JPEG, PNG or WebP picture",
+                len(fields.get("file", b"")),
+            )
             return web.Response(status=HTTPStatus.BAD_REQUEST, text="event_id and a JPEG, PNG or WebP file")
         thumb = fields.get("thumb")
         if thumb and image_type(thumb) is None:
@@ -168,9 +177,14 @@ class PhotoUploadView(HomeAssistantView):
         photo.root = root
         photo.file = f"plan/{target}/{event.done_on}_{photo.id}.{kind[0]}"
         photo.thumb = f"plan/{target}/{event.done_on}_{photo.id}_thumb.jpg" if thumb else None
-        await self.hass.async_add_executor_job(
-            write_original, photo_dir(self.hass, root), photo.file, fields["file"], photo.thumb, thumb
-        )
+        try:
+            await self.hass.async_add_executor_job(
+                write_original, photo_dir(self.hass, root), photo.file, fields["file"], photo.thumb, thumb
+            )
+        except OSError as err:
+            # A NAS that is not mounted, a full disk: say where it failed.
+            _LOGGER.error("Photo not written to %s/%s: %s", photo_dir(self.hass, root), photo.file, err)
+            return web.Response(status=HTTPStatus.INSUFFICIENT_STORAGE, text=f"not written: {err}")
         store.data.photos[photo.id] = photo
         await store.async_save()
         return self.json({"id": photo.id})

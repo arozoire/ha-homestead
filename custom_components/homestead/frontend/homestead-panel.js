@@ -9292,6 +9292,10 @@ class HomesteadPanel extends HTMLElement {
         canvas.getContext("2d").drawImage(video, 0, 0);
         blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.95));
       }
+      if (!blob?.size) {
+        this._showMessage(`⚠️ ${this.t("shotEmpty")}`, true);
+        return;
+      }
       this._savePlanPhoto(blob, `${today()}.jpg`);
     };
     const skip = async () => {

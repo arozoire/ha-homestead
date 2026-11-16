@@ -876,5 +876,6 @@
  "shotRetry": "Repetirla",
  "shotHeic": "Foto HEIC/HEIF: los navegadores no la muestran. Pon la cámara del móvil en JPEG (Más compatible) y repítela.",
  "shotTooBig": "foto demasiado grande (más de 64 MB)",
- "shotFailed": "Foto no guardada, la zona sigue pendiente: {error}"
+ "shotFailed": "Foto no guardada, la zona sigue pendiente: {error}",
+ "shotEmpty": "La cámara dio una imagen vacía: espera un segundo a que aparezca la imagen, o usa 📷 Cámara del móvil."
 }
