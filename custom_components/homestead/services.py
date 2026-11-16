@@ -243,6 +243,13 @@ SET_PHOTO_PLAN_SCHEMA = vol.Schema(
     }
 )
 
+SET_PHOTO_ORDER_SCHEMA = vol.Schema(
+    {
+        vol.Optional("order"): vol.All(cv.ensure_list, [cv.string]),
+        vol.Optional("sort"): vol.In(["manual", "zone"]),
+    }
+)
+
 ADD_SEED_LOT_SCHEMA = vol.Schema(
     {
         vol.Optional("species"): cv.string,
@@ -866,6 +873,19 @@ def async_register_services(hass: HomeAssistant) -> None:
         )
         return {"id": events[-1].id if events else None, "ids": [e.id for e in events]}
 
+    async def set_photo_order(call: ServiceCall) -> ServiceResponse:
+        """The order of the photo round: by hand (the ids in order) or zone by zone."""
+        store = _store(hass)
+        plan = next(iter(store.data.photo_plans.values()), None)
+        if plan is None:
+            raise ServiceValidationError(translation_domain=DOMAIN, translation_key="no_photo_plan")
+        if "order" in call.data:
+            plan.order = list(dict.fromkeys(call.data["order"]))
+        if "sort" in call.data:
+            plan.sort = call.data["sort"]
+        await store.async_save()
+        return {"id": plan.id}
+
     async def set_photo_plan(call: ServiceCall) -> ServiceResponse:
         """The photo plan (one): zones and plants, periods or every N weeks; empty = no more photo tasks."""
         store = _store(hass)
@@ -882,6 +902,8 @@ def async_register_services(hass: HomeAssistant) -> None:
             planting_ids=list(dict.fromkeys(args["planting_ids"])),
             periods=[dict(p) for p in args["periods"]],
             every_weeks=args.get("every_weeks"),
+            sort=old.sort if old else "manual",
+            order=list(old.order) if old else [],
         )
         if plan.every_weeks:
             # Same rhythm kept when only the targets change; a new rhythm starts today.
@@ -1060,6 +1082,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         ("add_event", add_event, ADD_EVENT_SCHEMA, SupportsResponse.OPTIONAL),
         ("set_hose", set_hose, SET_HOSE_SCHEMA, SupportsResponse.OPTIONAL),
         ("set_growth", set_growth, SET_GROWTH_SCHEMA, SupportsResponse.OPTIONAL),
+        ("set_photo_order", set_photo_order, SET_PHOTO_ORDER_SCHEMA, SupportsResponse.OPTIONAL),
         ("merge_plantings", merge_plantings_service, MERGE_PLANTINGS_SCHEMA, SupportsResponse.OPTIONAL),
         ("update_event", update_event, UPDATE_EVENT_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_event", delete_event, ID_SCHEMA, SupportsResponse.OPTIONAL),

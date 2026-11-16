@@ -87,6 +87,9 @@
     },
     "sources_unavailable": {
       "message": "GBIF e Wikidata non rispondono: riprova più tardi."
+    },
+    "no_photo_plan": {
+      "message": "Non c'è ancora un piano foto."
     }
   },
   "selector": {
@@ -1603,6 +1606,20 @@
         "ids": {
           "name": "Altre",
           "description": "Le piante riunite in essa."
+        }
+      }
+    },
+    "set_photo_order": {
+      "name": "Ordine del giro foto",
+      "description": "Come si susseguono zone e piante del giro foto: a mano o zona per zona.",
+      "fields": {
+        "order": {
+          "name": "Ordine",
+          "description": "ID di zone e piante nell'ordine voluto."
+        },
+        "sort": {
+          "name": "Criterio",
+          "description": "manual = l'ordine sopra, zone = ogni zona seguita dalle sue piante."
         }
       }
     }

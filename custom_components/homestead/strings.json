@@ -87,6 +87,9 @@
     },
     "sources_unavailable": {
       "message": "GBIF and Wikidata are not answering: try again later."
+    },
+    "no_photo_plan": {
+      "message": "There is no photo plan yet."
     }
   },
   "selector": {
@@ -1603,6 +1606,20 @@
         "ids": {
           "name": "Others",
           "description": "The plantings merged into it."
+        }
+      }
+    },
+    "set_photo_order": {
+      "name": "Order of the photo round",
+      "description": "How the zones and plants of the photo round follow each other: by hand or zone by zone.",
+      "fields": {
+        "order": {
+          "name": "Order",
+          "description": "Zone and plant IDs in the order wanted."
+        },
+        "sort": {
+          "name": "Sort",
+          "description": "manual = the order above, zone = each zone followed by its plants."
         }
       }
     }

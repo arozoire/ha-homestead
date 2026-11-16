@@ -867,5 +867,14 @@
  "planPlaceDone": "{count} planten van {name} op een rij: sleep ze elk naar hun plek.",
  "planMerge": "Weer één groep",
  "planMergeHint": "{count} beplantingen van hetzelfde gewas en dezelfde datum: ze kunnen weer één groep zijn ({name}).",
- "planMergeDone": "{name}: weer een groep van {count}."
+ "planMergeDone": "{name}: weer een groep van {count}.",
+ "photoOrder": "Volgorde:",
+ "photoOrderZone": "Per zone",
+ "photoOrderHand": "Met de hand",
+ "photoOrderDone": "Klaar",
+ "shotLost": "Foto van {date} niet opgeslagen",
+ "shotRetry": "Opnieuw maken",
+ "shotHeic": "HEIC/HEIF-foto: browsers kunnen hem niet tonen. Zet de camera van de telefoon op JPEG (Meest compatibel) en maak hem opnieuw.",
+ "shotTooBig": "foto te groot (meer dan 64 MB)",
+ "shotFailed": "Foto niet opgeslagen, de zone blijft te doen: {error}"
 }

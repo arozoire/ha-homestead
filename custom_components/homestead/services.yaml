@@ -1620,3 +1620,16 @@ merge_plantings:
       selector:
         text:
           multiple: true
+
+set_photo_order:
+  fields:
+    order:
+      selector:
+        text:
+          multiple: true
+    sort:
+      selector:
+        select:
+          options:
+            - manual
+            - zone

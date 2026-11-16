@@ -867,5 +867,14 @@
  "planPlaceDone": "{count} Pflanzen von {name} in einer Reihe: zieh jede an ihren Platz.",
  "planMerge": "Wieder zu einer Gruppe",
  "planMergeHint": "{count} Pflanzungen derselben Kultur und desselben Datums: sie können wieder eine Gruppe sein ({name}).",
- "planMergeDone": "{name}: wieder eine Gruppe von {count}."
+ "planMergeDone": "{name}: wieder eine Gruppe von {count}.",
+ "photoOrder": "Reihenfolge:",
+ "photoOrderZone": "Nach Zone",
+ "photoOrderHand": "Von Hand",
+ "photoOrderDone": "Fertig",
+ "shotLost": "Foto vom {date} nicht gespeichert",
+ "shotRetry": "Neu aufnehmen",
+ "shotHeic": "HEIC/HEIF-Foto: Browser können es nicht anzeigen. Stell die Handykamera auf JPEG (Maximale Kompatibilität) und nimm es neu auf.",
+ "shotTooBig": "Foto zu groß (über 64 MB)",
+ "shotFailed": "Foto nicht gespeichert, die Zone bleibt offen: {error}"
 }

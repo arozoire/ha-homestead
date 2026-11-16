@@ -591,6 +591,10 @@ class PhotoPlan(_Record):
     periods: list[dict[str, Any]] = field(default_factory=list)  # [{"month": 5, "part": "start"}]
     every_weeks: int | None = None
     start_on: str | None = None  # first day of the first window, with every_weeks
+    # The order of the round: "manual" (``order``: the ids as the user arranged them) or "zone"
+    # (each zone followed by the plants inside it).
+    sort: str = "manual"
+    order: list[str] = field(default_factory=list)
 
     def windows(self, year: int) -> list[tuple[date, date]]:
         """The periods of a year (and those of the year before that end in it), sorted."""

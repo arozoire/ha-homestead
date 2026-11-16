@@ -87,6 +87,9 @@
     },
     "sources_unavailable": {
       "message": "GBIF et Wikidata ne répondent pas : réessayez plus tard."
+    },
+    "no_photo_plan": {
+      "message": "Il n'y a pas encore de plan photo."
     }
   },
   "selector": {
@@ -1603,6 +1606,20 @@
         "ids": {
           "name": "Autres",
           "description": "Les plantations regroupées dedans."
+        }
+      }
+    },
+    "set_photo_order": {
+      "name": "Ordre de la tournée photo",
+      "description": "Comment se suivent les zones et plantes de la tournée photo : à la main ou zone par zone.",
+      "fields": {
+        "order": {
+          "name": "Ordre",
+          "description": "ID des zones et plantes dans l'ordre voulu."
+        },
+        "sort": {
+          "name": "Tri",
+          "description": "manual = l'ordre ci-dessus, zone = chaque zone suivie de ses plantes."
         }
       }
     }

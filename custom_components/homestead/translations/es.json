@@ -87,6 +87,9 @@
     },
     "sources_unavailable": {
       "message": "GBIF y Wikidata no responden: inténtalo más tarde."
+    },
+    "no_photo_plan": {
+      "message": "Todavía no hay un plan de fotos."
     }
   },
   "selector": {
@@ -1603,6 +1606,20 @@
         "ids": {
           "name": "Otras",
           "description": "Las plantaciones unidas a ella."
+        }
+      }
+    },
+    "set_photo_order": {
+      "name": "Orden de la ronda de fotos",
+      "description": "Cómo se suceden las zonas y plantas de la ronda de fotos: a mano o zona por zona.",
+      "fields": {
+        "order": {
+          "name": "Orden",
+          "description": "ID de zonas y plantas en el orden deseado."
+        },
+        "sort": {
+          "name": "Criterio",
+          "description": "manual = el orden de arriba, zone = cada zona seguida de sus plantas."
         }
       }
     }

@@ -87,6 +87,9 @@
     },
     "sources_unavailable": {
       "message": "GBIF und Wikidata antworten nicht: später erneut versuchen."
+    },
+    "no_photo_plan": {
+      "message": "Es gibt noch keinen Fotoplan."
     }
   },
   "selector": {
@@ -1603,6 +1606,20 @@
         "ids": {
           "name": "Andere",
           "description": "Die Pflanzungen, die darin aufgehen."
+        }
+      }
+    },
+    "set_photo_order": {
+      "name": "Reihenfolge der Fotorunde",
+      "description": "Wie Zonen und Pflanzen der Fotorunde aufeinander folgen: von Hand oder Zone für Zone.",
+      "fields": {
+        "order": {
+          "name": "Reihenfolge",
+          "description": "IDs der Zonen und Pflanzen in der gewünschten Reihenfolge."
+        },
+        "sort": {
+          "name": "Sortierung",
+          "description": "manual = die Reihenfolge oben, zone = jede Zone gefolgt von ihren Pflanzen."
         }
       }
     }

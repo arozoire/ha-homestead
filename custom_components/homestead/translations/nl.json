@@ -87,6 +87,9 @@
     },
     "sources_unavailable": {
       "message": "GBIF en Wikidata antwoorden niet: probeer het later opnieuw."
+    },
+    "no_photo_plan": {
+      "message": "Er is nog geen fotoplan."
     }
   },
   "selector": {
@@ -1603,6 +1606,20 @@
         "ids": {
           "name": "Andere",
           "description": "De beplantingen die erin opgaan."
+        }
+      }
+    },
+    "set_photo_order": {
+      "name": "Volgorde van de fotoronde",
+      "description": "Hoe de zones en planten van de fotoronde elkaar opvolgen: met de hand of zone per zone.",
+      "fields": {
+        "order": {
+          "name": "Volgorde",
+          "description": "ID's van zones en planten in de gewenste volgorde."
+        },
+        "sort": {
+          "name": "Sortering",
+          "description": "manual = de volgorde hierboven, zone = elke zone gevolgd door haar planten."
         }
       }
     }

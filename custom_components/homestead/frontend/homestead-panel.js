@@ -307,6 +307,10 @@ const STYLE = `
   .plan-wrap { position: relative; border: 1px solid var(--divider-color); border-radius: 12px; overflow: hidden; background: #fbfbf8; margin: 8px 0; }
   .plan-north { position: absolute; top: 8px; right: 8px; display: inline-flex; flex-direction: column; align-items: center; font-size: 12px; font-weight: 700; line-height: 1.1; color: #2e5a1e; pointer-events: none; width: 1.6em; text-align: center; }
   .plan-plant.faded { opacity: 0.2; }
+  .photo-order { align-items: center; flex-wrap: wrap; gap: 6px; margin: 4px 0; }
+  .photo-order button.on { border-color: var(--primary-color); font-weight: 600; }
+  .order-buttons { display: inline-flex; gap: 4px; }
+  .order-buttons button { min-width: 36px; min-height: 36px; }
   .growth-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0; }
   .growth-bar { flex: 1; min-width: 80px; height: 8px; border-radius: 4px; background: var(--divider-color); overflow: hidden; }
   .growth-bar i { display: block; height: 100%; background: #3a7d44; }
@@ -6183,7 +6187,63 @@ class HomesteadPanel extends HTMLElement {
   }
 
   _listItems(task) {
+    if (task.kind === "photo") return this._photoSorted([...(task.zone_ids || []), ...(task.planting_ids || [])]);
     return [...(task.zone_ids || []), ...(task.planting_ids || []), ...(task.seed_ids || [])];
+  }
+
+  /** The photo round in the order chosen: by hand (the plan's order) or zone by zone, plants after their zone. */
+  _photoSorted(ids) {
+    const plan = this._photoPlan();
+    if (!plan) return ids;
+    if (plan.sort === "zone") {
+      const key = (id) => {
+        const zone = this._zone(id);
+        if (zone) return `${this._zonePath(id)}\u0000`;
+        const p = this._planting(id);
+        return `${p?.zone_id ? this._zonePath(p.zone_id) : "\uffff"}\u0001${p?.name || id}`;
+      };
+      return [...ids].sort((a, b) => key(a).localeCompare(key(b), undefined, { numeric: true }));
+    }
+    const at = new Map((plan.order || []).map((id, i) => [id, i]));
+    return ids.map((id, i) => [id, at.has(id) ? at.get(id) : 1e6 + i]).sort((a, b) => a[1] - b[1]).map(([id]) => id);
+  }
+
+  /** Order bar of a photo list: zone by zone, or by hand with ↑ ↓ on each line. */
+  _photoOrderBar(t) {
+    const plan = this._photoPlan();
+    if (!plan) return null;
+    const editing = this._photoReorder === t.id;
+    const set = async (data) => this._call("set_photo_order", data);
+    return h(
+      "div",
+      { className: "row photo-order" },
+      h("span", { className: "sub" }, this.t("photoOrder")),
+      h("button", { type: "button", className: plan.sort === "zone" ? "on" : "", onclick: () => set({ sort: "zone" }) }, `🗺️ ${this.t("photoOrderZone")}`),
+      h(
+        "button",
+        {
+          type: "button",
+          className: plan.sort !== "zone" ? "on" : "",
+          onclick: () => {
+            this._photoReorder = editing ? null : t.id;
+            if (plan.sort === "zone") set({ sort: "manual", order: this._listItems(t) });
+            else this._render();
+          },
+        },
+        `✋ ${this.t(editing ? "photoOrderDone" : "photoOrderHand")}`,
+      ),
+    );
+  }
+
+  _photoMove(t, id, step) {
+    const items = this._listItems(t);
+    const plan = this._photoPlan();
+    const rest = (plan?.order || []).filter((x) => !items.includes(x));
+    const i = items.indexOf(id);
+    const j = i + step;
+    if (i < 0 || j < 0 || j >= items.length) return;
+    [items[i], items[j]] = [items[j], items[i]];
+    this._call("set_photo_order", { sort: "manual", order: [...items, ...rest] });
   }
 
   _itemName(id) {
@@ -6233,6 +6293,7 @@ class HomesteadPanel extends HTMLElement {
         h("span", { className: "list-count" }, this.t("listProgress", { done: count, total: items.length })),
       ),
       h("div", { className: "list-bar" }, h("i", { style: `width:${items.length ? (count / items.length) * 100 : 0}%` })),
+      photo ? this._photoOrderBar(t) : null,
       items.map((id) =>
         photo ? this._shotRow(t, id, done.has(id)) : h(
           "label",
@@ -6265,17 +6326,31 @@ class HomesteadPanel extends HTMLElement {
     const thumb = h("span", { className: "shot-thumb" }, last ? null : "📸");
     if (last) this._photoUrl(last.id, true).then((url) => thumb.replaceChildren(h("img", { src: url, alt: "" })));
     const event = done ? this._data.events.find((e) => e.kind === "photo" && (e.zone_id === id || e.planting_id === id) && e.done_on >= t.due_on) : null;
+    // A photo event whose file never arrived (network, format): say so and offer to take it again.
+    const lost = event && !this._data.photos.some((ph) => ph.event_id === event.id);
+    const editing = this._photoReorder === t.id;
     return h(
       "div",
-      { className: `list-item${done ? " done" : ""}` },
-      thumb,
+      { className: `list-item${done && !lost ? " done" : ""}` },
+      editing
+        ? h(
+            "span",
+            { className: "order-buttons" },
+            h("button", { type: "button", "aria-label": "↑", onclick: () => this._photoMove(t, id, -1) }, "↑"),
+            h("button", { type: "button", "aria-label": "↓", onclick: () => this._photoMove(t, id, 1) }, "↓"),
+          )
+        : thumb,
       h(
         "span",
         { style: "display:grid;flex:1" },
         h("span", {}, this._itemName(id)),
-        h("span", { className: "sub" }, done ? (event ? `✓ ${this._date(event.done_on)}` : this.t("shotSkipped")) : last ? this.t("shotLast", { date: this._date(last.taken_on) }) : this.t("shotFirst")),
+        h(
+          "span",
+          { className: lost ? "sub warn" : "sub" },
+          lost ? `⚠️ ${this.t("shotLost", { date: this._date(event.done_on) })}` : done ? (event ? `✓ ${this._date(event.done_on)}` : this.t("shotSkipped")) : last ? this.t("shotLast", { date: this._date(last.taken_on) }) : this.t("shotFirst"),
+        ),
       ),
-      done ? null : h("button", { type: "button", className: "primary", onclick: () => this._openShot(t, id) }, `📸 ${this.t("shotTake")}`),
+      editing ? null : done && !lost ? null : h("button", { type: "button", className: "primary", onclick: () => this._openShot(t, id, lost ? event.id : null) }, `📸 ${this.t(lost ? "shotRetry" : "shotTake")}`),
     );
   }
 
@@ -9132,10 +9207,10 @@ class HomesteadPanel extends HTMLElement {
 
   // ----- the shot: live camera with the last photo over it -----
 
-  _openShot(task, item) {
+  _openShot(task, item, emptyEvent = null) {
     this._clearSelection();
     this._showMessage("");
-    this._shot = { task_id: task.id, item };
+    this._shot = { task_id: task.id, item, emptyEvent };
     this._render();
   }
 
@@ -9250,9 +9325,15 @@ class HomesteadPanel extends HTMLElement {
     const shot = this._shot;
     const task = this._data.tasks.find((t) => t.id === shot?.task_id);
     if (!shot) return;
+    // HEIC/HEIF (some phones' "high efficiency" setting) cannot be shown in a browser: refuse it before anything.
+    if (/hei[cf]/i.test(blob.type || "") || /\.hei[cf]$/i.test(name || "")) {
+      this._showMessage(`⚠️ ${this.t("shotHeic")}`, true);
+      return;
+    }
     this._showMessage(this.t("uploading"));
     const target = this._zone(shot.item) ? { zone_id: shot.item } : { planting_id: shot.item };
-    const result = await this._call("add_event", { kind: "photo", done_on: today(), ...target, ...(task && !task.done_on ? { task_id: task.id } : {}) });
+    // The event first, without ticking the list: the zone is ticked only once the file is safe on the server.
+    const result = await this._call("add_event", { kind: "photo", done_on: today(), ...target });
     if (!result) return;
     try {
       const form = new FormData();
@@ -9261,11 +9342,15 @@ class HomesteadPanel extends HTMLElement {
       const thumb = await thumbnail(blob, THUMB_PX).catch(() => null);
       if (thumb) form.append("thumb", thumb, "thumb.jpg");
       const response = await this._hass.fetchWithAuth("/api/homestead/photo/upload", { method: "POST", body: form });
-      if (!response.ok) throw new Error(`${response.status} ${await response.text()}`);
+      if (!response.ok) throw new Error(response.status === 413 ? this.t("shotTooBig") : `${response.status} ${await response.text()}`);
     } catch (err) {
-      this._showMessage(err.message || String(err), true);
+      // No file, no entry: the event goes and the zone stays to do.
+      await this._call("delete_event", { id: result.id });
+      this._showMessage(`⚠️ ${this.t("shotFailed", { error: err.message || String(err) })}`, true);
       return;
     }
+    if (shot.emptyEvent) await this._call("delete_event", { id: shot.emptyEvent });
+    if (task && !task.done_on && !(task.done_ids || []).includes(shot.item)) await this._call("complete_task", { id: task.id, items: [shot.item] });
     this._showMessage(`✓ ${this.t("shotSaved", { name: this._itemName(shot.item) })}`);
     this._nextShot(task, shot.item);
   }

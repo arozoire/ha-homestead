@@ -75,3 +75,25 @@ async def test_services(hass: HomeAssistant) -> None:
     assert len(store.data.plantings[group].positions) == 4
     await call("update_planting", {"id": group, "positions": None})
     assert store.data.plantings[group].positions == []
+
+
+async def test_photo_order(hass: HomeAssistant) -> None:
+    entry = MockConfigEntry(domain=DOMAIN, title="HA Homestead")
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    async def call(service: str, data: dict) -> dict:
+        return await hass.services.async_call(DOMAIN, service, data, blocking=True, return_response=True)
+
+    a = (await call("add_zone", {"name": "Orto"}))["id"]
+    b = (await call("add_zone", {"name": "Frutteto"}))["id"]
+    await call("set_photo_plan", {"zone_ids": [a, b], "periods": [{"month": 5}]})
+    await call("set_photo_order", {"order": [b, a]})
+    plan = next(iter(entry.runtime_data.data.photo_plans.values()))
+    assert (plan.sort, plan.order) == ("manual", [b, a])
+    await call("set_photo_order", {"sort": "zone"})
+    # Changing the plan keeps the order chosen.
+    await call("set_photo_plan", {"zone_ids": [a, b], "periods": [{"month": 6}]})
+    plan = next(iter(entry.runtime_data.data.photo_plans.values()))
+    assert (plan.sort, plan.order) == ("zone", [b, a])

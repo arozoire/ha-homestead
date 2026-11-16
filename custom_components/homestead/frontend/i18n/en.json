@@ -867,5 +867,14 @@
  "planPlaceDone": "{count} plants of {name} in line: drag each one to its place.",
  "planMerge": "Merge back into one group",
  "planMergeHint": "{count} plantings of the same crop and date: they can be one group again ({name}).",
- "planMergeDone": "{name}: one group of {count} again."
+ "planMergeDone": "{name}: one group of {count} again.",
+ "photoOrder": "Order:",
+ "photoOrderZone": "By zone",
+ "photoOrderHand": "By hand",
+ "photoOrderDone": "Done",
+ "shotLost": "Photo of {date} not saved",
+ "shotRetry": "Take it again",
+ "shotHeic": "HEIC/HEIF picture: browsers cannot show it. Set the phone camera to JPEG (Most compatible) and take it again.",
+ "shotTooBig": "picture too large (over 64 MB)",
+ "shotFailed": "Photo not saved, the zone stays to do: {error}"
 }

@@ -867,5 +867,14 @@
  "planPlaceDone": "{count} piante di {name} in fila: trascina ognuna al suo posto.",
  "planMerge": "Riunisci nel gruppo",
  "planMergeHint": "{count} piante della stessa coltura e data: possono tornare un solo gruppo ({name}).",
- "planMergeDone": "{name}: di nuovo un gruppo di {count}."
+ "planMergeDone": "{name}: di nuovo un gruppo di {count}.",
+ "photoOrder": "Ordine:",
+ "photoOrderZone": "Per zona",
+ "photoOrderHand": "A mano",
+ "photoOrderDone": "Fatto",
+ "shotLost": "Foto del {date} non salvata",
+ "shotRetry": "Rifalla",
+ "shotHeic": "Foto HEIC/HEIF: i browser non la mostrano. Imposta la fotocamera del telefono su JPEG (Più compatibile) e rifalla.",
+ "shotTooBig": "foto troppo grande (oltre 64 MB)",
+ "shotFailed": "Foto non salvata, la zona resta da fare: {error}"
 }
