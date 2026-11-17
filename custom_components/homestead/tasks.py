@@ -15,11 +15,10 @@ from .weather import schedule_weather
 def close_task(store: HomesteadStore, task: Task, done_on: str, event_id: str | None = None) -> None:
     """Done; a yearly task comes back one year later."""
     task.done_on, task.event_id = done_on, event_id
-    if task.yearly:
-        follow = task.next_year()
-        store.data.tasks[follow.id] = follow
-    if repeat := task.next_repeat(done_on):
-        store.data.tasks[repeat.id] = repeat
+    for follow in (task.next_year() if task.yearly else None, task.next_repeat(done_on)):
+        # Reopened and done again (HA to-do): the follow-up made the first time is enough.
+        if follow and not any(t.same_as(follow) for t in store.data.tasks.values()):
+            store.data.tasks[follow.id] = follow
 
 
 def mark_task_done(store: HomesteadStore, task_id: str, event: Event) -> None:
@@ -150,7 +149,7 @@ def sync_photo_tasks(store: HomesteadStore, today: date) -> bool:
             continue
         start, end = (d.isoformat() for d in window)
         mine = [t for t in data.tasks.values() if t.plan_id == plan.id]
-        if any(t.window_on == start for t in mine):
+        if plan.last_window == start or any(t.window_on == start for t in mine):
             continue
         for old in mine:
             if not old.done_on and (old.window_on or "") < start:
@@ -165,6 +164,7 @@ def sync_photo_tasks(store: HomesteadStore, today: date) -> bool:
             window_on=start,
         )
         data.tasks[task.id] = task
+        plan.last_window = start
         changed = True
     return changed
 

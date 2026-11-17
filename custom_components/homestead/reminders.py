@@ -19,7 +19,7 @@ from homeassistant.util import dt as dt_util
 from .const import CONF_NOTIFY, CONF_NOTIFY_TIME, DEFAULT_NOTIFY_TIME, DOMAIN
 from .forecast import advice_text, get_outlook, sensor_readings
 from .labels import async_kind_names, summary
-from .models import COMPOST_TURN_DAYS, compost_due, watering_due
+from .models import COMPOST_TURN_DAYS, EventKind, compost_due, watering_due
 from .notify import async_send
 from .store import HomesteadStore
 from .tasks import async_complete_task
@@ -104,9 +104,10 @@ async def async_send_reminders(hass: HomeAssistant, store: HomesteadStore, servi
                 "url": task_url(t.id),  # iOS
                 "clickAction": task_url(t.id),  # Android
                 "tag": f"{DOMAIN}-{t.id}",
-                "actions": [
-                    {"action": f"{ACTION_DONE}{t.id}", "title": texts.get("notification_done", "✔ Done")}
-                ],
+                # No "Done" on a photo round: it would tick every zone without a picture.
+                "actions": []
+                if t.kind == EventKind.PHOTO
+                else [{"action": f"{ACTION_DONE}{t.id}", "title": texts.get("notification_done", "✔ Done")}],
             },
         }
         for t in due
