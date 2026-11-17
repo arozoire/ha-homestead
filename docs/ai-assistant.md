@@ -95,10 +95,6 @@ My list: <paste it here>
 
 [`examples/plantings.csv`](examples/plantings.csv) and [`examples/seeds.csv`](examples/seeds.csv) (zones `Orchard` and `Vegetable garden`). A test (`tests/test_csv_examples.py`) runs them through the panel's own import code and the integration's services, so they stay valid.
 
-### Examples
-
-[`examples/plantings.csv`](examples/plantings.csv) and [`examples/seeds.csv`](examples/seeds.csv) (zones `Orchard` and `Vegetable garden`). A test (`tests/test_csv_examples.py`) runs them through the panel's own import code and the integration's services, so they stay valid.
-
-### What the CSV does not cover
+## What the CSV does not cover
 
 Zones (drawn on the map), diary events, tasks, harvests and photos are entered in the panel, or through the integration's actions (`homestead.add_zone`, `homestead.add_event`, `homestead.add_task`… listed in *Developer tools → Actions*). A zone created by `homestead.add_zone` without `geometry` can be drawn later from its form (*Draw on map*).

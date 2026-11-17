@@ -904,6 +904,7 @@ def async_register_services(hass: HomeAssistant) -> None:
             every_weeks=args.get("every_weeks"),
             sort=old.sort if old else "manual",
             order=list(old.order) if old else [],
+            last_window=old.last_window if old else None,
         )
         if plan.every_weeks:
             # Same rhythm kept when only the targets change; a new rhythm starts today.

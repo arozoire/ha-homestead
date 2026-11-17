@@ -32,7 +32,11 @@ from .weather import schedule_weather
 _LOGGER = logging.getLogger(__name__)
 
 OPEN_STATES = {"open", "opening", "on"}
+LOST_STATES = {"unavailable", "unknown"}
 MIN_RUN_MINUTES = 1.0
+# A valve that drops off the network while open and comes back closed: if it was away this long at most,
+# the run ends when it came back; after a longer gap only the time it was seen open is counted.
+MAX_LOST_MINUTES = 15
 LITRES_PER_GALLON = 3.785411784
 
 
@@ -80,6 +84,8 @@ class Run:
     """Water measured while a valve is open."""
 
     meter: str | None
+    opened: datetime | None = None
+    lost_at: datetime | None = None  # when the valve went unavailable during the run
     total_at_start: float | None = None
     rate: float = 0.0  # L/min, the last flow rate reading
     since: datetime | None = None  # when that reading came
@@ -147,31 +153,55 @@ def async_setup_irrigation(hass: HomeAssistant, store: HomesteadStore) -> CALLBA
             if run.meter == event.data["entity_id"] and (rate := litres_per_minute(new)) is not None:
                 run.flow(rate, new.last_updated)
 
-    @callback
-    def _changed(event: HassEvent[EventStateChangedData]) -> None:
-        old, new = event.data["old_state"], event.data["new_state"]
-        valve = event.data["entity_id"]
-        if new is not None and new.state in OPEN_STATES and (old is None or old.state not in OPEN_STATES):
-            meter = flow_meter(list(store.data.zones.values()), valve)
-            reading = hass.states.get(meter) if meter else None
-            run = Run(meter=meter, total_at_start=litres(reading))
-            if (rate := litres_per_minute(reading)) is not None:
-                run.flow(rate, new.last_changed)
-            runs[valve] = run
-            return
-        if old is None or new is None or old.state not in OPEN_STATES or new.state in OPEN_STATES:
-            return
-        run = runs.pop(valve, None)
-        if new.state in ("unavailable", "unknown"):
-            return
-        minutes = run_minutes(old.last_changed, new.last_changed)
+    def _finish(valve: str, run: Run | None, opened: datetime, closed: datetime, name: str) -> None:
+        minutes = run_minutes(opened, closed)
         if minutes < MIN_RUN_MINUTES:
             return
         water = None
         if run is not None and run.meter:
-            water = run.water(new.last_changed, litres(hass.states.get(run.meter)))
-        name = new.attributes.get("friendly_name") or valve
+            water = run.water(closed, litres(hass.states.get(run.meter)))
         hass.async_create_task(_log_run(valve, minutes, name, water), f"homestead watering {valve}")
+
+    @callback
+    def _changed(event: HassEvent[EventStateChangedData]) -> None:
+        old, new = event.data["old_state"], event.data["new_state"]
+        valve = event.data["entity_id"]
+        if new is None or old is None:
+            if new is not None and new.state in OPEN_STATES:
+                runs[valve] = _start(valve, new.last_changed)
+            return
+        was_open, is_open = old.state in OPEN_STATES, new.state in OPEN_STATES
+        run = runs.get(valve)
+        if is_open and not was_open:
+            if run is not None and old.state in LOST_STATES:
+                run.lost_at = None  # back on the network, still open: the same run goes on
+            else:
+                runs[valve] = _start(valve, new.last_changed)
+            return
+        if was_open and new.state in LOST_STATES:
+            if run is None:
+                run = runs[valve] = _start(valve, old.last_changed)
+            run.lost_at = new.last_changed  # keep the run: Zigbee valves drop out now and then
+            return
+        name = new.attributes.get("friendly_name") or valve
+        if was_open and not is_open:
+            runs.pop(valve, None)
+            opened = run.opened if run and run.opened else old.last_changed
+            _finish(valve, run, opened, new.last_changed, name)
+            return
+        if old.state in LOST_STATES and not is_open and run is not None and run.lost_at is not None:
+            runs.pop(valve, None)
+            away = (new.last_changed - run.lost_at).total_seconds() / 60
+            closed = new.last_changed if away <= MAX_LOST_MINUTES else run.lost_at
+            _finish(valve, run, run.opened or run.lost_at, closed, name)
+
+    def _start(valve: str, opened: datetime) -> Run:
+        meter = flow_meter(list(store.data.zones.values()), valve)
+        reading = hass.states.get(meter) if meter else None
+        run = Run(meter=meter, opened=opened, total_at_start=litres(reading))
+        if (rate := litres_per_minute(reading)) is not None:
+            run.flow(rate, opened)
+        return run
 
     @callback
     def _sync() -> None:

@@ -430,6 +430,17 @@ class Event(_Record):
             self.moon_phase = moon_phase(date.fromisoformat(self.done_on))
 
 
+def _next_year_day(day: str | None) -> str | None:
+    """The same day one year later (29 February becomes 28)."""
+    if not day:
+        return None
+    d = date.fromisoformat(day)
+    try:
+        return d.replace(year=d.year + 1).isoformat()
+    except ValueError:
+        return d.replace(year=d.year + 1, day=28).isoformat()
+
+
 @dataclass(kw_only=True)
 class Task(_Record):
     """A planned activity: shown in the HA to-do list and calendar; done → a diary event."""
@@ -466,15 +477,10 @@ class Task(_Record):
         return [i for i in self.items if i not in self.done_ids]
 
     def next_year(self) -> Task:
-        """The same task one year later (29 February becomes 28)."""
-        due = date.fromisoformat(self.due_on)
-        try:
-            due = due.replace(year=due.year + 1)
-        except ValueError:
-            due = due.replace(year=due.year + 1, day=28)
+        """The same task one year later (29 February becomes 28), a succession up to the same day."""
         return Task(
             kind=self.kind,
-            due_on=due.isoformat(),
+            due_on=_next_year_day(self.due_on),
             title=self.title,
             planting_id=self.planting_id,
             zone_id=self.zone_id,
@@ -484,7 +490,20 @@ class Task(_Record):
             seed_ids=list(self.seed_ids),
             zone_ids=list(self.zone_ids),
             repeat_weeks=self.repeat_weeks,
-            repeat_until=self.repeat_until,
+            repeat_until=_next_year_day(self.repeat_until),
+        )
+
+    def same_as(self, other: Task) -> bool:
+        """The same planned work on the same day (a follow-up already made)."""
+        return (
+            self.kind == other.kind
+            and self.due_on == other.due_on
+            and self.title == other.title
+            and self.planting_id == other.planting_id
+            and self.zone_id == other.zone_id
+            and self.planting_ids == other.planting_ids
+            and self.seed_ids == other.seed_ids
+            and self.zone_ids == other.zone_ids
         )
 
     def next_repeat(self, done_on: str) -> Task | None:
@@ -595,6 +614,9 @@ class PhotoPlan(_Record):
     # (each zone followed by the plants inside it).
     sort: str = "manual"
     order: list[str] = field(default_factory=list)
+    # First day of the last period that opened a task: a done task deleted (HA to-do "clear completed")
+    # does not come back.
+    last_window: str | None = None
 
     def windows(self, year: int) -> list[tuple[date, date]]:
         """The periods of a year (and those of the year before that end in it), sorted."""
