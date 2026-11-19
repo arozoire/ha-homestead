@@ -20,5 +20,5 @@
   "issue_tracker": "https://github.com/arozoire/ha-homestead/issues",
   "requirements": [],
   "single_config_entry": true,
-  "version": "0.20.2"
+  "version": "0.21.0"
 }
