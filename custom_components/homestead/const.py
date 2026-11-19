@@ -14,6 +14,7 @@ CONF_RAIN = "rain_sensor"
 CONF_SOIL = "soil_moisture_sensor"
 CONF_SOIL_TEMP = "soil_temperature_sensor"
 CONF_SOIL_EC = "soil_ec_sensor"  # electrical conductivity (an Ecowitt WH52, for example)
+CONF_PRESSURE = "pressure_sensor"  # atmospheric pressure: how far the forecast can be trusted
 CONF_OPEN_METEO = "open_meteo"
 
 # Options: phone reminders for planned activities.

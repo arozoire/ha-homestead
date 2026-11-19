@@ -22,6 +22,7 @@
           "soil_moisture_sensor": "Umidità del suolo",
           "soil_temperature_sensor": "Sensore temperatura del suolo",
           "soil_ec_sensor": "Sensore EC del suolo",
+          "pressure_sensor": "Pressione atmosferica",
           "open_meteo": "Usa Open-Meteo per i dati mancanti",
           "notify_services": "Invia i promemoria a",
           "notify_time": "Ora dei promemoria",
@@ -38,7 +39,8 @@
           "photo_media": "Cartella media di HA dove il piano foto salva gli originali, senza compressione. Un NAS aggiunto in Impostazioni → Sistema → Archiviazione compare qui.",
           "soil_temperature_sensor": "Facoltativo: temperatura del suolo nel meteo del diario e controllo prima di seminare all'aperto o mettere a dimora (una sonda come l'Ecowitt WH52).",
           "soil_ec_sensor": "Facoltativo: conducibilità elettrica del suolo (sali, concime), registrata con il meteo del diario.",
-          "units": "Automatico: come Home Assistant (Impostazioni → Sistema → Generale). Imperiale mostra °F, pollici, piedi, acri, libbre e galloni; i dati restano salvati in metrico."
+          "units": "Automatico: come Home Assistant (Impostazioni → Sistema → Generale). Imperiale mostra °F, pollici, piedi, acri, libbre e galloni; i dati restano salvati in metrico.",
+          "pressure_sensor": "Facoltativo: per capire quanto fidarsi della previsione (un calo forte della pressione porta spesso pioggia non prevista)."
         }
       }
     }

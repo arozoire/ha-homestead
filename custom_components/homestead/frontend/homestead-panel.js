@@ -622,6 +622,33 @@ const STYLE = `
   .day-col .t-max { font-weight: 700; font-size: 15px; }
   .day-col .sub { white-space: normal; }
   .day-col .rain { color: #1e64c8; min-height: 15px; }
+  .trust-bars { display: flex; gap: 2px; justify-content: center; padding: 4px 0; min-height: 16px; border: none; background: none; cursor: pointer; }
+  .trust-bars i { display: block; width: 7px; height: 5px; border-radius: 2px; background: var(--divider-color, #ddd); }
+  .trust-bars.s4 i.on, .trust-bars.s5 i.on { background: #2f7d3a; }
+  .trust-bars.s3 i.on { background: #b07800; }
+  .trust-bars.s1 i.on, .trust-bars.s2 i.on { background: #b3401f; }
+  .trust-today { margin: 8px 0; padding: 10px; border-radius: 10px; background: var(--card-background-color); border: 1px solid var(--divider-color); }
+  .trust-today h3 { margin: 0; font-size: 14px; }
+  .trust-verdict { font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 999px; background: #e3f0e4; color: #1f5a28; flex: none; }
+  .trust-verdict.off { background: #fbe4d5; color: #8a3b0b; }
+  .trust-items { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 6px; margin-top: 8px; }
+  .trust-item { display: grid; gap: 1px; padding: 6px; border-radius: 8px; background: var(--secondary-background-color); }
+  .trust-item b { font-size: 16px; }
+  .trust-item .sub { white-space: normal; overflow: visible; }
+  .trust-item .verdict { font-weight: 600; color: #2f7d3a; }
+  .trust-item.off .verdict { color: #a3341a; }
+  .trust-sheet { justify-content: flex-start; overflow-y: auto; }
+  .trust-card { background: var(--card-background-color, #fff); color: var(--primary-text-color, #222); border-radius: 12px; padding: 14px;
+    width: min(420px, 100%); box-sizing: border-box; display: grid; gap: 4px; }
+  .trust-card h3 { margin: 0; font-size: 16px; }
+  .trust-version { display: grid; grid-template-columns: minmax(0, 1.4fr) 28px 1fr 64px; gap: 6px; align-items: center; padding: 6px 0;
+    border-top: 1px solid var(--divider-color); font-size: 13px; }
+  .trust-version > span:first-child { display: grid; }
+  .trust-version.actual { font-weight: 700; }
+  .trust-version .rain { color: #1e64c8; text-align: right; }
+  .trust-pct.good { color: #2f7d3a; font-weight: 600; }
+  .trust-pct.mid { color: #8a5a00; font-weight: 600; }
+  .trust-pct.bad { color: #a3341a; font-weight: 600; }
   .day-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 1px; min-height: 18px; }
   .alert-chip { font-size: 14px; }
   .task-chip { padding: 0 1px; border: none; background: none; font-size: 15px; border-radius: 4px; }
@@ -3138,6 +3165,7 @@ class HomesteadPanel extends HTMLElement {
     return [
       this._lastBackupBox(),
       this._weatherStrip(),
+      this._trustTodayBox(),
       ...this._soilLines(),
       this._todayBox(),
       this._alertsBox(),
@@ -8040,6 +8068,7 @@ class HomesteadPanel extends HTMLElement {
         h("div", { className: "t-max" }, `${day.t_max != null ? deg(day.t_max) : "–"}°`),
         h("div", { className: "sub" }, `${day.t_min != null ? deg(day.t_min) : "–"}°`),
         h("div", { className: "sub rain" }, day.rain_mm ? rainText(day.rain_mm) : ""),
+        this._trustBars(day.date),
         h(
           "div",
           { className: "day-chips" },
@@ -8056,6 +8085,142 @@ class HomesteadPanel extends HTMLElement {
       );
     });
     return h("div", { className: "days" }, columns);
+  }
+
+  // ----- how far the forecast can be trusted -----
+
+  /** Five little bars under a day of the strip: tap for the versions of its forecast. */
+  _trustBars(day) {
+    const trust = this._outlook?.trust?.days?.[day];
+    if (!trust) return null;
+    const label = `${this.t(`trust_${trust.score}`)} · ${trust.changes ? this._plural("trustChanges", trust.changes) : this.t("trustStable")}`;
+    return h(
+      "button",
+      { type: "button", className: `trust-bars s${trust.score}`, title: label, "aria-label": label, onclick: () => this._showForecastDay(day) },
+      [1, 2, 3, 4, 5].map((i) => h("i", { className: i <= trust.score ? "on" : "" })),
+    );
+  }
+
+  /** Today so far against yesterday's forecast for today, from the own sensors. */
+  _trustTodayBox() {
+    const trust = this._outlook?.trust;
+    const check = trust?.today;
+    const correction = trust?.correction;
+    if (!check && correction == null) return null;
+    const value = (item) => (item.kind === "pressure" ? pressureText(item.value) : item.kind === "rain" ? rainText(item.value) : `${deg(item.value)}°`);
+    const forecast = (item) => (item.forecast == null ? "" : this.t("trustForecast", { value: item.kind === "rain" ? rainText(item.forecast) : `${deg(item.forecast)}°` }));
+    return h(
+      "div",
+      { className: "trust-today" },
+      check
+        ? [
+            h(
+              "div",
+              { className: "row header" },
+              h("h3", {}, `🌦️ ${this.t("trustTodayTitle")}`),
+              h("span", { className: `trust-verdict${check.off ? " off" : ""}` }, this.t(check.off ? "trustOff" : "trustOk")),
+            ),
+            h(
+              "div",
+              { className: "trust-items" },
+              check.items.map((item) =>
+                h(
+                  "div",
+                  { className: `trust-item${item.off ? " off" : ""}` },
+                  h("span", { className: "sub" }, this.t(`trust_${item.kind}`)),
+                  h("b", {}, value(item)),
+                  h("span", { className: "sub" }, forecast(item)),
+                  h("span", { className: "sub verdict" }, this.t(item.off ? `trustOff_${item.kind}` : "trustAsForecast")),
+                ),
+              ),
+            ),
+          ]
+        : null,
+      correction != null ? h("p", { className: "hint", style: "white-space:normal" }, this.t("trustCorrection", { value: degDiff(correction) })) : null,
+    );
+  }
+
+  /** The versions of one day's forecast, newest first, and what the sensors measured. */
+  async _showForecastDay(day) {
+    let reply;
+    try {
+      reply = await this._hass.callWS({ type: "homestead/forecast/day", date: day });
+    } catch {
+      return;
+    }
+    const sky = { sun: "☀️", cloud: "☁️", rain: "🌧️", snow: "🌨️", storm: "⛈️" };
+    const versions = [...(reply.versions || [])].reverse();
+    const ahead = (lead) => (lead === 0 ? this.t("trustSameDay") : this._plural("trustAhead", lead));
+    const line = (when, sub, v, strong) =>
+      h(
+        "div",
+        { className: `trust-version${strong ? " actual" : ""}` },
+        h("span", {}, h("b", {}, when), h("span", { className: "sub" }, sub)),
+        h("span", { className: "wx" }, sky[v.sky] || ""),
+        h("span", {}, `${v.t_max != null ? deg(v.t_max) : "–"}° / ${v.t_min != null ? deg(v.t_min) : "–"}°`),
+        h("span", { className: "rain" }, v.rain_mm != null ? rainText(v.rain_mm) : ""),
+      );
+    const issued = (on) => `${this._date(on.slice(0, 10), false)} ${on.slice(11, 16)}`;
+    const trust = this._outlook?.trust?.days?.[day];
+    const close = () => overlay.remove();
+    const overlay = h(
+      "div",
+      { className: "lightbox trust-sheet", onclick: (ev) => ev.target === overlay && close() },
+      h(
+        "div",
+        { className: "trust-card" },
+        h("h3", {}, `${this.t("trustDayTitle")} · ${this._date(day)}`),
+        trust ? h("p", { className: "sub" }, `${this.t(`trust_${trust.score}`)} · ${trust.changes ? this._plural("trustChanges", trust.changes) : this.t("trustStable")}${trust.learned ? "" : ` ${this.t("trustGeneric")}`}`) : null,
+        reply.actual ? line(this.t("trustMeasured"), "", reply.actual, true) : null,
+        versions.map((v) => line(issued(v.on), ahead(v.lead), v, false)),
+        versions.length ? null : h("p", { className: "hint" }, this.t("trustNoVersions")),
+        h("button", { type: "button", onclick: close }, this.t("close")),
+      ),
+    );
+    this.shadowRoot.append(overlay);
+  }
+
+  /** Analysis: errors by days ahead, the garden's own offset, the pressure rule. */
+  _trustAnalysisBox() {
+    const trust = this._outlook?.trust;
+    if (!trust?.stats) return null;
+    const stats = trust.stats;
+    const leads = Object.entries(stats.leads || {}).sort((a, b) => Number(a[0]) - Number(b[0]));
+    const pct = (v) => (v == null ? "–" : `${v}%`);
+    const err = (v) => (v == null ? "–" : `±${degDiff(v).replace(/^[+−]/, "")}`);
+    const tone = (v) => (v == null ? "" : v >= 80 ? "good" : v >= 60 ? "mid" : "bad");
+    const lines = [
+      stats.night_bias != null ? this.t("anTrustNight", { value: degDiff(stats.night_bias) }) : null,
+      stats.day_bias != null ? this.t("anTrustDay", { value: degDiff(stats.day_bias) }) : null,
+      stats.pressure ? this.t("anTrustPressure", { rained: stats.pressure.rained, drops: stats.pressure.drops }) : null,
+    ].filter(Boolean);
+    return h(
+      "div",
+      { className: "an-box" },
+      h("h3", {}, this.t("anTrust")),
+      !trust.sensors
+        ? h("p", { className: "hint", style: "white-space:normal" }, this.t("anTrustNoSensors"))
+        : stats.days < 21
+          ? h("p", { className: "hint", style: "white-space:normal" }, this.t("anTrustFew", { count: stats.days }))
+          : h("p", { className: "sub" }, this.t("anTrustDays", { count: stats.days })),
+      leads.length
+        ? h(
+            "div",
+            { className: "an-table trust-table", style: "grid-template-columns: auto repeat(4, minmax(48px, 1fr))" },
+            [this.t("anTrustAhead"), this.t("anTrustMax"), this.t("anTrustMin"), this.t("anTrustRain"), this.t("anTrustChanges")].map((x) => h("div", { className: "an-th" }, x)),
+            leads.flatMap(([lead, row]) => [
+              h("div", { className: "an-th" }, this._plural("trustAhead", Number(lead))),
+              h("div", {}, err(row.max_err)),
+              h("div", {}, err(row.min_err)),
+              h("div", { className: `trust-pct ${tone(row.rain_ok)}` }, pct(row.rain_ok)),
+              h("div", {}, String(row.changes).replace(".", UNITS.comma ? "," : ".")),
+            ]),
+          )
+        : null,
+      lines.map((text) => h("p", { style: "margin:4px 0;white-space:normal;font-size:14px" }, text)),
+      trust.pressure ? null : h("p", { className: "hint", style: "white-space:normal" }, this.t("anTrustNoPressure")),
+      leads.length ? h("p", { className: "hint", style: "white-space:normal" }, this.t("anTrustHint")) : null,
+    );
   }
 
   // ----- the year as one continuous line, grouped by zone -----
@@ -8442,7 +8607,7 @@ class HomesteadPanel extends HTMLElement {
       ...this._data.events.map((e) => e.done_on.slice(0, 4)),
     ]);
     const years = [...allYears].sort().slice(-5);
-    if (!years.length) return [h("p", { className: "hint" }, this.t("anEmpty"))];
+    if (!years.length) return [h("p", { className: "hint" }, this.t("anEmpty")), this._trustAnalysisBox()];
     const zoneSelect = h(
       "select",
       {
@@ -8548,6 +8713,7 @@ class HomesteadPanel extends HTMLElement {
       this._timingBox(rows),
       this._moonBox(),
       this._lessonsBox(),
+      this._trustAnalysisBox(),
     ];
   }
 
@@ -10050,6 +10216,22 @@ function rainText(mm) {
   if (!UNITS.imperial) return `${text(Math.round(mm * 10) / 10)} mm`;
   const inches = mm / 25.4;
   return `${text(inches < 1 ? inches.toFixed(2) : inches.toFixed(1))} in`;
+}
+
+/** A temperature difference (°C) with its sign and one decimal: "−1,8°". */
+function degDiff(celsius) {
+  if (celsius == null) return "";
+  const value = Math.round((UNITS.imperial ? celsius * 1.8 : celsius) * 10) / 10;
+  const text = String(Math.abs(value)).replace(".", UNITS.comma ? "," : ".");
+  return `${value > 0 ? "+" : value < 0 ? "−" : ""}${text}°`;
+}
+
+/** A pressure change in hPa (inHg in imperial), with its sign. */
+function pressureText(hpa) {
+  if (hpa == null) return "";
+  const value = UNITS.imperial ? Math.round((hpa / 33.864) * 100) / 100 : Math.round(hpa * 10) / 10;
+  const text = String(Math.abs(value)).replace(".", UNITS.comma ? "," : ".");
+  return `${value > 0 ? "+" : value < 0 ? "−" : ""}${text} ${UNITS.imperial ? "inHg" : "hPa"}`;
 }
 
 function lengthText(cm) {

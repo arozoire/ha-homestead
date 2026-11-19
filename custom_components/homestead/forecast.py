@@ -3,6 +3,7 @@
 Forecast: the chosen HA weather entity (no extra calls), else Open-Meteo.
 History (frost dates, extremes): the user's temperature and rain sensors first (recorder daily
 long-term statistics), Open-Meteo for the years or values they lack. Kept in ``.storage/homestead.climate``.
+Forecast versions and what the sensors measured (how far it can be trusted): ``.storage/homestead.forecasts``.
 """
 
 from __future__ import annotations
@@ -19,7 +20,9 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dis
 from homeassistant.helpers.storage import Store
 from homeassistant.helpers.translation import async_get_translations
 from homeassistant.util import dt as dt_util
+from homeassistant.util.unit_conversion import PressureConverter
 
+from . import forecast_log
 from .climate import CHILL_NEEDS, chill_hours, chill_start, gdd_by_year, gdd_today, parse_hourly, soil_days
 from .const import (
     CONF_ALERT_NOTIFY,
@@ -29,6 +32,7 @@ from .const import (
     CONF_HEAT_NIGHT,
     CONF_NOTIFY,
     CONF_OPEN_METEO,
+    CONF_PRESSURE,
     CONF_RAIN,
     CONF_TEMPERATURE,
     CONF_WEATHER_ENTITY,
@@ -62,6 +66,7 @@ _LOGGER = logging.getLogger(__name__)
 OUTLOOK = f"{DOMAIN}_outlook"
 CROP_DEFAULTS = f"{DOMAIN}_crop_defaults"
 CLIMATE_STORAGE_KEY = f"{DOMAIN}.climate"
+FORECASTS_STORAGE_KEY = f"{DOMAIN}.forecasts"
 FORECAST_REFRESH = timedelta(hours=3)
 HISTORY_YEARS = 10
 HISTORY_MAX_AGE = timedelta(days=30)
@@ -275,6 +280,104 @@ async def _sensor_days(
     )
 
 
+async def _statistics(
+    hass: HomeAssistant, ids: set[str], start: datetime, end: datetime, period: str, types: set[str]
+) -> dict[str, list[dict]]:
+    if "recorder" not in hass.config.components or not ids:
+        return {}
+    from homeassistant.components.recorder import get_instance  # noqa: PLC0415
+    from homeassistant.components.recorder.statistics import statistics_during_period  # noqa: PLC0415
+
+    return await get_instance(hass).async_add_executor_job(
+        statistics_during_period, hass, dt_util.as_utc(start), dt_util.as_utc(end), ids, period, None, types
+    )
+
+
+def _row_time(row: dict) -> datetime | None:
+    begin = row.get("start")
+    when = dt_util.utc_from_timestamp(begin) if isinstance(begin, int | float) else begin
+    return dt_util.as_local(when) if isinstance(when, datetime) else None
+
+
+def _to_hpa(hass: HomeAssistant, entity_id: str) -> Callable[[float], float]:
+    """Pressure sensors in mbar, inHg, kPa…: the recorder keeps the sensor's own unit."""
+    state = hass.states.get(entity_id)
+    unit = state.attributes.get("unit_of_measurement") if state else None
+    if not unit or unit == "hPa" or unit not in PressureConverter.VALID_UNITS:
+        return lambda value: value
+    return lambda value: PressureConverter.convert(value, unit, "hPa")
+
+
+async def async_pressure_hours(
+    hass: HomeAssistant, options: dict[str, Any], start: datetime, end: datetime
+) -> list[tuple[datetime, float]]:
+    """Hourly mean pressure in hPa (several sensors averaged), oldest first."""
+    ids = entity_list(options.get(CONF_PRESSURE))
+    rows = await _statistics(hass, set(ids), start, end, "hour", {"mean"})
+    hours: dict[datetime, list[float]] = {}
+    for entity_id in ids:
+        convert = _to_hpa(hass, entity_id)
+        for row in rows.get(entity_id, []):
+            if (when := _row_time(row)) is not None and row.get("mean") is not None:
+                hours.setdefault(when, []).append(convert(row["mean"]))
+    return [(when, sum(v) / len(v)) for when, v in sorted(hours.items())]
+
+
+async def async_actuals(
+    hass: HomeAssistant, options: dict[str, Any], days: list[str]
+) -> dict[str, dict[str, Any]]:
+    """What the own sensors measured on those days: minimum, maximum, rain, largest pressure fall."""
+    if not days:
+        return {}
+    start, end = date.fromisoformat(days[0]), date.fromisoformat(days[-1])
+    measured = await _sensor_days(hass, options, start, end)
+    tz = dt_util.get_default_time_zone()
+    hours = await async_pressure_hours(
+        hass,
+        options,
+        datetime.combine(start - timedelta(days=1), datetime.min.time(), tz),
+        datetime.combine(end + timedelta(days=1), datetime.min.time(), tz),
+    )
+    drops = forecast_log.pressure_drop(hours)
+    out = {}
+    for day in days:
+        actual = {k: v for k, v in (measured.get(day) or {}).items() if k != "date"}
+        if hours and day in drops:
+            actual["p_drop"] = drops[day]
+        if actual:
+            out[day] = actual
+    return out
+
+
+async def async_today_so_far(
+    hass: HomeAssistant, options: dict[str, Any]
+) -> tuple[dict[str, Any], float | None]:
+    """Today until the last full hour (minimum, maximum, rain) and the pressure change of the last 3 hours."""
+    now = dt_util.now()
+    midnight = dt_util.start_of_local_day()
+    temp, rain = entity_list(options.get(CONF_TEMPERATURE)), entity_list(options.get(CONF_RAIN))
+    rows = await _statistics(hass, {*temp, *rain}, midnight, now, "hour", {"min", "max", "change"})
+    so_far: dict[str, Any] = {}
+    lows = [r["min"] for e in temp for r in rows.get(e, []) if r.get("min") is not None]
+    highs = [r["max"] for e in temp for r in rows.get(e, []) if r.get("max") is not None]
+    if lows:
+        so_far["t_min"] = round(min(lows), 1)
+    if highs:
+        so_far["t_max"] = round(max(highs), 1)
+    sums = [sum(max(r.get("change") or 0, 0) for r in rows.get(e, [])) for e in rain if rows.get(e)]
+    if sums:
+        so_far["rain_mm"] = round(sum(sums) / len(sums), 1)
+    pressure = None
+    ids = entity_list(options.get(CONF_PRESSURE))
+    if ids:
+        hours = await async_pressure_hours(hass, options, now - timedelta(hours=4), now)
+        current = [_to_hpa(hass, e)(v) for e, v in sensor_readings(hass, ids).items()]
+        before = [v for when, v in hours if now - when >= timedelta(hours=3)]
+        if current and before:
+            pressure = round(sum(current) / len(current) - before[-1], 1)
+    return so_far, pressure
+
+
 async def async_history(
     hass: HomeAssistant, options: dict[str, Any], thresholds: Thresholds
 ) -> dict[str, Any]:
@@ -330,14 +433,53 @@ class Outlook:
         self.updated: str | None = None
         self._notified: list[str] = []
         self._storage: Store = Store(hass, 1, CLIMATE_STORAGE_KEY)
+        self.log: dict[str, Any] = {}
+        self.trust: dict[str, Any] = {}
+        self._log_storage: Store = Store(hass, 1, FORECASTS_STORAGE_KEY)
 
     async def async_load(self) -> None:
         saved = await self._storage.async_load() or {}
         self.climate = saved.get("climate") or {}
         self._notified = list(saved.get("notified") or [])
+        self.log = await self._log_storage.async_load() or {}
 
     async def async_remove(self) -> None:
         await self._storage.async_remove()
+        await self._log_storage.async_remove()
+
+    async def _async_track_forecast(self) -> None:
+        """Keep the new forecast where it changed, the measurements of the days just over, the summary."""
+        now = dt_util.now()
+        today = now.date()
+        changed = forecast_log.record(self.log, self.forecast, now.replace(tzinfo=None))
+        try:
+            measured = await async_actuals(
+                self.hass, self.options, forecast_log.missing_actuals(self.log, today)
+            )
+            so_far, pressure = await async_today_so_far(self.hass, self.options)
+        except Exception as err:  # noqa: BLE001 - the recorder must not break the forecast
+            _LOGGER.debug("Sensor statistics for the forecast check failed: %s", err)
+            measured, so_far, pressure = {}, {}, None
+        for day, actual in measured.items():
+            forecast_log.set_actual(self.log, day, actual)
+        forecast_log.prune(self.log, today)
+        summary = forecast_log.stats(self.log)
+        self.trust = {
+            "stats": summary,
+            "days": forecast_log.reliability(self.log, summary, today),
+            "today": forecast_log.today_check(self.log, today, so_far, pressure),
+            "correction": forecast_log.night_correction(summary),
+            "pressure": bool(entity_list(self.options.get(CONF_PRESSURE))),
+            "sensors": bool(
+                entity_list(self.options.get(CONF_TEMPERATURE)) or entity_list(self.options.get(CONF_RAIN))
+            ),
+        }
+        if changed or measured:
+            await self._log_storage.async_save(self.log)
+
+    def day_history(self, day: str) -> dict[str, Any]:
+        entry = (self.log.get("days") or {}).get(day) or {}
+        return {"date": day, "versions": entry.get("versions") or [], "actual": entry.get("actual")}
 
     def _stale(self) -> bool:
         computed = self.climate.get("computed_on")
@@ -367,7 +509,9 @@ class Outlook:
     async def _async_evaluate(self) -> None:
         """Alerts and per-activity advice from the forecast already fetched."""
         risks = await self.async_plant_risks()
-        self.alerts = alerts(self.forecast, risks, self.thresholds)
+        # Nights colder than forecast here: the measured offset moves the minimum.
+        local = forecast_log.corrected(self.forecast, self.trust.get("correction"))
+        self.alerts = alerts(local, risks, self.thresholds)
         tender = {r.id for r in risks if r.warm or (r.hardiness_c is not None and r.hardiness_c > 0)}
         self.advice = {}
         for task in self.store.data.tasks.values():
@@ -423,6 +567,7 @@ class Outlook:
         self.forecast, self.source = await async_fetch_forecast(self.hass, self.options)
         today = dt_util.now().date().isoformat()
         self.forecast = [d for d in self.forecast if d["date"] >= today]
+        await self._async_track_forecast()
         self.water_days, self.soil_hours = await async_fetch_water(self.hass, self.options)
         if self.chill.get("on") != dt_util.now().date().isoformat():
             self.chill = await async_fetch_chill(self.hass, self.options)
@@ -494,6 +639,7 @@ class Outlook:
             "soil_forecast": soil_days(self.soil_hours),
             "climate": self.climate,
             "thresholds": vars(self.thresholds),
+            "trust": self.trust,
             "updated": self.updated,
         }
 

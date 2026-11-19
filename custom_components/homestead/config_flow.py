@@ -31,6 +31,7 @@ from .const import (
     CONF_NOTIFY_TIME,
     CONF_OPEN_METEO,
     CONF_PHOTO_MEDIA,
+    CONF_PRESSURE,
     CONF_RAIN,
     CONF_SOIL,
     CONF_SOIL_EC,
@@ -52,6 +53,7 @@ SENSORS = {
     CONF_SOIL: "moisture",
     CONF_SOIL_TEMP: "temperature",
     CONF_SOIL_EC: None,  # few integrations set a device class for conductivity
+    CONF_PRESSURE: ["atmospheric_pressure", "pressure"],
 }
 
 
