@@ -22,6 +22,7 @@
           "soil_moisture_sensor": "Humedad del suelo",
           "soil_temperature_sensor": "Sensor de temperatura del suelo",
           "soil_ec_sensor": "Sensor de CE del suelo",
+          "pressure_sensor": "Presión atmosférica",
           "open_meteo": "Usar Open-Meteo para los datos que faltan",
           "notify_services": "Enviar recordatorios a",
           "notify_time": "Hora de los recordatorios",
@@ -38,7 +39,8 @@
           "photo_media": "Carpeta multimedia de HA donde el plan de fotos guarda los originales, sin compresión. Un NAS añadido en Ajustes → Sistema → Almacenamiento aparece aquí.",
           "soil_temperature_sensor": "Opcional: temperatura del suelo en el tiempo del diario y control antes de sembrar al aire libre o trasplantar (una sonda como la Ecowitt WH52).",
           "soil_ec_sensor": "Opcional: conductividad eléctrica del suelo (sales, abono), registrada con el tiempo del diario.",
-          "units": "Auto: como Home Assistant (Ajustes → Sistema → General). Imperial muestra °F, pulgadas, pies, acres, libras y galones; los datos se guardan en métrico."
+          "units": "Auto: como Home Assistant (Ajustes → Sistema → General). Imperial muestra °F, pulgadas, pies, acres, libras y galones; los datos se guardan en métrico.",
+          "pressure_sensor": "Opcional: para saber cuánto fiarse de la previsión (una fuerte bajada de presión suele traer lluvia no prevista)."
         }
       }
     }

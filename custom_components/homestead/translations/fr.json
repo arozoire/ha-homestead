@@ -22,6 +22,7 @@
           "soil_moisture_sensor": "Humidité du sol",
           "soil_temperature_sensor": "Capteur de température du sol",
           "soil_ec_sensor": "Capteur EC du sol",
+          "pressure_sensor": "Pression atmosphérique",
           "open_meteo": "Utiliser Open-Meteo pour les données manquantes",
           "notify_services": "Envoyer les rappels à",
           "notify_time": "Heure des rappels",
@@ -38,7 +39,8 @@
           "photo_media": "Dossier média de HA où le plan photo garde les originaux, sans compression. Un NAS ajouté dans Paramètres → Système → Stockage apparaît ici.",
           "soil_temperature_sensor": "Facultatif : température du sol dans la météo du journal, et contrôle avant de semer en pleine terre ou de repiquer (une sonde comme l'Ecowitt WH52).",
           "soil_ec_sensor": "Facultatif : conductivité électrique du sol (sels, engrais), notée avec la météo du journal.",
-          "units": "Auto : comme Home Assistant (Paramètres → Système → Général). Impérial affiche °F, pouces, pieds, acres, livres et gallons ; les données restent enregistrées en métrique."
+          "units": "Auto : comme Home Assistant (Paramètres → Système → Général). Impérial affiche °F, pouces, pieds, acres, livres et gallons ; les données restent enregistrées en métrique.",
+          "pressure_sensor": "Facultatif : pour savoir à quel point se fier aux prévisions (une forte baisse de pression amène souvent une pluie non prévue)."
         }
       }
     }

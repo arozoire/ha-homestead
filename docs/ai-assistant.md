@@ -10,6 +10,7 @@
 | "A diary of pruning, treatments, sowing, harvests" | Diary events per plant or zone, with photos, moon phase and a weather snapshot (own sensors, else Open-Meteo) |
 | "Remind me to treat / prune / sow" | Tasks (also yearly) in the HA to-do and calendar, morning phone notifications with a ✔ Done button, weather check and best nearby day |
 | "Frost or heatwave alert for my plants" | Alerts per plant from the forecast and the plant's hardiness, on the phone |
+| "Is the forecast reliable here?" | Forecast versions kept and checked against the user's own sensors: a 1–5 score per day, how each day's forecast changed, error by days ahead, the garden's own night offset (used by frost alerts), pressure falls and rain |
 | "When should I water?" | Water balance per zone (rain − evapotranspiration, or the zone's soil moisture sensors), sensors on single pots, young trees followed for two years |
 | "Track seeds / what to sow now" | Seed lots with age warnings, sowing calendar set on the garden's own frost dates, rotation advice |
 | "Garden costs and harvest yields" | Expenses and sales, harvest quantities, yearly balance, multi-year analysis per crop |

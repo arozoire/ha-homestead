@@ -56,6 +56,7 @@ def async_register_websocket(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, ws_crop_defaults)
     websocket_api.async_register_command(hass, ws_outlook_subscribe)
     websocket_api.async_register_command(hass, ws_outlook_refresh)
+    websocket_api.async_register_command(hass, ws_forecast_day)
 
 
 @websocket_api.websocket_command({vol.Required("type"): "homestead/crops/defaults"})
@@ -84,6 +85,19 @@ def ws_outlook_subscribe(
     connection.subscriptions[msg_id] = async_dispatcher_connect(hass, SIGNAL_OUTLOOK_UPDATED, send)
     connection.send_result(msg_id)
     send()
+
+
+@websocket_api.websocket_command(
+    {vol.Required("type"): "homestead/forecast/day", vol.Required("date"): cv.date}
+)
+@callback
+def ws_forecast_day(
+    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]
+) -> None:
+    """The versions of the forecast for one day, and what the sensors measured."""
+    outlook = get_outlook(hass)
+    day = msg["date"].isoformat()
+    connection.send_result(msg["id"], outlook.day_history(day) if outlook else {"date": day, "versions": []})
 
 
 @websocket_api.websocket_command(

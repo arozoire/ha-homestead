@@ -22,6 +22,7 @@
           "soil_moisture_sensor": "Bodemvochtigheid",
           "soil_temperature_sensor": "Bodemtemperatuursensor",
           "soil_ec_sensor": "Bodem-EC-sensor",
+          "pressure_sensor": "Luchtdruk",
           "open_meteo": "Open-Meteo gebruiken voor ontbrekende gegevens",
           "notify_services": "Herinneringen sturen naar",
           "notify_time": "Tijd van de herinneringen",
@@ -38,7 +39,8 @@
           "photo_media": "HA-mediamap waar het fotoplan de originelen ongecomprimeerd bewaart. Een NAS toegevoegd via Instellingen → Systeem → Opslag verschijnt hier.",
           "soil_temperature_sensor": "Optioneel: bodemtemperatuur in het dagboekweer en een controle vóór buiten zaaien of uitplanten (een bodemsonde zoals de Ecowitt WH52).",
           "soil_ec_sensor": "Optioneel: elektrische geleidbaarheid van de bodem (zouten, mest), vastgelegd met het dagboekweer.",
-          "units": "Auto: zoals Home Assistant (Instellingen → Systeem → Algemeen). Imperiaal toont °F, inch, voet, acres, pond en gallon; de gegevens blijven metrisch opgeslagen."
+          "units": "Auto: zoals Home Assistant (Instellingen → Systeem → Algemeen). Imperiaal toont °F, inch, voet, acres, pond en gallon; de gegevens blijven metrisch opgeslagen.",
+          "pressure_sensor": "Optioneel: laat zien hoe betrouwbaar de verwachting is (een sterke drukdaling brengt vaak regen die niet voorspeld was)."
         }
       }
     }
