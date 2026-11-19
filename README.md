@@ -8,7 +8,7 @@
 
 A Home Assistant integration to manage your vegetable garden, orchard and garden: plants, fruit trees, beds, a diary, expenses, tools, seeds, harvests and weather-aware advice.
 
-> Status: **v0.19** (see *What it does today*). Full specification in [SPEC.md](SPEC.md) (Italian).
+> [![Latest release](https://img.shields.io/github/v/release/arozoire/ha-homestead?label=release)](https://github.com/arozoire/ha-homestead/releases/latest) · see *What it does today*. Full specification in [SPEC.md](SPEC.md) (Italian).
 
 ## Ask your AI assistant
 
