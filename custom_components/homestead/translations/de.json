@@ -172,9 +172,14 @@
         "lawn": "Rasen",
         "woodland": "Wald",
         "compost": "Komposter",
-        "coop": "Hühnerstall",
+        "coop": "Hoftiere",
         "nursery": "Anzucht",
         "indoor": "Drinnen (ein Raum)",
+        "apiary": "Bienenstand",
+        "hive": "Bienenstock",
+        "melliferous": "Bienenblumen",
+        "hydroponic": "Hydroponik-Kreislauf",
+        "fish_tank": "Fischbecken",
         "other": "Sonstiges"
       }
     },
@@ -209,13 +214,22 @@
         "compost_turn": "Kompost umsetzen",
         "compost_harvest": "Kompost ernten",
         "eggs": "Eier",
-        "flock_in": "Hühner dazu",
-        "flock_out": "Hühner weg",
+        "flock_in": "Tiere angekommen",
+        "flock_out": "Tiere abgegangen",
         "animal_care": "Futter und Pflege",
-        "coop_cleaning": "Stallreinigung",
+        "coop_cleaning": "Reinigung",
         "repotting": "Umtopfen",
         "wood_burned": "Verheiztes Holz (Winter)",
-        "photo": "Foto"
+        "photo": "Foto",
+        "hive_inspection": "Stockkontrolle",
+        "varroa_count": "Varroa-Zählung",
+        "bee_feeding": "Bienenfütterung",
+        "swarm": "Schwarm",
+        "honey_harvest": "Honigernte",
+        "predator": "Fressfeind gesehen",
+        "water_test": "Wassertest",
+        "fish_feeding": "Fischfütterung",
+        "fish_weighing": "Fischwiegung"
       }
     },
     "harvest_unit": {
@@ -248,6 +262,9 @@
         "age": "Alter",
         "sold": "Verkauft oder verschenkt",
         "slaughtered": "Geschlachtet",
+        "moved": "Umgesetzt (anderes Becken oder Gehege)",
+        "bought": "Gekauft",
+        "born": "Hier geboren",
         "other": "Sonstiges"
       }
     },
@@ -320,6 +337,18 @@
         "partly": "teilweise",
         "no": "nein"
       }
+    },
+    "animal": {
+      "options": {
+        "hens": "Hühner",
+        "quails": "Wachteln",
+        "ducks": "Enten",
+        "geese": "Gänse",
+        "turkeys": "Truthähne",
+        "rabbits": "Kaninchen",
+        "fish": "Fische",
+        "other": "Andere"
+      }
     }
   },
   "services": {
@@ -382,6 +411,22 @@
         "flow_entity": {
           "name": "Durchflussmesser",
           "description": "Durchflussmesser des Ventils (Durchfluss oder Gesamtmenge); jeder Lauf bekommt das Wasser, das er gegeben hat."
+        },
+        "varroa_threshold": {
+          "name": "Varroa-Schwelle",
+          "description": "Bienenstand: Milben pro Tag im natürlichen Totenfall, ab denen behandelt wird (Standard 10)."
+        },
+        "varroa_months": {
+          "name": "Varroa-Schwelle pro Monat",
+          "description": "Optional: \"3\": 3, \"8\": 10 (Monat: Schwelle) — in manchen Monaten eine andere Schwelle."
+        },
+        "traps": {
+          "name": "Hornissenfallen",
+          "description": "Bienenstand: aufgestellte Fallen."
+        },
+        "ph_entity": {
+          "name": "pH-Sensor",
+          "description": "Wasserkreislauf: pH-Sonden (mehrere werden gemittelt)."
         }
       }
     },
@@ -448,6 +493,22 @@
         "flow_entity": {
           "name": "Durchflussmesser",
           "description": "Durchflussmesser des Ventils (Durchfluss oder Gesamtmenge); jeder Lauf bekommt das Wasser, das er gegeben hat."
+        },
+        "varroa_threshold": {
+          "name": "Varroa-Schwelle",
+          "description": "Bienenstand: Milben pro Tag im natürlichen Totenfall, ab denen behandelt wird (Standard 10)."
+        },
+        "varroa_months": {
+          "name": "Varroa-Schwelle pro Monat",
+          "description": "Optional: \"3\": 3, \"8\": 10 (Monat: Schwelle) — in manchen Monaten eine andere Schwelle."
+        },
+        "traps": {
+          "name": "Hornissenfallen",
+          "description": "Bienenstand: aufgestellte Fallen."
+        },
+        "ph_entity": {
+          "name": "pH-Sensor",
+          "description": "Wasserkreislauf: pH-Sonden (mehrere werden gemittelt)."
         }
       }
     },
@@ -1074,6 +1135,18 @@
         "worked": {
           "name": "Hat es gewirkt",
           "description": "Behandlung: hat sie gewirkt."
+        },
+        "animal": {
+          "name": "Tier",
+          "description": "Eier, Zugänge und Abgänge: Hühner, Wachteln, Kaninchen, Fische… (leer = Hühner)."
+        },
+        "queen": {
+          "name": "Königin gesehen",
+          "description": "Stockkontrolle: Königin oder frische Eier gesehen."
+        },
+        "readings": {
+          "name": "Wasserwerte",
+          "description": "Wassertest: ph, ec, temperature, ammonia, nitrite, nitrate (z. B. \"ph\": 7.1)."
         }
       }
     },
@@ -1152,6 +1225,18 @@
         "worked": {
           "name": "Hat es gewirkt",
           "description": "Behandlung: hat sie gewirkt."
+        },
+        "animal": {
+          "name": "Tier",
+          "description": "Eier, Zugänge und Abgänge: Hühner, Wachteln, Kaninchen, Fische… (leer = Hühner)."
+        },
+        "queen": {
+          "name": "Königin gesehen",
+          "description": "Stockkontrolle: Königin oder frische Eier gesehen."
+        },
+        "readings": {
+          "name": "Wasserwerte",
+          "description": "Wassertest: ph, ec, temperature, ammonia, nitrite, nitrate (z. B. \"ph\": 7.1)."
         }
       }
     },

@@ -22,7 +22,17 @@ YOUNG_DRY_DAYS = 10
 YOUNG_RAIN = 10.0  # mm in a day that waters a young tree
 YOUNG_MONTHS = range(4, 11)  # April to October
 YOUNG_TYPES = {PlantType.FRUIT_TREE, PlantType.TREE, PlantType.SHRUB, PlantType.VINE}
-SKIPPED_ZONES = {ZoneKind.INDOOR, ZoneKind.COMPOST, ZoneKind.COOP, ZoneKind.WOODLAND}
+SKIPPED_ZONES = {
+    ZoneKind.INDOOR,
+    ZoneKind.COMPOST,
+    ZoneKind.COOP,
+    ZoneKind.WOODLAND,
+    ZoneKind.APIARY,
+    ZoneKind.HIVE,
+    ZoneKind.MELLIFEROUS,
+    ZoneKind.HYDROPONIC,
+    ZoneKind.FISH_TANK,
+}
 
 
 def parse_water_days(raw: dict[str, Any]) -> list[dict[str, Any]]:

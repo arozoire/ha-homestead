@@ -21,7 +21,10 @@ from .models import (
     EVENT_COST_CATEGORY,
     PHOTO_PARTS,
     SOIL_SENSOR_FIELDS,
+    WATER_READINGS,
     Abundance,
+    Animal,
+    ArrivalReason,
     CropProfile,
     DeathCause,
     EndReason,
@@ -77,7 +80,17 @@ ADD_ZONE_SCHEMA = vol.Schema(
         vol.Optional("geometry"): vol.Any(None, validate_polygon),
         vol.Optional("species"): vol.All(
             cv.ensure_list,
-            [vol.Any(cv.string, {vol.Required("name"): cv.string, vol.Optional("taxon_id"): _opt_str})],
+            [
+                vol.Any(
+                    cv.string,
+                    {
+                        vol.Required("name"): cv.string,
+                        vol.Optional("taxon_id"): _opt_str,
+                        vol.Optional("nectar"): [vol.All(vol.Coerce(int), vol.Range(min=1, max=12))],
+                        vol.Optional("pollen"): [vol.All(vol.Coerce(int), vol.Range(min=1, max=12))],
+                    },
+                )
+            ],
         ),
         vol.Optional("notes"): _opt_str,
         # One entity id or several (averaged).
@@ -87,6 +100,12 @@ ADD_ZONE_SCHEMA = vol.Schema(
         vol.Optional("valve_entity"): vol.Any(None, cv.entity_id),
         vol.Optional("hose_here"): cv.boolean,
         vol.Optional("flow_entity"): vol.Any(None, cv.entity_id),
+        # Apiary: varroa threshold (mites a day), by month if the user wants it; hornet traps
+        vol.Optional("varroa_threshold"): vol.Any(None, _positive),
+        vol.Optional("varroa_months"): vol.Any(None, {vol.Coerce(str): _positive}),
+        vol.Optional("traps"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0))),
+        # Water circuit: pH probes
+        vol.Optional("ph_entity"): vol.Any(None, cv.entity_ids),
     }
 )
 
@@ -307,11 +326,16 @@ _EVENT_FIELDS = {
     vol.Optional("abundance"): vol.Any(None, vol.In([a.value for a in Abundance])),
     vol.Optional("keep"): _opt_str,
     vol.Optional("avoid"): _opt_str,
-    vol.Optional("reason"): vol.Any(None, vol.In([r.value for r in (*LeaveReason, *EndReason)])),
+    vol.Optional("reason"): vol.Any(
+        None, vol.In(list(dict.fromkeys(r.value for r in (*LeaveReason, *EndReason, *ArrivalReason))))
+    ),
     vol.Optional("cause"): vol.Any(None, vol.In([c.value for c in DeathCause])),
     vol.Optional("severity"): vol.Any(None, vol.In([s.value for s in Severity])),
     vol.Optional("worked"): vol.Any(None, vol.In([w.value for w in Worked])),
     vol.Optional("notes"): _opt_str,
+    vol.Optional("animal"): vol.Any(None, vol.In([a.value for a in Animal])),
+    vol.Optional("queen"): vol.Any(None, cv.boolean),
+    vol.Optional("readings"): vol.Any(None, {vol.In(WATER_READINGS): vol.Coerce(float)}),
 }
 
 TRANSPLANT_SCHEMA = vol.Schema(

@@ -172,9 +172,14 @@
         "lawn": "Prato",
         "woodland": "Bosco",
         "compost": "Compostiera",
-        "coop": "Pollaio",
+        "coop": "Animali da cortile",
         "nursery": "Semenzaio",
         "indoor": "In casa (una stanza)",
+        "apiary": "Apiario",
+        "hive": "Arnia",
+        "melliferous": "Fiori per le api",
+        "hydroponic": "Circuito idroponico",
+        "fish_tank": "Vasca dei pesci",
         "other": "Altro"
       }
     },
@@ -209,13 +214,22 @@
         "compost_turn": "Rivoltare il compost",
         "compost_harvest": "Raccolta compost",
         "eggs": "Uova",
-        "flock_in": "Arrivo galline",
-        "flock_out": "Uscita galline",
+        "flock_in": "Arrivo animali",
+        "flock_out": "Uscita animali",
         "animal_care": "Mangime e cure",
-        "coop_cleaning": "Pulizia pollaio",
+        "coop_cleaning": "Pulizia",
         "repotting": "Rinvaso",
         "wood_burned": "Legna bruciata (inverno)",
-        "photo": "Foto"
+        "photo": "Foto",
+        "hive_inspection": "Ispezione dell'arnia",
+        "varroa_count": "Conta della varroa",
+        "bee_feeding": "Nutrizione delle api",
+        "swarm": "Sciamatura",
+        "honey_harvest": "Raccolta del miele",
+        "predator": "Predatore avvistato",
+        "water_test": "Test dell'acqua",
+        "fish_feeding": "Mangime ai pesci",
+        "fish_weighing": "Pesata dei pesci"
       }
     },
     "harvest_unit": {
@@ -248,6 +262,9 @@
         "age": "Vecchiaia",
         "sold": "Venduta o regalata",
         "slaughtered": "Macellata",
+        "moved": "Spostati (altra vasca o recinto)",
+        "bought": "Comprati",
+        "born": "Nati qui",
         "other": "Altro"
       }
     },
@@ -320,6 +337,18 @@
         "partly": "in parte",
         "no": "no"
       }
+    },
+    "animal": {
+      "options": {
+        "hens": "Galline",
+        "quails": "Quaglie",
+        "ducks": "Anatre",
+        "geese": "Oche",
+        "turkeys": "Tacchini",
+        "rabbits": "Conigli",
+        "fish": "Pesci",
+        "other": "Altro"
+      }
     }
   },
   "services": {
@@ -382,6 +411,22 @@
         "flow_entity": {
           "name": "Contatore",
           "description": "Contatore dell'acqua della valvola (portata o totale); ogni apertura riceve l'acqua erogata."
+        },
+        "varroa_threshold": {
+          "name": "Soglia della varroa",
+          "description": "Apiario: varroe al giorno nella caduta naturale oltre cui trattare (predefinita 10)."
+        },
+        "varroa_months": {
+          "name": "Soglia della varroa per mese",
+          "description": "Facoltativo: \"3\": 3, \"8\": 10 (mese: soglia) — una soglia diversa in certi mesi."
+        },
+        "traps": {
+          "name": "Trappole per calabroni",
+          "description": "Apiario: trappole messe intorno."
+        },
+        "ph_entity": {
+          "name": "Sensore di pH",
+          "description": "Circuito d'acqua: sonde del pH (più sonde vengono mediate)."
         }
       }
     },
@@ -448,6 +493,22 @@
         "flow_entity": {
           "name": "Contatore",
           "description": "Contatore dell'acqua della valvola (portata o totale); ogni apertura riceve l'acqua erogata."
+        },
+        "varroa_threshold": {
+          "name": "Soglia della varroa",
+          "description": "Apiario: varroe al giorno nella caduta naturale oltre cui trattare (predefinita 10)."
+        },
+        "varroa_months": {
+          "name": "Soglia della varroa per mese",
+          "description": "Facoltativo: \"3\": 3, \"8\": 10 (mese: soglia) — una soglia diversa in certi mesi."
+        },
+        "traps": {
+          "name": "Trappole per calabroni",
+          "description": "Apiario: trappole messe intorno."
+        },
+        "ph_entity": {
+          "name": "Sensore di pH",
+          "description": "Circuito d'acqua: sonde del pH (più sonde vengono mediate)."
         }
       }
     },
@@ -1074,6 +1135,18 @@
         "worked": {
           "name": "Ha funzionato",
           "description": "Trattamento: ha funzionato."
+        },
+        "animal": {
+          "name": "Animale",
+          "description": "Uova, arrivi e uscite: galline, quaglie, conigli, pesci… (vuoto = galline)."
+        },
+        "queen": {
+          "name": "Regina vista",
+          "description": "Ispezione dell'arnia: regina o uova fresche viste."
+        },
+        "readings": {
+          "name": "Valori dell'acqua",
+          "description": "Test dell'acqua: ph, ec, temperature, ammonia, nitrite, nitrate (es. \"ph\": 7.1)."
         }
       }
     },
@@ -1152,6 +1225,18 @@
         "worked": {
           "name": "Ha funzionato",
           "description": "Trattamento: ha funzionato."
+        },
+        "animal": {
+          "name": "Animale",
+          "description": "Uova, arrivi e uscite: galline, quaglie, conigli, pesci… (vuoto = galline)."
+        },
+        "queen": {
+          "name": "Regina vista",
+          "description": "Ispezione dell'arnia: regina o uova fresche viste."
+        },
+        "readings": {
+          "name": "Valori dell'acqua",
+          "description": "Test dell'acqua: ph, ec, temperature, ammonia, nitrite, nitrate (es. \"ph\": 7.1)."
         }
       }
     },

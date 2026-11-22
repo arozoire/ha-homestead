@@ -2,7 +2,7 @@ import * as L from "./vendor/leaflet.js";
 
 const BASE = new URL(".", import.meta.url).href;
 
-const ZONE_KINDS = ["vegetable_garden", "orchard", "flower_bed", "greenhouse", "pots", "lawn", "woodland", "compost", "coop", "nursery", "indoor", "other"];
+const ZONE_KINDS = ["vegetable_garden", "orchard", "flower_bed", "greenhouse", "pots", "lawn", "woodland", "compost", "coop", "nursery", "indoor", "apiary", "hive", "melliferous", "hydroponic", "fish_tank", "other"];
 
 const TEXT = {};
 // Metric or imperial: set from the integration options (auto = as Home Assistant). Data stays metric.
@@ -59,6 +59,15 @@ const EVENT_ICONS = {
   repotting: "🪴",
   wood_burned: "🔥",
   photo: "📸",
+  hive_inspection: "🐝",
+  varroa_count: "🔬",
+  bee_feeding: "🍯",
+  swarm: "🌪️",
+  honey_harvest: "🍯",
+  predator: "🦟",
+  water_test: "🧫",
+  fish_feeding: "🐟",
+  fish_weighing: "⚖️",
 };
 const WOOD_KINDS = ["clearing", "wood_cutting", "brushwood", "foraging", "wood_burned"];
 // Kinds that make sense for a houseplant.
@@ -80,12 +89,12 @@ const YARD_ALSO = ["note", "problem"];
 const COMPOST_TURN_DAYS = 28;
 // Diary entries drawn at once (more on request).
 const DIARY_PAGE = 60;
-const LEAVE_REASONS = ["predator", "illness", "age", "sold", "slaughtered", "other"];
+const LEAVE_REASONS = ["predator", "illness", "age", "sold", "slaughtered", "moved", "other"];
 const END_REASONS = { finished: "✅", died: "💀", removed: "🗑️" };
 const DEATH_CAUSES = { frost: "❄️", drought: "🏜️", disease: "🦠", pests: "🐛", animals: "🐾", unknown: "❔" };
 // Seedlings are usually planted out a few weeks after they come up.
 const READY_DAYS = 21;
-const LEAVE_ICONS = { predator: "🦊", illness: "🤒", age: "⌛", sold: "🤝", slaughtered: "🔪", other: "❔" };
+const LEAVE_ICONS = { predator: "🦊", illness: "🤒", age: "⌛", sold: "🤝", slaughtered: "🔪", moved: "↔️", other: "❔" };
 // Quantity label when it is not a harvest.
 const QUANTITY_LABEL = { eggs: "eggCount", flock_in: "henCount", flock_out: "henCount" };
 const QUANTITY_UNITS = {
@@ -97,11 +106,24 @@ const QUANTITY_UNITS = {
   eggs: ["pieces"],
   flock_in: ["pieces"],
   flock_out: ["pieces"],
+  honey_harvest: ["kg"],
 };
 // The same in imperial units first; the metric ones stay for older entries.
 const IMPERIAL_UNITS = { harvest: ["lb", "oz", "pieces", "gal", "kg", "l"], foraging: ["lb", "oz", "pieces", "gal", "kg", "l"] };
 // Kinds with a "product" field, and its label.
-const PRODUCT_LABEL = { problem: "pestWhat", fertilizing: "product", treatment: "product", foraging: "what", wood_cutting: "essence", flock_in: "breed", animal_care: "feedOrCare" };
+const PRODUCT_LABEL = {
+  problem: "pestWhat",
+  fertilizing: "product",
+  treatment: "product",
+  foraging: "what",
+  wood_cutting: "essence",
+  flock_in: "breed",
+  animal_care: "feedOrCare",
+  bee_feeding: "feedOrCare",
+  honey_harvest: "honeyKind",
+  predator: "predatorWhat",
+  fish_feeding: "feedOrCare",
+};
 // Rotation: the next family after the last one grown in a bed (leaves after fruits, roots after leaves…).
 const ROTATION_ORDER = ["Solanaceae", "Fabaceae", "Brassicaceae", "Cucurbitaceae", "Apiaceae", "Amaryllidaceae", "Asteraceae", "Amaranthaceae"];
 // Icon of a crop at a glance: "genus species" first, then the genus (keys as _cropKey writes them).
@@ -166,7 +188,31 @@ const SEED_VIABILITY = {
   Malvaceae: 3,
 };
 const ROTATION_YEARS = 3;
-const ZONE_ICONS = { vegetable_garden: "🥕", orchard: "🍎", flower_bed: "🌸", greenhouse: "🏠", pots: "🪴", lawn: "🌾", woodland: "🌲", compost: "♻️", coop: "🐔", nursery: "🌱", indoor: "🛋️", other: "📍" };
+const ZONE_ICONS = { vegetable_garden: "🥕", orchard: "🍎", flower_bed: "🌸", greenhouse: "🏠", pots: "🪴", lawn: "🌾", woodland: "🌲", compost: "♻️", coop: "🐔", nursery: "🌱", indoor: "🛋️", apiary: "🐝", hive: "🍯", melliferous: "🌼", hydroponic: "💧", fish_tank: "🐟", other: "📍" };
+// Farmyard animals (and fish): who an arrival, a departure or eggs are about; none = hens (before 0.22).
+const ANIMALS = { hens: "🐔", quails: "🐦", ducks: "🦆", geese: "🪿", turkeys: "🦃", rabbits: "🐇", fish: "🐟", other: "🐾" };
+const LAYERS = ["hens", "quails", "ducks", "geese", "turkeys"];
+const ARRIVAL_REASONS = { bought: "🛒", born: "🐣", moved: "↔️" };
+// Bees: their own kinds; varroa counted as a natural drop (a day) or a test (% of the bees).
+const BEE_KINDS = ["hive_inspection", "varroa_count", "treatment", "bee_feeding", "swarm", "honey_harvest", "predator"];
+const VARROA_METHODS = ["drop", "sugar", "alcohol"];
+const VARROA_PCT_THRESHOLD = 3;
+// Water circuit: tests, fish lots moved by hand.
+const WATER_KINDS = ["water_test", "fish_feeding", "fish_weighing", "flock_in", "flock_out"];
+const WATER_READINGS = ["ph", "ec", "temperature", "ammonia", "nitrite", "nitrate"];
+// Quantity without a unit, and its label.
+const QUANTITY_ONLY = { varroa_count: "varroaValue", predator: "predatorCount", fish_feeding: "fishFeedG", fish_weighing: "fishWeightG" };
+// Flowers for the bees, by genus: [months with nectar (and pollen), months with pollen only]. Temperate Europe, indicative.
+const MELLIFEROUS = {
+  corylus: [[], [1, 2]], salix: [[3, 4], [2]], prunus: [[3, 4], []], malus: [[4, 5], []], pyrus: [[4], []], taraxacum: [[3, 4, 5], []],
+  rosmarinus: [[2, 3, 4, 5], []], erica: [[2, 3], []], crocus: [[], [2, 3]], acer: [[4], []], robinia: [[5], []], castanea: [[6], []],
+  tilia: [[6], []], rubus: [[6, 7], []], trifolium: [[5, 6, 7, 8], []], medicago: [[6, 7, 8, 9], []], onobrychis: [[5, 6], []],
+  phacelia: [[5, 6, 7, 8, 9], []], fagopyrum: [[7, 8, 9], []], lavandula: [[6, 7, 8], []], thymus: [[5, 6, 7], []], salvia: [[5, 6, 7], []],
+  borago: [[5, 6, 7, 8, 9], []], echium: [[5, 6, 7, 8], []], origanum: [[7, 8], []], helianthus: [[7, 8], []], brassica: [[3, 4], []],
+  sinapis: [[4, 5, 9], []], citrus: [[4, 5], []], hedera: [[9, 10, 11], []], arbutus: [[10, 11, 12], []],
+  calluna: [[8, 9], []], ailanthus: [[6], []], sophora: [[7, 8], []], styphnolobium: [[7, 8], []], cucurbita: [[6, 7, 8], []],
+  zea: [[], [7, 8]], papaver: [[], [5, 6]], vicia: [[5, 6], []], olea: [[], [5, 6]], vitis: [[], [5]],
+};
 // Typical work of a whole zone, shown on the calendar when the zone itself has no plantings.
 const ZONE_SEASONS = { woodland: [["wood", [11, 12, 1, 2, 3]], ["foraging", [9, 10, 11]]] };
 const CAL_COLOR = { wood: "#6d4c41", foraging: "#8e7cc3" };
@@ -506,6 +552,35 @@ const STYLE = `
   .coop-stat .sub { white-space: normal; }
   .coop-recent, .coop-flock { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
   .coop-flock strong { flex-basis: 100%; }
+  .yard-animals { display: grid; gap: 6px; margin: 6px 0; }
+  .hive-table { display: grid; gap: 2px; margin: 6px 0; }
+  .hive-head, .hive-row { display: grid; grid-template-columns: minmax(0, 1fr) 56px 76px 56px; gap: 6px; align-items: center; }
+  .hive-row { padding: 8px 4px; border: none; border-top: 1px solid var(--divider-color); background: none; text-align: left; color: inherit; font: inherit; min-height: 44px; }
+  .hive-row:has(> strong:last-child) { grid-template-columns: minmax(0, 1fr) auto; }
+  .hive-name { display: grid; }
+  .hive-force { display: flex; gap: 2px; }
+  .hive-force i { display: block; width: 7px; height: 12px; border-radius: 2px; background: var(--divider-color, #ddd); }
+  .hive-force i.on { background: var(--homestead-accent, #3a7d44); }
+  .hive-varroa { font-weight: 600; color: #2f7d3a; }
+  .hive-varroa.over { color: #a3341a; }
+  .varroa-chart { display: flex; align-items: flex-end; gap: 4px; height: 130px; padding-bottom: 2px; border-bottom: 1px solid var(--divider-color); }
+  .varroa-bar { position: relative; flex: 1 1 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 2px; height: 100%; border: none; background: none; padding: 0; color: inherit; }
+  .varroa-bar i { display: block; width: 100%; border-radius: 3px 3px 0 0; background: #d9a441; }
+  .varroa-bar i.over { background: #c0583a; }
+  .varroa-bar .limit { position: absolute; left: 0; right: 0; border-top: 2px dashed #a3341a; }
+  .mel-grid { display: grid; grid-template-columns: minmax(80px, 1.6fr) repeat(12, minmax(0, 1fr)); gap: 2px; align-items: center; }
+  .mel-name { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mel-month { text-align: center; }
+  .mel-cell { display: block; height: 16px; border-radius: 3px; border: none; padding: 0; background: var(--secondary-background-color, #efede6); }
+  .mel-cell.nectar { background: #d99a1e; }
+  .mel-cell.pollen { background: #f2d99a; }
+  .mel-total { text-align: center; font-size: 11px; font-weight: 700; color: #2f7d3a; }
+  .mel-total.zero { color: #a3341a; }
+  .coop-stat.off strong { color: #a3341a; }
+  .varroa-months { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
+  .varroa-months input { width: 100%; box-sizing: border-box; }
+  .yard-animal { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 8px; padding-top: 6px; border-top: 1px solid var(--divider-color); }
+  .yard-animal .sub { grid-column: 1 / -1; white-space: normal; }
   .check { display: flex; gap: 8px; align-items: center; color: var(--primary-text-color); }
   .income { color: var(--success-color, #43a047); }
   .kinds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
@@ -1345,6 +1420,16 @@ class HomesteadPanel extends HTMLElement {
       valve_entity: values.valve_entity || null,
       flow_entity: values.flow_entity || null,
     };
+    if (values.kind === "hydroponic") data.ph_entity = new FormData(ev.target).getAll("ph_entity");
+    if (values.kind === "apiary") {
+      data.varroa_threshold = values.varroa_threshold !== "" && values.varroa_threshold != null ? Number(values.varroa_threshold) : null;
+      data.traps = values.traps !== "" && values.traps != null ? Number(values.traps) : null;
+      data.varroa_months = Object.fromEntries(
+        Array.from({ length: 12 }, (_, i) => i + 1)
+          .filter((m) => values[`vm_${m}`] !== "" && values[`vm_${m}`] != null)
+          .map((m) => [String(m), Number(values[`vm_${m}`])]),
+      );
+    }
     const id = this._zoneForm.id;
     if (id) {
       if (await this._call("update_zone", { id, ...data })) this._saved(data.name);
@@ -2346,7 +2431,10 @@ class HomesteadPanel extends HTMLElement {
   /** Quantity of a diary entry: eggs and hens are counted, not weighed. */
   _eventQuantity(e) {
     if (e.kind === "eggs") return `${new Intl.NumberFormat(this._lang()).format(e.quantity)} 🥚`;
-    if (e.kind === "flock_in" || e.kind === "flock_out") return this._hensText(e.quantity);
+    if (e.kind === "flock_in" || e.kind === "flock_out") return `${ANIMALS[e.animal || "hens"] || ""} ${new Intl.NumberFormat(this._lang()).format(e.quantity)}`;
+    if (e.kind === "varroa_count") return `${new Intl.NumberFormat(this._lang(), { maximumFractionDigits: 1 }).format(e.quantity)}${e.product && e.product !== "drop" ? " %" : ` ${this.t("perDay")}`}`;
+    if (e.kind === "predator") return `× ${e.quantity}`;
+    if (e.kind === "fish_feeding" || e.kind === "fish_weighing") return `${new Intl.NumberFormat(this._lang()).format(e.quantity)} g`;
     return this._quantity(e.quantity, e.unit);
   }
 
@@ -2778,8 +2866,13 @@ class HomesteadPanel extends HTMLElement {
   /** "woodland", "compost" or "coop" when the target is (in) such a zone, else null. */
   _zoneFamily(target) {
     const planting = target.planting_id && this._planting(target.planting_id);
+    let first = null;
     for (let z = this._zone(target.zone_id || planting?.zone_id), guard = 0; z && guard < 20; z = this._zone(z.parent_id), guard++) {
       if (["woodland", "compost", "coop", "nursery", "indoor"].includes(z.kind)) return z.kind;
+      if (["apiary", "hive"].includes(z.kind)) return "apiary";
+      // The beds of a water circuit keep the garden kinds; its own zone and the tanks get the water ones.
+      if (["hydroponic", "fish_tank"].includes(z.kind)) return !planting && (!first || first === z) ? "water" : null;
+      first = first || (z.kind ? z : null);
     }
     return null;
   }
@@ -2805,7 +2898,430 @@ class HomesteadPanel extends HTMLElement {
   _zoneBox(zone) {
     if (zone.kind === "compost") return this._compostBox(zone);
     if (zone.kind === "coop") return this._coopBox(zone);
+    if (zone.kind === "apiary") return this._apiaryBox(zone);
+    if (zone.kind === "hive") return this._hiveBox(zone);
+    if (zone.kind === "melliferous") return this._melliferousBox(zone);
+    if (zone.kind === "hydroponic") return this._circuitBox(zone);
+    if (zone.kind === "fish_tank") return this._tankBox(zone);
     return this._woodBox(zone);
+  }
+
+  // ----- bees -----
+
+  /** Mites that call for a treatment: set on the hive or its apiary (by month if set), else 10 a day; tests in % fixed. */
+  _varroaThreshold(zoneId, month, method = "drop") {
+    if (method !== "drop") return VARROA_PCT_THRESHOLD;
+    for (let z = this._zone(zoneId), guard = 0; z && guard < 20; z = this._zone(z.parent_id), guard++) {
+      const byMonth = z.varroa_months?.[String(month)];
+      if (byMonth != null) return byMonth;
+      if (z.varroa_threshold != null) return z.varroa_threshold;
+    }
+    return 10;
+  }
+
+  _hives(apiary) {
+    return this._data.zones.filter((z) => z.kind === "hive" && this._zoneDescendants(apiary.id).has(z.id)).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+  }
+
+  _zoneEvents(zoneId, kinds) {
+    return this._data.events.filter((e) => e.zone_id === zoneId && kinds.includes(e.kind)).sort((a, b) => b.done_on.localeCompare(a.done_on));
+  }
+
+  /** A treatment against varroa and its effect: the count before (up to 30 days) and after (7–35 days). */
+  _treatmentEffect(hive, treatment) {
+    const counts = this._zoneEvents(hive.id, ["varroa_count"]);
+    const before = counts.find((c) => c.done_on <= treatment.done_on && daysBetween(c.done_on, treatment.done_on) <= 30);
+    const after = [...counts].reverse().find((c) => c.done_on > treatment.done_on && daysBetween(treatment.done_on, c.done_on) >= 7 && daysBetween(treatment.done_on, c.done_on) <= 35);
+    const due = !after && daysBetween(treatment.done_on, today()) >= 14 && daysBetween(treatment.done_on, today()) <= 35;
+    const worked = before && after ? after.quantity <= before.quantity / 2 && after.quantity < this._varroaThreshold(hive.id, Number(after.done_on.slice(5, 7)), after.product || "drop") : null;
+    return { before, after, due, worked };
+  }
+
+  /** Treatments of a hive, its own and those given to the whole apiary. */
+  _hiveTreatments(hive) {
+    const ids = new Set([hive.id]);
+    for (let z = this._zone(hive.parent_id), guard = 0; z && guard < 20; z = this._zone(z.parent_id), guard++) ids.add(z.id);
+    return this._data.events.filter((e) => e.kind === "treatment" && ids.has(e.zone_id)).sort((a, b) => b.done_on.localeCompare(a.done_on));
+  }
+
+  _varroaText(count) {
+    if (!count) return "—";
+    const n = new Intl.NumberFormat(this._lang(), { maximumFractionDigits: 1 }).format(count.quantity ?? 0);
+    return count.product && count.product !== "drop" ? `${n} %` : `${n} ${this.t("perDay")}`;
+  }
+
+  /** Months of past sightings of a predator around the apiary: the risky season, from the years before. */
+  _hornetSeason(apiary) {
+    const zones = new Set([apiary.id, ...this._zoneDescendants(apiary.id)]);
+    const sightings = this._data.events.filter((e) => e.kind === "predator" && zones.has(e.zone_id)).sort((a, b) => b.done_on.localeCompare(a.done_on));
+    const year = today().slice(0, 4);
+    const before = sightings.filter((e) => e.done_on.slice(0, 4) < year);
+    const months = before.map((e) => Number(e.done_on.slice(5, 7)));
+    const month = Number(today().slice(5, 7));
+    const years = new Set(before.map((e) => e.done_on.slice(0, 4))).size;
+    const from = months.length ? Math.min(...months) : null;
+    const to = months.length ? Math.max(...months) : null;
+    return { last: sightings[0], risky: from != null && month >= from && month <= to, from, to, years };
+  }
+
+  /** What flowers for the bees in a month: zones of flowers for bees and the plants of the whole garden. */
+  _beeFlowers() {
+    const out = new Map();
+    const add = (name, key, own) => {
+      const [nectar, pollen] = own?.nectar || own?.pollen ? [own.nectar || [], own.pollen || []] : MELLIFEROUS[key] || [[], []];
+      if (!nectar.length && !pollen.length) return;
+      if (!out.has(name)) out.set(name, { name, nectar, pollen });
+    };
+    for (const zone of this._data.zones.filter((z) => z.kind === "melliferous")) {
+      for (const item of zone.species || []) add(this._beeName(item), this._cropKey(item.name).split(" ")[0], item);
+    }
+    for (const p of this._data.plantings.filter((x) => x.status === "active" || !x.status)) {
+      const genus = this._cropKey(p.species || "").split(" ")[0];
+      if (MELLIFEROUS[genus]) add(this._beeName({ name: p.species, taxon_id: p.taxon_id }), genus);
+    }
+    return [...out.values()];
+  }
+
+  _beeName(item) {
+    const taxon = item.taxon_id && this._taxon(item.taxon_id);
+    return taxon?.common_names?.[this._lang()] || item.name;
+  }
+
+  _flowersLine() {
+    const flowers = this._beeFlowers();
+    if (!flowers.length) return h("p", { className: "hint" }, this.t("beeFlowersNone"));
+    const month = Number(today().slice(5, 7));
+    const now = flowers.filter((f) => f.nectar.includes(month) || f.pollen.includes(month)).map((f) => f.name);
+    const next = flowers.filter((f) => !now.includes(f.name) && [1, 2].some((d) => f.nectar.includes(((month + d - 1) % 12) + 1))).map((f) => f.name);
+    return h(
+      "div",
+      { className: "sub", style: "white-space:normal" },
+      `${this.t("beeFlowersNow")}: ${now.join(", ") || "—"}`,
+      h("br"),
+      `${this.t("beeFlowersNext")}: ${next.join(", ") || "—"}`,
+    );
+  }
+
+  _newHive(apiary) {
+    this._clearSelection();
+    this._tab = "zones";
+    this._zoneForm = { name: `${this.t("hive")} ${this._hives(apiary).length + 1}`, kind: "hive", parent_id: apiary.id, species: [] };
+    this._render();
+  }
+
+  _apiaryBox(zone) {
+    const hives = this._hives(zone);
+    const now = today();
+    const month = Number(now.slice(5, 7));
+    const back = { zone_id: zone.id };
+    const target = hives[0]?.id || zone.id;
+    const open = (kind, extra = {}) => this._openEvent({ kind, done_on: now, zone_id: target, ...extra }, back);
+    const season = this._hornetSeason(zone);
+    const hornet =
+      season.risky || (season.last && daysBetween(season.last.done_on, now) <= 30)
+        ? h(
+            "div",
+            { className: "alert-line", style: "white-space:normal" },
+            h("strong", {}, this.t("hornetRisk")),
+            " ",
+            season.from ? this.t("hornetSeason", { from: this._monthName(season.from), to: this._monthName(season.to), years: season.years }) : "",
+            season.last ? ` ${this.t("hornetLast", { date: this._date(season.last.done_on), count: season.last.quantity || 1, where: this._zone(season.last.zone_id)?.name || "" })}` : "",
+          )
+        : null;
+    const todo = [];
+    const rows = hives.map((hive) => {
+      const inspection = this._zoneEvents(hive.id, ["hive_inspection"])[0];
+      const count = this._zoneEvents(hive.id, ["varroa_count"])[0];
+      const limit = count ? this._varroaThreshold(hive.id, Number(count.done_on.slice(5, 7)), count.product || "drop") : null;
+      const over = count && count.quantity >= limit;
+      const honey = this._zoneEvents(hive.id, ["honey_harvest"]).filter((e) => e.done_on.startsWith(now.slice(0, 4))).reduce((n, e) => n + (e.quantity || 0), 0);
+      const treatment = this._hiveTreatments(hive)[0];
+      const effect = treatment ? this._treatmentEffect(hive, treatment) : null;
+      if (effect?.due) todo.push(this.t("varroaCheckAfter", { hive: hive.name, date: this._date(treatment.done_on, false) }));
+      if (over && (!treatment || treatment.done_on < count.done_on)) todo.push(this.t("varroaOver", { hive: hive.name, value: this._varroaText(count), limit }));
+      return h(
+        "button",
+        { type: "button", className: "hive-row", onclick: () => this._selectZone(hive.id) },
+        h("span", { className: "hive-name" }, h("strong", {}, hive.name), h("span", { className: "sub" }, inspection ? this.t("hiveInspected", { date: this._date(inspection.done_on, false) }) + (inspection.queen ? ` · ${this.t("queenSeenShort")}` : "") : this.t("hiveNever"))),
+        h("span", { className: "hive-force", "aria-label": `${inspection?.rating || 0}/5` }, [1, 2, 3, 4, 5].map((i) => h("i", { className: i <= (inspection?.rating || 0) ? "on" : "" }))),
+        h("span", { className: `hive-varroa${over ? " over" : ""}` }, this._varroaText(count)),
+        h("span", {}, honey ? this._quantity(honey, "kg") : "—"),
+      );
+    });
+    return h(
+      "div",
+      { className: "seasons apiary" },
+      h("div", { className: "cal-head" }, h("h3", {}, `🐝 ${this.t("apiaryBox")}`), h("strong", {}, this._plural("hivesCount", hives.length))),
+      hornet,
+      h(
+        "div",
+        { className: "row", style: "flex-wrap:wrap" },
+        h("button", { type: "button", onclick: () => this._openEvent({ kind: "predator", done_on: now, zone_id: zone.id, product: "Vespa velutina" }, back) }, `🦟 ${this.t("hornetReport")}`),
+        zone.traps ? h("span", { className: "sub", style: "align-self:center" }, this.t("trapsCount", { count: zone.traps })) : null,
+      ),
+      hives.length
+        ? h("div", { className: "hive-table" }, h("div", { className: "hive-head sub" }, h("span", {}, this.t("hive")), h("span", {}, this.t("hiveForce")), h("span", {}, "Varroa"), h("span", {}, this.t("honey"))), rows)
+        : h("p", { className: "hint" }, this.t("apiaryNoHives")),
+      h("button", { type: "button", onclick: () => this._newHive(zone) }, `+ ${this.t("hive")}`),
+      todo.length ? h("div", { className: "todo" }, h("h3", {}, this.t("todo")), todo.map((text) => h("div", { className: "alert-line", style: "white-space:normal" }, text))) : null,
+      h("h3", {}, `🌼 ${this.t("beeFlowers")}`),
+      this._flowersLine(),
+      hives.length
+        ? h(
+            "div",
+            { className: "row", style: "flex-wrap:wrap" },
+            ["hive_inspection", "varroa_count", "treatment", "honey_harvest"].map((kind) => h("button", { type: "button", onclick: () => open(kind) }, `${EVENT_ICONS[kind]} ${this.t(`ev_${kind}`)}`)),
+          )
+        : null,
+      h("p", { className: "hint" }, this.t("varroaThresholdNow", { value: this._varroaThreshold(zone.id, month) })),
+    );
+  }
+
+  _monthName(month) {
+    return new Intl.DateTimeFormat(this._lang(), { month: "long" }).format(new Date(2026, month - 1, 15));
+  }
+
+  _hiveBox(zone) {
+    const now = today();
+    const back = { zone_id: zone.id };
+    const open = (kind, extra = {}) => this._openEvent({ kind, done_on: now, zone_id: zone.id, ...extra }, back);
+    const counts = this._zoneEvents(zone.id, ["varroa_count"]).slice(0, 10).reverse();
+    const max = Math.max(...counts.map((c) => Math.max(c.quantity || 0, this._varroaThreshold(zone.id, Number(c.done_on.slice(5, 7)), c.product || "drop"))), 1);
+    const chart = counts.length
+      ? h(
+          "div",
+          { className: "varroa-chart", role: "img", "aria-label": this.t("varroaChart") },
+          counts.map((c) => {
+            const limit = this._varroaThreshold(zone.id, Number(c.done_on.slice(5, 7)), c.product || "drop");
+            const over = c.quantity >= limit;
+            return h(
+              "button",
+              { type: "button", className: "varroa-bar", title: `${this._date(c.done_on)} · ${this._varroaText(c)} (${this.t("threshold")} ${limit})`, onclick: () => this._openEvent(c, back) },
+              h("span", { className: "sub" }, new Intl.NumberFormat(this._lang(), { maximumFractionDigits: 1 }).format(c.quantity || 0)),
+              h("i", { className: over ? "over" : "", style: `height:${Math.max(3, ((c.quantity || 0) / max) * 90)}px` }),
+              h("b", { className: "limit", style: `bottom:${(limit / max) * 90 + 16}px` }),
+              h("span", { className: "sub" }, this._date(c.done_on, false).slice(0, 5)),
+            );
+          }),
+        )
+      : h("p", { className: "hint" }, this.t("varroaNone"));
+    const treatments = this._hiveTreatments(zone).slice(0, 4).map((t) => {
+      const effect = this._treatmentEffect(zone, t);
+      const text =
+        effect.before && effect.after
+          ? this.t(effect.worked ? "treatmentWorked" : "treatmentNotEnough", { before: this._varroaText(effect.before), after: this._varroaText(effect.after) })
+          : effect.due
+            ? this.t("treatmentCountNow")
+            : effect.before
+              ? this.t("treatmentCountFrom", { before: this._varroaText(effect.before), date: this._date(addDays(t.done_on, 14), false) })
+              : this.t("treatmentNoCount");
+      return h(
+        "button",
+        { type: "button", className: "link", style: "display:block;text-align:left;white-space:normal", onclick: () => this._openEvent(t, back) },
+        `${this._date(t.done_on, false)} · ${t.product || this.t("ev_treatment")}${t.dose ? ` ${t.dose}` : ""} — `,
+        h("span", { className: effect.worked === false ? "warn" : "" }, text),
+      );
+    });
+    const inspections = this._zoneEvents(zone.id, ["hive_inspection"]).slice(0, 3);
+    const honey = new Map();
+    for (const e of this._zoneEvents(zone.id, ["honey_harvest"])) honey.set(e.done_on.slice(0, 4), (honey.get(e.done_on.slice(0, 4)) || 0) + (e.quantity || 0));
+    return h(
+      "div",
+      { className: "seasons" },
+      h("div", { className: "cal-head" }, h("h3", {}, `🔬 Varroa`), h("span", { className: "sub" }, this.t("varroaThresholdNow", { value: this._varroaThreshold(zone.id, Number(now.slice(5, 7))) }))),
+      chart,
+      h("h3", {}, `🧪 ${this.t("treatments")}`),
+      treatments.length ? treatments : h("p", { className: "hint" }, "—"),
+      h("h3", {}, `🐝 ${this.t("ev_hive_inspection")}`),
+      inspections.length
+        ? inspections.map((e) =>
+            h(
+              "button",
+              { type: "button", className: "link", style: "display:block;text-align:left;white-space:normal", onclick: () => this._openEvent(e, back) },
+              `${this._date(e.done_on, false)} · ${e.rating ? `${this.t("hiveForce")} ${e.rating}/5` : ""}${e.queen ? ` · ${this.t("queenSeenShort")}` : ""}${e.notes ? ` · ${e.notes}` : ""}`,
+            ),
+          )
+        : h("p", { className: "hint" }, this.t("hiveNever")),
+      honey.size ? h("div", { className: "coop-stats" }, [...honey.entries()].sort((a, b) => b[0].localeCompare(a[0])).slice(0, 4).map(([y, kg]) => h("div", { className: "coop-stat" }, h("strong", {}, this._quantity(kg, "kg")), h("span", { className: "sub" }, `🍯 ${y}`)))) : null,
+      h(
+        "div",
+        { className: "row", style: "flex-wrap:wrap" },
+        ["hive_inspection", "varroa_count", "treatment", "bee_feeding", "swarm", "honey_harvest"].map((kind) => h("button", { type: "button", onclick: () => open(kind) }, `${EVENT_ICONS[kind]} ${this.t(`ev_${kind}`)}`)),
+      ),
+    );
+  }
+
+  _melliferousBox(zone) {
+    const months = Array.from({ length: 12 }, (_, i) => i + 1);
+    const letters = new Intl.DateTimeFormat(this._lang(), { month: "narrow" });
+    const state = (item) => {
+      const genus = this._cropKey(item.name).split(" ")[0];
+      return item.nectar || item.pollen ? [item.nectar || [], item.pollen || []] : MELLIFEROUS[genus] || [[], []];
+    };
+    const save = async (species) => {
+      await this._call("update_zone", { id: zone.id, species });
+    };
+    const cycle = (index, month) => {
+      const species = (zone.species || []).map((x) => ({ ...x }));
+      const item = species[index];
+      const [nectar, pollen] = state(item).map((m) => [...m]);
+      const next = nectar.includes(month) ? "pollen" : pollen.includes(month) ? "none" : "nectar";
+      item.nectar = nectar.filter((m) => m !== month);
+      item.pollen = pollen.filter((m) => m !== month);
+      if (next === "nectar") item.nectar.push(month);
+      if (next === "pollen") item.pollen.push(month);
+      save(species);
+    };
+    const garden = this._beeFlowers();
+    const total = months.map((m) => garden.filter((f) => f.nectar.includes(m)).length);
+    const gaps = months.filter((m) => m >= 3 && m <= 10 && total[m - 1] === 0);
+    const cell = (cls, title, onclick) => (onclick ? h("button", { type: "button", className: `mel-cell ${cls}`, title, onclick }) : h("i", { className: `mel-cell ${cls}`, title }));
+    return h(
+      "div",
+      { className: "seasons" },
+      h("h3", {}, `🌼 ${this.t("melliferousBox")}`),
+      h(
+        "div",
+        { className: "mel-grid" },
+        h("span"),
+        months.map((m) => h("span", { className: "sub mel-month" }, letters.format(new Date(2026, m - 1, 15)))),
+        (zone.species || []).flatMap((item, i) => {
+          const [nectar, pollen] = state(item);
+          return [
+            h("span", { className: "mel-name" }, this._beeName(item)),
+            ...months.map((m) => cell(nectar.includes(m) ? "nectar" : pollen.includes(m) ? "pollen" : "", this._monthName(m), () => cycle(i, m))),
+          ];
+        }),
+        h("strong", { className: "mel-name" }, this.t("melliferousTotal")),
+        months.map((m) => h("span", { className: `mel-total${total[m - 1] ? "" : " zero"}` }, String(total[m - 1]))),
+      ),
+      h("p", { className: "hint", style: "white-space:normal" }, this.t("melliferousHint")),
+      (zone.species || []).length ? null : h("p", { className: "hint" }, this.t("melliferousEmpty")),
+      gaps.length ? h("div", { className: "alert-line", style: "white-space:normal" }, this.t("melliferousGaps", { months: gaps.map((m) => this._monthName(m)).join(", ") })) : null,
+    );
+  }
+
+  // ----- water circuit and fish -----
+
+  _tanks(circuit) {
+    return this._data.zones.filter((z) => z.kind === "fish_tank" && this._zoneDescendants(circuit.id).has(z.id)).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+  }
+
+  _fishIn(tank) {
+    return this._hensAt(new Set([tank.id]), today(), "fish");
+  }
+
+  /** Move fish from a tank to another: an exit and an arrival, both "moved". */
+  async _moveFish(from, to, count) {
+    const day = today();
+    if (!(await this._call("add_event", { kind: "flock_out", zone_id: from, done_on: day, quantity: count, animal: "fish", reason: "moved" }))) return;
+    await this._call("add_event", { kind: "flock_in", zone_id: to, done_on: day, quantity: count, animal: "fish", reason: "moved" });
+    this._showMessage(this.t("fishMoved", { count }));
+  }
+
+  _circuitBox(zone) {
+    const tanks = this._tanks(zone);
+    const aquaponic = tanks.length > 0;
+    const ranges = aquaponic ? { ph: [6.8, 7.2], temperature: [18, 26] } : { ph: [5.5, 6.5], temperature: [18, 24] };
+    const now = today();
+    const back = { zone_id: zone.id };
+    const tests = this._zoneEvents(zone.id, ["water_test"]);
+    const last = tests[0]?.readings || {};
+    const value = (ids) => (sensorIds(ids).length ? this._meanState(sensorIds(ids)) : null);
+    const live = { ph: value(zone.ph_entity), ec: value(zone.soil_ec_entity), temperature: value(zone.soil_temperature_entity) };
+    const tile = (key) => {
+      const v = live[key] ?? last[key];
+      if (v == null) return null;
+      const [lo, hi] = ranges[key] || [];
+      const off = lo != null && (v < lo || v > hi);
+      const unit = key === "temperature" ? "°C" : key === "ec" ? (this._hass.states[sensorIds(zone.soil_ec_entity)[0]]?.attributes?.unit_of_measurement || "mS/cm") : "";
+      return h(
+        "div",
+        { className: `coop-stat${off ? " off" : ""}` },
+        h("strong", {}, `${new Intl.NumberFormat(this._lang(), { maximumFractionDigits: 2 }).format(v)}${unit ? ` ${unit}` : ""}`),
+        h("span", { className: "sub" }, `${this.t(`wr_${key}`)}${lo != null ? ` · ${String(lo).replace(".", ",")}–${String(hi).replace(".", ",")}` : ""}${live[key] == null ? ` · ${this.t("fromTest")}` : ""}`),
+      );
+    };
+    const readingsText = (r) => WATER_READINGS.filter((k) => r?.[k] != null).map((k) => `${this.t(`wr_${k}`)} ${String(r[k]).replace(".", ",")}`).join(" · ");
+    const fromSel = h("select", {}, tanks.map((t) => h("option", { value: t.id }, `${t.name} (${this._fishIn(t)})`)));
+    const toSel = h("select", {}, tanks.map((t, i) => h("option", { value: t.id, selected: i === 1 }, t.name)));
+    const countIn = h("input", { type: "number", min: 1, step: 1, inputMode: "numeric", style: "width:5em" });
+    const move = h(
+      "form",
+      {
+        className: "row",
+        onsubmit: (ev) => {
+          ev.preventDefault();
+          const count = Number(countIn.value);
+          if (count > 0 && fromSel.value !== toSel.value) this._moveFish(fromSel.value, toSel.value, count);
+        },
+      },
+      h("label", {}, this.t("fishFrom"), fromSel),
+      h("label", {}, this.t("fishTo"), toSel),
+      h("label", {}, this.t("fishCount"), countIn),
+      h("button", { type: "submit" }, `↔ ${this.t("fishMove")}`),
+    );
+    const target = tanks[0]?.id || zone.id;
+    const open = (kind, extra = {}) => this._openEvent({ kind, done_on: now, zone_id: target, ...extra }, back);
+    return h(
+      "div",
+      { className: "seasons" },
+      h("h3", {}, `💧 ${this.t("circuitBox")}`),
+      h("div", { className: "coop-stats" }, ["ph", "ec", "temperature", "ammonia", "nitrite", "nitrate"].map(tile)),
+      tests.length
+        ? tests.slice(0, 4).map((e) => h("button", { type: "button", className: "link", style: "display:block;text-align:left;white-space:normal", onclick: () => this._openEvent(e, back) }, `${this._date(e.done_on, false)} · ${readingsText(e.readings) || e.notes || this.t("ev_water_test")}`))
+        : h("p", { className: "hint" }, this.t("circuitNoTests")),
+      h("button", { type: "button", onclick: () => this._openEvent({ kind: "water_test", done_on: now, zone_id: zone.id }, back) }, `🧫 ${this.t("ev_water_test")}`),
+      h("h3", {}, `🐟 ${this.t("fishTanks")}`),
+      tanks.length
+        ? tanks.map((t) => {
+            const weighing = this._zoneEvents(t.id, ["fish_weighing"])[0];
+            return h(
+              "button",
+              { type: "button", className: "hive-row", onclick: () => this._selectZone(t.id) },
+              h("span", { className: "hive-name" }, h("strong", {}, t.name), h("span", { className: "sub" }, weighing ? `${this._date(weighing.done_on, false)} · ~${weighing.quantity} g` : "")),
+              h("strong", {}, String(this._fishIn(t))),
+            );
+          })
+        : h("p", { className: "hint" }, this.t("circuitNoTanks")),
+      tanks.length > 1 ? move : null,
+      h(
+        "div",
+        { className: "row", style: "flex-wrap:wrap" },
+        h("button", { type: "button", onclick: () => this._newTank(zone) }, `+ ${this.t("fish_tank")}`),
+        tanks.length ? h("button", { type: "button", onclick: () => open("flock_in", { animal: "fish", reason: "bought" }) }, `🐟 ${this.t("flockIn")}`) : null,
+        tanks.length ? h("button", { type: "button", onclick: () => open("fish_feeding") }, `${EVENT_ICONS.fish_feeding} ${this.t("ev_fish_feeding")}`) : null,
+      ),
+    );
+  }
+
+  _newTank(circuit) {
+    this._clearSelection();
+    this._tab = "zones";
+    this._zoneForm = { name: `${this.t("fish_tank")} ${this._tanks(circuit).length + 1}`, kind: "fish_tank", parent_id: circuit.id, species: [] };
+    this._render();
+  }
+
+  _tankBox(zone) {
+    const now = today();
+    const back = { zone_id: zone.id };
+    const open = (kind, extra = {}) => this._openEvent({ kind, done_on: now, zone_id: zone.id, ...extra }, back);
+    const moves = this._data.events.filter((e) => e.zone_id === zone.id && ["flock_in", "flock_out", "fish_weighing", "fish_feeding"].includes(e.kind)).sort((a, b) => b.done_on.localeCompare(a.done_on)).slice(0, 8);
+    return h(
+      "div",
+      { className: "seasons" },
+      h("div", { className: "cal-head" }, h("h3", {}, `🐟 ${zone.name}`), h("strong", {}, String(this._fishIn(zone)))),
+      moves.map((e) => h("button", { type: "button", className: "link", style: "display:block;text-align:left", onclick: () => this._openEvent(e, back) }, `${this._date(e.done_on, false)} · ${EVENT_ICONS[e.kind]} ${this.t(`ev_${e.kind}`)} ${this._eventQuantity(e)}${e.reason ? ` · ${this.t(ARRIVAL_REASONS[e.reason] && e.kind === "flock_in" ? `ar_${e.reason}` : `lr_${e.reason}`)}` : ""}`)),
+      h(
+        "div",
+        { className: "row", style: "flex-wrap:wrap" },
+        h("button", { type: "button", onclick: () => open("flock_in", { animal: "fish", reason: "bought" }) }, `🐟 ${this.t("flockIn")}`),
+        h("button", { type: "button", onclick: () => open("fish_feeding") }, `${EVENT_ICONS.fish_feeding} ${this.t("ev_fish_feeding")}`),
+        h("button", { type: "button", onclick: () => open("fish_weighing") }, `${EVENT_ICONS.fish_weighing} ${this.t("ev_fish_weighing")}`),
+        h("button", { type: "button", onclick: () => open("flock_out", { animal: "fish", reason: "illness" }) }, `💀 ${this.t("fishLoss")}`),
+        h("button", { type: "button", onclick: () => open("flock_out", { animal: "fish", reason: "slaughtered" }) }, `🎣 ${this.t("fishHarvest")}`),
+      ),
+    );
   }
 
   /** Compost bins not turned for COMPOST_TURN_DAYS days (since the last turn or harvest), unless a turn is planned. */
@@ -2876,24 +3392,49 @@ class HomesteadPanel extends HTMLElement {
     );
   }
 
-  /** Arrivals (+) and departures (−) of hens in the given zones, by date. */
-  _flockMoves(zones) {
+  /** Arrivals (+) and departures (−) of one animal (entries without one are hens) in the given zones, by date. */
+  _flockMoves(zones, animal = "hens") {
     return this._data.events
-      .filter((e) => zones.has(e.zone_id) && e.quantity && (e.kind === "flock_in" || e.kind === "flock_out"))
+      .filter((e) => zones.has(e.zone_id) && e.quantity && (e.kind === "flock_in" || e.kind === "flock_out") && (e.animal || "hens") === animal)
       .map((e) => [e.done_on, e.kind === "flock_in" ? e.quantity : -e.quantity])
       .sort((a, b) => a[0].localeCompare(b[0]));
   }
 
-  /** Hens in the given zones on a day: arrivals minus departures up to that day. */
-  _hensAt(zones, day) {
-    return Math.max(this._flockMoves(zones).reduce((n, [date, change]) => (date <= day ? n + change : n), 0), 0);
+  /** Hens (or another animal) in the given zones on a day: arrivals minus departures up to that day. */
+  _hensAt(zones, day, animal = "hens") {
+    return Math.max(this._flockMoves(zones, animal).reduce((n, [date, change]) => (date <= day ? n + change : n), 0), 0);
   }
 
-  /** Eggs, average hens, eggs per hen and cost per egg between two days (included). */
-  _eggStats(zones, from, to) {
+  /** {animal: count} in the given zones on a day, only those present. */
+  _animalsAt(zones, day) {
+    const out = {};
+    for (const animal of Object.keys(ANIMALS)) {
+      const n = this._hensAt(zones, day, animal);
+      if (n > 0) out[animal] = n;
+    }
+    return out;
+  }
+
+  _animalsText(counts) {
+    const entries = Object.entries(counts);
+    return entries.length ? entries.map(([a, n]) => `${ANIMALS[a]} ${n}`).join(" · ") : this.t("yardEmpty");
+  }
+
+  /** The laying animal of the last eggs (or the first layer present): the default of a new egg count. */
+  _lastAnimal(zoneId) {
+    const zones = new Set([zoneId, ...(zoneId ? this._zoneDescendants(zoneId) : [])]);
+    const last = this._data.events
+      .filter((e) => zones.has(e.zone_id) && e.kind === "eggs")
+      .sort((a, b) => b.done_on.localeCompare(a.done_on))[0];
+    if (last) return last.animal || "hens";
+    return LAYERS.find((a) => this._hensAt(zones, today(), a) > 0) || "hens";
+  }
+
+  /** Eggs, average animals, eggs per animal and cost per egg between two days (included). */
+  _eggStats(zones, from, to, animal = "hens") {
     const events = this._data.events.filter((e) => zones.has(e.zone_id) && e.done_on >= from && e.done_on <= to);
-    const eggs = events.filter((e) => e.kind === "eggs").reduce((n, e) => n + (e.quantity || 0), 0);
-    const moves = this._flockMoves(zones);
+    const eggs = events.filter((e) => e.kind === "eggs" && (e.animal || "hens") === animal).reduce((n, e) => n + (e.quantity || 0), 0);
+    const moves = this._flockMoves(zones, animal);
     let henDays = 0;
     let days = 0;
     let count = 0;
@@ -2906,7 +3447,9 @@ class HomesteadPanel extends HTMLElement {
     const hens = days ? henDays / days : 0;
     const ids = new Set(events.map((e) => e.id));
     const spent = this._data.expenses.filter((x) => !x.income && ids.has(x.event_id)).reduce((sum, x) => sum + x.amount, 0);
-    return { eggs, hens, perHen: hens ? eggs / hens : null, costPerEgg: spent && eggs ? spent / eggs : null };
+    // The cost is shared by the whole yard: per egg only when one kind of animal lays there.
+    const layers = new Set(events.filter((e) => e.kind === "eggs").map((e) => e.animal || "hens"));
+    return { eggs, hens, perHen: hens ? eggs / hens : null, costPerEgg: spent && eggs && layers.size <= 1 ? spent / eggs : null };
   }
 
   _coopBox(zone) {
@@ -2914,12 +3457,26 @@ class HomesteadPanel extends HTMLElement {
     const now = today();
     const back = { zone_id: zone.id };
     const open = (kind, extra = {}) => this._openEvent({ kind, done_on: now, zone_id: zone.id, ...extra }, back);
-    const sum = (from) =>
-      this._data.events.filter((e) => zones.has(e.zone_id) && e.kind === "eggs" && e.done_on >= from && e.done_on <= now).reduce((n, e) => n + (e.quantity || 0), 0);
-    const year = this._eggStats(zones, `${now.slice(0, 4)}-01-01`, now);
     const number = (value, digits = 0) => new Intl.NumberFormat(this._lang(), { maximumFractionDigits: digits }).format(value);
+    const counts = this._animalsAt(zones, now);
+    const laying = [...new Set([...LAYERS.filter((a) => counts[a]), ...this._data.events.filter((e) => zones.has(e.zone_id) && e.kind === "eggs").map((e) => e.animal || "hens")])];
+    const eggAnimal = laying.includes(this._yardAnimal) ? this._yardAnimal : this._lastAnimal(zone.id);
+    const sum = (from, animal) =>
+      this._data.events
+        .filter((e) => zones.has(e.zone_id) && e.kind === "eggs" && (e.animal || "hens") === animal && e.done_on >= from && e.done_on <= now)
+        .reduce((n, e) => n + (e.quantity || 0), 0);
+    const year = this._eggStats(zones, `${now.slice(0, 4)}-01-01`, now, eggAnimal);
     const dateInput = h("input", { type: "date", value: now, max: now, required: true });
     const countInput = h("input", { type: "number", min: 1, step: 1, required: true, inputMode: "numeric", placeholder: "🥚", style: "width:5em" });
+    const chips = laying.length > 1
+      ? h(
+          "div",
+          { className: "segmented" },
+          laying.map((a) =>
+            h("button", { type: "button", className: a === eggAnimal ? "active" : "", onclick: () => ((this._yardAnimal = a), this._render()) }, `${ANIMALS[a]} ${this.t(`animal_${a}`)}`),
+          ),
+        )
+      : null;
     const quick = h(
       "form",
       {
@@ -2928,7 +3485,7 @@ class HomesteadPanel extends HTMLElement {
           ev.preventDefault();
           const count = Number(countInput.value);
           if (!count || !dateInput.value) return;
-          const result = await this._call("add_event", { kind: "eggs", zone_id: zone.id, done_on: dateInput.value, quantity: count });
+          const result = await this._call("add_event", { kind: "eggs", zone_id: zone.id, done_on: dateInput.value, quantity: count, animal: eggAnimal });
           if (result) this._showMessage(this.t("eggsSaved", { count }));
         },
       },
@@ -2937,27 +3494,47 @@ class HomesteadPanel extends HTMLElement {
       h("button", { type: "submit", className: "primary" }, this.t("eggsAdd")),
     );
     const stat = (label, value) => h("div", { className: "coop-stat" }, h("strong", {}, value), h("span", { className: "sub" }, label));
+    const animalLine = ([animal, n]) => {
+      const week = LAYERS.includes(animal) ? sum(addDays(now, -6), animal) : 0;
+      const litter = this._data.events
+        .filter((e) => zones.has(e.zone_id) && e.kind === "flock_in" && e.reason === "born" && (e.animal || "hens") === animal)
+        .sort((a, b) => b.done_on.localeCompare(a.done_on))[0];
+      const parts = [
+        week ? this.t("yardEggsWeek", { count: number(week), per: number(week / 7 / n, 1) }) : null,
+        litter ? this.t("yardBorn", { date: this._date(litter.done_on, false), count: number(litter.quantity || 0) }) : null,
+      ].filter(Boolean);
+      return h("div", { className: "yard-animal" }, h("strong", {}, `${ANIMALS[animal]} ${this.t(`animal_${animal}`)}`), h("strong", {}, number(n)), parts.length ? h("span", { className: "sub" }, parts.join(" · ")) : null);
+    };
     const recent = this._data.events
-      .filter((e) => zones.has(e.zone_id) && e.kind === "eggs")
+      .filter((e) => zones.has(e.zone_id) && e.kind === "eggs" && (e.animal || "hens") === eggAnimal)
       .sort((a, b) => b.done_on.localeCompare(a.done_on))
       .slice(0, 7);
     const flock = this._data.events
       .filter((e) => zones.has(e.zone_id) && (e.kind === "flock_in" || e.kind === "flock_out"))
       .sort((a, b) => b.done_on.localeCompare(a.done_on));
+    const moveText = (e) => {
+      const icon = ANIMALS[e.animal || "hens"];
+      if (e.kind === "flock_in") return `${icon} +${number(e.quantity || 0)}${e.reason && ARRIVAL_REASONS[e.reason] ? ` ${this.t(`ar_${e.reason}`)}` : ""}${e.product ? ` ${e.product}` : ""}`;
+      return `${icon} −${number(e.quantity || 0)}${e.reason ? ` ${LEAVE_ICONS[e.reason] || ""} ${this.t(`lr_${e.reason}`)}` : ""}`;
+    };
     return h(
       "div",
       { className: "seasons coop" },
-      h("div", { className: "cal-head" }, h("h3", {}, this.t("coopBox")), h("strong", {}, this._hensText(this._hensAt(zones, now)))),
+      h("div", { className: "cal-head" }, h("h3", {}, this.t("coopBox")), h("strong", {}, this._animalsText(counts))),
+      Object.keys(counts).length ? h("div", { className: "yard-animals" }, Object.entries(counts).map(animalLine)) : null,
+      chips,
       quick,
-      h(
-        "div",
-        { className: "coop-stats" },
-        stat(this.t("eggsWeek"), number(sum(addDays(now, -6)))),
-        stat(this.t("eggsMonth"), number(sum(`${now.slice(0, 7)}-01`))),
-        stat(this.t("eggsYear"), number(year.eggs)),
-        stat(this.t("eggsPerHen"), year.perHen != null ? number(year.perHen, 1) : "—"),
-        stat(this.t("eggsCost"), year.costPerEgg != null ? this._money(year.costPerEgg) : "—"),
-      ),
+      laying.length
+        ? h(
+            "div",
+            { className: "coop-stats" },
+            stat(this.t("eggsWeek"), number(sum(addDays(now, -6), eggAnimal))),
+            stat(this.t("eggsMonth"), number(sum(`${now.slice(0, 7)}-01`, eggAnimal))),
+            stat(this.t("eggsYear"), number(year.eggs)),
+            stat(this.t("eggsPerAnimal", { animal: this.t(`animal_${eggAnimal}`).toLowerCase() }), year.perHen != null ? number(year.perHen, 1) : "—"),
+            stat(this.t("eggsCost"), year.costPerEgg != null ? this._money(year.costPerEgg) : "—"),
+          )
+        : null,
       recent.length
         ? h(
             "div",
@@ -2968,35 +3545,32 @@ class HomesteadPanel extends HTMLElement {
         : null,
       h(
         "div",
-        { className: "row" },
-        h("button", { type: "button", onclick: () => open("flock_in") }, this.t("flockIn")),
-        h("button", { type: "button", onclick: () => open("flock_out", { reason: "predator" }) }, this.t("flockOut")),
+        { className: "row", style: "flex-wrap:wrap" },
+        h("button", { type: "button", onclick: () => open("flock_in", { reason: "bought", animal: this._lastAnimal(zone.id) }) }, this.t("flockIn")),
+        h("button", { type: "button", onclick: () => open("flock_in", { reason: "born", animal: Object.keys(counts).includes("rabbits") ? "rabbits" : this._lastAnimal(zone.id) }) }, `🐣 ${this.t("ar_born")}`),
+        h("button", { type: "button", onclick: () => open("flock_out", { reason: "predator", animal: this._lastAnimal(zone.id) }) }, this.t("flockOut")),
         h("button", { type: "button", onclick: () => open("animal_care") }, this.t("animalCare")),
+        h("button", { type: "button", onclick: () => open("coop_cleaning") }, `🧹 ${this.t("ev_coop_cleaning")}`),
       ),
       flock.length
         ? h(
             "div",
             { className: "coop-flock" },
             h("strong", {}, this.t("flockLog")),
-            flock.map((e) =>
-              h(
-                "button",
-                { type: "button", className: "link", onclick: () => this._openEvent(e, back) },
-                `${this._date(e.done_on)} · ${e.kind === "flock_in" ? `🐔 +${number(e.quantity || 0)}${e.product ? ` ${e.product}` : ""}` : `${LEAVE_ICONS[e.reason] || "🦊"} −${number(e.quantity || 0)}${e.reason ? ` ${this.t(`lr_${e.reason}`)}` : ""}`}`,
-              ),
-            ),
+            flock.map((e) => h("button", { type: "button", className: "link", onclick: () => this._openEvent(e, back) }, `${this._date(e.done_on)} · ${moveText(e)}`)),
           )
         : null,
     );
   }
 
-  /** Analysis: eggs per year for all hen houses. */
+  /** Analysis: eggs per year in all the farmyards, one block of rows per laying animal. */
   _eggsBox(years) {
     const zones = new Set(this._data.zones.filter((z) => z.kind === "coop").flatMap((z) => [z.id, ...this._zoneDescendants(z.id)]));
-    if (!zones.size || !this._data.events.some((e) => e.kind === "eggs" && zones.has(e.zone_id))) return null;
+    const eggs = this._data.events.filter((e) => e.kind === "eggs" && zones.has(e.zone_id));
+    if (!zones.size || !eggs.length) return null;
     const now = today();
     const number = (value, digits = 0) => new Intl.NumberFormat(this._lang(), { maximumFractionDigits: digits }).format(value);
-    const rows = years.map((year) => ({ year, ...this._eggStats(zones, `${year}-01-01`, year === now.slice(0, 4) ? now : `${year}-12-31`) }));
+    const animals = LAYERS.filter((a) => eggs.some((e) => (e.animal || "hens") === a));
     return h(
       "div",
       { className: "an-box" },
@@ -3006,14 +3580,44 @@ class HomesteadPanel extends HTMLElement {
         { className: "an-table", style: `grid-template-columns: minmax(110px, 1.4fr) repeat(${years.length}, minmax(52px, 1fr))` },
         h("div"),
         years.map((y) => h("div", { className: "an-th" }, y)),
-        h("div", { className: "an-name" }, `🥚 ${this.t("ev_eggs")}`),
-        rows.map((r) => h("div", { className: "an-cell" }, r.eggs ? number(r.eggs) : "—")),
-        h("div", { className: "an-name" }, `🐔 ${this.t("anHens")}`),
-        rows.map((r) => h("div", { className: "an-cell" }, r.hens ? number(r.hens, 1) : "—")),
-        h("div", { className: "an-name" }, this.t("anPerHen")),
-        rows.map((r) => h("div", { className: "an-cell" }, r.perHen != null && r.eggs ? number(r.perHen) : "—")),
-        h("div", { className: "an-name" }, this.t("anEggCost")),
-        rows.map((r) => h("div", { className: "an-cell" }, r.costPerEgg != null ? this._money(r.costPerEgg) : "—")),
+        animals.flatMap((animal) => {
+          const rows = years.map((year) => ({ year, ...this._eggStats(zones, `${year}-01-01`, year === now.slice(0, 4) ? now : `${year}-12-31`, animal) }));
+          const name = this.t(`animal_${animal}`);
+          return [
+            h("div", { className: "an-zone" }, `${ANIMALS[animal]} ${name}`),
+            h("div", { className: "an-name" }, `🥚 ${this.t("ev_eggs")}`),
+            ...rows.map((r) => h("div", { className: "an-cell" }, r.eggs ? number(r.eggs) : "—")),
+            h("div", { className: "an-name" }, this.t("anAnimals")),
+            ...rows.map((r) => h("div", { className: "an-cell" }, r.hens ? number(r.hens, 1) : "—")),
+            h("div", { className: "an-name" }, this.t("anPerAnimal")),
+            ...rows.map((r) => h("div", { className: "an-cell" }, r.perHen != null && r.eggs ? number(r.perHen) : "—")),
+            h("div", { className: "an-name" }, this.t("anEggCost")),
+            ...rows.map((r) => h("div", { className: "an-cell" }, r.costPerEgg != null ? this._money(r.costPerEgg) : "—")),
+          ];
+        }),
+      ),
+    );
+  }
+
+  /** Analysis: honey per year and hive. */
+  _honeyBox(years) {
+    const harvests = this._data.events.filter((e) => e.kind === "honey_harvest" && e.quantity);
+    if (!harvests.length) return null;
+    const hives = [...new Set(harvests.map((e) => e.zone_id))].map((id) => this._zone(id)).filter(Boolean).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+    const kg = (zoneId, year) => harvests.filter((e) => e.zone_id === zoneId && e.done_on.startsWith(year)).reduce((n, e) => n + e.quantity, 0);
+    const cell = (value) => h("div", { className: "an-cell" }, value ? this._quantity(value, "kg") : "—");
+    return h(
+      "div",
+      { className: "an-box" },
+      h("h3", {}, `🍯 ${this.t("honey")}`),
+      h(
+        "div",
+        { className: "an-table", style: `grid-template-columns: minmax(110px, 1.4fr) repeat(${years.length}, minmax(52px, 1fr))` },
+        h("div"),
+        years.map((y) => h("div", { className: "an-th" }, y)),
+        hives.flatMap((hive) => [h("button", { type: "button", className: "an-name", onclick: () => this._selectZone(hive.id) }, hive.name), ...years.map((y) => cell(kg(hive.id, y)))]),
+        h("strong", { className: "an-name" }, this.t("melliferousTotal")),
+        years.map((y) => cell(harvests.filter((e) => e.done_on.startsWith(y)).reduce((n, e) => n + e.quantity, 0))),
       ),
     );
   }
@@ -3283,7 +3887,7 @@ class HomesteadPanel extends HTMLElement {
         coop: true,
         icon: "🐔",
         name: zone.name,
-        where: this._hensText(this._hensAt(zones, now)),
+        where: this._animalsText(this._animalsAt(zones, now)),
         search: zone.name.toLowerCase(),
         last: last.get(key),
         harvest: lastHarvest.get(key),
@@ -3370,7 +3974,7 @@ class HomesteadPanel extends HTMLElement {
     const save = async () => {
       const quantity = this._quickValue;
       const data = row.coop
-        ? { kind: "eggs", zone_id: row.zone.id, quantity, done_on: today() }
+        ? { kind: "eggs", zone_id: row.zone.id, quantity, done_on: today(), animal: this._lastAnimal(row.zone.id) }
         : { kind: "harvest", planting_id: row.planting.id, quantity, unit, done_on: today() };
       const result = await this._call("add_event", data);
       if (!result) return;
@@ -3868,7 +4472,7 @@ class HomesteadPanel extends HTMLElement {
       cold.hidden = !warning;
     };
     const stepper = this._stepper("quantity", f.quantity, 1, p.quantity, update);
-    const zones = this._data.zones.filter((z) => z.kind !== "nursery" && !["compost", "coop", "woodland"].includes(z.kind));
+    const zones = this._data.zones.filter((z) => z.kind !== "nursery" && !["compost", "coop", "woodland", "apiary", "hive", "fish_tank"].includes(z.kind));
     form = h(
       "form",
       { onsubmit: (ev) => this._saveTransplant(ev) },
@@ -3920,7 +4524,7 @@ class HomesteadPanel extends HTMLElement {
   /** Tap on a zone of the map: the usual next step first, the zone card one tap away. */
   _tapZone(id, latlng) {
     const zone = this._zone(id);
-    if (!zone || ["compost", "coop", "woodland"].includes(zone.kind)) return this._selectZone(id);
+    if (!zone || ["compost", "coop", "woodland", "apiary", "hive", "hydroponic", "fish_tank"].includes(zone.kind)) return this._selectZone(id);
     this._clearSelection();
     this._showMessage("");
     this._zoneTap = { id, latlng };
@@ -5861,6 +6465,18 @@ class HomesteadPanel extends HTMLElement {
     causeField.hidden = endSelect.value !== "died";
     extras.pest = this._selectField(f, "severity", [["", "—"], ...["few", "spread", "heavy"].map((v) => [v, this.t(`sev_${v}`)])]);
     extras.worked = this._selectField(f, "worked", [["", "—"], ...["yes", "partly", "no"].map((v) => [v, this.t(`wk_${v}`)])]);
+    const family0 = this._zoneFamily(f);
+    extras.animal = this._selectField({ animal: f.animal || (family0 === "water" ? "fish" : f.id ? "hens" : this._lastAnimal(f.zone_id)) }, "animal", Object.entries(ANIMALS).map(([a, icon]) => [a, `${icon} ${this.t(`animal_${a}`)}`]));
+    extras.arrival = this._selectField({ arrival: f.kind === "flock_in" && ARRIVAL_REASONS[f.reason] ? f.reason : "bought" }, "arrival", Object.entries(ARRIVAL_REASONS).map(([r, icon]) => [r, `${icon} ${this.t(`ar_${r}`)}`]));
+    extras.queen = h("label", { className: "check" }, h("input", { type: "checkbox", name: "queen", checked: !!f.queen }), this.t("queenSeen"));
+    extras.varroa = this._selectField({ varroa_method: VARROA_METHODS.includes(f.product) ? f.product : "drop" }, "varroa_method", VARROA_METHODS.map((m) => [m, this.t(`vm_${m}`)]));
+    extras.readings = h(
+      "div",
+      { className: "row", style: "flex-wrap:wrap" },
+      WATER_READINGS.map((key) =>
+        h("label", { style: "flex:1 1 30%" }, this.t(`wr_${key}`), h("input", { name: `r_${key}`, type: "number", step: "any", inputMode: "decimal", value: f.readings?.[key] ?? "" })),
+      ),
+    );
     extras.review = h(
       "div",
       { className: "review" },
@@ -5885,8 +6501,15 @@ class HomesteadPanel extends HTMLElement {
     // Woodland, compost and hen house targets get their own kinds; gardens the others. The current kind always stays visible.
     const filterKinds = () => {
       const family = this._zoneFamily(currentTarget());
-      const own = { woodland: [...WOOD_KINDS, ...WOODLAND_ALSO], compost: [...COMPOST_KINDS, ...YARD_ALSO], coop: [...COOP_KINDS, ...YARD_ALSO], indoor: INDOOR_KINDS }[family];
-      const special = [...WOOD_KINDS, ...COMPOST_KINDS, ...COOP_KINDS];
+      const own = {
+        woodland: [...WOOD_KINDS, ...WOODLAND_ALSO],
+        compost: [...COMPOST_KINDS, ...YARD_ALSO],
+        coop: [...COOP_KINDS, ...YARD_ALSO],
+        indoor: INDOOR_KINDS,
+        apiary: [...BEE_KINDS, ...YARD_ALSO, "photo"],
+        water: [...WATER_KINDS, ...YARD_ALSO, "treatment"],
+      }[family];
+      const special = [...WOOD_KINDS, ...COMPOST_KINDS, ...COOP_KINDS, ...BEE_KINDS.filter((k) => k !== "treatment"), ...WATER_KINDS];
       kinds.querySelectorAll("button").forEach((b) => {
         const kind = b.dataset.kind;
         b.hidden = kind !== kindInput.value && (own ? !own.includes(kind) : special.includes(kind));
@@ -5896,19 +6519,25 @@ class HomesteadPanel extends HTMLElement {
       const kind = kindInput.value;
       updateLast();
       extras.review.hidden = kind !== "review";
-      extras.stars.hidden = !["review", "compost_harvest"].includes(kind);
+      extras.stars.hidden = !["review", "compost_harvest", "hive_inspection"].includes(kind);
       extras.reason.hidden = kind !== "flock_out";
+      extras.animal.hidden = !["eggs", "flock_in", "flock_out"].includes(kind);
+      extras.arrival.hidden = kind !== "flock_in";
+      extras.queen.hidden = kind !== "hive_inspection";
+      extras.varroa.hidden = kind !== "varroa_count";
+      extras.readings.hidden = kind !== "water_test";
       extras.end.hidden = kind !== "removal";
       extras.pest.hidden = kind !== "problem";
       extras.worked.hidden = kind !== "treatment";
-      quantityLabel.firstChild.textContent = this.t(QUANTITY_LABEL[kind] || "quantity_h");
+      quantityLabel.firstChild.textContent = this.t(QUANTITY_ONLY[kind] || QUANTITY_LABEL[kind] || "quantity_h");
       unitLabel.hidden = (QUANTITY_UNITS[kind] || []).length < 2;
+      if (kind === "predator" && !productInput.value) productInput.value = "Vespa velutina";
       extras.product.hidden = !PRODUCT_LABEL[kind];
       productLabel.firstChild.textContent = this.t(PRODUCT_LABEL[kind] || "product");
       doseLabel.hidden = !["fertilizing", "treatment"].includes(kind);
       shopButton.hidden = doseLabel.hidden;
       productInput.setAttribute("list", kind === "wood_cutting" ? "homestead-essences" : kind === "problem" ? "homestead-pests" : "");
-      extras.harvest.hidden = !QUANTITY_UNITS[kind];
+      extras.harvest.hidden = !QUANTITY_UNITS[kind] && !QUANTITY_ONLY[kind];
       if (QUANTITY_UNITS[kind]) {
         const units = UNITS.imperial && IMPERIAL_UNITS[kind] ? IMPERIAL_UNITS[kind] : QUANTITY_UNITS[kind];
         const previous = unitSelect.value || f.unit;
@@ -6015,8 +6644,13 @@ class HomesteadPanel extends HTMLElement {
       extras.harvest,
       extras.pest,
       extras.worked,
+      extras.animal,
+      extras.arrival,
       extras.reason,
       extras.end,
+      extras.varroa,
+      extras.readings,
+      extras.queen,
       extras.stars,
       extras.review,
       money,
@@ -6062,9 +6696,12 @@ class HomesteadPanel extends HTMLElement {
       ...(type === "p" ? { planting_id: targetId } : { zone_id: targetId }),
       product: v.product?.trim() || null,
       dose: v.dose?.trim() || null,
-      quantity: QUANTITY_UNITS[v.kind] && v.quantity ? Number(v.quantity) : null,
-      rating: ["review", "compost_harvest"].includes(v.kind) && v.rating ? Number(v.rating) : null,
-      reason: v.kind === "flock_out" ? v.reason || null : v.kind === "removal" ? v.end_reason || null : null,
+      quantity: (QUANTITY_UNITS[v.kind] || QUANTITY_ONLY[v.kind]) && v.quantity ? Number(v.quantity) : null,
+      rating: ["review", "compost_harvest", "hive_inspection"].includes(v.kind) && v.rating ? Number(v.rating) : null,
+      reason: v.kind === "flock_out" ? v.reason || null : v.kind === "flock_in" ? v.arrival || null : v.kind === "removal" ? v.end_reason || null : null,
+      animal: ["eggs", "flock_in", "flock_out"].includes(v.kind) ? v.animal || null : null,
+      queen: v.kind === "hive_inspection" ? v.queen === "on" : null,
+      readings: v.kind === "water_test" ? Object.fromEntries(WATER_READINGS.filter((k) => v[`r_${k}`] !== "" && v[`r_${k}`] != null).map((k) => [k, Number(v[`r_${k}`])])) : null,
       cause: v.kind === "removal" && v.end_reason === "died" ? v.cause || "unknown" : null,
       abundance: v.kind === "review" ? v.abundance || null : null,
       keep: v.kind === "review" ? v.keep?.trim() || null : null,
@@ -6074,7 +6711,8 @@ class HomesteadPanel extends HTMLElement {
       worked: v.kind === "treatment" ? v.worked || null : null,
       notes: v.notes?.trim() || null,
     };
-    if (!PRODUCT_LABEL[v.kind]) data.product = null;
+    if (v.kind === "varroa_count") data.product = v.varroa_method || "drop";
+    else if (!PRODUCT_LABEL[v.kind]) data.product = null;
     if (!["fertilizing", "treatment"].includes(v.kind)) data.dose = null;
     const id = this._eventForm.id;
     if (!id) {
@@ -8706,6 +9344,7 @@ class HomesteadPanel extends HTMLElement {
         h("p", { className: "hint" }, this.t("anYieldsHint")),
       ),
       this._eggsBox(years),
+      this._honeyBox(years),
       this._germinationBox(),
       this._lossesBox(),
       this._data.events.some((e) => e.kind === "wood_burned") ? h("div", { className: "an-box" }, this._woodStockBox()) : null,
@@ -9831,13 +10470,40 @@ class HomesteadPanel extends HTMLElement {
       const matching = sensors.filter(fits[name]);
       return h("div", { className: "sensor-field" }, h("span", { className: "sensor-label" }, this.t(attr)), this._sensorPicker(attr, matching.length ? matching : sensors, z[attr]));
     };
-    const own = SOIL_SENSOR_FIELDS.filter(([, attr]) => sensorIds(z[attr]).length).length;
+    fits.ph = ([, st]) => st.attributes?.device_class === "ph" || /ph/i.test(st.attributes?.friendly_name || "");
+    // A water circuit: pH, water temperature and EC (the last two stored in the soil fields).
+    const water = z.kind === "hydroponic";
+    const fields = water ? [["ph", "ph_entity"], ["temperature", "soil_temperature_entity"], ["ec", "soil_ec_entity"]] : SOIL_SENSOR_FIELDS;
+    const own = fields.filter(([, attr]) => sensorIds(z[attr]).length).length;
     return h(
       "details",
       { className: "care-notes", open: own > 0 },
-      h("summary", {}, `🌱 ${this.t("soilSensors")}${own ? ` · ${own}` : ""}`),
-      h("p", { className: "hint" }, this.t("soilSensorsHint")),
-      SOIL_SENSOR_FIELDS.map(([name, attr]) => select(name, attr)),
+      h("summary", {}, `${water ? "💧" : "🌱"} ${this.t(water ? "waterSensors" : "soilSensors")}${own ? ` · ${own}` : ""}`),
+      water ? null : h("p", { className: "hint" }, this.t("soilSensorsHint")),
+      fields.map(([name, attr]) => (water ? h("div", { className: "sensor-field" }, h("span", { className: "sensor-label" }, this.t(`wr_${name}`)), this._sensorPicker(attr, sensors.filter(fits[name]).length ? sensors.filter(fits[name]) : sensors, z[attr])) : select(name, attr))),
+    );
+  }
+
+  /** Apiary: the varroa threshold, the same all year or by month, and the hornet traps. */
+  _varroaFields(z) {
+    const months = Array.from({ length: 12 }, (_, i) => i + 1);
+    const letters = new Intl.DateTimeFormat(this._lang(), { month: "short" });
+    return h(
+      "details",
+      { className: "care-notes", open: z.varroa_threshold != null || Object.keys(z.varroa_months || {}).length > 0 },
+      h("summary", {}, `🔬 ${this.t("varroaThreshold")}`),
+      h(
+        "div",
+        { className: "row" },
+        h("label", {}, this.t("varroaThresholdAll"), h("input", { name: "varroa_threshold", type: "number", min: 0, step: 0.5, inputMode: "decimal", placeholder: "10", value: z.varroa_threshold ?? "" })),
+        h("label", {}, this.t("traps"), h("input", { name: "traps", type: "number", min: 0, step: 1, inputMode: "numeric", value: z.traps ?? "" })),
+      ),
+      h("p", { className: "hint", style: "white-space:normal" }, this.t("varroaMonthsHint")),
+      h(
+        "div",
+        { className: "varroa-months" },
+        months.map((m) => h("label", {}, letters.format(new Date(2026, m - 1, 15)), h("input", { name: `vm_${m}`, type: "number", min: 0, step: 0.5, inputMode: "decimal", value: z.varroa_months?.[String(m)] ?? "" }))),
+      ),
     );
   }
 
@@ -9847,16 +10513,17 @@ class HomesteadPanel extends HTMLElement {
     const area = formatArea(z.area_m2 ?? polygonArea(z.geometry));
     const kindSelect = this._selectField(z, "kind", [["", this.t("noZone")], ...ZONE_KINDS.map((k) => [k, this.t(k)])]);
     const essences = this._essencesField(z);
-    const toggleEssences = () => (essences.hidden = kindSelect.querySelector("select").value !== "woodland" && !z.species.length);
+    const toggleEssences = () => (essences.hidden = !["woodland", "melliferous"].includes(kindSelect.querySelector("select").value) && !z.species.length);
     kindSelect.addEventListener("change", toggleEssences);
     toggleEssences();
     const box = z.id ? (this._woodEl = h("div", {}, this._zoneBox(z))) : null;
-    // Hen house and compost: the daily things first, the zone settings below.
-    const first = ["compost", "coop"].includes(z.kind);
+    // Yard, compost, bees, water circuit: the daily things first, the zone settings below.
+    const first = ["compost", "coop", "apiary", "hive", "melliferous", "hydroponic", "fish_tank"].includes(z.kind);
+    const noGarden = ["compost", "coop", "apiary", "hive", "fish_tank"].includes(z.kind);
     return [
-      z.id && this._zoneHasSoil(z.id) ? this._soilLine(z.id) : null,
+      z.id && z.kind !== "hydroponic" && this._zoneHasSoil(z.id) ? this._soilLine(z.id) : null,
       z.id && z.valve_entity ? this._valveLine(z) : null,
-      z.id && !["compost", "coop", "indoor", "woodland"].includes(z.kind) ? this._waterBox(z) : null,
+      z.id && !["compost", "coop", "indoor", "woodland", "apiary", "hive", "melliferous", "hydroponic", "fish_tank"].includes(z.kind) ? this._waterBox(z) : null,
       first ? box : null,
       h(
         "form",
@@ -9870,9 +10537,10 @@ class HomesteadPanel extends HTMLElement {
           this._selectField(z, "parent_id", this._zoneOptions(exclude)),
         ),
         essences,
-        ["compost", "coop", "indoor"].includes(z.kind) ? null : this._waterSelect(z, this.t(z.parent_id ? "wmInherit" : "wmUnset")),
-        ["compost", "coop"].includes(z.kind) ? null : this._zoneSoilFields(z),
-        ["compost", "coop", "woodland"].includes(z.kind) ? null : this._zoneValveFields(z),
+        noGarden || ["indoor", "hydroponic"].includes(z.kind) ? null : this._waterSelect(z, this.t(z.parent_id ? "wmInherit" : "wmUnset")),
+        noGarden ? null : this._zoneSoilFields(z),
+        noGarden || z.kind === "woodland" ? null : this._zoneValveFields(z),
+        z.kind === "apiary" ? this._varroaFields(z) : null,
         this._notes(z),
         area ? h("div", { className: "hint" }, `${this.t("surface")}: ${area}`) : null,
         h(
@@ -9893,7 +10561,7 @@ class HomesteadPanel extends HTMLElement {
       ),
       first ? null : box,
       z.id && ["vegetable_garden", "greenhouse"].includes(z.kind) && !z.parent_id ? this._nextYearBox(z) : null,
-      z.id && !["woodland", "compost", "coop"].includes(z.kind) ? this._rotationBox(z) : null,
+      z.id && !["woodland", "compost", "coop", "apiary", "hive", "melliferous", "hydroponic", "fish_tank"].includes(z.kind) ? this._rotationBox(z) : null,
       z.id ? this._photoHistoryBox(z.id) : null,
       z.id ? this._diaryBox({ zone_id: z.id }) : null,
       z.id ? this._lastYearsBox(this._data.events.filter((e) => e.zone_id === z.id || this._zoneDescendants(z.id).has(e.zone_id)), { zone_id: z.id }) : null,
