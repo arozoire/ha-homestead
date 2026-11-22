@@ -172,9 +172,14 @@
         "lawn": "Gazon",
         "woodland": "Bos",
         "compost": "Composthoop",
-        "coop": "Kippenhok",
+        "coop": "Erfdieren",
         "nursery": "Kweekbak",
         "indoor": "Binnen (een kamer)",
+        "apiary": "Bijenstal",
+        "hive": "Bijenkast",
+        "melliferous": "Drachtplanten",
+        "hydroponic": "Hydrocultuurcircuit",
+        "fish_tank": "Visbak",
         "other": "Overig"
       }
     },
@@ -209,13 +214,22 @@
         "compost_turn": "Compost omzetten",
         "compost_harvest": "Compost oogsten",
         "eggs": "Eieren",
-        "flock_in": "Kippen erbij",
-        "flock_out": "Kippen weg",
+        "flock_in": "Dieren aangekomen",
+        "flock_out": "Dieren vertrokken",
         "animal_care": "Voer en verzorging",
-        "coop_cleaning": "Kippenhok schoonmaken",
+        "coop_cleaning": "Schoonmaak",
         "repotting": "Verpotten",
         "wood_burned": "Gestookt hout (winter)",
-        "photo": "Foto"
+        "photo": "Foto",
+        "hive_inspection": "Kastcontrole",
+        "varroa_count": "Varroatelling",
+        "bee_feeding": "Bijen bijvoeren",
+        "swarm": "Zwerm",
+        "honey_harvest": "Honingoogst",
+        "predator": "Rover gezien",
+        "water_test": "Watertest",
+        "fish_feeding": "Vis voeren",
+        "fish_weighing": "Vis wegen"
       }
     },
     "harvest_unit": {
@@ -248,6 +262,9 @@
         "age": "Ouderdom",
         "sold": "Verkocht of weggegeven",
         "slaughtered": "Geslacht",
+        "moved": "Verplaatst (andere bak of ren)",
+        "bought": "Gekocht",
+        "born": "Hier geboren",
         "other": "Overig"
       }
     },
@@ -320,6 +337,18 @@
         "partly": "deels",
         "no": "nee"
       }
+    },
+    "animal": {
+      "options": {
+        "hens": "Kippen",
+        "quails": "Kwartels",
+        "ducks": "Eenden",
+        "geese": "Ganzen",
+        "turkeys": "Kalkoenen",
+        "rabbits": "Konijnen",
+        "fish": "Vissen",
+        "other": "Overig"
+      }
     }
   },
   "services": {
@@ -382,6 +411,22 @@
         "flow_entity": {
           "name": "Debietmeter",
           "description": "Debietmeter van de klep (debiet of totaal volume); elke beurt krijgt het water dat ze gaf."
+        },
+        "varroa_threshold": {
+          "name": "Varroadrempel",
+          "description": "Bijenstal: mijten per dag in de natuurlijke val waarboven je behandelt (standaard 10)."
+        },
+        "varroa_months": {
+          "name": "Varroadrempel per maand",
+          "description": "Optioneel: \"3\": 3, \"8\": 10 (maand: drempel) — in sommige maanden een andere drempel."
+        },
+        "traps": {
+          "name": "Hoornaarvallen",
+          "description": "Bijenstal: geplaatste vallen."
+        },
+        "ph_entity": {
+          "name": "pH-sensor",
+          "description": "Watercircuit: pH-sondes (meerdere worden gemiddeld)."
         }
       }
     },
@@ -448,6 +493,22 @@
         "flow_entity": {
           "name": "Debietmeter",
           "description": "Debietmeter van de klep (debiet of totaal volume); elke beurt krijgt het water dat ze gaf."
+        },
+        "varroa_threshold": {
+          "name": "Varroadrempel",
+          "description": "Bijenstal: mijten per dag in de natuurlijke val waarboven je behandelt (standaard 10)."
+        },
+        "varroa_months": {
+          "name": "Varroadrempel per maand",
+          "description": "Optioneel: \"3\": 3, \"8\": 10 (maand: drempel) — in sommige maanden een andere drempel."
+        },
+        "traps": {
+          "name": "Hoornaarvallen",
+          "description": "Bijenstal: geplaatste vallen."
+        },
+        "ph_entity": {
+          "name": "pH-sensor",
+          "description": "Watercircuit: pH-sondes (meerdere worden gemiddeld)."
         }
       }
     },
@@ -1074,6 +1135,18 @@
         "worked": {
           "name": "Werkte het",
           "description": "Behandeling: werkte het."
+        },
+        "animal": {
+          "name": "Dier",
+          "description": "Eieren, aankomsten en vertrekken: kippen, kwartels, konijnen, vissen… (leeg = kippen)."
+        },
+        "queen": {
+          "name": "Koningin gezien",
+          "description": "Kastcontrole: koningin of verse eitjes gezien."
+        },
+        "readings": {
+          "name": "Waterwaarden",
+          "description": "Watertest: ph, ec, temperature, ammonia, nitrite, nitrate (bijv. \"ph\": 7.1)."
         }
       }
     },
@@ -1152,6 +1225,18 @@
         "worked": {
           "name": "Werkte het",
           "description": "Behandeling: werkte het."
+        },
+        "animal": {
+          "name": "Dier",
+          "description": "Eieren, aankomsten en vertrekken: kippen, kwartels, konijnen, vissen… (leeg = kippen)."
+        },
+        "queen": {
+          "name": "Koningin gezien",
+          "description": "Kastcontrole: koningin of verse eitjes gezien."
+        },
+        "readings": {
+          "name": "Waterwaarden",
+          "description": "Watertest: ph, ec, temperature, ammonia, nitrite, nitrate (bijv. \"ph\": 7.1)."
         }
       }
     },

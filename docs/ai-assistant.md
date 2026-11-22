@@ -14,7 +14,9 @@
 | "When should I water?" | Water balance per zone (rain − evapotranspiration, or the zone's soil moisture sensors), sensors on single pots, young trees followed for two years |
 | "Track seeds / what to sow now" | Seed lots with age warnings, sowing calendar set on the garden's own frost dates, rotation advice |
 | "Garden costs and harvest yields" | Expenses and sales, harvest quantities, yearly balance, multi-year analysis per crop |
-| "Firewood, compost, hens, houseplants" | Woodland zones and firewood stock, compost bins with turning reminders, hen house with egg counts, indoor plants with watering rounds |
+| "Firewood, compost, hens, houseplants" | Woodland zones and firewood stock, compost bins with turning reminders, farmyard animals (hens, quails, ducks, geese, rabbits) with egg counts and births, indoor plants with watering rounds |
+| "Beehives, varroa, Asian hornet" | Apiary zone with hives as sub-zones: inspections, varroa counts against the user's threshold (also by month), treatments and their effect, honey per hive, hornet sightings and season warning, flowers for bees with nectar months |
+| "Hydroponics, aquaponics, fish" | Water circuit zone: pH/EC/temperature sensors, manual water tests, fish tanks as sub-zones with counts, losses, feed, weighings and fish moved between tanks |
 | "Where is the data? Backup?" | Inside HA (`.storage/homestead.data`, in the normal HA backups), photos in the media folder; JSON or .zip export from the panel; no cloud account |
 
 ## Help the user set it up

@@ -172,9 +172,14 @@
         "lawn": "Césped",
         "woodland": "Bosque",
         "compost": "Compostador",
-        "coop": "Gallinero",
+        "coop": "Animales de corral",
         "nursery": "Semillero",
         "indoor": "Interior (una habitación)",
+        "apiary": "Colmenar",
+        "hive": "Colmena",
+        "melliferous": "Flores melíferas",
+        "hydroponic": "Circuito hidropónico",
+        "fish_tank": "Tanque de peces",
         "other": "Otro"
       }
     },
@@ -209,13 +214,22 @@
         "compost_turn": "Voltear el compost",
         "compost_harvest": "Recogida de compost",
         "eggs": "Huevos",
-        "flock_in": "Llegada de gallinas",
-        "flock_out": "Salida de gallinas",
+        "flock_in": "Llegada de animales",
+        "flock_out": "Salida de animales",
         "animal_care": "Pienso y cuidados",
-        "coop_cleaning": "Limpieza del gallinero",
+        "coop_cleaning": "Limpieza",
         "repotting": "Trasplante a maceta",
         "wood_burned": "Leña quemada (invierno)",
-        "photo": "Foto"
+        "photo": "Foto",
+        "hive_inspection": "Revisión de la colmena",
+        "varroa_count": "Conteo de varroa",
+        "bee_feeding": "Alimentación de las abejas",
+        "swarm": "Enjambre",
+        "honey_harvest": "Cosecha de miel",
+        "predator": "Depredador visto",
+        "water_test": "Prueba del agua",
+        "fish_feeding": "Alimento a los peces",
+        "fish_weighing": "Pesaje de los peces"
       }
     },
     "harvest_unit": {
@@ -248,6 +262,9 @@
         "age": "Vejez",
         "sold": "Vendida o regalada",
         "slaughtered": "Sacrificada",
+        "moved": "Trasladados (otro tanque o corral)",
+        "bought": "Comprados",
+        "born": "Nacidos aquí",
         "other": "Otro"
       }
     },
@@ -320,6 +337,18 @@
         "partly": "en parte",
         "no": "no"
       }
+    },
+    "animal": {
+      "options": {
+        "hens": "Gallinas",
+        "quails": "Codornices",
+        "ducks": "Patos",
+        "geese": "Ocas",
+        "turkeys": "Pavos",
+        "rabbits": "Conejos",
+        "fish": "Peces",
+        "other": "Otro"
+      }
     }
   },
   "services": {
@@ -382,6 +411,22 @@
         "flow_entity": {
           "name": "Caudalímetro",
           "description": "Caudalímetro de la válvula (caudal o volumen total); cada apertura recibe el agua que dio."
+        },
+        "varroa_threshold": {
+          "name": "Umbral de varroa",
+          "description": "Colmenar: varroas al día en la caída natural a partir de las cuales tratar (10 por defecto)."
+        },
+        "varroa_months": {
+          "name": "Umbral de varroa por mes",
+          "description": "Opcional: \"3\": 3, \"8\": 10 (mes: umbral) — un umbral distinto en algunos meses."
+        },
+        "traps": {
+          "name": "Trampas para avispones",
+          "description": "Colmenar: trampas puestas alrededor."
+        },
+        "ph_entity": {
+          "name": "Sensor de pH",
+          "description": "Circuito de agua: sondas de pH (varias se promedian)."
         }
       }
     },
@@ -448,6 +493,22 @@
         "flow_entity": {
           "name": "Caudalímetro",
           "description": "Caudalímetro de la válvula (caudal o volumen total); cada apertura recibe el agua que dio."
+        },
+        "varroa_threshold": {
+          "name": "Umbral de varroa",
+          "description": "Colmenar: varroas al día en la caída natural a partir de las cuales tratar (10 por defecto)."
+        },
+        "varroa_months": {
+          "name": "Umbral de varroa por mes",
+          "description": "Opcional: \"3\": 3, \"8\": 10 (mes: umbral) — un umbral distinto en algunos meses."
+        },
+        "traps": {
+          "name": "Trampas para avispones",
+          "description": "Colmenar: trampas puestas alrededor."
+        },
+        "ph_entity": {
+          "name": "Sensor de pH",
+          "description": "Circuito de agua: sondas de pH (varias se promedian)."
         }
       }
     },
@@ -1074,6 +1135,18 @@
         "worked": {
           "name": "Funcionó",
           "description": "Tratamiento: funcionó."
+        },
+        "animal": {
+          "name": "Animal",
+          "description": "Huevos, llegadas y salidas: gallinas, codornices, conejos, peces… (vacío = gallinas)."
+        },
+        "queen": {
+          "name": "Reina vista",
+          "description": "Revisión de la colmena: reina o huevos frescos vistos."
+        },
+        "readings": {
+          "name": "Valores del agua",
+          "description": "Prueba del agua: ph, ec, temperature, ammonia, nitrite, nitrate (p. ej. \"ph\": 7.1)."
         }
       }
     },
@@ -1152,6 +1225,18 @@
         "worked": {
           "name": "Funcionó",
           "description": "Tratamiento: funcionó."
+        },
+        "animal": {
+          "name": "Animal",
+          "description": "Huevos, llegadas y salidas: gallinas, codornices, conejos, peces… (vacío = gallinas)."
+        },
+        "queen": {
+          "name": "Reina vista",
+          "description": "Revisión de la colmena: reina o huevos frescos vistos."
+        },
+        "readings": {
+          "name": "Valores del agua",
+          "description": "Prueba del agua: ph, ec, temperature, ammonia, nitrite, nitrate (p. ej. \"ph\": 7.1)."
         }
       }
     },

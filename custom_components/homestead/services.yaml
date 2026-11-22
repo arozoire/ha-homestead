@@ -23,6 +23,11 @@ add_zone:
             - coop
             - nursery
             - indoor
+            - apiary
+            - hive
+            - melliferous
+            - hydroponic
+            - fish_tank
             - other
     area_id:
       selector:
@@ -75,6 +80,28 @@ add_zone:
         entity:
           domain: sensor
           device_class: [volume_flow_rate, volume, water]
+    varroa_threshold:
+      selector:
+        number:
+          min: 0
+          max: 1000
+          step: 0.5
+          mode: box
+    varroa_months:
+      selector:
+        object:
+    traps:
+      selector:
+        number:
+          min: 0
+          max: 100
+          mode: box
+    ph_entity:
+      selector:
+        entity:
+          domain: sensor
+          device_class: ph
+          multiple: true
 
 update_zone:
   fields:
@@ -104,6 +131,11 @@ update_zone:
             - coop
             - nursery
             - indoor
+            - apiary
+            - hive
+            - melliferous
+            - hydroponic
+            - fish_tank
             - other
     area_id:
       selector:
@@ -156,6 +188,28 @@ update_zone:
         entity:
           domain: sensor
           device_class: [volume_flow_rate, volume, water]
+    varroa_threshold:
+      selector:
+        number:
+          min: 0
+          max: 1000
+          step: 0.5
+          mode: box
+    varroa_months:
+      selector:
+        object:
+    traps:
+      selector:
+        number:
+          min: 0
+          max: 100
+          mode: box
+    ph_entity:
+      selector:
+        entity:
+          domain: sensor
+          device_class: ph
+          multiple: true
 
 delete_zone:
   fields:
@@ -852,6 +906,15 @@ add_event:
             - repotting
             - wood_burned
             - photo
+            - hive_inspection
+            - varroa_count
+            - bee_feeding
+            - swarm
+            - honey_harvest
+            - predator
+            - water_test
+            - fish_feeding
+            - fish_weighing
     done_on:
       selector:
         date:
@@ -924,6 +987,9 @@ add_event:
             - age
             - sold
             - slaughtered
+            - moved
+            - bought
+            - born
             - other
     cause:
       selector:
@@ -971,6 +1037,25 @@ add_event:
             - "yes"
             - partly
             - "no"
+    animal:
+      selector:
+        select:
+          translation_key: animal
+          options:
+            - hens
+            - quails
+            - ducks
+            - geese
+            - turkeys
+            - rabbits
+            - fish
+            - other
+    queen:
+      selector:
+        boolean:
+    readings:
+      selector:
+        object:
 
 update_event:
   fields:
@@ -1012,6 +1097,15 @@ update_event:
             - repotting
             - wood_burned
             - photo
+            - hive_inspection
+            - varroa_count
+            - bee_feeding
+            - swarm
+            - honey_harvest
+            - predator
+            - water_test
+            - fish_feeding
+            - fish_weighing
     done_on:
       selector:
         date:
@@ -1084,6 +1178,9 @@ update_event:
             - age
             - sold
             - slaughtered
+            - moved
+            - bought
+            - born
             - other
     cause:
       selector:
@@ -1116,6 +1213,25 @@ update_event:
             - "yes"
             - partly
             - "no"
+    animal:
+      selector:
+        select:
+          translation_key: animal
+          options:
+            - hens
+            - quails
+            - ducks
+            - geese
+            - turkeys
+            - rabbits
+            - fish
+            - other
+    queen:
+      selector:
+        boolean:
+    readings:
+      selector:
+        object:
 
 delete_event:
   fields:
@@ -1213,6 +1329,15 @@ add_task:
             - repotting
             - wood_burned
             - photo
+            - hive_inspection
+            - varroa_count
+            - bee_feeding
+            - swarm
+            - honey_harvest
+            - predator
+            - water_test
+            - fish_feeding
+            - fish_weighing
     due_on:
       required: true
       selector:
@@ -1292,6 +1417,15 @@ update_task:
             - repotting
             - wood_burned
             - photo
+            - hive_inspection
+            - varroa_count
+            - bee_feeding
+            - swarm
+            - honey_harvest
+            - predator
+            - water_test
+            - fish_feeding
+            - fish_weighing
     due_on:
       selector:
         date:

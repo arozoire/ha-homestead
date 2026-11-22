@@ -54,10 +54,44 @@ class ZoneKind(StrEnum):
     LAWN = "lawn"
     WOODLAND = "woodland"
     COMPOST = "compost"  # compost bin: only turning and harvesting events
-    COOP = "coop"  # hen house: eggs and flock movements
+    COOP = "coop"  # farmyard animals (hens, quails, geese, rabbits…): eggs and arrivals/departures by animal
     NURSERY = "nursery"  # seed trays, cold frame: seedlings until they are planted out
     INDOOR = "indoor"  # a room of the house: houseplants, no map, no weather
+    APIARY = "apiary"  # bee yard: its hives are sub-zones
+    HIVE = "hive"  # one beehive, inside an apiary (no drawing needed)
+    MELLIFEROUS = "melliferous"  # flowers for the bees: species with their flowering months
+    HYDROPONIC = "hydroponic"  # a water circuit: its beds and fish tanks are sub-zones
+    FISH_TANK = "fish_tank"  # a tank of the circuit: fish lots moved by hand
     OTHER = "other"
+
+
+class Animal(StrEnum):
+    """Who an arrival, a departure or eggs are about (none = hens, as before 0.22)."""
+
+    HENS = "hens"
+    QUAILS = "quails"
+    DUCKS = "ducks"
+    GEESE = "geese"
+    TURKEYS = "turkeys"
+    RABBITS = "rabbits"
+    FISH = "fish"
+    OTHER = "other"
+
+
+class ArrivalReason(StrEnum):
+    """Why animals arrived (flock_in)."""
+
+    BOUGHT = "bought"
+    BORN = "born"  # a litter, a hatch, fry
+    MOVED = "moved"  # from another tank or yard
+
+
+class VarroaMethod(StrEnum):
+    """How mites were counted (varroa_count): a natural drop is per day, the tests in %."""
+
+    DROP = "drop"
+    SUGAR = "sugar"
+    ALCOHOL = "alcohol"
 
 
 class InitialForm(StrEnum):
@@ -114,6 +148,15 @@ class EventKind(StrEnum):
     REPOTTING = "repotting"
     WOOD_BURNED = "wood_burned"  # firewood burnt over a winter, logged once at its end
     PHOTO = "photo"  # a picture of a zone or a plant from the photo plan, to compare over the years
+    HIVE_INSPECTION = "hive_inspection"  # strength 1–5 in rating, queen seen in queen
+    VARROA_COUNT = "varroa_count"  # mites: per day (drop) or % (sugar, alcohol test), method in product
+    BEE_FEEDING = "bee_feeding"
+    SWARM = "swarm"
+    HONEY_HARVEST = "honey_harvest"  # kg in quantity, kind of honey in product
+    PREDATOR = "predator"  # a sighting (Asian hornet…): what in product, how many in quantity
+    WATER_TEST = "water_test"  # readings: pH, EC, temperature, ammonia, nitrites, nitrates
+    FISH_FEEDING = "fish_feeding"  # grams in quantity
+    FISH_WEIGHING = "fish_weighing"  # average weight in grams in quantity
 
 
 class Severity(StrEnum):
@@ -155,13 +198,28 @@ class LeaveReason(StrEnum):
     AGE = "age"
     SOLD = "sold"
     SLAUGHTERED = "slaughtered"
+    MOVED = "moved"  # to another tank or yard
     OTHER = "other"
 
 
 # Animal and compost entries: no weather snapshot (eggs are logged every day).
 NO_WEATHER_KINDS = frozenset(
-    {"compost_turn", "compost_harvest", "eggs", "flock_in", "flock_out", "animal_care", "coop_cleaning"}
+    {
+        "compost_turn",
+        "compost_harvest",
+        "eggs",
+        "flock_in",
+        "flock_out",
+        "animal_care",
+        "coop_cleaning",
+        "varroa_count",
+        "water_test",
+        "fish_feeding",
+        "fish_weighing",
+    }
 )
+WATER_READINGS = ("ph", "ec", "temperature", "ammonia", "nitrite", "nitrate")
+DEFAULT_VARROA_THRESHOLD = 10.0  # mites a day in the natural drop
 COMPOST_TURN_DAYS = 28
 
 
@@ -190,6 +248,8 @@ EVENT_COST_CATEGORY = {
     EventKind.ANIMAL_CARE: ExpenseCategory.ANIMALS,
     EventKind.COOP_CLEANING: ExpenseCategory.ANIMALS,
     EventKind.COMPOST_TURN: ExpenseCategory.SERVICES,
+    EventKind.BEE_FEEDING: ExpenseCategory.ANIMALS,
+    EventKind.FISH_FEEDING: ExpenseCategory.ANIMALS,
 }
 
 
@@ -262,6 +322,13 @@ class Zone(_Record):
     hose_here: bool = True
     # The valve's flow meter (a flow rate or a volume total): how much water each run gave.
     flow_entity: str | None = None
+    # Apiary (its hives follow it): mites a day that call for a treatment, and by month if it changes
+    # through the year ({"3": 3, "8": 10}); none = DEFAULT_VARROA_THRESHOLD.
+    varroa_threshold: float | None = None
+    varroa_months: dict[str, float] = field(default_factory=dict)
+    traps: int | None = None  # hornet traps set around the apiary
+    # Water circuit: pH probes (EC and temperature use the soil_ec / soil_temperature fields).
+    ph_entity: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         if self.watering == "valve":  # mode of 0.19 replaced by valve_entity (any mode can be on a valve)
@@ -270,6 +337,8 @@ class Zone(_Record):
         self.species = clean_species(self.species)
         for attr in SOIL_SENSOR_FIELDS.values():
             setattr(self, attr, entity_list(getattr(self, attr)))
+        self.ph_entity = entity_list(self.ph_entity)
+        self.varroa_months = clean_months(self.varroa_months)
 
 
 def entity_list(value: Any) -> list[str]:
@@ -297,7 +366,24 @@ def clean_species(value: Any) -> list[dict[str, Any]]:
             continue
         name = entry["name"].strip()
         if all(e["name"].lower() != name.lower() for e in out):
-            out.append({"name": name, "taxon_id": entry.get("taxon_id") or None})
+            clean = {"name": name, "taxon_id": entry.get("taxon_id") or None}
+            # Flowers for the bees: the months of nectar and of pollen, when the user set them.
+            for key in ("nectar", "pollen"):
+                months = sorted(
+                    {int(m) for m in entry.get(key) or [] if str(m).isdigit() and 1 <= int(m) <= 12}
+                )
+                if months:
+                    clean[key] = months
+            out.append(clean)
+    return out
+
+
+def clean_months(value: Any) -> dict[str, float]:
+    """{"<month 1–12>": number} without anything else."""
+    out: dict[str, float] = {}
+    for key, number in (value or {}).items() if isinstance(value, dict) else []:
+        if str(key).isdigit() and 1 <= int(key) <= 12 and isinstance(number, int | float) and number >= 0:
+            out[str(int(key))] = float(number)
     return out
 
 
@@ -424,10 +510,17 @@ class Event(_Record):
     weather: dict[str, Any] | None = None
     notes: str | None = None
     valve_minutes: float | None = None  # watering logged from a valve run: its length (minutes)
+    animal: str | None = None  # eggs, flock_in, flock_out: hens, quails, rabbits, fish… (none = hens)
+    queen: bool | None = None  # hive_inspection: queen (or fresh eggs) seen
+    readings: dict[str, float] = field(default_factory=dict)  # water_test: WATER_READINGS
 
     def __post_init__(self) -> None:
         if not self.moon_phase:
             self.moon_phase = moon_phase(date.fromisoformat(self.done_on))
+        readings = self.readings if isinstance(self.readings, dict) else {}
+        self.readings = {
+            k: float(v) for k, v in readings.items() if k in WATER_READINGS and isinstance(v, int | float)
+        }
 
 
 def _next_year_day(day: str | None) -> str | None:
@@ -727,17 +820,34 @@ class HomesteadData:
         ]
 
 
-def hens(data: HomesteadData, zone_id: str, until: str | None = None) -> int:
-    """Hens in a coop: arrivals minus departures (up to a date, included)."""
-    count = 0
+def animals(data: HomesteadData, zone_id: str, until: str | None = None) -> dict[str, int]:
+    """Animals in a yard or a fish tank, by kind: arrivals minus departures (up to a date, included)."""
+    counts: dict[str, int] = {}
     for e in data.events.values():
         if e.zone_id != zone_id or (until and e.done_on > until) or not e.quantity:
             continue
-        if e.kind == EventKind.FLOCK_IN:
-            count += int(e.quantity)
-        elif e.kind == EventKind.FLOCK_OUT:
-            count -= int(e.quantity)
-    return max(count, 0)
+        if e.kind in (EventKind.FLOCK_IN, EventKind.FLOCK_OUT):
+            kind = e.animal or Animal.HENS
+            counts[kind] = counts.get(kind, 0) + int(e.quantity) * (1 if e.kind == EventKind.FLOCK_IN else -1)
+    return {kind: n for kind, n in counts.items() if n > 0}
+
+
+def hens(data: HomesteadData, zone_id: str, until: str | None = None) -> int:
+    """Hens in a yard (entries from before 0.22, without an animal, are hens)."""
+    return animals(data, zone_id, until).get(Animal.HENS, 0)
+
+
+def varroa_threshold(data: HomesteadData, zone_id: str | None, month: int) -> float:
+    """Mites a day that call for a treatment: set on the hive or its apiary (by month if set), else 10."""
+    seen: set[str] = set()
+    while zone_id and zone_id not in seen and (zone := data.zones.get(zone_id)):
+        if (value := zone.varroa_months.get(str(month))) is not None:
+            return value
+        if zone.varroa_threshold is not None:
+            return zone.varroa_threshold
+        seen.add(zone_id)
+        zone_id = zone.parent_id
+    return DEFAULT_VARROA_THRESHOLD
 
 
 def compost_due(data: HomesteadData, today: date) -> list[tuple[Zone, int]]:

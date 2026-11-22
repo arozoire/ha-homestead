@@ -172,9 +172,14 @@
         "lawn": "Lawn",
         "woodland": "Woodland",
         "compost": "Compost bin",
-        "coop": "Hen house",
+        "coop": "Farmyard animals",
         "nursery": "Nursery (seed trays)",
         "indoor": "Indoors (a room)",
+        "apiary": "Apiary",
+        "hive": "Beehive",
+        "melliferous": "Flowers for bees",
+        "hydroponic": "Hydroponic circuit",
+        "fish_tank": "Fish tank",
         "other": "Other"
       }
     },
@@ -209,13 +214,22 @@
         "compost_turn": "Compost turning",
         "compost_harvest": "Compost harvest",
         "eggs": "Eggs",
-        "flock_in": "Hens arrived",
-        "flock_out": "Hens gone",
+        "flock_in": "Animals arrived",
+        "flock_out": "Animals gone",
         "animal_care": "Feed and care",
-        "coop_cleaning": "Coop cleaning",
+        "coop_cleaning": "Cleaning",
         "repotting": "Repotting",
         "wood_burned": "Firewood burnt (winter)",
-        "photo": "Photo"
+        "photo": "Photo",
+        "hive_inspection": "Hive inspection",
+        "varroa_count": "Varroa count",
+        "bee_feeding": "Bee feeding",
+        "swarm": "Swarm",
+        "honey_harvest": "Honey harvest",
+        "predator": "Predator seen",
+        "water_test": "Water test",
+        "fish_feeding": "Fish feeding",
+        "fish_weighing": "Fish weighing"
       }
     },
     "harvest_unit": {
@@ -248,6 +262,9 @@
         "age": "Old age",
         "sold": "Sold or given",
         "slaughtered": "Slaughtered",
+        "moved": "Moved (another tank or yard)",
+        "bought": "Bought",
+        "born": "Born here",
         "other": "Other"
       }
     },
@@ -320,6 +337,18 @@
         "partly": "partly",
         "no": "no"
       }
+    },
+    "animal": {
+      "options": {
+        "hens": "Hens",
+        "quails": "Quails",
+        "ducks": "Ducks",
+        "geese": "Geese",
+        "turkeys": "Turkeys",
+        "rabbits": "Rabbits",
+        "fish": "Fish",
+        "other": "Other"
+      }
     }
   },
   "services": {
@@ -382,6 +411,22 @@
         "flow_entity": {
           "name": "Flow meter",
           "description": "Flow meter of the valve (flow rate or volume total); each run gets the water it gave."
+        },
+        "varroa_threshold": {
+          "name": "Varroa threshold",
+          "description": "Apiary: mites a day in the natural drop that call for a treatment (default 10)."
+        },
+        "varroa_months": {
+          "name": "Varroa threshold by month",
+          "description": "Optional: \"3\": 3, \"8\": 10 (month: threshold) — a different threshold in some months."
+        },
+        "traps": {
+          "name": "Hornet traps",
+          "description": "Apiary: traps set around it."
+        },
+        "ph_entity": {
+          "name": "pH sensor",
+          "description": "Water circuit: pH probes (several are averaged)."
         }
       }
     },
@@ -448,6 +493,22 @@
         "flow_entity": {
           "name": "Flow meter",
           "description": "Flow meter of the valve (flow rate or volume total); each run gets the water it gave."
+        },
+        "varroa_threshold": {
+          "name": "Varroa threshold",
+          "description": "Apiary: mites a day in the natural drop that call for a treatment (default 10)."
+        },
+        "varroa_months": {
+          "name": "Varroa threshold by month",
+          "description": "Optional: \"3\": 3, \"8\": 10 (month: threshold) — a different threshold in some months."
+        },
+        "traps": {
+          "name": "Hornet traps",
+          "description": "Apiary: traps set around it."
+        },
+        "ph_entity": {
+          "name": "pH sensor",
+          "description": "Water circuit: pH probes (several are averaged)."
         }
       }
     },
@@ -1074,6 +1135,18 @@
         "worked": {
           "name": "Did it work",
           "description": "Treatment: did it work."
+        },
+        "animal": {
+          "name": "Animal",
+          "description": "Eggs, arrivals and departures: hens, quails, rabbits, fish… (empty = hens)."
+        },
+        "queen": {
+          "name": "Queen seen",
+          "description": "Hive inspection: queen or fresh eggs seen."
+        },
+        "readings": {
+          "name": "Water readings",
+          "description": "Water test: ph, ec, temperature, ammonia, nitrite, nitrate (e.g. \"ph\": 7.1)."
         }
       }
     },
@@ -1152,6 +1225,18 @@
         "worked": {
           "name": "Did it work",
           "description": "Treatment: did it work."
+        },
+        "animal": {
+          "name": "Animal",
+          "description": "Eggs, arrivals and departures: hens, quails, rabbits, fish… (empty = hens)."
+        },
+        "queen": {
+          "name": "Queen seen",
+          "description": "Hive inspection: queen or fresh eggs seen."
+        },
+        "readings": {
+          "name": "Water readings",
+          "description": "Water test: ph, ec, temperature, ammonia, nitrite, nitrate (e.g. \"ph\": 7.1)."
         }
       }
     },

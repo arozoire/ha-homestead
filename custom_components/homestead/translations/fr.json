@@ -172,9 +172,14 @@
         "lawn": "Pelouse",
         "woodland": "Bois",
         "compost": "Composteur",
-        "coop": "Poulailler",
+        "coop": "Animaux de basse-cour",
         "nursery": "Pépinière (semis)",
         "indoor": "À l'intérieur (une pièce)",
+        "apiary": "Rucher",
+        "hive": "Ruche",
+        "melliferous": "Fleurs mellifères",
+        "hydroponic": "Circuit hydroponique",
+        "fish_tank": "Bassin à poissons",
         "other": "Autre"
       }
     },
@@ -209,13 +214,22 @@
         "compost_turn": "Retournement du compost",
         "compost_harvest": "Récolte du compost",
         "eggs": "Œufs",
-        "flock_in": "Arrivée de poules",
-        "flock_out": "Départ de poules",
+        "flock_in": "Arrivée d'animaux",
+        "flock_out": "Départ d'animaux",
         "animal_care": "Nourriture et soins",
-        "coop_cleaning": "Nettoyage du poulailler",
+        "coop_cleaning": "Nettoyage",
         "repotting": "Rempotage",
         "wood_burned": "Bois brûlé (hiver)",
-        "photo": "Photo"
+        "photo": "Photo",
+        "hive_inspection": "Visite de la ruche",
+        "varroa_count": "Comptage du varroa",
+        "bee_feeding": "Nourrissement des abeilles",
+        "swarm": "Essaimage",
+        "honey_harvest": "Récolte de miel",
+        "predator": "Prédateur vu",
+        "water_test": "Test de l'eau",
+        "fish_feeding": "Nourriture des poissons",
+        "fish_weighing": "Pesée des poissons"
       }
     },
     "harvest_unit": {
@@ -248,6 +262,9 @@
         "age": "Vieillesse",
         "sold": "Vendue ou donnée",
         "slaughtered": "Abattue",
+        "moved": "Déplacés (autre bassin ou enclos)",
+        "bought": "Achetés",
+        "born": "Nés ici",
         "other": "Autre"
       }
     },
@@ -320,6 +337,18 @@
         "partly": "en partie",
         "no": "non"
       }
+    },
+    "animal": {
+      "options": {
+        "hens": "Poules",
+        "quails": "Cailles",
+        "ducks": "Canards",
+        "geese": "Oies",
+        "turkeys": "Dindes",
+        "rabbits": "Lapins",
+        "fish": "Poissons",
+        "other": "Autre"
+      }
     }
   },
   "services": {
@@ -382,6 +411,22 @@
         "flow_entity": {
           "name": "Débitmètre",
           "description": "Débitmètre de la vanne (débit ou volume total) ; chaque ouverture reçoit l'eau qu'elle a donnée."
+        },
+        "varroa_threshold": {
+          "name": "Seuil varroa",
+          "description": "Rucher : varroas par jour dans la chute naturelle au-delà desquels traiter (10 par défaut)."
+        },
+        "varroa_months": {
+          "name": "Seuil varroa par mois",
+          "description": "Facultatif : \"3\": 3, \"8\": 10 (mois : seuil) — un seuil différent certains mois."
+        },
+        "traps": {
+          "name": "Pièges à frelons",
+          "description": "Rucher : pièges posés autour."
+        },
+        "ph_entity": {
+          "name": "Capteur de pH",
+          "description": "Circuit d'eau : sondes de pH (plusieurs sont moyennées)."
         }
       }
     },
@@ -448,6 +493,22 @@
         "flow_entity": {
           "name": "Débitmètre",
           "description": "Débitmètre de la vanne (débit ou volume total) ; chaque ouverture reçoit l'eau qu'elle a donnée."
+        },
+        "varroa_threshold": {
+          "name": "Seuil varroa",
+          "description": "Rucher : varroas par jour dans la chute naturelle au-delà desquels traiter (10 par défaut)."
+        },
+        "varroa_months": {
+          "name": "Seuil varroa par mois",
+          "description": "Facultatif : \"3\": 3, \"8\": 10 (mois : seuil) — un seuil différent certains mois."
+        },
+        "traps": {
+          "name": "Pièges à frelons",
+          "description": "Rucher : pièges posés autour."
+        },
+        "ph_entity": {
+          "name": "Capteur de pH",
+          "description": "Circuit d'eau : sondes de pH (plusieurs sont moyennées)."
         }
       }
     },
@@ -1074,6 +1135,18 @@
         "worked": {
           "name": "Efficace",
           "description": "Traitement : a-t-il marché."
+        },
+        "animal": {
+          "name": "Animal",
+          "description": "Œufs, arrivées et départs : poules, cailles, lapins, poissons… (vide = poules)."
+        },
+        "queen": {
+          "name": "Reine vue",
+          "description": "Visite de la ruche : reine ou œufs frais vus."
+        },
+        "readings": {
+          "name": "Valeurs de l'eau",
+          "description": "Test de l'eau : ph, ec, temperature, ammonia, nitrite, nitrate (ex. \"ph\": 7.1)."
         }
       }
     },
@@ -1152,6 +1225,18 @@
         "worked": {
           "name": "Efficace",
           "description": "Traitement : a-t-il marché."
+        },
+        "animal": {
+          "name": "Animal",
+          "description": "Œufs, arrivées et départs : poules, cailles, lapins, poissons… (vide = poules)."
+        },
+        "queen": {
+          "name": "Reine vue",
+          "description": "Visite de la ruche : reine ou œufs frais vus."
+        },
+        "readings": {
+          "name": "Valeurs de l'eau",
+          "description": "Test de l'eau : ph, ec, temperature, ammonia, nitrite, nitrate (ex. \"ph\": 7.1)."
         }
       }
     },
