@@ -349,6 +349,16 @@
         "fish": "Poissons",
         "other": "Autre"
       }
+    },
+    "module": {
+      "options": {
+        "coop": "Animaux de basse-cour",
+        "bees": "Abeilles",
+        "water": "Eau et poissons",
+        "woodland": "Bois et bûches",
+        "indoor": "Plantes d'intérieur",
+        "compost": "Compost"
+      }
     }
   },
   "services": {
@@ -1707,6 +1717,16 @@
         "sort": {
           "name": "Tri",
           "description": "manual = l'ordre ci-dessus, zone = chaque zone suivie de ses plantes."
+        }
+      }
+    },
+    "set_modules": {
+      "name": "Modules",
+      "description": "Choisissez les parties du jardin utilisées dans cette maison ; les autres quittent les menus des zones et des événements.",
+      "fields": {
+        "modules": {
+          "name": "Modules actifs",
+          "description": "Les modules à garder."
         }
       }
     }

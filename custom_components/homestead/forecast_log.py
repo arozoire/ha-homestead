@@ -142,6 +142,21 @@ def forecast_at(versions: list[dict[str, Any]], lead: int) -> dict[str, Any] | N
     return next((v for v in reversed(versions) if v["lead"] >= lead), None)
 
 
+def past_days(log: dict[str, Any], today: date, count: int) -> list[dict[str, Any]]:
+    """The last days over, newest first: the forecast of the day before (or the latest), what was measured."""
+    days = log.get("days") or {}
+    out = []
+    for back in range(1, count + 1):
+        key = (today - timedelta(days=back)).isoformat()
+        entry = days.get(key) or {}
+        versions = entry.get("versions") or []
+        guess = forecast_at(versions, 1) or (versions[0] if versions else None)
+        if guess is None and not entry.get("actual"):
+            continue
+        out.append({"date": key, "forecast": guess, "actual": entry.get("actual"), "changes": len(versions)})
+    return out
+
+
 def changes_after(versions: list[dict[str, Any]], lead: int) -> int:
     """How many times it changed from ``lead`` days before to the day itself."""
     if forecast_at(versions, lead) is None:

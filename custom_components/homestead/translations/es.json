@@ -349,6 +349,16 @@
         "fish": "Peces",
         "other": "Otro"
       }
+    },
+    "module": {
+      "options": {
+        "coop": "Animales de corral",
+        "bees": "Abejas",
+        "water": "Agua y peces",
+        "woodland": "Bosque y leña",
+        "indoor": "Plantas de interior",
+        "compost": "Compost"
+      }
     }
   },
   "services": {
@@ -1707,6 +1717,16 @@
         "sort": {
           "name": "Criterio",
           "description": "manual = el orden de arriba, zone = cada zona seguida de sus plantas."
+        }
+      }
+    },
+    "set_modules": {
+      "name": "Módulos",
+      "description": "Elige las partes del jardín que se usan en esta casa; las demás salen de los menús de zonas y eventos.",
+      "fields": {
+        "modules": {
+          "name": "Módulos activos",
+          "description": "Los módulos que se mantienen."
         }
       }
     }

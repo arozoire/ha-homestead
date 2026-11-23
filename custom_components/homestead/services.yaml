@@ -1767,3 +1767,19 @@ set_photo_order:
           options:
             - manual
             - zone
+
+set_modules:
+  fields:
+    modules:
+      required: true
+      selector:
+        select:
+          translation_key: module
+          multiple: true
+          options:
+            - coop
+            - bees
+            - water
+            - woodland
+            - indoor
+            - compost

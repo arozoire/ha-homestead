@@ -99,6 +99,9 @@ ChatGPT, Claude, Gemini o Perplexity possono aiutarti a installare e configurare
 | Stato | Verde = attiva, rosso = morta, grigio = rimossa |
 | Nuova zona | Scheda *Zone* → *+ Nuova zona* → clic sugli angoli → *Fine* → nome e tipo |
 | Zona di una pianta | Proposta in automatico se la pianta cade dentro un poligono (la zona più piccola) |
+| Scorciatoie | 📌 *Fissa in alto* nella scheda di una zona (o *Altro → 🧩 Moduli e scorciatoie*): una fila sotto le schede apre la pagina della zona (pulsanti rapidi, oggi, da fare, piante per aiuola, diario). Per dispositivo |
+| Moduli | *Altro → 🧩 Moduli e scorciatoie*: spegni quello che non usi (animali da cortile, api, acqua e pesci, bosco, piante da interno, compost); sparisce dai menu di zone ed eventi, i dati restano. Per tutta la casa (servizio `set_modules`) |
+| Opzioni del giro foto | Stessa pagina, per dispositivo: copia di ogni foto sul telefono (cartella Download su Android), invio solo in Wi-Fi (coi dati mobili le foto aspettano ⏳; su iPhone il browser non dice la rete e si inviano sempre) |
 | Backup | In *Altro*: *💾 Esporta JSON* scarica tutti i dati e i collegamenti alle foto (non i file delle foto); *🗜️ Esporta con le foto (.zip)* aggiunge tutti i file delle foto, originali compresi (può essere grande); *📂 Ripristina* (solo admin) accetta i due file e sostituisce tutti i dati, dopo conferma. Da uno .zip tornano anche le foto, nella cartella media locale se quella d'origine (un NAS) non c'è |
 
 Specie: solo piante (regno Plantae); le specie già importate si trovano anche senza internet; le ricerche online restano in memoria 24 h. Home Assistant deve poter raggiungere `api.gbif.org` e `www.wikidata.org` (dati aperti, nessun account).

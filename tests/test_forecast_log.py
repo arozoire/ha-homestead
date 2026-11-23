@@ -14,6 +14,7 @@ from custom_components.homestead.forecast_log import (
     forecast_at,
     missing_actuals,
     night_correction,
+    past_days,
     pressure_drop,
     record,
     reliability,
@@ -162,3 +163,22 @@ async def test_outlook_keeps_the_versions_and_answers_a_day(hass: HomeAssistant,
     reply = await client.receive_json()
     assert reply["result"]["versions"][0]["lead"] >= 0
     assert "trust" in outlook.as_dict()
+    await client.send_json({"id": 2, "type": "homestead/forecast/days", "count": 7})
+    reply = await client.receive_json()
+    assert reply["success"] and reply["result"] == {"days": []}  # nothing over yet
+
+
+def test_past_days_forecast_of_the_day_before_against_the_measure() -> None:
+    today = date(2026, 11, 23)
+    yesterday = today - timedelta(days=1)
+    log: dict = {}
+    record(log, [_day(yesterday, 5, 12, 31, 63)], datetime(2026, 11, 20, 6))
+    record(log, [_day(yesterday, 5, 12, 25, 63)], datetime(2026, 11, 21, 6))
+    record(log, [_day(yesterday, 6, 12, 18, 63)], datetime(2026, 11, 22, 6))  # the day itself: not the guess
+    set_actual(log, yesterday.isoformat(), {"t_min": 6.2, "t_max": 11.1, "rain_mm": 13})
+    set_actual(log, (today - timedelta(days=3)).isoformat(), {"t_min": 1, "t_max": 9, "rain_mm": 0})
+    days = past_days(log, today, 14)
+    assert [d["date"] for d in days] == ["2026-11-22", "2026-11-20"]
+    assert days[0]["forecast"]["rain_mm"] == 25 and days[0]["actual"]["rain_mm"] == 13
+    assert days[0]["changes"] == 3
+    assert days[1]["forecast"] is None  # measured, never forecast

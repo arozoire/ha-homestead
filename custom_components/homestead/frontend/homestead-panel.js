@@ -204,6 +204,15 @@ const VARROA_METHODS = ["drop", "sugar", "alcohol"];
 const VARROA_PCT_THRESHOLD = 3;
 // Water circuit: tests, fish lots moved by hand.
 const WATER_KINDS = ["water_test", "fish_feeding", "fish_weighing", "flock_in", "flock_out"];
+// Modules switched on for the whole house (settings.modules, none set = all on): their zone kinds and own event kinds.
+const MODULES = {
+  coop: { icon: "🐔", zones: ["coop"], events: COOP_KINDS },
+  bees: { icon: "🐝", zones: ["apiary", "hive", "melliferous"], events: BEE_KINDS.filter((k) => k !== "treatment") },
+  water: { icon: "🐟", zones: ["hydroponic", "fish_tank"], events: ["water_test", "fish_feeding", "fish_weighing"] },
+  woodland: { icon: "🌲", zones: ["woodland"], events: WOOD_KINDS },
+  indoor: { icon: "🪴", zones: ["indoor"], events: ["repotting"] },
+  compost: { icon: "♻️", zones: ["compost"], events: COMPOST_KINDS },
+};
 const WATER_READINGS = ["ph", "ec", "temperature", "ammonia", "nitrite", "nitrate"];
 // Quantity without a unit, and its label.
 const QUANTITY_ONLY = { varroa_count: "varroaValue", predator: "predatorCount", fish_feeding: "fishFeedG", fish_weighing: "fishWeightG" };
@@ -308,6 +317,37 @@ const STYLE = `
   .narrow .tabs-bar button.active { border-top-color: var(--homestead-accent, #3a7d44); }
   .narrow .tab-icon { margin: 0; font-size: 20px; line-height: 1.1; }
   .narrow.typing .tabs-bar { display: none; }
+  /* Shortcuts (pinned zones, modules): one row under the header, the same in every tab. */
+  .chips-bar { display: flex; gap: 6px; align-items: center; padding: 6px 12px; overflow-x: auto; scrollbar-width: none; flex: none;
+    background: var(--secondary-background-color, #f2f2ee); border-bottom: 1px solid var(--divider-color); }
+  .chips-bar[hidden] { display: none; }
+  .chips-label { font-size: 12px; font-weight: 600; color: var(--secondary-text-color); flex: none; }
+  .chip-short { flex: none; display: flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 12px; border-radius: 999px; font-weight: 600; }
+  .chip-short.active { background: var(--homestead-accent, #3a7d44); color: #fff; border-color: transparent; }
+  .chip-short.add { border-style: dashed; min-width: 34px; padding: 0; justify-content: center; font-size: 18px; }
+  .narrow .chips-label { display: none; }
+  .narrow.typing .chips-bar { display: none; }
+  /* Home of a pinned zone: the map beside it on a computer, two columns. */
+  .home-tab .map { flex: 0 0 440px; }
+  .home-tab aside { width: auto; max-width: none; flex: 1; }
+  .home-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+  .home-head h2 { margin: 0; flex: 1; min-width: 0; }
+  .home-head .sub { flex-basis: 100%; }
+  .home-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-bottom: 12px; }
+  .home-actions button { min-height: 48px; font-weight: 600; }
+  .home-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start; }
+  .narrow .home-grid { grid-template-columns: minmax(0, 1fr); }
+  .home-card { border: 1px solid var(--divider-color); border-radius: 12px; padding: 10px 12px; min-width: 0; }
+  .home-card.span { grid-column: 1 / -1; }
+  .home-card h3 { margin: 0 0 6px; }
+  .home-bed { display: flex; gap: 10px; justify-content: space-between; border-top: 1px solid var(--divider-color); padding: 6px 0; }
+  .home-bed .plants { display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
+  .home-bed .plants button { padding: 2px 8px; }
+  .home-zone { width: 100%; text-align: left; display: flex; gap: 10px; align-items: center; min-height: 52px; margin-bottom: 8px; }
+  .module-row, .short-row { display: flex; align-items: center; gap: 8px; min-height: 48px; border-top: 1px solid var(--divider-color); }
+  .module-row input { width: 22px; height: 22px; flex: none; }
+  .module-row .main, .short-row .main { flex: 1; display: grid; min-width: 0; }
+  .short-row button { min-width: 40px; min-height: 40px; padding: 0; }
   .back { border: none; background: none; color: var(--primary-color); padding: 4px 0; margin-bottom: 6px; font-size: 15px; }
   .map-switch { margin-bottom: 10px; }
   .repeat-card { display: grid; gap: 2px; width: 100%; text-align: left; border: 2px solid #26a69a; background: rgba(38, 166, 154, .08);
@@ -717,6 +757,10 @@ const STYLE = `
   .trust-item .sub { white-space: normal; overflow: visible; }
   .trust-item .verdict { font-weight: 600; color: #2f7d3a; }
   .trust-item.off .verdict { color: #a3341a; }
+  .trust-past { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; width: 100%; text-align: left; margin-top: 8px;
+    background: var(--secondary-background-color); border: none; border-radius: 8px; padding: 6px 8px; font-size: 13px; }
+  .trust-past b { min-width: 52px; }
+  .trust-past .off { color: #a3341a; font-weight: 600; }
   .trust-sheet { justify-content: flex-start; overflow-y: auto; }
   .trust-card { background: var(--card-background-color, #fff); color: var(--primary-text-color, #222); border-radius: 12px; padding: 14px;
     width: min(420px, 100%); box-sizing: border-box; display: grid; gap: 4px; }
@@ -798,7 +842,7 @@ const STYLE = `
 class HomesteadPanel extends HTMLElement {
   constructor() {
     super();
-    this._data = { plantings: [], zones: [], taxa: [], expenses: [], tools: [], photos: [], events: [], tasks: [], seeds: [], crops: [] };
+    this._data = { plantings: [], zones: [], taxa: [], expenses: [], tools: [], photos: [], events: [], tasks: [], seeds: [], crops: [], settings: {} };
     this._cropDefaults = {};
     this._diaryFilter = { kind: "", zone: "", year: "" };
     this._photoUrls = new Map();
@@ -880,6 +924,7 @@ class HomesteadPanel extends HTMLElement {
         ),
       ),
       (this._tabsEl = h("nav", { className: "tabs-bar" })),
+      (this._chipsEl = h("nav", { className: "chips-bar", hidden: true })),
       h("div", { className: "body" }, this._mapWrap, this._aside),
     );
     root.append(
@@ -953,6 +998,7 @@ class HomesteadPanel extends HTMLElement {
       .subscribeMessage(
         (outlook) => {
           this._outlook = outlook;
+          this._pastDays = undefined;
           this._renderCalendar();
           if (this._tab === "diary" && !this._eventForm && !this._taskForm) this._render();
         },
@@ -1008,6 +1054,7 @@ class HomesteadPanel extends HTMLElement {
           events: data.events || [],
           tasks: data.tasks || [],
           growth: data.growth || {},
+          settings: data.settings || {},
         };
         this._loaded = !!data.plantings;
         this._syncMap();
@@ -1016,7 +1063,10 @@ class HomesteadPanel extends HTMLElement {
         if (first && this._layout.classList.contains("wide-tab")) this._needsFit = true;
         else if (first) this._fitAll();
         // Photos kept on the phone because the upload did not finish: send them now.
-        if (first) this._retryPending();
+        if (first) {
+          this._retryPending();
+          navigator.connection?.addEventListener?.("change", () => this._pendingList?.length && this._retryPending());
+        }
         first = false;
         if (/[?&](task|zone)=/.test(window.location.search)) {
           this._openTaskFromUrl();
@@ -1220,6 +1270,11 @@ class HomesteadPanel extends HTMLElement {
 
   _close() {
     this._clearSelection();
+    // Something opened from a pinned zone goes back to it.
+    if (this._fromHome) {
+      this._tab = "home";
+      this._home = this._fromHome;
+    }
     this._showMessage("");
     this._syncMap();
     this._drawPreview();
@@ -1227,6 +1282,7 @@ class HomesteadPanel extends HTMLElement {
   }
 
   _setTab(tab) {
+    this._fromHome = null;
     if (tab === "expenses" && this._tab !== "expenses") this._expenseYear = undefined;
     if (tab !== "photos") this._planDraft = null;
     this._plan = null;
@@ -1625,6 +1681,7 @@ class HomesteadPanel extends HTMLElement {
     if (!this._aside) return;
     UNITS.comma = this._decimalComma();
     this._tabsEl.replaceChildren(this._renderTabs());
+    this._renderChips();
     this._renderBanner();
     this._showMessage(this._message.text, this._message.error);
     let content;
@@ -1657,11 +1714,16 @@ class HomesteadPanel extends HTMLElement {
         photos: () => [back, ...this._renderPhotoPlan()],
         report: () => this._renderReport(),
         more: () => this._renderMore(),
+        modules: () => [back, ...this._renderModules()],
+        home: () => this._renderHome(),
       };
       content = (lists[this._tab] || lists.diary)();
     }
     // The map only where it is used: plantings and zones, and their cards.
-    const wide = !!(this._plan && (!this._form || this._form.fromPlan) && !this._zoneForm) || !(["plantings", "zones"].includes(this._tab) || this._form || this._zoneForm);
+    // A pinned zone on a computer: its map beside it, centred on it.
+    const home = this._tab === "home" && !this._narrow && !this._plan && this._home?.startsWith("z:") && !!this._zone(this._home.slice(2))?.geometry;
+    const wide = !!(this._plan && (!this._form || this._form.fromPlan) && !this._zoneForm) || !(["plantings", "zones"].includes(this._tab) || this._form || this._zoneForm || home);
+    this._layout.classList.toggle("home-tab", home && !wide);
     this._calendarOn = this._tab === "calendar" && content[0] === this._calWrap;
     this._content.replaceChildren(...content.filter(Boolean));
     if (this._calendarOn) this._renderCalendar();
@@ -1680,7 +1742,7 @@ class HomesteadPanel extends HTMLElement {
 
   /** Main menu section of a page. */
   _section(tab = this._tab) {
-    return { plantings: "map", zones: "map", seeds: "more", expenses: "more", tools: "more", photos: "more" }[tab] || tab;
+    return { plantings: "map", zones: "map", seeds: "more", expenses: "more", tools: "more", photos: "more", modules: "more" }[tab] || tab;
   }
 
   _mapSwitch() {
@@ -1714,6 +1776,7 @@ class HomesteadPanel extends HTMLElement {
         item("tools", "🔧", this.t("tabTools"), toolsDue ? this.t("moreToolsDue", { count: toolsDue }) : this.t("moreTools", { count: this._data.tools.length }), !!toolsDue),
         item("photos", "📸", this.t("tabPhotos"), this._photoPlanSummary()),
         item("report", "📄", this.t("reportMenu"), this.t("reportMenuSub")),
+        item("modules", "🧩", this.t("modulesTitle"), this.t("modulesSub")),
         h(
           "button",
           {
@@ -1763,6 +1826,394 @@ class HomesteadPanel extends HTMLElement {
         button,
       ),
     );
+  }
+
+  // ----- modules and shortcuts -----
+
+  /** A module is on for the whole house: all of them until the user chooses (settings.modules). */
+  _moduleOn(name) {
+    const chosen = this._data.settings?.modules;
+    return !Array.isArray(chosen) || chosen.includes(name);
+  }
+
+  _zoneKindOn(kind) {
+    return !Object.entries(MODULES).some(([name, m]) => m.zones.includes(kind) && !this._moduleOn(name));
+  }
+
+  _eventKindOn(kind) {
+    return !Object.entries(MODULES).some(([name, m]) => m.events.includes(kind) && !this._moduleOn(name));
+  }
+
+  /** The top zones of a module (an apiary, not its hives). */
+  _moduleZones(name) {
+    const kinds = MODULES[name].zones;
+    return this._data.zones
+      .filter((z) => kinds.includes(z.kind) && !kinds.includes(this._zone(z.parent_id)?.kind))
+      .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+  }
+
+  /** Shortcuts of this phone ("z:<zone id>", "m:<module>"); until chosen, the modules that have zones. */
+  _shortcuts() {
+    let list = null;
+    try {
+      list = JSON.parse(localStorage.getItem("homestead-shortcuts") || "null");
+    } catch {
+      list = this._shortcutsMemory || null;
+    }
+    if (!Array.isArray(list)) list = Object.keys(MODULES).filter((m) => this._moduleZones(m).length).map((m) => `m:${m}`);
+    return list.filter((key) => (key.startsWith("z:") ? !!this._zone(key.slice(2)) : MODULES[key.slice(2)] && this._moduleOn(key.slice(2))));
+  }
+
+  _setShortcuts(list) {
+    this._shortcutsMemory = list;
+    try {
+      localStorage.setItem("homestead-shortcuts", JSON.stringify(list));
+    } catch {
+      // private mode: kept until the page is closed
+    }
+    this._render();
+  }
+
+  _togglePin(zoneId) {
+    const key = `z:${zoneId}`;
+    const list = this._shortcuts();
+    const pinned = list.includes(key);
+    this._setShortcuts(pinned ? list.filter((k) => k !== key) : [...list, key]);
+    this._showMessage(pinned ? "" : `✓ ${this.t("pinnedDone")}`);
+  }
+
+  _shortcutLabel(key) {
+    if (key.startsWith("z:")) {
+      const zone = this._zone(key.slice(2));
+      return [ZONE_ICONS[zone?.kind] || "📍", zone?.name || "?"];
+    }
+    const name = key.slice(2);
+    return [MODULES[name].icon, this.t(`mod_${name}`)];
+  }
+
+  _renderChips() {
+    const list = this._shortcuts();
+    this._chipsEl.hidden = !list.length;
+    if (!list.length) return this._chipsEl.replaceChildren();
+    const chip = (key) => {
+      const [icon, label] = this._shortcutLabel(key);
+      return h(
+        "button",
+        { type: "button", className: `chip-short${this._tab === "home" && this._home === key ? " active" : ""}`, onclick: () => this._openShortcut(key) },
+        h("span", {}, icon),
+        label,
+      );
+    };
+    this._chipsEl.replaceChildren(
+      h("span", { className: "chips-label" }, this.t("shortcutsHead")),
+      ...list.map(chip),
+      h("button", { type: "button", className: "chip-short add", title: this.t("shortcutAdd"), "aria-label": this.t("shortcutAdd"), onclick: () => this._setTab("modules") }, "+"),
+    );
+  }
+
+  /** A module with one zone opens that zone straight away. */
+  _openShortcut(key) {
+    if (key.startsWith("m:")) {
+      const zones = this._moduleZones(key.slice(2));
+      if (zones.length === 1) {
+        this._openHome(`z:${zones[0].id}`);
+        this._home = key;
+        this._fromHome = key;
+        return this._render();
+      }
+    }
+    this._openHome(key);
+  }
+
+  _openHome(key) {
+    this._clearSelection();
+    this._plan = null;
+    this._planDraft = null;
+    this._tab = "home";
+    this._home = key;
+    this._fromHome = key;
+    this._showMessage("");
+    this._syncMap();
+    this._drawPreview();
+    this._aside.scrollTop = 0;
+    this._render();
+    const zone = this._homeZone();
+    const polygon = zone && this._polygons.get(zone.id);
+    if (polygon && !this._narrow)
+      setTimeout(() => {
+        this._map.invalidateSize();
+        this._map.fitBounds(polygon.getBounds(), { padding: [30, 30], maxZoom: 20 });
+      }, 0);
+  }
+
+  /** The zone a home shows: the pinned one, or the only zone of a module. */
+  _homeZone() {
+    const key = this._home || "";
+    if (key.startsWith("z:")) return this._zone(key.slice(2)) || null;
+    const zones = MODULES[key.slice(2)] ? this._moduleZones(key.slice(2)) : [];
+    return zones.length === 1 ? zones[0] : null;
+  }
+
+  _renderHome() {
+    const key = this._home || "";
+    const zone = this._homeZone();
+    if (zone) return this._renderZoneHome(zone);
+    const name = key.slice(2);
+    if (!MODULES[name]) return this._renderDiary();
+    const zones = this._moduleZones(name);
+    return [
+      h("div", { className: "home-head" }, h("h2", {}, `${MODULES[name].icon} ${this.t(`mod_${name}`)}`)),
+      ...(zones.length
+        ? zones.map((z) =>
+            h(
+              "button",
+              { type: "button", className: "home-zone", onclick: () => this._openHome(`z:${z.id}`) },
+              h("span", { style: "font-size:24px" }, ZONE_ICONS[z.kind] || "📍"),
+              h("span", { className: "main" }, h("strong", {}, z.name), h("span", { className: "sub" }, this.t(z.kind))),
+              "›",
+            ),
+          )
+        : [h("p", { className: "hint" }, this.t("modNoZonesHint"))]),
+    ];
+  }
+
+  /** Home of one zone: quick buttons, today here, to do, plants by bed, diary. */
+  _renderZoneHome(z) {
+    const inside = new Set([z.id, ...this._zoneDescendants(z.id)]);
+    const all = this._data.plantings.filter((p) => inside.has(p.zone_id));
+    const allIds = new Set(all.map((p) => p.id));
+    const plants = all.filter((p) => p.status === "active");
+    const beds = this._data.zones.filter((c) => c.parent_id === z.id).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+    const area = formatArea(z.area_m2 ?? polygonArea(z.geometry));
+    const pinned = this._shortcuts().includes(`z:${z.id}`);
+    const family = this._zoneFamily({ zone_id: z.id });
+    const garden = !["coop", "compost", "apiary", "water", "woodland"].includes(family) && z.kind !== "melliferous";
+    const center = () => {
+      const polygon = this._polygons.get(z.id);
+      return polygon ? polygon.getBounds().getCenter() : this._map.getCenter();
+    };
+    const action = (label, onclick) => h("button", { type: "button", onclick }, label);
+    const actions = [
+      action(`+ ${this.t("quickEvent")}`, () => this._newEvent({ zone_id: z.id })),
+      garden && plants.length ? action(`🍅 ${this.t("ev_harvest")}`, () => this._openEvent({ kind: "harvest", done_on: today(), zone_id: z.id })) : null,
+      z.kind === "indoor"
+        ? action(`+ ${this.t("homePlant")}`, () => {
+            this._newHouseplant();
+            this._form.zone_id = z.id;
+            this._render();
+          })
+        : garden
+          ? action(`+ ${this.t("homePlant")}`, () => (z.kind === "nursery" ? this._openSow({ zone_id: z.id }) : this._newPlantingAt(center(), z.id)))
+          : null,
+      z.geometry && garden ? action(`📐 ${this.t("planOpen")}`, () => this._openPlan(z.id)) : null,
+      action(`⚙️ ${this.t("zoneCard")}`, () => this._selectZone(z.id)),
+    ].filter(Boolean);
+    const now = [
+      this._zoneHasSoil(z.id) && z.kind !== "hydroponic" ? this._soilLine(z.id) : null,
+      z.valve_entity ? this._valveLine(z) : null,
+      garden && !["indoor", "nursery"].includes(z.kind) ? this._waterBox(z) : null,
+    ].filter(Boolean);
+    const tasks = this._data.tasks.filter(
+      (t) =>
+        !t.done_on &&
+        (inside.has(t.zone_id) || allIds.has(t.planting_id) || (t.planting_ids || []).some((id) => allIds.has(id)) || (t.zone_ids || []).some((id) => inside.has(id))),
+    );
+    const byBed = [z, ...beds.flatMap((b) => [b, ...[...this._zoneDescendants(b.id)].map((id) => this._zone(id))])]
+      .filter(Boolean)
+      .map((bed) => ({ bed, list: plants.filter((p) => p.zone_id === bed.id) }))
+      .filter((row) => row.list.length);
+    const events = this._data.events
+      .filter((e) => (inside.has(e.zone_id) || allIds.has(e.planting_id)) && e.kind !== "eggs")
+      .sort((a, b) => b.done_on.localeCompare(a.done_on))
+      .slice(0, 6);
+    this._woodEl = h("div", {}, ...[z.kind === "indoor" ? this._houseplantsBox() : this._zoneBox(z)].filter(Boolean));
+    const sub = [area, beds.length ? this._plural("homeBeds", beds.length) : null, garden ? this._plural("homePlants", plants.length) : null].filter(Boolean).join(" · ");
+    return [
+      h(
+        "div",
+        { className: "home-head" },
+        h("h2", {}, `${ZONE_ICONS[z.kind] || "📍"} ${z.name}`),
+        h("button", { type: "button", onclick: () => this._togglePin(z.id) }, pinned ? this.t("pinnedOff") : `📌 ${this.t("pin")}`),
+        sub ? h("span", { className: "sub" }, sub) : null,
+      ),
+      h("div", { className: "home-actions" }, actions),
+      h(
+        "div",
+        { className: "home-grid" },
+        this._woodEl.childNodes.length ? h("div", { className: "home-card span" }, this._woodEl) : null,
+        now.length ? h("div", { className: "home-card" }, h("h3", {}, this.t("homeToday")), now) : null,
+        tasks.length ? h("div", { className: "home-card" }, this._todoBox(tasks)) : null,
+        byBed.length
+          ? h(
+              "div",
+              { className: "home-card" },
+              h("h3", {}, this.t(beds.length ? "homeByBed" : "homePlantsHead")),
+              byBed.map(({ bed, list }) =>
+                h(
+                  "div",
+                  { className: "home-bed" },
+                  h("span", {}, bed.id === z.id ? (beds.length ? this.t("homeWholeZone") : "") : bed.name),
+                  h(
+                    "span",
+                    { className: "plants" },
+                    list.map((p) => h("button", { type: "button", onclick: () => this._select(p.id) }, `${this._plantIcon(p)} ${p.name}${p.quantity > 1 ? ` (${p.quantity})` : ""}`)),
+                  ),
+                ),
+              ),
+            )
+          : null,
+        h(
+          "div",
+          { className: "home-card" },
+          h("h3", {}, this.t("tabDiary")),
+          events.length ? this._renderTimeline(events, true) : h("p", { className: "hint" }, this.t("emptyDiary")),
+          events.length
+            ? h(
+                "button",
+                {
+                  type: "button",
+                  onclick: () => {
+                    this._diaryFilter = { kind: "", zone: z.id, year: "" };
+                    this._setTab("diary");
+                  },
+                },
+                this.t("allEvents"),
+              )
+            : null,
+        ),
+        z.geometry || this._data.photos.some((ph) => inside.has(this._data.events.find((e) => e.id === ph.event_id)?.zone_id)) ? h("div", { className: "home-card span" }, this._photoHistoryBox(z.id)) : null,
+      ),
+    ];
+  }
+
+  /** Altro → modules for the whole house, shortcuts and photo options of this phone. */
+  _renderModules() {
+    const chosen = Object.keys(MODULES).filter((m) => this._moduleOn(m));
+    const moduleRow = (name) => {
+      const zones = this._data.zones.filter((z) => MODULES[name].zones.includes(z.kind)).length;
+      const input = h("input", {
+        type: "checkbox",
+        checked: chosen.includes(name),
+        onchange: async (ev) => {
+          const modules = ev.target.checked ? [...chosen, name] : chosen.filter((m) => m !== name);
+          if (await this._call("set_modules", { modules })) {
+            this._data.settings = { ...this._data.settings, modules };
+            this._showMessage(ev.target.checked || !zones ? "" : `ℹ️ ${this.t("modOffKept")}`);
+            this._render();
+          } else ev.target.checked = !ev.target.checked;
+        },
+      });
+      return h(
+        "label",
+        { className: "module-row" },
+        h("span", { style: "font-size:22px" }, MODULES[name].icon),
+        h("span", { className: "main" }, h("strong", {}, this.t(`mod_${name}`)), h("span", { className: "sub" }, `${this.t(`modSub_${name}`)} · ${zones ? this._plural("modZones", zones) : this.t("modNoZones")}`)),
+        input,
+      );
+    };
+    const list = this._shortcuts();
+    const move = (i, step) => {
+      const next = [...list];
+      [next[i], next[i + step]] = [next[i + step], next[i]];
+      this._setShortcuts(next);
+    };
+    const add = h(
+      "select",
+      {
+        onchange: (ev) => ev.target.value && this._setShortcuts([...list, ev.target.value]),
+      },
+      h("option", { value: "" }, `+ ${this.t("shortcutAdd")}`),
+      ...Object.keys(MODULES)
+        .filter((m) => this._moduleOn(m) && !list.includes(`m:${m}`))
+        .map((m) => h("option", { value: `m:${m}` }, `${MODULES[m].icon} ${this.t(`mod_${m}`)}`)),
+      ...this._data.zones
+        .filter((z) => !list.includes(`z:${z.id}`) && this._zoneKindOn(z.kind))
+        .map((z) => [z.id, this._zonePath(z.id), z.kind])
+        .sort((a, b) => a[1].localeCompare(b[1]))
+        .map(([id, path, kind]) => h("option", { value: `z:${id}` }, `${ZONE_ICONS[kind] || "📍"} ${path}`)),
+    );
+    const option = (key, label, sub) =>
+      h(
+        "label",
+        { className: "module-row" },
+        h("span", { className: "main" }, h("strong", {}, this.t(label)), h("span", { className: "sub", style: "white-space:normal" }, this.t(sub))),
+        h("input", { type: "checkbox", checked: this._photoOption(key), onchange: (ev) => this._setPhotoOption(key, ev.target.checked) }),
+      );
+    return [
+      h("h2", {}, `🧩 ${this.t("modulesTitle")}`),
+      h(
+        "div",
+        { className: "home-card", style: "margin-bottom:12px" },
+        h("div", { className: "cal-head" }, h("h3", {}, this.t("modulesHead")), h("span", { className: "sub" }, this.t("modulesAll"))),
+        Object.keys(MODULES).map(moduleRow),
+      ),
+      h(
+        "div",
+        { className: "home-card", style: "margin-bottom:12px" },
+        h("div", { className: "cal-head" }, h("h3", {}, this.t("shortcutsHead")), h("span", { className: "sub" }, this.t("shortcutsLocal"))),
+        list.length
+          ? list.map((key, i) => {
+              const [icon, label] = this._shortcutLabel(key);
+              return h(
+                "div",
+                { className: "short-row" },
+                h("span", { className: "main" }, `${icon} ${label}`),
+                h("button", { type: "button", "aria-label": this.t("moveUp"), disabled: i === 0, onclick: () => move(i, -1) }, "↑"),
+                h("button", { type: "button", "aria-label": this.t("moveDown"), disabled: i === list.length - 1, onclick: () => move(i, 1) }, "↓"),
+                h("button", { type: "button", "aria-label": this.t("shortcutRemove"), onclick: () => this._setShortcuts(list.filter((k) => k !== key)) }, "✕"),
+              );
+            })
+          : h("p", { className: "hint" }, this.t("shortcutsEmpty")),
+        add.options.length > 1 ? h("label", { style: "margin-top:8px" }, add) : null,
+      ),
+      h(
+        "div",
+        { className: "home-card" },
+        h("h3", {}, `📸 ${this.t("photoOptions")}`),
+        option("copy", "photoCopy", "photoCopySub"),
+        option("wifi", "photoWifi", "photoWifiSub"),
+      ),
+    ];
+  }
+
+  /** Photo options of this phone: "copy" (a copy in Download), "wifi" (send on Wi-Fi only). */
+  _photoOption(key) {
+    try {
+      return localStorage.getItem(`homestead-photo-${key}`) === "1";
+    } catch {
+      return !!this._photoOptions?.[key];
+    }
+  }
+
+  _setPhotoOption(key, on) {
+    this._photoOptions = { ...this._photoOptions, [key]: on };
+    try {
+      localStorage.setItem(`homestead-photo-${key}`, on ? "1" : "");
+    } catch {
+      // private mode: for this visit only
+    }
+    if (key === "wifi" && !on) this._retryPending();
+  }
+
+  /** On mobile data with "Wi-Fi only": wait. Browsers that do not tell the network (iPhone) always send. */
+  _waitForWifi() {
+    const type = navigator.connection?.type;
+    return this._photoOption("wifi") && !!type && !["wifi", "ethernet", "wimax"].includes(type);
+  }
+
+  /** "Copy on the phone": the original as a download (Android puts it in Download). */
+  _copyToPhone(blob, item) {
+    try {
+      const url = URL.createObjectURL(blob);
+      const name = `${(this._itemName(item) || "homestead").replace(/[^\p{L}\p{N}_-]+/gu, "-")}-${today()}.${(blob.type.split("/")[1] || "jpg").replace("jpeg", "jpg")}`;
+      const link = h("a", { href: url, download: name, style: "display:none" });
+      this.shadowRoot.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+    } catch {
+      // no download on this browser: the picture is on the server anyway
+    }
   }
 
   _renderTabs() {
@@ -3816,7 +4267,7 @@ class HomesteadPanel extends HTMLElement {
   // ----- daily use: one tap to log the usual things -----
 
   _quickButtons() {
-    const coops = this._data.zones.filter((z) => z.kind === "coop");
+    const coops = this._moduleOn("coop") ? this._data.zones.filter((z) => z.kind === "coop") : [];
     const open = (kind, extra = {}) => this._openEvent({ kind, done_on: today(), ...extra });
     const button = (icon, label, onclick) => h("button", { type: "button", className: "quick-button", onclick }, h("span", {}, icon), label);
     return h(
@@ -6519,7 +6970,7 @@ class HomesteadPanel extends HTMLElement {
       const special = [...WOOD_KINDS, ...COMPOST_KINDS, ...COOP_KINDS, ...BEE_KINDS.filter((k) => k !== "treatment"), ...WATER_KINDS];
       kinds.querySelectorAll("button").forEach((b) => {
         const kind = b.dataset.kind;
-        b.hidden = kind !== kindInput.value && (own ? !own.includes(kind) : special.includes(kind));
+        b.hidden = kind !== kindInput.value && (own ? !own.includes(kind) : special.includes(kind) || !this._eventKindOn(kind));
       });
     };
     const showExtras = () => {
@@ -8757,11 +9208,46 @@ class HomesteadPanel extends HTMLElement {
   }
 
   /** Today so far against yesterday's forecast for today, from the own sensors. */
+  /** The last days over (forecast of the day before against the sensors), fetched once per outlook update. */
+  _pastDaysData() {
+    if (this._pastDays === undefined && !this._pastLoading && this._outlook?.trust) {
+      this._pastLoading = true;
+      this._hass
+        .callWS({ type: "homestead/forecast/days", count: 14 })
+        .then((reply) => {
+          this._pastDays = reply.days || [];
+          if (["diary", "analysis"].includes(this._tab) && !this._eventForm && !this._taskForm && !this._shot && !this._form && !this._zoneForm) this._render();
+        })
+        .catch(() => (this._pastDays = []))
+        .finally(() => (this._pastLoading = false));
+    }
+    return this._pastDays || [];
+  }
+
+  /** One past day: "🌧️ 31 mm → 13 mm · 🌡️ 12°/5° → 11°/6°", tap = all its versions. */
+  _pastDayLine(d, label) {
+    const f = d.forecast || {};
+    const a = d.actual || {};
+    const rain = (v) => (v == null ? "–" : rainText(v));
+    const temp = (v) => (v == null ? "–" : `${deg(v)}°`);
+    const rainOff = f.rain_mm != null && a.rain_mm != null && ((f.rain_mm >= 1) !== (a.rain_mm >= 1) || Math.abs(f.rain_mm - a.rain_mm) >= Math.max(5, a.rain_mm / 2));
+    const tempOff = ["t_max", "t_min"].some((k) => f[k] != null && a[k] != null && Math.abs(f[k] - a[k]) >= 2);
+    return h(
+      "button",
+      { type: "button", className: "trust-past", onclick: () => this._showForecastDay(d.date) },
+      h("b", {}, label),
+      h("span", { className: rainOff ? "off" : "" }, `🌧️ ${rain(f.rain_mm)} → ${rain(a.rain_mm)}`),
+      h("span", { className: tempOff ? "off" : "" }, `🌡️ ${temp(f.t_max)}/${temp(f.t_min)} → ${temp(a.t_max)}/${temp(a.t_min)}`),
+      d.actual ? null : h("span", { className: "sub" }, this.t("trustNotMeasured")),
+    );
+  }
+
   _trustTodayBox() {
     const trust = this._outlook?.trust;
     const check = trust?.today;
     const correction = trust?.correction;
-    if (!check && correction == null) return null;
+    const yesterday = this._pastDaysData().find((d) => d.date === addDays(today(), -1) && d.forecast && d.actual);
+    if (!check && correction == null && !yesterday) return null;
     const value = (item) => (item.kind === "pressure" ? pressureText(item.value) : item.kind === "rain" ? rainText(item.value) : `${deg(item.value)}°`);
     const forecast = (item) => (item.forecast == null ? "" : this.t("trustForecast", { value: item.kind === "rain" ? rainText(item.forecast) : `${deg(item.forecast)}°` }));
     return h(
@@ -8791,6 +9277,7 @@ class HomesteadPanel extends HTMLElement {
             ),
           ]
         : null,
+      yesterday ? this._pastDayLine(yesterday, this.t("trustYesterday")) : null,
       correction != null ? h("p", { className: "hint", style: "white-space:normal" }, this.t("trustCorrection", { value: degDiff(correction) })) : null,
     );
   }
@@ -8840,6 +9327,7 @@ class HomesteadPanel extends HTMLElement {
     const trust = this._outlook?.trust;
     if (!trust?.stats) return null;
     const stats = trust.stats;
+    const past = this._pastDaysData().filter((d) => d.forecast);
     const leads = Object.entries(stats.leads || {}).sort((a, b) => Number(a[0]) - Number(b[0]));
     const pct = (v) => (v == null ? "–" : `${v}%`);
     const err = (v) => (v == null ? "–" : `±${degDiff(v).replace(/^[+−]/, "")}`);
@@ -8874,6 +9362,7 @@ class HomesteadPanel extends HTMLElement {
         : null,
       lines.map((text) => h("p", { style: "margin:4px 0;white-space:normal;font-size:14px" }, text)),
       trust.pressure ? null : h("p", { className: "hint", style: "white-space:normal" }, this.t("anTrustNoPressure")),
+      past.length ? [h("h4", { style: "margin:10px 0 2px" }, this.t("anTrustPast")), h("p", { className: "hint", style: "white-space:normal;margin:0" }, this.t("anTrustPastHint")), ...past.map((d) => this._pastDayLine(d, this._date(d.date, false)))] : null,
       leads.length ? h("p", { className: "hint", style: "white-space:normal" }, this.t("anTrustHint")) : null,
     );
   }
@@ -10113,7 +10602,7 @@ class HomesteadPanel extends HTMLElement {
         onchange: (ev) => {
           const file = ev.target.files?.[0];
           ev.target.value = "";
-          if (file) this._savePlanPhoto(file, file.name);
+          if (file) this._savePlanPhoto(file, file.name, capture);
         },
       });
     const gallery = pick(false);
@@ -10150,7 +10639,7 @@ class HomesteadPanel extends HTMLElement {
         this._showMessage(`⚠️ ${this.t("shotEmpty")}`, true);
         return;
       }
-      this._savePlanPhoto(blob, `${today()}.jpg`);
+      this._savePlanPhoto(blob, `${today()}.jpg`, true);
     };
     const skip = async () => {
       if (await this._call("complete_task", { id: shot.task_id, items: [shot.item] })) this._nextShot(task, shot.item);
@@ -10197,7 +10686,7 @@ class HomesteadPanel extends HTMLElement {
    * It is kept on the phone (IndexedDB) until the server has it: the server writes the file and only then
    * creates the photo event, so a phone that loses the network or goes to sleep halfway loses nothing.
    */
-  async _savePlanPhoto(blob, name) {
+  async _savePlanPhoto(blob, name, camera = false) {
     const shot = this._shot;
     const task = this._data.tasks.find((t) => t.id === shot?.task_id);
     if (!shot) return;
@@ -10225,6 +10714,13 @@ class HomesteadPanel extends HTMLElement {
       // No storage on this browser (private mode): straight to the server, as before.
     }
     this._pendingList = [...(this._pendingList || []).filter((p) => p.id !== item.id), item];
+    // A copy on the phone too (not for a picture taken from the gallery: it is there already).
+    if (camera && this._photoOption("copy")) this._copyToPhone(blob, shot.item);
+    if (kept && this._waitForWifi()) {
+      this._showMessage(`⏳ ${this.t("shotWaitWifi")}`);
+      this._leaveShot(shot, task);
+      return;
+    }
     this._showMessage(this.t("uploading"));
     const error = await this._sendPending(item);
     if (error && !kept) {
@@ -10274,7 +10770,7 @@ class HomesteadPanel extends HTMLElement {
       return;
     }
     this._pendingList = items;
-    if (!items.length) return;
+    if (!items.length || this._waitForWifi()) return;
     let sent = 0;
     for (const item of items.sort((a, b) => a.id.localeCompare(b.id))) if (!(await this._sendPending(item))) sent++;
     if (sent) this._showMessage(`✓ ${this.t("shotPendingSent", { count: sent })}`);
@@ -10586,7 +11082,8 @@ class HomesteadPanel extends HTMLElement {
     const z = this._zoneForm;
     const exclude = z.id ? new Set([z.id, ...this._zoneDescendants(z.id)]) : new Set();
     const area = formatArea(z.area_m2 ?? polygonArea(z.geometry));
-    const kindSelect = this._selectField(z, "kind", [["", this.t("noZone")], ...ZONE_KINDS.map((k) => [k, this.t(k)])]);
+    // A module switched off leaves the menu; the zone's own kind always stays.
+    const kindSelect = this._selectField(z, "kind", [["", this.t("noZone")], ...ZONE_KINDS.filter((k) => k === z.kind || this._zoneKindOn(k)).map((k) => [k, this.t(k)])]);
     const essences = this._essencesField(z);
     const toggleEssences = () => (essences.hidden = !["woodland", "melliferous"].includes(kindSelect.querySelector("select").value) && !z.species.length);
     kindSelect.addEventListener("change", toggleEssences);
@@ -10630,6 +11127,7 @@ class HomesteadPanel extends HTMLElement {
               { className: "row" },
               h("button", { type: "button", onclick: () => this._startDrawing(z) }, this.t(z.geometry ? "redraw" : "draw")),
               z.geometry ? h("button", { type: "button", className: "primary", onclick: () => this._openPlan(z.id) }, `📐 ${this.t("planOpen")}`) : null,
+              h("button", { type: "button", onclick: () => (this._shortcuts().includes(`z:${z.id}`) ? this._togglePin(z.id) : (this._togglePin(z.id), this._openHome(`z:${z.id}`), this._showMessage(`✓ ${this.t("pinnedDone")}`))) }, this._shortcuts().includes(`z:${z.id}`) ? this.t("pinnedOff") : `📌 ${this.t("pin")}`),
               h("button", { type: "button", className: "danger", onclick: () => this._deleteZone() }, this.t("delete")),
             )
           : null,

@@ -349,6 +349,16 @@
         "fish": "Fische",
         "other": "Andere"
       }
+    },
+    "module": {
+      "options": {
+        "coop": "Hoftiere",
+        "bees": "Bienen",
+        "water": "Wasser und Fische",
+        "woodland": "Wald und Brennholz",
+        "indoor": "Zimmerpflanzen",
+        "compost": "Kompost"
+      }
     }
   },
   "services": {
@@ -1707,6 +1717,16 @@
         "sort": {
           "name": "Sortierung",
           "description": "manual = die Reihenfolge oben, zone = jede Zone gefolgt von ihren Pflanzen."
+        }
+      }
+    },
+    "set_modules": {
+      "name": "Module",
+      "description": "Wähle die Teile des Gartens, die in diesem Haus genutzt werden; die anderen verschwinden aus den Zonen- und Ereignismenüs.",
+      "fields": {
+        "modules": {
+          "name": "Aktive Module",
+          "description": "Die Module, die bleiben."
         }
       }
     }

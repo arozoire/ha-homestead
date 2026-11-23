@@ -349,6 +349,16 @@
         "fish": "Vissen",
         "other": "Overig"
       }
+    },
+    "module": {
+      "options": {
+        "coop": "Erfdieren",
+        "bees": "Bijen",
+        "water": "Water en vissen",
+        "woodland": "Bos en brandhout",
+        "indoor": "Kamerplanten",
+        "compost": "Compost"
+      }
     }
   },
   "services": {
@@ -1707,6 +1717,16 @@
         "sort": {
           "name": "Sortering",
           "description": "manual = de volgorde hierboven, zone = elke zone gevolgd door haar planten."
+        }
+      }
+    },
+    "set_modules": {
+      "name": "Modules",
+      "description": "Kies de delen van de tuin die in dit huis gebruikt worden; de andere verdwijnen uit de menu's van zones en gebeurtenissen.",
+      "fields": {
+        "modules": {
+          "name": "Actieve modules",
+          "description": "De modules die blijven."
         }
       }
     }
