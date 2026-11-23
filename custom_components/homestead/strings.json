@@ -437,6 +437,10 @@
         "ph_entity": {
           "name": "pH sensor",
           "description": "Water circuit: pH probes (several are averaged)."
+        },
+        "water_targets": {
+          "name": "Water targets",
+          "description": "Fish tank: the ranges its water should stay in, by reading (ph, temperature, ec, ammonia, nitrite, nitrate), each a list of low and high (null = no limit). Empty = from the species of its fish."
         }
       }
     },
@@ -519,6 +523,10 @@
         "ph_entity": {
           "name": "pH sensor",
           "description": "Water circuit: pH probes (several are averaged)."
+        },
+        "water_targets": {
+          "name": "Water targets",
+          "description": "Fish tank: the ranges its water should stay in, by reading (ph, temperature, ec, ammonia, nitrite, nitrate), each a list of low and high (null = no limit). Empty = from the species of its fish."
         }
       }
     },
@@ -1157,6 +1165,10 @@
         "readings": {
           "name": "Water readings",
           "description": "Water test: ph, ec, temperature, ammonia, nitrite, nitrate (e.g. \"ph\": 7.1)."
+        },
+        "lot_id": {
+          "name": "Fish lot",
+          "description": "Arrivals, departures and weighings of fish: the lot they belong to (kept when fish move between tanks)."
         }
       }
     },
@@ -1247,6 +1259,10 @@
         "readings": {
           "name": "Water readings",
           "description": "Water test: ph, ec, temperature, ammonia, nitrite, nitrate (e.g. \"ph\": 7.1)."
+        },
+        "lot_id": {
+          "name": "Fish lot",
+          "description": "Arrivals, departures and weighings of fish: the lot they belong to (kept when fish move between tanks)."
         }
       }
     },
@@ -1727,6 +1743,146 @@
         "modules": {
           "name": "Modules on",
           "description": "The modules to keep."
+        }
+      }
+    },
+    "add_fish_species": {
+      "name": "Add fish species",
+      "description": "Adds a fish species with the water it needs and how to feed it, filled in by you.",
+      "fields": {
+        "name": {
+          "name": "Name",
+          "description": "Name."
+        },
+        "scientific_name": {
+          "name": "Scientific name",
+          "description": "Latin name, if known."
+        },
+        "targets": {
+          "name": "Water targets",
+          "description": "Ranges by reading (ph, temperature, ec, ammonia, nitrite, nitrate), each a list of low and high (null = no limit)."
+        },
+        "feeding": {
+          "name": "Feeding",
+          "description": "How and how much to feed."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "update_fish_species": {
+      "name": "Update fish species",
+      "description": "Changes the given fields of a fish species.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Record id."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Name."
+        },
+        "scientific_name": {
+          "name": "Scientific name",
+          "description": "Latin name, if known."
+        },
+        "targets": {
+          "name": "Water targets",
+          "description": "Ranges by reading (ph, temperature, ec, ammonia, nitrite, nitrate), each a list of low and high (null = no limit)."
+        },
+        "feeding": {
+          "name": "Feeding",
+          "description": "How and how much to feed."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "delete_fish_species": {
+      "name": "Delete fish species",
+      "description": "Deletes a fish species; its lots stay without a species.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Record id."
+        }
+      }
+    },
+    "add_fish_lot": {
+      "name": "Add fish lot",
+      "description": "Adds a group of fish followed together, with its species and parent lots.",
+      "fields": {
+        "name": {
+          "name": "Name",
+          "description": "Name."
+        },
+        "species_id": {
+          "name": "Species",
+          "description": "Fish species id."
+        },
+        "parent_ids": {
+          "name": "Parent lots",
+          "description": "Lots the fish were spawned from."
+        },
+        "started_on": {
+          "name": "Started on",
+          "description": "Hatched or arrived."
+        },
+        "finished": {
+          "name": "Finished",
+          "description": "The lot is over (all harvested or gone)."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "update_fish_lot": {
+      "name": "Update fish lot",
+      "description": "Changes the given fields of a fish lot.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Record id."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Name."
+        },
+        "species_id": {
+          "name": "Species",
+          "description": "Fish species id."
+        },
+        "parent_ids": {
+          "name": "Parent lots",
+          "description": "Lots the fish were spawned from."
+        },
+        "started_on": {
+          "name": "Started on",
+          "description": "Hatched or arrived."
+        },
+        "finished": {
+          "name": "Finished",
+          "description": "The lot is over (all harvested or gone)."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "delete_fish_lot": {
+      "name": "Delete fish lot",
+      "description": "Deletes a fish lot; its diary entries stay without the lot.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Record id."
         }
       }
     }

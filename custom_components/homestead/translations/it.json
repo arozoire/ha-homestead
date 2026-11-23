@@ -437,6 +437,10 @@
         "ph_entity": {
           "name": "Sensore di pH",
           "description": "Circuito d'acqua: sonde del pH (più sonde vengono mediate)."
+        },
+        "water_targets": {
+          "name": "Valori ideali dell'acqua",
+          "description": "Vasca: gli intervalli in cui deve restare l'acqua, per lettura (ph, temperature, ec, ammonia, nitrite, nitrate), ognuno una lista di minimo e massimo (null = nessun limite). Vuoto = dalle specie dei suoi pesci."
         }
       }
     },
@@ -519,6 +523,10 @@
         "ph_entity": {
           "name": "Sensore di pH",
           "description": "Circuito d'acqua: sonde del pH (più sonde vengono mediate)."
+        },
+        "water_targets": {
+          "name": "Valori ideali dell'acqua",
+          "description": "Vasca: gli intervalli in cui deve restare l'acqua, per lettura (ph, temperature, ec, ammonia, nitrite, nitrate), ognuno una lista di minimo e massimo (null = nessun limite). Vuoto = dalle specie dei suoi pesci."
         }
       }
     },
@@ -1157,6 +1165,10 @@
         "readings": {
           "name": "Valori dell'acqua",
           "description": "Test dell'acqua: ph, ec, temperature, ammonia, nitrite, nitrate (es. \"ph\": 7.1)."
+        },
+        "lot_id": {
+          "name": "Lotto di pesci",
+          "description": "Arrivi, uscite e pesate di pesci: il lotto a cui appartengono (resta lo stesso quando i pesci cambiano vasca)."
         }
       }
     },
@@ -1247,6 +1259,10 @@
         "readings": {
           "name": "Valori dell'acqua",
           "description": "Test dell'acqua: ph, ec, temperature, ammonia, nitrite, nitrate (es. \"ph\": 7.1)."
+        },
+        "lot_id": {
+          "name": "Lotto di pesci",
+          "description": "Arrivi, uscite e pesate di pesci: il lotto a cui appartengono (resta lo stesso quando i pesci cambiano vasca)."
         }
       }
     },
@@ -1727,6 +1743,146 @@
         "modules": {
           "name": "Moduli attivi",
           "description": "I moduli da tenere."
+        }
+      }
+    },
+    "add_fish_species": {
+      "name": "Aggiungi specie di pesci",
+      "description": "Aggiunge una specie di pesci con l'acqua che le serve e come nutrirla, compilata da te.",
+      "fields": {
+        "name": {
+          "name": "Nome",
+          "description": "Nome."
+        },
+        "scientific_name": {
+          "name": "Nome scientifico",
+          "description": "Nome latino, se lo sai."
+        },
+        "targets": {
+          "name": "Valori ideali dell'acqua",
+          "description": "Intervalli per lettura (ph, temperature, ec, ammonia, nitrite, nitrate), ognuno una lista di minimo e massimo (null = nessun limite)."
+        },
+        "feeding": {
+          "name": "Alimentazione",
+          "description": "Come e quanto nutrire."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "update_fish_species": {
+      "name": "Modifica specie di pesci",
+      "description": "Cambia i campi indicati di una specie di pesci.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id del record."
+        },
+        "name": {
+          "name": "Nome",
+          "description": "Nome."
+        },
+        "scientific_name": {
+          "name": "Nome scientifico",
+          "description": "Nome latino, se lo sai."
+        },
+        "targets": {
+          "name": "Valori ideali dell'acqua",
+          "description": "Intervalli per lettura (ph, temperature, ec, ammonia, nitrite, nitrate), ognuno una lista di minimo e massimo (null = nessun limite)."
+        },
+        "feeding": {
+          "name": "Alimentazione",
+          "description": "Come e quanto nutrire."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "delete_fish_species": {
+      "name": "Elimina specie di pesci",
+      "description": "Elimina una specie di pesci; i suoi lotti restano senza specie.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id del record."
+        }
+      }
+    },
+    "add_fish_lot": {
+      "name": "Aggiungi lotto di pesci",
+      "description": "Aggiunge un gruppo di pesci seguiti insieme, con la specie e i lotti genitori.",
+      "fields": {
+        "name": {
+          "name": "Nome",
+          "description": "Nome."
+        },
+        "species_id": {
+          "name": "Specie",
+          "description": "Id della specie di pesci."
+        },
+        "parent_ids": {
+          "name": "Lotti genitori",
+          "description": "Lotti da cui sono nati i pesci."
+        },
+        "started_on": {
+          "name": "Dal",
+          "description": "Nati o arrivati."
+        },
+        "finished": {
+          "name": "Finito",
+          "description": "Il lotto è chiuso (tutto raccolto o uscito)."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "update_fish_lot": {
+      "name": "Modifica lotto di pesci",
+      "description": "Cambia i campi indicati di un lotto di pesci.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id del record."
+        },
+        "name": {
+          "name": "Nome",
+          "description": "Nome."
+        },
+        "species_id": {
+          "name": "Specie",
+          "description": "Id della specie di pesci."
+        },
+        "parent_ids": {
+          "name": "Lotti genitori",
+          "description": "Lotti da cui sono nati i pesci."
+        },
+        "started_on": {
+          "name": "Dal",
+          "description": "Nati o arrivati."
+        },
+        "finished": {
+          "name": "Finito",
+          "description": "Il lotto è chiuso (tutto raccolto o uscito)."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "delete_fish_lot": {
+      "name": "Elimina lotto di pesci",
+      "description": "Elimina un lotto di pesci; le sue voci del diario restano senza lotto.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id del record."
         }
       }
     }

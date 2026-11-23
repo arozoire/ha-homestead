@@ -99,6 +99,7 @@ ChatGPT, Claude, Gemini or Perplexity can help you install and configure HA Home
 | Status | Green = active, red = dead, grey = removed |
 | New zone | *Zones* tab → *+ New zone* → click the corners → *Done* → name and type |
 | Zone of a plant | Proposed automatically when the plant falls inside a polygon (the smallest zone) |
+| Fish lots and species | In a water circuit or tank: lots of fish with their species and parent lots, kept the same when part of a lot moves to another tank; species profiles filled in by you (water ranges, feeding); water targets per tank, else what all its species accept, with a warning when species sharing a tank do not agree |
 | Shortcuts | 📌 *Pin to the top* on a zone's card (or *More → 🧩 Modules and shortcuts*): a row of chips under the tabs opens the zone's own page (quick buttons, today, to-do, plants by bed, diary). Kept per device |
 | Modules | *More → 🧩 Modules and shortcuts*: switch off what your home does not use (backyard animals, bees, water and fish, woodland, houseplants, compost); it leaves the zone and event menus, the data stays. For the whole home (service `set_modules`) |
 | Photo round options | Same page, per device: keep a copy of each picture on the phone (Download folder on Android), send on Wi-Fi only (on mobile data pictures wait ⏳; iPhone browsers do not tell the network, so they are always sent) |

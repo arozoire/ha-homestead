@@ -761,6 +761,12 @@ const STYLE = `
     background: var(--secondary-background-color); border: none; border-radius: 8px; padding: 6px 8px; font-size: 13px; }
   .trust-past b { min-width: 52px; }
   .trust-past .off { color: #a3341a; font-weight: 600; }
+  .fish-sheet { gap: 8px; }
+  .fish-sheet label { display: grid; gap: 2px; }
+  .fish-sheet label.check { display: flex; align-items: center; gap: 8px; }
+  .targets-grid { display: grid; grid-template-columns: minmax(0, 1fr) 80px 80px; gap: 4px 8px; align-items: center; font-size: 14px; }
+  .targets-grid input { width: 100%; box-sizing: border-box; }
+  .parent-list { display: flex; flex-wrap: wrap; gap: 4px 14px; }
   .trust-sheet { justify-content: flex-start; overflow-y: auto; }
   .trust-card { background: var(--card-background-color, #fff); color: var(--primary-text-color, #222); border-radius: 12px; padding: 14px;
     width: min(420px, 100%); box-sizing: border-box; display: grid; gap: 4px; }
@@ -842,7 +848,7 @@ const STYLE = `
 class HomesteadPanel extends HTMLElement {
   constructor() {
     super();
-    this._data = { plantings: [], zones: [], taxa: [], expenses: [], tools: [], photos: [], events: [], tasks: [], seeds: [], crops: [], settings: {} };
+    this._data = { plantings: [], zones: [], taxa: [], expenses: [], tools: [], photos: [], events: [], tasks: [], seeds: [], crops: [], settings: {}, fish_species: [], fish_lots: [] };
     this._cropDefaults = {};
     this._diaryFilter = { kind: "", zone: "", year: "" };
     this._photoUrls = new Map();
@@ -1055,6 +1061,8 @@ class HomesteadPanel extends HTMLElement {
           tasks: data.tasks || [],
           growth: data.growth || {},
           settings: data.settings || {},
+          fish_species: data.fish_species || [],
+          fish_lots: data.fish_lots || [],
         };
         this._loaded = !!data.plantings;
         this._syncMap();
@@ -3670,17 +3678,281 @@ class HomesteadPanel extends HTMLElement {
   }
 
   /** Move fish from a tank to another: an exit and an arrival, both "moved". */
-  async _moveFish(from, to, count) {
+  async _moveFish(from, to, count, lot = null) {
     const day = today();
-    if (!(await this._call("add_event", { kind: "flock_out", zone_id: from, done_on: day, quantity: count, animal: "fish", reason: "moved" }))) return;
-    await this._call("add_event", { kind: "flock_in", zone_id: to, done_on: day, quantity: count, animal: "fish", reason: "moved" });
+    const lotId = lot ? { lot_id: lot } : {};
+    if (!(await this._call("add_event", { kind: "flock_out", zone_id: from, done_on: day, quantity: count, animal: "fish", reason: "moved", ...lotId }))) return;
+    await this._call("add_event", { kind: "flock_in", zone_id: to, done_on: day, quantity: count, animal: "fish", reason: "moved", ...lotId });
     this._showMessage(this.t("fishMoved", { count }));
+  }
+
+  // ----- fish lots and species (filled in by hand) -----
+
+  /** Fish per lot (in a tank, or everywhere): arrivals minus departures with that lot. Same as models.lot_counts. */
+  _lotCounts(zoneId = null) {
+    const out = {};
+    for (const e of this._data.events) {
+      if (!e.lot_id || !e.quantity || (zoneId && e.zone_id !== zoneId) || !["flock_in", "flock_out"].includes(e.kind)) continue;
+      out[e.lot_id] = (out[e.lot_id] || 0) + (e.kind === "flock_in" ? 1 : -1) * Math.trunc(e.quantity);
+    }
+    return Object.fromEntries(Object.entries(out).filter(([, n]) => n > 0));
+  }
+
+  _fishLot(id) {
+    return this._data.fish_lots.find((l) => l.id === id);
+  }
+
+  _fishSpecies(id) {
+    return this._data.fish_species.find((s) => s.id === id);
+  }
+
+  _tankSpecies(tankId) {
+    const out = new Map();
+    for (const id of Object.keys(this._lotCounts(tankId))) {
+      const species = this._fishSpecies(this._fishLot(id)?.species_id);
+      if (species) out.set(species.id, species);
+    }
+    return [...out.values()];
+  }
+
+  /** What the tank's water should be: its own ranges, else what all its species accept (as models.tank_targets). */
+  _tankTargets(tank) {
+    const out = { ...(tank.water_targets || {}) };
+    const species = this._tankSpecies(tank.id);
+    for (const key of WATER_READINGS) {
+      if (out[key]) continue;
+      const common = overlapRanges(species.map((s) => s.targets?.[key]).filter(Boolean));
+      if (common) out[key] = common;
+    }
+    return out;
+  }
+
+  /** Readings on which the species sharing a tank do not agree: [{key, species: [[name, range]]}]. */
+  _tankConflicts(tank) {
+    const species = this._tankSpecies(tank.id);
+    return WATER_READINGS.map((key) => ({ key, list: species.filter((s) => s.targets?.[key]).map((s) => [s.name, s.targets[key]]) }))
+      .filter(({ list }) => list.length > 1 && !overlapRanges(list.map(([, r]) => r)));
+  }
+
+  _rangeText([lo, hi]) {
+    const n = (v) => String(v).replace(".", UNITS.comma ? "," : ".");
+    return lo != null && hi != null ? `${n(lo)}–${n(hi)}` : lo != null ? `≥ ${n(lo)}` : `≤ ${n(hi)}`;
+  }
+
+  _fishConflictLines(tank) {
+    return this._tankConflicts(tank).map(({ key, list }) =>
+      h("div", { className: "alert-line" }, `⚠️ ${this.t("fishConflict", { reading: this.t(`wr_${key}`), species: list.map(([name, r]) => `${name} ${this._rangeText(r)}`).join(" · ") })}`),
+    );
+  }
+
+  /** Lots of a circuit (or one tank): name, species, how many and where, parents. */
+  _lotRows(tanks) {
+    const ids = new Set(tanks.map((t) => t.id));
+    const byTank = tanks.map((t) => [t, this._lotCounts(t.id)]);
+    const lots = this._data.fish_lots
+      .filter((l) => byTank.some(([, c]) => c[l.id]) || (!l.finished && !Object.keys(this._lotCounts()).includes(l.id)))
+      .sort((a, b) => (b.started_on || "").localeCompare(a.started_on || "") || a.name.localeCompare(b.name));
+    return lots.map((lot) => {
+      const where = byTank.filter(([, c]) => c[lot.id]).map(([t, c]) => `${t.name} ${c[lot.id]}`);
+      const total = byTank.reduce((n, [, c]) => n + (c[lot.id] || 0), 0);
+      const parents = lot.parent_ids.map((id) => this._fishLot(id)?.name).filter(Boolean);
+      const species = this._fishSpecies(lot.species_id)?.name;
+      return h(
+        "button",
+        { type: "button", className: "hive-row", onclick: () => this._fishLotSheet(lot) },
+        h(
+          "span",
+          { className: "hive-name" },
+          h("strong", {}, lot.name),
+          h("span", { className: "sub", style: "white-space:normal" }, [species, ids.size > 1 ? where.join(" · ") : "", total ? "" : this.t("fishLotEmpty"), parents.length ? `↖ ${parents.join(", ")}` : ""].filter(Boolean).join(" · ")),
+        ),
+        h("strong", {}, String(total)),
+      );
+    });
+  }
+
+  _fishLotsBox(tanks) {
+    return h(
+      "div",
+      {},
+      h("h3", {}, `🏷️ ${this.t("fishLots")}`),
+      ...(this._data.fish_lots.length ? this._lotRows(tanks) : [h("p", { className: "hint", style: "white-space:normal" }, this.t("fishLotsHint"))]),
+      h(
+        "div",
+        { className: "row", style: "flex-wrap:wrap" },
+        h("button", { type: "button", onclick: () => this._fishLotSheet(null) }, `+ ${this.t("fishLot")}`),
+        h("button", { type: "button", onclick: () => this._fishSpeciesList() }, `🐟 ${this.t("fishSpeciesTitle")} (${this._data.fish_species.length})`),
+      ),
+    );
+  }
+
+  /** A sheet over the page (a form or a list); closed by its buttons or a tap outside. */
+  _sheet(title, ...content) {
+    const close = () => overlay.remove();
+    const overlay = h(
+      "div",
+      { className: "lightbox trust-sheet", onclick: (ev) => ev.target === overlay && close() },
+      h("div", { className: "trust-card fish-sheet" }, h("h3", {}, title), ...content),
+    );
+    this.shadowRoot.append(overlay);
+    return close;
+  }
+
+  /** Min and max per reading, for a species or a tank. */
+  _targetsFields(targets = {}) {
+    const inputs = {};
+    const grid = h(
+      "div",
+      { className: "targets-grid" },
+      h("span"),
+      h("span", { className: "sub" }, this.t("min")),
+      h("span", { className: "sub" }, this.t("max")),
+      ...WATER_READINGS.flatMap((key) => {
+        const [lo, hi] = targets[key] || [null, null];
+        inputs[key] = [lo, hi].map((v) => h("input", { type: "number", step: "any", inputMode: "decimal", value: v ?? "" }));
+        return [h("span", {}, `${this.t(`wr_${key}`)}${key === "temperature" ? " °C" : ""}`), ...inputs[key]];
+      }),
+    );
+    const read = () =>
+      Object.fromEntries(
+        Object.entries(inputs)
+          .map(([key, pair]) => [key, pair.map((i) => (i.value === "" ? null : Number(i.value)))])
+          .filter(([, pair]) => pair.some((v) => v != null)),
+      );
+    return { grid, read };
+  }
+
+  _fishSpeciesList() {
+    const close = this._sheet(
+      `🐟 ${this.t("fishSpeciesTitle")}`,
+      h("p", { className: "hint", style: "white-space:normal" }, this.t("fishSpeciesHint")),
+      ...this._data.fish_species.map((s) =>
+        h(
+          "button",
+          { type: "button", className: "hive-row", onclick: () => (close(), this._fishSpeciesSheet(s)) },
+          h("span", { className: "hive-name" }, h("strong", {}, s.name), h("span", { className: "sub", style: "white-space:normal" }, [s.scientific_name, ...Object.entries(s.targets || {}).map(([k, r]) => `${this.t(`wr_${k}`)} ${this._rangeText(r)}`)].filter(Boolean).join(" · "))),
+        ),
+      ),
+      h("div", { className: "row" }, h("button", { type: "button", className: "primary", onclick: () => (close(), this._fishSpeciesSheet(null)) }, `+ ${this.t("fishSpeciesNew")}`), h("button", { type: "button", onclick: () => close() }, this.t("close"))),
+    );
+  }
+
+  _fishSpeciesSheet(species, onSaved = null) {
+    const s = species || { name: "", targets: {} };
+    const name = h("input", { value: s.name || "", required: true });
+    const latin = h("input", { value: s.scientific_name || "", placeholder: "Oreochromis niloticus" });
+    const feeding = h("textarea", { rows: 2, value: s.feeding || "" });
+    const notes = h("textarea", { rows: 2, value: s.notes || "" });
+    const targets = this._targetsFields(s.targets);
+    const save = async () => {
+      if (!name.value.trim()) return name.focus();
+      const data = { name: name.value.trim(), scientific_name: latin.value.trim() || null, targets: targets.read(), feeding: feeding.value.trim() || null, notes: notes.value.trim() || null };
+      const result = await this._call(s.id ? "update_fish_species" : "add_fish_species", s.id ? { id: s.id, ...data } : data);
+      if (!result) return;
+      close();
+      this._showMessage(`✓ ${this.t("saved", { name: data.name })}`);
+      onSaved?.(result.id);
+    };
+    const close = this._sheet(
+      `🐟 ${s.id ? s.name : this.t("fishSpeciesNew")}`,
+      h("label", {}, this.t("name"), name),
+      h("label", {}, this.t("scientificName"), latin),
+      h("strong", {}, this.t("fishTargets")),
+      targets.grid,
+      h("p", { className: "hint", style: "white-space:normal;margin:0" }, this.t("fishTargetsHint")),
+      h("label", {}, this.t("fishFeeding"), feeding),
+      h("label", {}, this.t("notes"), notes),
+      h(
+        "div",
+        { className: "row" },
+        h("button", { type: "button", className: "primary", onclick: save }, this.t("save")),
+        h("button", { type: "button", onclick: () => close() }, this.t("cancel")),
+        s.id
+          ? h("button", { type: "button", className: "danger", onclick: async () => confirm(this.t("confirmDelete", { name: s.name })) && (await this._call("delete_fish_species", { id: s.id })) && close() }, this.t("delete"))
+          : null,
+      ),
+    );
+  }
+
+  _fishLotSheet(lot, onSaved = null) {
+    const l = lot || { name: "", parent_ids: [], started_on: today() };
+    const name = h("input", { value: l.name || "", required: true, placeholder: this.t("fishLotPlaceholder") });
+    const speciesSel = h("select", {}, h("option", { value: "" }, "—"), ...this._data.fish_species.map((s) => h("option", { value: s.id, selected: s.id === l.species_id }, s.name)));
+    const started = h("input", { type: "date", value: l.started_on || "" });
+    const finished = h("input", { type: "checkbox", checked: !!l.finished });
+    const notes = h("textarea", { rows: 2, value: l.notes || "" });
+    const others = this._data.fish_lots.filter((o) => o.id !== l.id);
+    const parentBoxes = others.map((o) => h("input", { type: "checkbox", value: o.id, checked: l.parent_ids?.includes(o.id) }));
+    const children = l.id ? this._data.fish_lots.filter((o) => o.parent_ids.includes(l.id)).map((o) => o.name) : [];
+    const counts = l.id ? this._data.zones.filter((z) => z.kind === "fish_tank").map((t) => [t.name, this._lotCounts(t.id)[l.id]]).filter(([, n]) => n) : [];
+    const save = async () => {
+      if (!name.value.trim()) return name.focus();
+      const data = {
+        name: name.value.trim(),
+        species_id: speciesSel.value || null,
+        parent_ids: parentBoxes.filter((b) => b.checked).map((b) => b.value),
+        started_on: started.value || null,
+        finished: finished.checked,
+        notes: notes.value.trim() || null,
+      };
+      const result = await this._call(l.id ? "update_fish_lot" : "add_fish_lot", l.id ? { id: l.id, ...data } : data);
+      if (!result) return;
+      close();
+      this._showMessage(`✓ ${this.t("saved", { name: data.name })}`);
+      onSaved?.(result.id);
+    };
+    const close = this._sheet(
+      `🏷️ ${l.id ? l.name : this.t("fishLotNew")}`,
+      counts.length ? h("p", { className: "sub", style: "white-space:normal" }, counts.map(([t, n]) => `${t}: ${n}`).join(" · ")) : null,
+      h("label", {}, this.t("name"), name),
+      h(
+        "div",
+        { className: "row" },
+        h("label", {}, this.t("fishSpecies"), speciesSel),
+        h("button", { type: "button", style: "align-self:end", onclick: () => this._fishSpeciesSheet(null, (id) => speciesSel.append(h("option", { value: id, selected: true }, this._fishSpecies(id)?.name || "…"))) }, "+"),
+      ),
+      h("label", {}, this.t("fishStarted"), started),
+      others.length
+        ? h("div", {}, h("strong", {}, this.t("fishParents")), h("div", { className: "parent-list" }, others.map((o, i) => h("label", { className: "check" }, parentBoxes[i], o.name))))
+        : null,
+      children.length ? h("p", { className: "sub", style: "white-space:normal" }, `↘ ${this.t("fishChildren")}: ${children.join(", ")}`) : null,
+      h("label", { className: "check" }, finished, this.t("fishFinished")),
+      h("label", {}, this.t("notes"), notes),
+      h(
+        "div",
+        { className: "row" },
+        h("button", { type: "button", className: "primary", onclick: save }, this.t("save")),
+        h("button", { type: "button", onclick: () => close() }, this.t("cancel")),
+        l.id ? h("button", { type: "button", className: "danger", onclick: async () => confirm(this.t("confirmDelete", { name: l.name })) && (await this._call("delete_fish_lot", { id: l.id })) && close() }, this.t("delete")) : null,
+      ),
+    );
+  }
+
+  /** A tank's own water ranges (empty = from its fish). */
+  _tankTargetsSheet(tank) {
+    const targets = this._targetsFields(tank.water_targets || {});
+    const fromFish = this._tankSpecies(tank.id);
+    const close = this._sheet(
+      `🎯 ${this.t("fishTargets")} · ${tank.name}`,
+      h("p", { className: "hint", style: "white-space:normal;margin:0" }, this.t("tankTargetsHint", { species: fromFish.map((s) => s.name).join(", ") || "—" })),
+      targets.grid,
+      h(
+        "div",
+        { className: "row" },
+        h("button", { type: "button", className: "primary", onclick: async () => (await this._call("update_zone", { id: tank.id, water_targets: targets.read() })) && close() }, this.t("save")),
+        h("button", { type: "button", onclick: () => close() }, this.t("cancel")),
+      ),
+    );
   }
 
   _circuitBox(zone) {
     const tanks = this._tanks(zone);
     const aquaponic = tanks.length > 0;
-    const ranges = aquaponic ? { ph: [6.8, 7.2], temperature: [18, 26] } : { ph: [5.5, 6.5], temperature: [18, 24] };
+    // The tanks' own or fish ranges, all of them together; else the usual ones.
+    const fromTanks = Object.fromEntries(
+      WATER_READINGS.map((key) => [key, overlapRanges(tanks.map((t) => this._tankTargets(t)[key]).filter(Boolean))]).filter(([, r]) => r),
+    );
+    const ranges = { ...(aquaponic ? { ph: [6.8, 7.2], temperature: [18, 26] } : { ph: [5.5, 6.5], temperature: [18, 24] }), ...fromTanks };
     const now = today();
     const back = { zone_id: zone.id };
     const tests = this._zoneEvents(zone.id, ["water_test"]);
@@ -3691,19 +3963,26 @@ class HomesteadPanel extends HTMLElement {
       const v = live[key] ?? last[key];
       if (v == null) return null;
       const [lo, hi] = ranges[key] || [];
-      const off = lo != null && (v < lo || v > hi);
+      const off = (lo != null && v < lo) || (hi != null && v > hi);
       const unit = key === "temperature" ? "°C" : key === "ec" ? (this._hass.states[sensorIds(zone.soil_ec_entity)[0]]?.attributes?.unit_of_measurement || "mS/cm") : "";
       return h(
         "div",
         { className: `coop-stat${off ? " off" : ""}` },
         h("strong", {}, `${new Intl.NumberFormat(this._lang(), { maximumFractionDigits: 2 }).format(v)}${unit ? ` ${unit}` : ""}`),
-        h("span", { className: "sub" }, `${this.t(`wr_${key}`)}${lo != null ? ` · ${String(lo).replace(".", ",")}–${String(hi).replace(".", ",")}` : ""}${live[key] == null ? ` · ${this.t("fromTest")}` : ""}`),
+        h("span", { className: "sub" }, `${this.t(`wr_${key}`)}${ranges[key] ? ` · ${this._rangeText(ranges[key])}` : ""}${live[key] == null ? ` · ${this.t("fromTest")}` : ""}`),
       );
     };
     const readingsText = (r) => WATER_READINGS.filter((k) => r?.[k] != null).map((k) => `${this.t(`wr_${k}`)} ${String(r[k]).replace(".", ",")}`).join(" · ");
     const fromSel = h("select", {}, tanks.map((t) => h("option", { value: t.id }, `${t.name} (${this._fishIn(t)})`)));
     const toSel = h("select", {}, tanks.map((t, i) => h("option", { value: t.id, selected: i === 1 }, t.name)));
     const countIn = h("input", { type: "number", min: 1, step: 1, inputMode: "numeric", style: "width:5em" });
+    const lotSel = h("select", {}, h("option", { value: "" }, "—"));
+    const fillLots = () => {
+      const counts = this._lotCounts(fromSel.value);
+      lotSel.replaceChildren(h("option", { value: "" }, "—"), ...Object.entries(counts).map(([id, n]) => h("option", { value: id }, `${this._fishLot(id)?.name || "?"} (${n})`)));
+      lotSel.parentElement && (lotSel.parentElement.hidden = !Object.keys(counts).length);
+    };
+    fromSel.addEventListener("change", fillLots);
     const move = h(
       "form",
       {
@@ -3711,14 +3990,16 @@ class HomesteadPanel extends HTMLElement {
         onsubmit: (ev) => {
           ev.preventDefault();
           const count = Number(countIn.value);
-          if (count > 0 && fromSel.value !== toSel.value) this._moveFish(fromSel.value, toSel.value, count);
+          if (count > 0 && fromSel.value !== toSel.value) this._moveFish(fromSel.value, toSel.value, count, lotSel.value || null);
         },
       },
       h("label", {}, this.t("fishFrom"), fromSel),
+      h("label", {}, this.t("fishLot"), lotSel),
       h("label", {}, this.t("fishTo"), toSel),
       h("label", {}, this.t("fishCount"), countIn),
       h("button", { type: "submit" }, `↔ ${this.t("fishMove")}`),
     );
+    fillLots();
     const target = tanks[0]?.id || zone.id;
     const open = (kind, extra = {}) => this._openEvent({ kind, done_on: now, zone_id: target, ...extra }, back);
     return h(
@@ -3743,6 +4024,8 @@ class HomesteadPanel extends HTMLElement {
           })
         : h("p", { className: "hint" }, this.t("circuitNoTanks")),
       tanks.length > 1 ? move : null,
+      ...tanks.flatMap((t) => this._fishConflictLines(t)),
+      tanks.length ? this._fishLotsBox(tanks) : null,
       h(
         "div",
         { className: "row", style: "flex-wrap:wrap" },
@@ -3769,6 +4052,13 @@ class HomesteadPanel extends HTMLElement {
       "div",
       { className: "seasons" },
       h("div", { className: "cal-head" }, h("h3", {}, `🐟 ${zone.name}`), h("strong", {}, String(this._fishIn(zone)))),
+      ...this._fishConflictLines(zone),
+      h(
+        "button",
+        { type: "button", className: "link", style: "display:block;text-align:left;white-space:normal", onclick: () => this._tankTargetsSheet(zone) },
+        `🎯 ${Object.entries(this._tankTargets(zone)).map(([k, r]) => `${this.t(`wr_${k}`)} ${this._rangeText(r)}`).join(" · ") || this.t("fishTargetsNone")}${Object.keys(zone.water_targets || {}).length ? ` · ${this.t("fishTargetsOwn")}` : ""}`,
+      ),
+      this._fishLotsBox([zone]),
       moves.map((e) => h("button", { type: "button", className: "link", style: "display:block;text-align:left", onclick: () => this._openEvent(e, back) }, `${this._date(e.done_on, false)} · ${EVENT_ICONS[e.kind]} ${this.t(`ev_${e.kind}`)} ${this._eventQuantity(e)}${e.reason ? ` · ${this.t(ARRIVAL_REASONS[e.reason] && e.kind === "flock_in" ? `ar_${e.reason}` : `lr_${e.reason}`)}` : ""}`)),
       h(
         "div",
@@ -6926,6 +7216,20 @@ class HomesteadPanel extends HTMLElement {
     const family0 = this._zoneFamily(f);
     extras.animal = this._selectField({ animal: f.animal || (family0 === "water" ? "fish" : f.id ? "hens" : this._lastAnimal(f.zone_id)) }, "animal", Object.entries(ANIMALS).map(([a, icon]) => [a, `${icon} ${this.t(`animal_${a}`)}`]));
     extras.arrival = this._selectField({ arrival: f.kind === "flock_in" && ARRIVAL_REASONS[f.reason] ? f.reason : "bought" }, "arrival", Object.entries(ARRIVAL_REASONS).map(([r, icon]) => [r, `${icon} ${this.t(`ar_${r}`)}`]));
+    // Fish: the lot they belong to (kept through moves); "+ New lot" on the spot.
+    const lotSelect = h(
+      "select",
+      { name: "lot_id" },
+      h("option", { value: "" }, "—"),
+      ...this._data.fish_lots.filter((l) => !l.finished || l.id === f.lot_id).map((l) => h("option", { value: l.id, selected: l.id === f.lot_id }, l.name)),
+    );
+    extras.lot = h(
+      "div",
+      { className: "row" },
+      h("label", {}, this.t("fishLot"), lotSelect),
+      h("button", { type: "button", style: "align-self:end;flex:none", onclick: () => this._fishLotSheet(null, (id) => lotSelect.append(h("option", { value: id, selected: true }, this._fishLot(id)?.name || "…"))) }, `+ ${this.t("fishLot")}`),
+    );
+    extras.animal.addEventListener("change", () => showExtras());
     extras.queen = h("label", { className: "check" }, h("input", { type: "checkbox", name: "queen", checked: !!f.queen }), this.t("queenSeen"));
     extras.varroa = this._selectField({ varroa_method: VARROA_METHODS.includes(f.product) ? f.product : "drop" }, "varroa_method", VARROA_METHODS.map((m) => [m, this.t(`vm_${m}`)]));
     extras.readings = h(
@@ -6980,6 +7284,7 @@ class HomesteadPanel extends HTMLElement {
       extras.stars.hidden = !["review", "compost_harvest", "hive_inspection"].includes(kind);
       extras.reason.hidden = kind !== "flock_out";
       extras.animal.hidden = !["eggs", "flock_in", "flock_out"].includes(kind);
+      extras.lot.hidden = !(kind === "fish_weighing" || (["flock_in", "flock_out"].includes(kind) && extras.animal.querySelector("select").value === "fish"));
       extras.arrival.hidden = kind !== "flock_in";
       extras.queen.hidden = kind !== "hive_inspection";
       extras.varroa.hidden = kind !== "varroa_count";
@@ -7103,6 +7408,7 @@ class HomesteadPanel extends HTMLElement {
       extras.pest,
       extras.worked,
       extras.animal,
+      extras.lot,
       extras.arrival,
       extras.reason,
       extras.end,
@@ -7158,6 +7464,7 @@ class HomesteadPanel extends HTMLElement {
       rating: ["review", "compost_harvest", "hive_inspection"].includes(v.kind) && v.rating ? Number(v.rating) : null,
       reason: v.kind === "flock_out" ? v.reason || null : v.kind === "flock_in" ? v.arrival || null : v.kind === "removal" ? v.end_reason || null : null,
       animal: ["eggs", "flock_in", "flock_out"].includes(v.kind) ? v.animal || null : null,
+      lot_id: v.kind === "fish_weighing" || (["flock_in", "flock_out"].includes(v.kind) && v.animal === "fish") ? v.lot_id || null : null,
       queen: v.kind === "hive_inspection" ? v.queen === "on" : null,
       readings: v.kind === "water_test" ? Object.fromEntries(WATER_READINGS.filter((k) => v[`r_${k}`] !== "" && v[`r_${k}`] != null).map((k) => [k, Number(v[`r_${k}`])])) : null,
       cause: v.kind === "removal" && v.end_reason === "died" ? v.cause || "unknown" : null,
@@ -11170,6 +11477,16 @@ function addMonths(iso, months) {
 
 function daysBetween(from, to) {
   return Math.round((Date.parse(`${to}T12:00:00`) - Date.parse(`${from}T12:00:00`)) / 86400000);
+}
+
+/** The common part of [low, high] ranges (null = no limit); null when they do not meet. As models._overlap. */
+function overlapRanges(ranges) {
+  if (!ranges.length) return null;
+  const lows = ranges.map((r) => r[0]).filter((v) => v != null);
+  const highs = ranges.map((r) => r[1]).filter((v) => v != null);
+  const lo = lows.length ? Math.max(...lows) : null;
+  const hi = highs.length ? Math.min(...highs) : null;
+  return lo != null && hi != null && lo > hi ? null : [lo, hi];
 }
 
 function median(values) {

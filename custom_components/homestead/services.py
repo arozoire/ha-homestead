@@ -33,6 +33,8 @@ from .models import (
     EventKind,
     Expense,
     ExpenseCategory,
+    FishLot,
+    FishSpecies,
     HarvestUnit,
     InitialForm,
     LeaveReason,
@@ -70,6 +72,12 @@ from .tasks import (
 from .weather import async_fill_event, async_refresh, schedule_weather
 
 _opt_str = vol.Any(None, cv.string)
+# Water ranges {reading: [low, high]}, either side may be None (no limit)
+_TARGETS = {
+    vol.In(WATER_READINGS): vol.All(
+        cv.ensure_list, [vol.Any(None, vol.Coerce(float))], vol.Length(min=2, max=2)
+    )
+}
 _opt_date = vol.Any(None, cv.date)
 _positive = vol.All(vol.Coerce(float), vol.Range(min=0))
 
@@ -106,8 +114,9 @@ ADD_ZONE_SCHEMA = vol.Schema(
         vol.Optional("varroa_threshold"): vol.Any(None, _positive),
         vol.Optional("varroa_months"): vol.Any(None, {vol.Coerce(str): _positive}),
         vol.Optional("traps"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0))),
-        # Water circuit: pH probes
+        # Water circuit: pH probes; fish tank: the water it should have
         vol.Optional("ph_entity"): vol.Any(None, cv.entity_ids),
+        vol.Optional("water_targets"): vol.Any(None, _TARGETS),
     }
 )
 
@@ -310,6 +319,38 @@ SET_CROP_PROFILE_SCHEMA = vol.Schema(
     }
 )
 
+ADD_FISH_SPECIES_SCHEMA = vol.Schema(
+    {
+        vol.Required("name"): cv.string,
+        vol.Optional("scientific_name"): _opt_str,
+        vol.Optional("targets"): vol.Any(None, _TARGETS),
+        vol.Optional("feeding"): _opt_str,
+        vol.Optional("notes"): _opt_str,
+    }
+)
+UPDATE_FISH_SPECIES_SCHEMA = vol.Schema(
+    {
+        vol.Required("id"): cv.string,
+        **{vol.Optional(str(k)): v for k, v in ADD_FISH_SPECIES_SCHEMA.schema.items()},
+    }
+)
+ADD_FISH_LOT_SCHEMA = vol.Schema(
+    {
+        vol.Required("name"): cv.string,
+        vol.Optional("species_id"): _opt_str,
+        vol.Optional("parent_ids"): vol.All(cv.ensure_list, [cv.string]),
+        vol.Optional("started_on"): vol.Any(None, cv.date),
+        vol.Optional("finished"): cv.boolean,
+        vol.Optional("notes"): _opt_str,
+    }
+)
+UPDATE_FISH_LOT_SCHEMA = vol.Schema(
+    {
+        vol.Required("id"): cv.string,
+        **{vol.Optional(str(k)): v for k, v in ADD_FISH_LOT_SCHEMA.schema.items()},
+    }
+)
+
 UPDATE_SEED_LOT_SCHEMA = vol.Schema(
     {
         vol.Required("id"): cv.string,
@@ -340,6 +381,7 @@ _EVENT_FIELDS = {
     vol.Optional("animal"): vol.Any(None, vol.In([a.value for a in Animal])),
     vol.Optional("queen"): vol.Any(None, cv.boolean),
     vol.Optional("readings"): vol.Any(None, {vol.In(WATER_READINGS): vol.Coerce(float)}),
+    vol.Optional("lot_id"): _opt_str,
 }
 
 TRANSPLANT_SCHEMA = vol.Schema(
@@ -743,6 +785,74 @@ def async_register_services(hass: HomeAssistant) -> None:
         await store.async_save()
         return {"id": lot_id}
 
+    async def add_fish_species(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        species = FishSpecies(**dict(call.data))
+        store.data.fish_species[species.id] = species
+        await store.async_save()
+        return {"id": species.id}
+
+    async def update_fish_species(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        args: dict[str, Any] = dict(call.data)
+        species_id = args.pop("id")
+        _check_ref(store.data.fish_species, species_id, "id")
+        if "targets" in args and args["targets"] is None:
+            args["targets"] = {}
+        store.data.fish_species[species_id] = replace(store.data.fish_species[species_id], **args)
+        await store.async_save()
+        return {"id": species_id}
+
+    async def delete_fish_species(call: ServiceCall) -> ServiceResponse:
+        """The lots stay, without a species."""
+        store = _store(hass)
+        species_id = call.data["id"]
+        _check_ref(store.data.fish_species, species_id, "id")
+        del store.data.fish_species[species_id]
+        for lot in store.data.fish_lots.values():
+            if lot.species_id == species_id:
+                lot.species_id = None
+        await store.async_save()
+        return {"id": species_id}
+
+    def _fish_lot_args(store: HomesteadStore, args: dict[str, Any]) -> dict[str, Any]:
+        _check_ref(store.data.fish_species, args.get("species_id"), "species_id")
+        for parent in args.get("parent_ids") or []:
+            _check_ref(store.data.fish_lots, parent, "parent_ids")
+        if "started_on" in args:
+            args["started_on"] = _iso(args["started_on"])
+        return args
+
+    async def add_fish_lot(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        lot = FishLot(**_fish_lot_args(store, dict(call.data)))
+        store.data.fish_lots[lot.id] = lot
+        await store.async_save()
+        return {"id": lot.id}
+
+    async def update_fish_lot(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        args = _fish_lot_args(store, dict(call.data))
+        lot_id = args.pop("id")
+        _check_ref(store.data.fish_lots, lot_id, "id")
+        store.data.fish_lots[lot_id] = replace(store.data.fish_lots[lot_id], **args)
+        await store.async_save()
+        return {"id": lot_id}
+
+    async def delete_fish_lot(call: ServiceCall) -> ServiceResponse:
+        """Its arrivals and moves stay in the diary, without the lot; its children lose that parent."""
+        store = _store(hass)
+        lot_id = call.data["id"]
+        _check_ref(store.data.fish_lots, lot_id, "id")
+        del store.data.fish_lots[lot_id]
+        for event in store.data.events.values():
+            if event.lot_id == lot_id:
+                event.lot_id = None
+        for lot in store.data.fish_lots.values():
+            lot.parent_ids = [i for i in lot.parent_ids if i != lot_id]
+        await store.async_save()
+        return {"id": lot_id}
+
     async def set_crop_profile(call: ServiceCall) -> ServiceResponse:
         """Replace the user's crop data for a species (one record per species)."""
         store = _store(hass)
@@ -824,6 +934,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         cost, revenue = args.pop("cost", None), args.pop("revenue", None)
         task_id = args.pop("task_id", None)
         _check_ref(store.data.tasks, task_id, "task_id")
+        _check_ref(store.data.fish_lots, args.get("lot_id"), "lot_id")
         _check_ref(store.data.plantings, args.get("planting_id"), "planting_id")
         _check_ref(store.data.zones, args.get("zone_id"), "zone_id")
         args["done_on"] = _iso(args.get("done_on")) or dt_util.now().date().isoformat()
@@ -979,6 +1090,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         _check_ref(store.data.events, event_id, "id")
         _check_ref(store.data.plantings, args.get("planting_id"), "planting_id")
         _check_ref(store.data.zones, args.get("zone_id"), "zone_id")
+        _check_ref(store.data.fish_lots, args.get("lot_id"), "lot_id")
         if args.get("planting_id"):
             args["zone_id"] = None
         if args.get("zone_id"):
@@ -1120,6 +1232,12 @@ def async_register_services(hass: HomeAssistant) -> None:
         ("set_growth", set_growth, SET_GROWTH_SCHEMA, SupportsResponse.OPTIONAL),
         ("set_photo_order", set_photo_order, SET_PHOTO_ORDER_SCHEMA, SupportsResponse.OPTIONAL),
         ("set_modules", set_modules, SET_MODULES_SCHEMA, SupportsResponse.OPTIONAL),
+        ("add_fish_species", add_fish_species, ADD_FISH_SPECIES_SCHEMA, SupportsResponse.OPTIONAL),
+        ("update_fish_species", update_fish_species, UPDATE_FISH_SPECIES_SCHEMA, SupportsResponse.OPTIONAL),
+        ("delete_fish_species", delete_fish_species, ID_SCHEMA, SupportsResponse.OPTIONAL),
+        ("add_fish_lot", add_fish_lot, ADD_FISH_LOT_SCHEMA, SupportsResponse.OPTIONAL),
+        ("update_fish_lot", update_fish_lot, UPDATE_FISH_LOT_SCHEMA, SupportsResponse.OPTIONAL),
+        ("delete_fish_lot", delete_fish_lot, ID_SCHEMA, SupportsResponse.OPTIONAL),
         ("merge_plantings", merge_plantings_service, MERGE_PLANTINGS_SCHEMA, SupportsResponse.OPTIONAL),
         ("update_event", update_event, UPDATE_EVENT_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_event", delete_event, ID_SCHEMA, SupportsResponse.OPTIONAL),

@@ -99,6 +99,7 @@ ChatGPT, Claude, Gemini o Perplexity possono aiutarti a installare e configurare
 | Stato | Verde = attiva, rosso = morta, grigio = rimossa |
 | Nuova zona | Scheda *Zone* → *+ Nuova zona* → clic sugli angoli → *Fine* → nome e tipo |
 | Zona di una pianta | Proposta in automatico se la pianta cade dentro un poligono (la zona più piccola) |
+| Lotti e specie di pesci | Nel circuito o nella vasca: lotti di pesci con specie e lotti genitori, che restano gli stessi quando una parte cambia vasca; schede delle specie compilate da te (intervalli dell'acqua, alimentazione); valori ideali per vasca, altrimenti quelli accettati da tutte le sue specie, con avviso se le specie della stessa vasca non vanno d'accordo |
 | Scorciatoie | 📌 *Fissa in alto* nella scheda di una zona (o *Altro → 🧩 Moduli e scorciatoie*): una fila sotto le schede apre la pagina della zona (pulsanti rapidi, oggi, da fare, piante per aiuola, diario). Per dispositivo |
 | Moduli | *Altro → 🧩 Moduli e scorciatoie*: spegni quello che non usi (animali da cortile, api, acqua e pesci, bosco, piante da interno, compost); sparisce dai menu di zone ed eventi, i dati restano. Per tutta la casa (servizio `set_modules`) |
 | Opzioni del giro foto | Stessa pagina, per dispositivo: copia di ogni foto sul telefono (cartella Download su Android), invio solo in Wi-Fi (coi dati mobili le foto aspettano ⏳; su iPhone il browser non dice la rete e si inviano sempre) |

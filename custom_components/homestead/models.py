@@ -329,6 +329,8 @@ class Zone(_Record):
     traps: int | None = None  # hornet traps set around the apiary
     # Water circuit: pH probes (EC and temperature use the soil_ec / soil_temperature fields).
     ph_entity: list[str] = field(default_factory=list)
+    # Fish tank: the water it should have, {"ph": [6.8, 7.4], "nitrite": [None, 0.5]}; none = from its fish.
+    water_targets: dict[str, list[float | None]] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if self.watering == "valve":  # mode of 0.19 replaced by valve_entity (any mode can be on a valve)
@@ -339,6 +341,26 @@ class Zone(_Record):
             setattr(self, attr, entity_list(getattr(self, attr)))
         self.ph_entity = entity_list(self.ph_entity)
         self.varroa_months = clean_months(self.varroa_months)
+        self.water_targets = clean_targets(self.water_targets)
+
+
+def clean_targets(value: Any) -> dict[str, list[float | None]]:
+    """Water ranges {reading: [low, high]}: known readings, numbers or None (no limit), low <= high."""
+    out: dict[str, list[float | None]] = {}
+    if not isinstance(value, dict):
+        return out
+    for key, pair in value.items():
+        if key not in WATER_READINGS or not isinstance(pair, list | tuple) or len(pair) != 2:
+            continue
+        low, high = (
+            float(v) if isinstance(v, int | float) and not isinstance(v, bool) else None for v in pair
+        )
+        if low is None and high is None:
+            continue
+        if low is not None and high is not None and low > high:
+            low, high = high, low
+        out[key] = [low, high]
+    return out
 
 
 def entity_list(value: Any) -> list[str]:
@@ -513,6 +535,7 @@ class Event(_Record):
     animal: str | None = None  # eggs, flock_in, flock_out: hens, quails, rabbits, fish… (none = hens)
     queen: bool | None = None  # hive_inspection: queen (or fresh eggs) seen
     readings: dict[str, float] = field(default_factory=dict)  # water_test: WATER_READINGS
+    lot_id: str | None = None  # flock_in, flock_out, fish_weighing: the fish lot (kept through moves)
 
     def __post_init__(self) -> None:
         if not self.moon_phase:
@@ -654,6 +677,40 @@ class SeedLot(_Record):
 
 
 @dataclass(kw_only=True)
+class FishSpecies(_Record):
+    """A fish species as the user keeps it: the water it needs and how to feed it (filled in by hand)."""
+
+    name: str
+    id: str = field(default_factory=new_id)
+    scientific_name: str | None = None
+    targets: dict[str, list[float | None]] = field(default_factory=dict)  # as Zone.water_targets
+    feeding: str | None = None
+    notes: str | None = None
+
+    def __post_init__(self) -> None:
+        self.targets = clean_targets(self.targets)
+
+
+@dataclass(kw_only=True)
+class FishLot(_Record):
+    """A group of fish followed together, with its parents (spawned here) like a line of own seeds.
+
+    How many and where come from the arrivals, departures and moves with its ``lot_id``.
+    """
+
+    name: str
+    id: str = field(default_factory=new_id)
+    species_id: str | None = None
+    parent_ids: list[str] = field(default_factory=list)
+    started_on: str | None = None  # hatched or arrived
+    finished: bool = False
+    notes: str | None = None
+
+    def __post_init__(self) -> None:
+        self.parent_ids = list(dict.fromkeys(i for i in self.parent_ids or [] if i and i != self.id))
+
+
+@dataclass(kw_only=True)
 class CropProfile(_Record):
     """The user's correction of a species' crop data (built-in defaults in crops.json)."""
 
@@ -751,6 +808,8 @@ _COLLECTIONS: dict[str, type[_Record]] = {
     "seeds": SeedLot,
     "crops": CropProfile,
     "photo_plans": PhotoPlan,
+    "fish_species": FishSpecies,
+    "fish_lots": FishLot,
 }
 
 
@@ -767,6 +826,8 @@ class HomesteadData:
     seeds: dict[str, SeedLot] = field(default_factory=dict)
     crops: dict[str, CropProfile] = field(default_factory=dict)
     photo_plans: dict[str, PhotoPlan] = field(default_factory=dict)
+    fish_species: dict[str, FishSpecies] = field(default_factory=dict)
+    fish_lots: dict[str, FishLot] = field(default_factory=dict)
     # Choices for the whole house: {"modules": [...]} (absent = every module on)
     settings: dict[str, Any] = field(default_factory=dict)
 
@@ -854,6 +915,67 @@ def animals(data: HomesteadData, zone_id: str, until: str | None = None) -> dict
 def hens(data: HomesteadData, zone_id: str, until: str | None = None) -> int:
     """Hens in a yard (entries from before 0.22, without an animal, are hens)."""
     return animals(data, zone_id, until).get(Animal.HENS, 0)
+
+
+def lot_counts(data: HomesteadData, zone_id: str | None = None, until: str | None = None) -> dict[str, int]:
+    """Fish per lot (in one tank, or everywhere): arrivals minus departures with that ``lot_id``."""
+    counts: dict[str, int] = {}
+    for e in data.events.values():
+        if (
+            not e.lot_id
+            or not e.quantity
+            or (zone_id and e.zone_id != zone_id)
+            or (until and e.done_on > until)
+        ):
+            continue
+        if e.kind in (EventKind.FLOCK_IN, EventKind.FLOCK_OUT):
+            sign = 1 if e.kind == EventKind.FLOCK_IN else -1
+            counts[e.lot_id] = counts.get(e.lot_id, 0) + sign * int(e.quantity)
+    return {lot: n for lot, n in counts.items() if n > 0}
+
+
+def tank_species(data: HomesteadData, tank_id: str) -> list[FishSpecies]:
+    """The species of the lots living in a tank now."""
+    out: dict[str, FishSpecies] = {}
+    for lot_id in lot_counts(data, tank_id):
+        lot = data.fish_lots.get(lot_id)
+        species = lot and data.fish_species.get(lot.species_id or "")
+        if species:
+            out[species.id] = species
+    return list(out.values())
+
+
+def _overlap(ranges: list[list[float | None]]) -> list[float | None] | None:
+    """The common part of several ranges (None = no limit on that side); None when they do not meet."""
+    lows = [r[0] for r in ranges if r[0] is not None]
+    highs = [r[1] for r in ranges if r[1] is not None]
+    low, high = (max(lows) if lows else None), (min(highs) if highs else None)
+    if low is not None and high is not None and low > high:
+        return None
+    return [low, high]
+
+
+def tank_targets(data: HomesteadData, tank_id: str) -> dict[str, list[float | None]]:
+    """What the tank's water should be: its own ranges, else the part all its species accept."""
+    zone = data.zones.get(tank_id)
+    out = dict(zone.water_targets) if zone else {}
+    species = tank_species(data, tank_id)
+    for key in WATER_READINGS:
+        ranges = [s.targets[key] for s in species if key in s.targets]
+        if key not in out and ranges and (common := _overlap(ranges)):
+            out[key] = common
+    return out
+
+
+def tank_conflicts(data: HomesteadData, tank_id: str) -> list[str]:
+    """Readings for which the species sharing a tank want ranges that do not meet."""
+    species = tank_species(data, tank_id)
+    return [
+        key
+        for key in WATER_READINGS
+        if len(ranges := [s.targets[key] for s in species if key in s.targets]) > 1
+        and _overlap(ranges) is None
+    ]
 
 
 def varroa_threshold(data: HomesteadData, zone_id: str | None, month: int) -> float:

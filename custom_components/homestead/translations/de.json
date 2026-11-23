@@ -437,6 +437,10 @@
         "ph_entity": {
           "name": "pH-Sensor",
           "description": "Wasserkreislauf: pH-Sonden (mehrere werden gemittelt)."
+        },
+        "water_targets": {
+          "name": "Wasser-Zielwerte",
+          "description": "Becken: die Bereiche, in denen das Wasser bleiben soll, je Messwert (ph, temperature, ec, ammonia, nitrite, nitrate), jeweils eine Liste aus Minimum und Maximum (null = keine Grenze). Leer = aus den Arten seiner Fische."
         }
       }
     },
@@ -519,6 +523,10 @@
         "ph_entity": {
           "name": "pH-Sensor",
           "description": "Wasserkreislauf: pH-Sonden (mehrere werden gemittelt)."
+        },
+        "water_targets": {
+          "name": "Wasser-Zielwerte",
+          "description": "Becken: die Bereiche, in denen das Wasser bleiben soll, je Messwert (ph, temperature, ec, ammonia, nitrite, nitrate), jeweils eine Liste aus Minimum und Maximum (null = keine Grenze). Leer = aus den Arten seiner Fische."
         }
       }
     },
@@ -1157,6 +1165,10 @@
         "readings": {
           "name": "Wasserwerte",
           "description": "Wassertest: ph, ec, temperature, ammonia, nitrite, nitrate (z. B. \"ph\": 7.1)."
+        },
+        "lot_id": {
+          "name": "Fischcharge",
+          "description": "Zugänge, Abgänge und Wiegungen von Fischen: die Charge, zu der sie gehören (bleibt beim Umsetzen in ein anderes Becken)."
         }
       }
     },
@@ -1247,6 +1259,10 @@
         "readings": {
           "name": "Wasserwerte",
           "description": "Wassertest: ph, ec, temperature, ammonia, nitrite, nitrate (z. B. \"ph\": 7.1)."
+        },
+        "lot_id": {
+          "name": "Fischcharge",
+          "description": "Zugänge, Abgänge und Wiegungen von Fischen: die Charge, zu der sie gehören (bleibt beim Umsetzen in ein anderes Becken)."
         }
       }
     },
@@ -1727,6 +1743,146 @@
         "modules": {
           "name": "Aktive Module",
           "description": "Die Module, die bleiben."
+        }
+      }
+    },
+    "add_fish_species": {
+      "name": "Fischart hinzufügen",
+      "description": "Fügt eine Fischart mit dem benötigten Wasser und der Fütterung hinzu, von Ihnen ausgefüllt.",
+      "fields": {
+        "name": {
+          "name": "Name",
+          "description": "Name."
+        },
+        "scientific_name": {
+          "name": "Wissenschaftlicher Name",
+          "description": "Lateinischer Name, falls bekannt."
+        },
+        "targets": {
+          "name": "Wasser-Zielwerte",
+          "description": "Bereiche je Messwert (ph, temperature, ec, ammonia, nitrite, nitrate), jeweils eine Liste aus Minimum und Maximum (null = keine Grenze)."
+        },
+        "feeding": {
+          "name": "Fütterung",
+          "description": "Wie und wie viel füttern."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        }
+      }
+    },
+    "update_fish_species": {
+      "name": "Fischart ändern",
+      "description": "Ändert die angegebenen Felder einer Fischart.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Datensatz-ID."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Name."
+        },
+        "scientific_name": {
+          "name": "Wissenschaftlicher Name",
+          "description": "Lateinischer Name, falls bekannt."
+        },
+        "targets": {
+          "name": "Wasser-Zielwerte",
+          "description": "Bereiche je Messwert (ph, temperature, ec, ammonia, nitrite, nitrate), jeweils eine Liste aus Minimum und Maximum (null = keine Grenze)."
+        },
+        "feeding": {
+          "name": "Fütterung",
+          "description": "Wie und wie viel füttern."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        }
+      }
+    },
+    "delete_fish_species": {
+      "name": "Fischart löschen",
+      "description": "Löscht eine Fischart; ihre Chargen bleiben ohne Art.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Datensatz-ID."
+        }
+      }
+    },
+    "add_fish_lot": {
+      "name": "Fischcharge hinzufügen",
+      "description": "Fügt eine gemeinsam geführte Fischgruppe mit Art und Elternchargen hinzu.",
+      "fields": {
+        "name": {
+          "name": "Name",
+          "description": "Name."
+        },
+        "species_id": {
+          "name": "Art",
+          "description": "ID der Fischart."
+        },
+        "parent_ids": {
+          "name": "Elternchargen",
+          "description": "Chargen, aus denen die Fische stammen."
+        },
+        "started_on": {
+          "name": "Seit",
+          "description": "Geschlüpft oder angekommen."
+        },
+        "finished": {
+          "name": "Beendet",
+          "description": "Die Charge ist abgeschlossen (alles entnommen)."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        }
+      }
+    },
+    "update_fish_lot": {
+      "name": "Fischcharge ändern",
+      "description": "Ändert die angegebenen Felder einer Fischcharge.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Datensatz-ID."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Name."
+        },
+        "species_id": {
+          "name": "Art",
+          "description": "ID der Fischart."
+        },
+        "parent_ids": {
+          "name": "Elternchargen",
+          "description": "Chargen, aus denen die Fische stammen."
+        },
+        "started_on": {
+          "name": "Seit",
+          "description": "Geschlüpft oder angekommen."
+        },
+        "finished": {
+          "name": "Beendet",
+          "description": "Die Charge ist abgeschlossen (alles entnommen)."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        }
+      }
+    },
+    "delete_fish_lot": {
+      "name": "Fischcharge löschen",
+      "description": "Löscht eine Fischcharge; ihre Tagebucheinträge bleiben ohne Charge.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Datensatz-ID."
         }
       }
     }
