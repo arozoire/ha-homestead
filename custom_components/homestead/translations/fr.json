@@ -437,6 +437,10 @@
         "ph_entity": {
           "name": "Capteur de pH",
           "description": "Circuit d'eau : sondes de pH (plusieurs sont moyennées)."
+        },
+        "water_targets": {
+          "name": "Valeurs cibles de l'eau",
+          "description": "Bassin : les plages où l'eau doit rester, par mesure (ph, temperature, ec, ammonia, nitrite, nitrate), chacune une liste minimum et maximum (null = sans limite). Vide = d'après les espèces de ses poissons."
         }
       }
     },
@@ -519,6 +523,10 @@
         "ph_entity": {
           "name": "Capteur de pH",
           "description": "Circuit d'eau : sondes de pH (plusieurs sont moyennées)."
+        },
+        "water_targets": {
+          "name": "Valeurs cibles de l'eau",
+          "description": "Bassin : les plages où l'eau doit rester, par mesure (ph, temperature, ec, ammonia, nitrite, nitrate), chacune une liste minimum et maximum (null = sans limite). Vide = d'après les espèces de ses poissons."
         }
       }
     },
@@ -1157,6 +1165,10 @@
         "readings": {
           "name": "Valeurs de l'eau",
           "description": "Test de l'eau : ph, ec, temperature, ammonia, nitrite, nitrate (ex. \"ph\": 7.1)."
+        },
+        "lot_id": {
+          "name": "Lot de poissons",
+          "description": "Arrivées, sorties et pesées de poissons : le lot auquel ils appartiennent (gardé quand ils changent de bassin)."
         }
       }
     },
@@ -1247,6 +1259,10 @@
         "readings": {
           "name": "Valeurs de l'eau",
           "description": "Test de l'eau : ph, ec, temperature, ammonia, nitrite, nitrate (ex. \"ph\": 7.1)."
+        },
+        "lot_id": {
+          "name": "Lot de poissons",
+          "description": "Arrivées, sorties et pesées de poissons : le lot auquel ils appartiennent (gardé quand ils changent de bassin)."
         }
       }
     },
@@ -1727,6 +1743,146 @@
         "modules": {
           "name": "Modules actifs",
           "description": "Les modules à garder."
+        }
+      }
+    },
+    "add_fish_species": {
+      "name": "Ajouter une espèce de poisson",
+      "description": "Ajoute une espèce de poisson avec l'eau qu'il lui faut et son alimentation, remplies par vous.",
+      "fields": {
+        "name": {
+          "name": "Nom",
+          "description": "Nom."
+        },
+        "scientific_name": {
+          "name": "Nom scientifique",
+          "description": "Nom latin, si connu."
+        },
+        "targets": {
+          "name": "Valeurs cibles de l'eau",
+          "description": "Plages par mesure (ph, temperature, ec, ammonia, nitrite, nitrate), chacune une liste minimum et maximum (null = sans limite)."
+        },
+        "feeding": {
+          "name": "Alimentation",
+          "description": "Comment et combien nourrir."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Notes libres."
+        }
+      }
+    },
+    "update_fish_species": {
+      "name": "Modifier une espèce de poisson",
+      "description": "Modifie les champs indiqués d'une espèce de poisson.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id de l'élément."
+        },
+        "name": {
+          "name": "Nom",
+          "description": "Nom."
+        },
+        "scientific_name": {
+          "name": "Nom scientifique",
+          "description": "Nom latin, si connu."
+        },
+        "targets": {
+          "name": "Valeurs cibles de l'eau",
+          "description": "Plages par mesure (ph, temperature, ec, ammonia, nitrite, nitrate), chacune une liste minimum et maximum (null = sans limite)."
+        },
+        "feeding": {
+          "name": "Alimentation",
+          "description": "Comment et combien nourrir."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Notes libres."
+        }
+      }
+    },
+    "delete_fish_species": {
+      "name": "Supprimer une espèce de poisson",
+      "description": "Supprime une espèce de poisson ; ses lots restent sans espèce.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id de l'élément."
+        }
+      }
+    },
+    "add_fish_lot": {
+      "name": "Ajouter un lot de poissons",
+      "description": "Ajoute un groupe de poissons suivis ensemble, avec son espèce et ses lots parents.",
+      "fields": {
+        "name": {
+          "name": "Nom",
+          "description": "Nom."
+        },
+        "species_id": {
+          "name": "Espèce",
+          "description": "Id de l'espèce de poisson."
+        },
+        "parent_ids": {
+          "name": "Lots parents",
+          "description": "Lots dont sont issus les poissons."
+        },
+        "started_on": {
+          "name": "Depuis le",
+          "description": "Éclos ou arrivés."
+        },
+        "finished": {
+          "name": "Terminé",
+          "description": "Le lot est fini (tout récolté ou sorti)."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Notes libres."
+        }
+      }
+    },
+    "update_fish_lot": {
+      "name": "Modifier un lot de poissons",
+      "description": "Modifie les champs indiqués d'un lot de poissons.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id de l'élément."
+        },
+        "name": {
+          "name": "Nom",
+          "description": "Nom."
+        },
+        "species_id": {
+          "name": "Espèce",
+          "description": "Id de l'espèce de poisson."
+        },
+        "parent_ids": {
+          "name": "Lots parents",
+          "description": "Lots dont sont issus les poissons."
+        },
+        "started_on": {
+          "name": "Depuis le",
+          "description": "Éclos ou arrivés."
+        },
+        "finished": {
+          "name": "Terminé",
+          "description": "Le lot est fini (tout récolté ou sorti)."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Notes libres."
+        }
+      }
+    },
+    "delete_fish_lot": {
+      "name": "Supprimer un lot de poissons",
+      "description": "Supprime un lot de poissons ; ses entrées du journal restent sans lot.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id de l'élément."
         }
       }
     }

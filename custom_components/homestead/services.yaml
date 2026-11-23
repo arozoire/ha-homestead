@@ -102,6 +102,9 @@ add_zone:
           domain: sensor
           device_class: ph
           multiple: true
+    water_targets:
+      selector:
+        object:
 
 update_zone:
   fields:
@@ -210,6 +213,9 @@ update_zone:
           domain: sensor
           device_class: ph
           multiple: true
+    water_targets:
+      selector:
+        object:
 
 delete_zone:
   fields:
@@ -1056,6 +1062,9 @@ add_event:
     readings:
       selector:
         object:
+    lot_id:
+      selector:
+        text:
 
 update_event:
   fields:
@@ -1232,6 +1241,9 @@ update_event:
     readings:
       selector:
         object:
+    lot_id:
+      selector:
+        text:
 
 delete_event:
   fields:
@@ -1783,3 +1795,116 @@ set_modules:
             - woodland
             - indoor
             - compost
+
+add_fish_species:
+  fields:
+    name:
+      required: true
+      example: "Nile tilapia"
+      selector:
+        text:
+    scientific_name:
+      example: "Oreochromis niloticus"
+      selector:
+        text:
+    targets:
+      selector:
+        object:
+    feeding:
+      selector:
+        text:
+          multiline: true
+    notes:
+      selector:
+        text:
+          multiline: true
+
+update_fish_species:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+    name:
+      selector:
+        text:
+    scientific_name:
+      selector:
+        text:
+    targets:
+      selector:
+        object:
+    feeding:
+      selector:
+        text:
+          multiline: true
+    notes:
+      selector:
+        text:
+          multiline: true
+
+delete_fish_species:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+
+add_fish_lot:
+  fields:
+    name:
+      required: true
+      example: "Tilapia 2026-A"
+      selector:
+        text:
+    species_id:
+      selector:
+        text:
+    parent_ids:
+      selector:
+        text:
+          multiple: true
+    started_on:
+      selector:
+        date:
+    finished:
+      selector:
+        boolean:
+    notes:
+      selector:
+        text:
+          multiline: true
+
+update_fish_lot:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+    name:
+      selector:
+        text:
+    species_id:
+      selector:
+        text:
+    parent_ids:
+      selector:
+        text:
+          multiple: true
+    started_on:
+      selector:
+        date:
+    finished:
+      selector:
+        boolean:
+    notes:
+      selector:
+        text:
+          multiline: true
+
+delete_fish_lot:
+  fields:
+    id:
+      required: true
+      selector:
+        text:

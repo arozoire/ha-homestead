@@ -437,6 +437,10 @@
         "ph_entity": {
           "name": "pH-sensor",
           "description": "Watercircuit: pH-sondes (meerdere worden gemiddeld)."
+        },
+        "water_targets": {
+          "name": "Streefwaarden water",
+          "description": "Bak: de bereiken waarin het water moet blijven, per meting (ph, temperature, ec, ammonia, nitrite, nitrate), elk een lijst van minimum en maximum (null = geen grens). Leeg = volgens de soorten van zijn vissen."
         }
       }
     },
@@ -519,6 +523,10 @@
         "ph_entity": {
           "name": "pH-sensor",
           "description": "Watercircuit: pH-sondes (meerdere worden gemiddeld)."
+        },
+        "water_targets": {
+          "name": "Streefwaarden water",
+          "description": "Bak: de bereiken waarin het water moet blijven, per meting (ph, temperature, ec, ammonia, nitrite, nitrate), elk een lijst van minimum en maximum (null = geen grens). Leeg = volgens de soorten van zijn vissen."
         }
       }
     },
@@ -1157,6 +1165,10 @@
         "readings": {
           "name": "Waterwaarden",
           "description": "Watertest: ph, ec, temperature, ammonia, nitrite, nitrate (bijv. \"ph\": 7.1)."
+        },
+        "lot_id": {
+          "name": "Vispartij",
+          "description": "Aankomsten, vertrek en wegingen van vissen: de partij waartoe ze horen (blijft bij verplaatsen naar een andere bak)."
         }
       }
     },
@@ -1247,6 +1259,10 @@
         "readings": {
           "name": "Waterwaarden",
           "description": "Watertest: ph, ec, temperature, ammonia, nitrite, nitrate (bijv. \"ph\": 7.1)."
+        },
+        "lot_id": {
+          "name": "Vispartij",
+          "description": "Aankomsten, vertrek en wegingen van vissen: de partij waartoe ze horen (blijft bij verplaatsen naar een andere bak)."
         }
       }
     },
@@ -1727,6 +1743,146 @@
         "modules": {
           "name": "Actieve modules",
           "description": "De modules die blijven."
+        }
+      }
+    },
+    "add_fish_species": {
+      "name": "Vissoort toevoegen",
+      "description": "Voegt een vissoort toe met het water dat ze nodig heeft en het voeren, door u ingevuld.",
+      "fields": {
+        "name": {
+          "name": "Naam",
+          "description": "Naam."
+        },
+        "scientific_name": {
+          "name": "Wetenschappelijke naam",
+          "description": "Latijnse naam, indien bekend."
+        },
+        "targets": {
+          "name": "Streefwaarden water",
+          "description": "Bereiken per meting (ph, temperature, ec, ammonia, nitrite, nitrate), elk een lijst van minimum en maximum (null = geen grens)."
+        },
+        "feeding": {
+          "name": "Voeren",
+          "description": "Hoe en hoeveel voeren."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        }
+      }
+    },
+    "update_fish_species": {
+      "name": "Vissoort wijzigen",
+      "description": "Wijzigt de opgegeven velden van een vissoort.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id van het record."
+        },
+        "name": {
+          "name": "Naam",
+          "description": "Naam."
+        },
+        "scientific_name": {
+          "name": "Wetenschappelijke naam",
+          "description": "Latijnse naam, indien bekend."
+        },
+        "targets": {
+          "name": "Streefwaarden water",
+          "description": "Bereiken per meting (ph, temperature, ec, ammonia, nitrite, nitrate), elk een lijst van minimum en maximum (null = geen grens)."
+        },
+        "feeding": {
+          "name": "Voeren",
+          "description": "Hoe en hoeveel voeren."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        }
+      }
+    },
+    "delete_fish_species": {
+      "name": "Vissoort verwijderen",
+      "description": "Verwijdert een vissoort; haar partijen blijven zonder soort.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id van het record."
+        }
+      }
+    },
+    "add_fish_lot": {
+      "name": "Vispartij toevoegen",
+      "description": "Voegt een samen gevolgde groep vissen toe, met soort en ouderpartijen.",
+      "fields": {
+        "name": {
+          "name": "Naam",
+          "description": "Naam."
+        },
+        "species_id": {
+          "name": "Soort",
+          "description": "Id van de vissoort."
+        },
+        "parent_ids": {
+          "name": "Ouderpartijen",
+          "description": "Partijen waaruit de vissen zijn gekweekt."
+        },
+        "started_on": {
+          "name": "Sinds",
+          "description": "Uitgekomen of aangekomen."
+        },
+        "finished": {
+          "name": "Afgerond",
+          "description": "De partij is klaar (alles geoogst of weg)."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        }
+      }
+    },
+    "update_fish_lot": {
+      "name": "Vispartij wijzigen",
+      "description": "Wijzigt de opgegeven velden van een vispartij.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id van het record."
+        },
+        "name": {
+          "name": "Naam",
+          "description": "Naam."
+        },
+        "species_id": {
+          "name": "Soort",
+          "description": "Id van de vissoort."
+        },
+        "parent_ids": {
+          "name": "Ouderpartijen",
+          "description": "Partijen waaruit de vissen zijn gekweekt."
+        },
+        "started_on": {
+          "name": "Sinds",
+          "description": "Uitgekomen of aangekomen."
+        },
+        "finished": {
+          "name": "Afgerond",
+          "description": "De partij is klaar (alles geoogst of weg)."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        }
+      }
+    },
+    "delete_fish_lot": {
+      "name": "Vispartij verwijderen",
+      "description": "Verwijdert een vispartij; haar dagboekregels blijven zonder partij.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id van het record."
         }
       }
     }

@@ -437,6 +437,10 @@
         "ph_entity": {
           "name": "Sensor de pH",
           "description": "Circuito de agua: sondas de pH (varias se promedian)."
+        },
+        "water_targets": {
+          "name": "Valores ideales del agua",
+          "description": "Tanque: los intervalos en que debe quedarse el agua, por medida (ph, temperature, ec, ammonia, nitrite, nitrate), cada uno una lista de mínimo y máximo (null = sin límite). Vacío = según las especies de sus peces."
         }
       }
     },
@@ -519,6 +523,10 @@
         "ph_entity": {
           "name": "Sensor de pH",
           "description": "Circuito de agua: sondas de pH (varias se promedian)."
+        },
+        "water_targets": {
+          "name": "Valores ideales del agua",
+          "description": "Tanque: los intervalos en que debe quedarse el agua, por medida (ph, temperature, ec, ammonia, nitrite, nitrate), cada uno una lista de mínimo y máximo (null = sin límite). Vacío = según las especies de sus peces."
         }
       }
     },
@@ -1157,6 +1165,10 @@
         "readings": {
           "name": "Valores del agua",
           "description": "Prueba del agua: ph, ec, temperature, ammonia, nitrite, nitrate (p. ej. \"ph\": 7.1)."
+        },
+        "lot_id": {
+          "name": "Lote de peces",
+          "description": "Llegadas, salidas y pesajes de peces: el lote al que pertenecen (se mantiene al cambiar de tanque)."
         }
       }
     },
@@ -1247,6 +1259,10 @@
         "readings": {
           "name": "Valores del agua",
           "description": "Prueba del agua: ph, ec, temperature, ammonia, nitrite, nitrate (p. ej. \"ph\": 7.1)."
+        },
+        "lot_id": {
+          "name": "Lote de peces",
+          "description": "Llegadas, salidas y pesajes de peces: el lote al que pertenecen (se mantiene al cambiar de tanque)."
         }
       }
     },
@@ -1727,6 +1743,146 @@
         "modules": {
           "name": "Módulos activos",
           "description": "Los módulos que se mantienen."
+        }
+      }
+    },
+    "add_fish_species": {
+      "name": "Añadir especie de pez",
+      "description": "Añade una especie de pez con el agua que necesita y cómo alimentarla, rellenadas por ti.",
+      "fields": {
+        "name": {
+          "name": "Nombre",
+          "description": "Nombre."
+        },
+        "scientific_name": {
+          "name": "Nombre científico",
+          "description": "Nombre latino, si lo sabes."
+        },
+        "targets": {
+          "name": "Valores ideales del agua",
+          "description": "Intervalos por medida (ph, temperature, ec, ammonia, nitrite, nitrate), cada uno una lista de mínimo y máximo (null = sin límite)."
+        },
+        "feeding": {
+          "name": "Alimentación",
+          "description": "Cómo y cuánto alimentar."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        }
+      }
+    },
+    "update_fish_species": {
+      "name": "Modificar especie de pez",
+      "description": "Cambia los campos indicados de una especie de pez.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id del registro."
+        },
+        "name": {
+          "name": "Nombre",
+          "description": "Nombre."
+        },
+        "scientific_name": {
+          "name": "Nombre científico",
+          "description": "Nombre latino, si lo sabes."
+        },
+        "targets": {
+          "name": "Valores ideales del agua",
+          "description": "Intervalos por medida (ph, temperature, ec, ammonia, nitrite, nitrate), cada uno una lista de mínimo y máximo (null = sin límite)."
+        },
+        "feeding": {
+          "name": "Alimentación",
+          "description": "Cómo y cuánto alimentar."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        }
+      }
+    },
+    "delete_fish_species": {
+      "name": "Eliminar especie de pez",
+      "description": "Elimina una especie de pez; sus lotes quedan sin especie.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id del registro."
+        }
+      }
+    },
+    "add_fish_lot": {
+      "name": "Añadir lote de peces",
+      "description": "Añade un grupo de peces seguidos juntos, con su especie y lotes padres.",
+      "fields": {
+        "name": {
+          "name": "Nombre",
+          "description": "Nombre."
+        },
+        "species_id": {
+          "name": "Especie",
+          "description": "Id de la especie de pez."
+        },
+        "parent_ids": {
+          "name": "Lotes padres",
+          "description": "Lotes de los que nacieron los peces."
+        },
+        "started_on": {
+          "name": "Desde",
+          "description": "Nacidos o llegados."
+        },
+        "finished": {
+          "name": "Terminado",
+          "description": "El lote ha terminado (todo cosechado o salido)."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        }
+      }
+    },
+    "update_fish_lot": {
+      "name": "Modificar lote de peces",
+      "description": "Cambia los campos indicados de un lote de peces.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id del registro."
+        },
+        "name": {
+          "name": "Nombre",
+          "description": "Nombre."
+        },
+        "species_id": {
+          "name": "Especie",
+          "description": "Id de la especie de pez."
+        },
+        "parent_ids": {
+          "name": "Lotes padres",
+          "description": "Lotes de los que nacieron los peces."
+        },
+        "started_on": {
+          "name": "Desde",
+          "description": "Nacidos o llegados."
+        },
+        "finished": {
+          "name": "Terminado",
+          "description": "El lote ha terminado (todo cosechado o salido)."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        }
+      }
+    },
+    "delete_fish_lot": {
+      "name": "Eliminar lote de peces",
+      "description": "Elimina un lote de peces; sus entradas del diario quedan sin lote.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id del registro."
         }
       }
     }

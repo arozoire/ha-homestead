@@ -22,6 +22,8 @@ REQUIRED = {
     "tasks": ("kind", "due_on"),
     "seeds": ("species",),
     "crops": ("species",),
+    "fish_species": ("name",),
+    "fish_lots": ("name",),
 }
 
 # (collection, field, referenced collection): dangling references are cleared.
@@ -44,6 +46,8 @@ REFERENCES = (
     ("plantings", "from_planting_id", "plantings"),
     ("tasks", "plan_id", "photo_plans"),
     ("seeds", "from_planting_id", "plantings"),
+    ("fish_lots", "species_id", "fish_species"),
+    ("events", "lot_id", "fish_lots"),
 )
 
 
@@ -108,6 +112,8 @@ def read_backup(raw: Any) -> HomesteadData:
     for plan in data.photo_plans.values():
         plan.zone_ids = [i for i in plan.zone_ids if i in data.zones]
         plan.planting_ids = [i for i in plan.planting_ids if i in data.plantings]
+    for lot in data.fish_lots.values():
+        lot.parent_ids = [i for i in lot.parent_ids if i in data.fish_lots]
     for zone in data.zones.values():
         for item in zone.species:
             if item["taxon_id"] not in data.taxa:
