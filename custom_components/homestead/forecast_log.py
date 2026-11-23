@@ -143,7 +143,7 @@ def forecast_at(versions: list[dict[str, Any]], lead: int) -> dict[str, Any] | N
 
 
 def past_days(log: dict[str, Any], today: date, count: int) -> list[dict[str, Any]]:
-    """The last days over, newest first: the forecast of the day before (or the latest made ahead), what was measured."""
+    """The last days over, newest first: the forecast of the day before (or the latest), what was measured."""
     days = log.get("days") or {}
     out = []
     for back in range(1, count + 1):
