@@ -477,6 +477,9 @@ class Outlook:
         if changed or measured:
             await self._log_storage.async_save(self.log)
 
+    def past_days(self, count: int) -> list[dict[str, Any]]:
+        return forecast_log.past_days(self.log, dt_util.now().date(), count)
+
     def day_history(self, day: str) -> dict[str, Any]:
         entry = (self.log.get("days") or {}).get(day) or {}
         return {"date": day, "versions": entry.get("versions") or [], "actual": entry.get("actual")}

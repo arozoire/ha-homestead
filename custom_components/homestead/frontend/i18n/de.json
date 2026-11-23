@@ -1069,5 +1069,9 @@
  "photoCopySub": "hier aufgenommene Fotos landen auch im Download-Ordner (Android); die aus der Galerie sind schon da",
  "photoWifi": "Nur über WLAN senden",
  "photoWifiSub": "mit mobilen Daten warten sie (⏳); auf dem iPhone nennt der Browser das Netz nicht, sie werden immer gesendet",
- "shotWaitWifi": "Foto auf dem Telefon behalten: wird gesendet, sobald WLAN da ist"
+ "shotWaitWifi": "Foto auf dem Telefon behalten: wird gesendet, sobald WLAN da ist",
+ "trustYesterday": "Gestern",
+ "trustNotMeasured": "nicht gemessen",
+ "anTrustPast": "Letzte 14 Tage",
+ "anTrustPastHint": "am Vortag vorhergesagt → von Ihren Sensoren gemessen; Tag antippen für alle Versionen"
 }

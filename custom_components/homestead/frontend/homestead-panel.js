@@ -757,6 +757,10 @@ const STYLE = `
   .trust-item .sub { white-space: normal; overflow: visible; }
   .trust-item .verdict { font-weight: 600; color: #2f7d3a; }
   .trust-item.off .verdict { color: #a3341a; }
+  .trust-past { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; width: 100%; text-align: left; margin-top: 8px;
+    background: var(--secondary-background-color); border: none; border-radius: 8px; padding: 6px 8px; font-size: 13px; }
+  .trust-past b { min-width: 52px; }
+  .trust-past .off { color: #a3341a; font-weight: 600; }
   .trust-sheet { justify-content: flex-start; overflow-y: auto; }
   .trust-card { background: var(--card-background-color, #fff); color: var(--primary-text-color, #222); border-radius: 12px; padding: 14px;
     width: min(420px, 100%); box-sizing: border-box; display: grid; gap: 4px; }
@@ -994,6 +998,7 @@ class HomesteadPanel extends HTMLElement {
       .subscribeMessage(
         (outlook) => {
           this._outlook = outlook;
+          this._pastDays = undefined;
           this._renderCalendar();
           if (this._tab === "diary" && !this._eventForm && !this._taskForm) this._render();
         },
@@ -9203,11 +9208,46 @@ class HomesteadPanel extends HTMLElement {
   }
 
   /** Today so far against yesterday's forecast for today, from the own sensors. */
+  /** The last days over (forecast of the day before against the sensors), fetched once per outlook update. */
+  _pastDaysData() {
+    if (this._pastDays === undefined && !this._pastLoading && this._outlook?.trust) {
+      this._pastLoading = true;
+      this._hass
+        .callWS({ type: "homestead/forecast/days", count: 14 })
+        .then((reply) => {
+          this._pastDays = reply.days || [];
+          if (["diary", "analysis"].includes(this._tab) && !this._eventForm && !this._taskForm && !this._shot && !this._form && !this._zoneForm) this._render();
+        })
+        .catch(() => (this._pastDays = []))
+        .finally(() => (this._pastLoading = false));
+    }
+    return this._pastDays || [];
+  }
+
+  /** One past day: "🌧️ 31 mm → 13 mm · 🌡️ 12°/5° → 11°/6°", tap = all its versions. */
+  _pastDayLine(d, label) {
+    const f = d.forecast || {};
+    const a = d.actual || {};
+    const rain = (v) => (v == null ? "–" : rainText(v));
+    const temp = (v) => (v == null ? "–" : `${deg(v)}°`);
+    const rainOff = f.rain_mm != null && a.rain_mm != null && ((f.rain_mm >= 1) !== (a.rain_mm >= 1) || Math.abs(f.rain_mm - a.rain_mm) >= Math.max(5, a.rain_mm / 2));
+    const tempOff = ["t_max", "t_min"].some((k) => f[k] != null && a[k] != null && Math.abs(f[k] - a[k]) >= 2);
+    return h(
+      "button",
+      { type: "button", className: "trust-past", onclick: () => this._showForecastDay(d.date) },
+      h("b", {}, label),
+      h("span", { className: rainOff ? "off" : "" }, `🌧️ ${rain(f.rain_mm)} → ${rain(a.rain_mm)}`),
+      h("span", { className: tempOff ? "off" : "" }, `🌡️ ${temp(f.t_max)}/${temp(f.t_min)} → ${temp(a.t_max)}/${temp(a.t_min)}`),
+      d.actual ? null : h("span", { className: "sub" }, this.t("trustNotMeasured")),
+    );
+  }
+
   _trustTodayBox() {
     const trust = this._outlook?.trust;
     const check = trust?.today;
     const correction = trust?.correction;
-    if (!check && correction == null) return null;
+    const yesterday = this._pastDaysData().find((d) => d.date === addDays(today(), -1) && d.forecast && d.actual);
+    if (!check && correction == null && !yesterday) return null;
     const value = (item) => (item.kind === "pressure" ? pressureText(item.value) : item.kind === "rain" ? rainText(item.value) : `${deg(item.value)}°`);
     const forecast = (item) => (item.forecast == null ? "" : this.t("trustForecast", { value: item.kind === "rain" ? rainText(item.forecast) : `${deg(item.forecast)}°` }));
     return h(
@@ -9237,6 +9277,7 @@ class HomesteadPanel extends HTMLElement {
             ),
           ]
         : null,
+      yesterday ? this._pastDayLine(yesterday, this.t("trustYesterday")) : null,
       correction != null ? h("p", { className: "hint", style: "white-space:normal" }, this.t("trustCorrection", { value: degDiff(correction) })) : null,
     );
   }
@@ -9286,6 +9327,7 @@ class HomesteadPanel extends HTMLElement {
     const trust = this._outlook?.trust;
     if (!trust?.stats) return null;
     const stats = trust.stats;
+    const past = this._pastDaysData().filter((d) => d.forecast);
     const leads = Object.entries(stats.leads || {}).sort((a, b) => Number(a[0]) - Number(b[0]));
     const pct = (v) => (v == null ? "–" : `${v}%`);
     const err = (v) => (v == null ? "–" : `±${degDiff(v).replace(/^[+−]/, "")}`);
@@ -9320,6 +9362,7 @@ class HomesteadPanel extends HTMLElement {
         : null,
       lines.map((text) => h("p", { style: "margin:4px 0;white-space:normal;font-size:14px" }, text)),
       trust.pressure ? null : h("p", { className: "hint", style: "white-space:normal" }, this.t("anTrustNoPressure")),
+      past.length ? [h("h4", { style: "margin:10px 0 2px" }, this.t("anTrustPast")), h("p", { className: "hint", style: "white-space:normal;margin:0" }, this.t("anTrustPastHint")), ...past.map((d) => this._pastDayLine(d, this._date(d.date, false)))] : null,
       leads.length ? h("p", { className: "hint", style: "white-space:normal" }, this.t("anTrustHint")) : null,
     );
   }

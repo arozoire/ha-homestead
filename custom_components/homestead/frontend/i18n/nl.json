@@ -1069,5 +1069,9 @@
  "photoCopySub": "hier gemaakte foto's gaan ook naar Downloads (Android); die uit de galerij staan er al",
  "photoWifi": "Alleen via wifi versturen",
  "photoWifiSub": "met mobiele data wachten ze (⏳); op iPhone geeft de browser het netwerk niet door, ze gaan altijd",
- "shotWaitWifi": "Foto bewaard op de telefoon: verstuurd zodra er wifi is"
+ "shotWaitWifi": "Foto bewaard op de telefoon: verstuurd zodra er wifi is",
+ "trustYesterday": "Gisteren",
+ "trustNotMeasured": "niet gemeten",
+ "anTrustPast": "Laatste 14 dagen",
+ "anTrustPastHint": "de dag ervoor voorspeld → gemeten door uw sensoren; tik op een dag voor alle versies"
 }

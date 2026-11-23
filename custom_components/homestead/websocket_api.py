@@ -57,6 +57,7 @@ def async_register_websocket(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, ws_outlook_subscribe)
     websocket_api.async_register_command(hass, ws_outlook_refresh)
     websocket_api.async_register_command(hass, ws_forecast_day)
+    websocket_api.async_register_command(hass, ws_forecast_days)
 
 
 @websocket_api.websocket_command({vol.Required("type"): "homestead/crops/defaults"})
@@ -98,6 +99,21 @@ def ws_forecast_day(
     outlook = get_outlook(hass)
     day = msg["date"].isoformat()
     connection.send_result(msg["id"], outlook.day_history(day) if outlook else {"date": day, "versions": []})
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "homestead/forecast/days",
+        vol.Optional("count", default=14): vol.All(int, vol.Range(min=1, max=60)),
+    }
+)
+@callback
+def ws_forecast_days(
+    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]
+) -> None:
+    """The last days over: forecast of the day before against what the sensors measured."""
+    outlook = get_outlook(hass)
+    connection.send_result(msg["id"], {"days": outlook.past_days(msg["count"]) if outlook else []})
 
 
 @websocket_api.websocket_command(

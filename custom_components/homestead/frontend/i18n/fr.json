@@ -1069,5 +1069,9 @@
  "photoCopySub": "les photos prises ici vont aussi dans Téléchargements (Android) ; celles de la galerie y sont déjà",
  "photoWifi": "Envoyer en Wi-Fi seulement",
  "photoWifiSub": "en données mobiles elles attendent (⏳) ; sur iPhone le navigateur ne donne pas le réseau, elles partent toujours",
- "shotWaitWifi": "Photo gardée sur le téléphone : envoyée dès qu'il y a du Wi-Fi"
+ "shotWaitWifi": "Photo gardée sur le téléphone : envoyée dès qu'il y a du Wi-Fi",
+ "trustYesterday": "Hier",
+ "trustNotMeasured": "non mesuré",
+ "anTrustPast": "14 derniers jours",
+ "anTrustPastHint": "prévu la veille → mesuré par vos capteurs ; touchez un jour pour toutes les versions"
 }
