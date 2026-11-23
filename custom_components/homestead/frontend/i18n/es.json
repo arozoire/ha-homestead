@@ -1019,5 +1019,9 @@
  "wr_ammonia": "Amoníaco mg/l",
  "wr_nitrite": "Nitritos mg/l",
  "wr_nitrate": "Nitratos mg/l",
- "treatmentCountFrom": "antes {before}: volver a contar desde el {date}"
+ "treatmentCountFrom": "antes {before}: volver a contar desde el {date}",
+ "shotKept": "Foto guardada en el teléfono, se enviará en cuanto sea posible ({error})",
+ "shotPendingSent": "{count} foto(s) que quedaban en el teléfono enviadas",
+ "shotPending": "hecha, pendiente de envío",
+ "shotSendNow": "Enviar"
 }
