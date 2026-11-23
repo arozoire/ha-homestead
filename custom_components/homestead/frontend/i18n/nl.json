@@ -1019,5 +1019,9 @@
  "wr_ammonia": "Ammoniak mg/l",
  "wr_nitrite": "Nitriet mg/l",
  "wr_nitrate": "Nitraat mg/l",
- "treatmentCountFrom": "voor {before}: opnieuw tellen vanaf {date}"
+ "treatmentCountFrom": "voor {before}: opnieuw tellen vanaf {date}",
+ "shotKept": "Foto op de telefoon bewaard, wordt zo snel mogelijk verstuurd ({error})",
+ "shotPendingSent": "{count} foto('s) van de telefoon verstuurd",
+ "shotPending": "gemaakt, wacht op verzenden",
+ "shotSendNow": "Versturen"
 }

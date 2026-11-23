@@ -1019,5 +1019,9 @@
  "wr_ammonia": "Ammonia mg/l",
  "wr_nitrite": "Nitrite mg/l",
  "wr_nitrate": "Nitrate mg/l",
- "treatmentCountFrom": "before {before}: count again from {date}"
+ "treatmentCountFrom": "before {before}: count again from {date}",
+ "shotKept": "Photo kept on the phone, it will be sent as soon as possible ({error})",
+ "shotPendingSent": "{count} photo(s) kept on the phone sent",
+ "shotPending": "taken, waiting to be sent",
+ "shotSendNow": "Send"
 }

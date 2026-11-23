@@ -134,6 +134,11 @@ const CROP_ICONS = {
   "brassica oleracea": "🥦", brassica: "🥬", phaseolus: "🫘", vigna: "🫘", pisum: "🫛", vicia: "🫛", zea: "🌽", fragaria: "🍓",
   ocimum: "🌿", petroselinum: "🌿", foeniculum: "🌿", anethum: "🌿", coriandrum: "🌿", apium: "🥬", pastinaca: "🥕", cynara: "🌿", asparagus: "🌱", salvia: "🌿", rosmarinus: "🌿", mentha: "🌿", thymus: "🌿", origanum: "🌿", lavandula: "🪻",
   helianthus: "🌻", tulipa: "🌷", rosa: "🌹", hibiscus: "🌺",
+  festuca: "🌾", miscanthus: "🌾", stipa: "🌾", pennisetum: "🌾", cenchrus: "🌾", carex: "🌾", calamagrostis: "🌾", panicum: "🌾", briza: "🌾",
+  lolium: "🌾", poa: "🌾", deschampsia: "🌾", molinia: "🌾", hakonechloa: "🌾", imperata: "🌾", cortaderia: "🌾",
+  narcissus: "🌼", hyacinthus: "💐", muscari: "💐", crocus: "💐", galanthus: "💐", iris: "💐", lilium: "💐", gladiolus: "💐", dahlia: "💐",
+  fritillaria: "💐", anemone: "💐", ranunculus: "💐", freesia: "💐", hippeastrum: "💐", scilla: "💐", leucojum: "💐",
+  "allium giganteum": "💐", "allium aflatunense": "💐", "allium cristophii": "💐", "allium sphaerocephalon": "💐", "allium moly": "💐", "allium karataviense": "💐", "allium schubertii": "💐",
   malus: "🍎", pyrus: "🍐", "prunus persica": "🍑", "prunus armeniaca": "🍑", "prunus avium": "🍒", "prunus cerasus": "🍒", "prunus dulcis": "🌰",
   "citrus limon": "🍋", citrus: "🍊", vitis: "🍇", olea: "🫒", actinidia: "🥝", vaccinium: "🫐", ribes: "🫐", rubus: "🫐",
   corylus: "🌰", juglans: "🌰", castanea: "🌰", mangifera: "🥭", musa: "🍌", persea: "🥑", ananas: "🍍",
@@ -1010,6 +1015,8 @@ class HomesteadPanel extends HTMLElement {
         // A hidden map cannot be fitted: do it when it is first shown.
         if (first && this._layout.classList.contains("wide-tab")) this._needsFit = true;
         else if (first) this._fitAll();
+        // Photos kept on the phone because the upload did not finish: send them now.
+        if (first) this._retryPending();
         first = false;
         if (/[?&](task|zone)=/.test(window.location.search)) {
           this._openTaskFromUrl();
@@ -6989,6 +6996,16 @@ class HomesteadPanel extends HTMLElement {
 
   /** A zone or plant of a photo list: last picture as a thumbnail, then 📸 (the camera) or ✓. */
   _shotRow(t, id, done) {
+    const pending = this._pendingFor(id).at(-1);
+    if (pending) {
+      return h(
+        "div",
+        { className: "list-item" },
+        h("span", { className: "shot-thumb" }, h("img", { src: URL.createObjectURL(pending.blob), alt: "" })),
+        h("span", { style: "display:grid;flex:1" }, h("span", {}, this._itemName(id)), h("span", { className: "sub warn" }, `⏳ ${this.t("shotPending")}`)),
+        h("button", { type: "button", className: "primary", onclick: () => this._retryPending() }, `↻ ${this.t("shotSendNow")}`),
+      );
+    }
     const last = this._lastPlanPhoto(id);
     const thumb = h("span", { className: "shot-thumb" }, last ? null : "📸");
     if (last) this._photoUrl(last.id, true).then((url) => thumb.replaceChildren(h("img", { src: url, alt: "" })));
@@ -10067,9 +10084,12 @@ class HomesteadPanel extends HTMLElement {
     }
     const video = h("video", { autoplay: true, muted: true, playsInline: true, className: "shot-video" });
     const overlay = h("img", { className: "shot-ghost", alt: "", style: `opacity:${ghost}` });
-    if (last) this._photoUrl(last.id).then((url) => (overlay.src = url));
+    // A picture still waiting on the phone is the newest one: line up with it.
+    const waiting = shot.replace ? null : this._pendingFor(shot.item).at(-1);
+    if (waiting) overlay.src = URL.createObjectURL(waiting.blob);
+    else if (last) this._photoUrl(last.id).then((url) => (overlay.src = url));
     const status = h("p", { className: "hint", style: "white-space:normal" });
-    const stage = h("div", { className: "shot-stage" }, video, last ? overlay : null);
+    const stage = h("div", { className: "shot-stage" }, video, last || waiting ? overlay : null);
     const slider = h("input", {
       type: "range",
       min: 0,
@@ -10172,6 +10192,11 @@ class HomesteadPanel extends HTMLElement {
   }
 
   /** The picture as it is (no compression) with a small copy for the lists, then the next zone or plant. */
+  /**
+   * The picture as it is (no compression) with a small copy for the lists, then the next zone or plant.
+   * It is kept on the phone (IndexedDB) until the server has it: the server writes the file and only then
+   * creates the photo event, so a phone that loses the network or goes to sleep halfway loses nothing.
+   */
   async _savePlanPhoto(blob, name) {
     const shot = this._shot;
     const task = this._data.tasks.find((t) => t.id === shot?.task_id);
@@ -10181,33 +10206,83 @@ class HomesteadPanel extends HTMLElement {
       this._showMessage(`⚠️ ${this.t("shotHeic")}`, true);
       return;
     }
-    this._showMessage(this.t("uploading"));
-    const target = this._zone(shot.item) ? { zone_id: shot.item } : { planting_id: shot.item };
-    // The event first, without ticking the list: the zone is ticked only once the file is safe on the server.
-    const result = await this._call("add_event", { kind: "photo", done_on: today(), ...target });
-    if (!result) return;
+    const item = {
+      id: `p${Date.now()}${Math.random().toString(36).slice(2, 6)}`,
+      blob,
+      name,
+      item: shot.item,
+      target: this._zone(shot.item) ? { zone_id: shot.item } : { planting_id: shot.item },
+      done_on: today(),
+      task_id: task?.id || null,
+      replace_event: shot.replace?.event_id || null,
+      empty_event: shot.emptyEvent || null,
+    };
+    let kept = false;
     try {
-      const form = new FormData();
-      form.append("event_id", result.id);
-      form.append("file", blob, name);
-      const thumb = await thumbnail(blob, THUMB_PX).catch(() => null);
-      if (thumb) form.append("thumb", thumb, "thumb.jpg");
-      const response = await this._hass.fetchWithAuth("/api/homestead/photo/upload", { method: "POST", body: form });
-      if (!response.ok) throw new Error(response.status === 413 ? this.t("shotTooBig") : `${response.status} ${await response.text()}`);
-    } catch (err) {
-      // No file, no entry: the event goes and the zone stays to do.
-      await this._call("delete_event", { id: result.id });
-      this._showMessage(`⚠️ ${this.t("shotFailed", { error: err.message || String(err) })}`, true);
+      await pendingPut(item);
+      kept = true;
+    } catch {
+      // No storage on this browser (private mode): straight to the server, as before.
+    }
+    this._pendingList = [...(this._pendingList || []).filter((p) => p.id !== item.id), item];
+    this._showMessage(this.t("uploading"));
+    const error = await this._sendPending(item);
+    if (error && !kept) {
+      this._pendingList = this._pendingList.filter((p) => p.id !== item.id);
+      this._showMessage(`⚠️ ${this.t("shotFailed", { error })}`, true);
       return;
     }
-    if (shot.emptyEvent) await this._call("delete_event", { id: shot.emptyEvent });
-    // A redo: the new picture is safe, the one it replaces goes (with its file).
-    if (shot.replace && shot.replace.event_id !== result.id) await this._call("delete_event", { id: shot.replace.event_id });
-    // A photo on its own still counts for the round when this zone is waiting in an open photo list.
-    const open = task || this._openPhotoTask(shot.item);
-    if (open && !open.done_on && !(open.done_ids || []).includes(shot.item)) await this._call("complete_task", { id: open.id, items: [shot.item] });
-    this._showMessage(`✓ ${this.t("shotSaved", { name: this._itemName(shot.item) })}`);
+    this._showMessage(error ? `⏳ ${this.t("shotKept", { error })}` : `✓ ${this.t("shotSaved", { name: this._itemName(shot.item) })}`, !!error);
     this._leaveShot(shot, task);
+  }
+
+  /** Send a picture kept on the phone: null when the server has it, else the error. */
+  async _sendPending(item) {
+    try {
+      const form = new FormData();
+      for (const [key, value] of Object.entries(item.target)) form.append(key, value);
+      form.append("done_on", item.done_on);
+      form.append("file", item.blob, item.name);
+      const thumb = await thumbnail(item.blob, THUMB_PX).catch(() => null);
+      if (thumb) form.append("thumb", thumb, "thumb.jpg");
+      const response = await this._hass.fetchWithAuth("/api/homestead/photo/upload", { method: "POST", body: form });
+      if (!response.ok) {
+        // A refusal (too large, unknown zone, not a picture) will not get better: drop it from the phone.
+        if ([400, 413].includes(response.status)) await pendingDelete(item.id).catch(() => null);
+        throw new Error(response.status === 413 ? this.t("shotTooBig") : `${response.status} ${await response.text()}`);
+      }
+    } catch (err) {
+      return err.message || String(err);
+    }
+    await pendingDelete(item.id).catch(() => null);
+    this._pendingList = (this._pendingList || []).filter((p) => p.id !== item.id);
+    // A photo event of an earlier try that has no file, and the picture a redo replaces, go.
+    if (item.empty_event && this._data.events.some((e) => e.id === item.empty_event)) await this._call("delete_event", { id: item.empty_event });
+    if (item.replace_event && this._data.events.some((e) => e.id === item.replace_event)) await this._call("delete_event", { id: item.replace_event });
+    // The round is ticked only now; a photo on its own counts when an open round waits for that zone.
+    const task = this._data.tasks.find((t) => t.id === item.task_id && !t.done_on) || this._openPhotoTask(item.item);
+    if (task && !(task.done_ids || []).includes(item.item)) await this._call("complete_task", { id: task.id, items: [item.item] });
+    return null;
+  }
+
+  /** Pictures still on the phone (an upload cut off): send them, oldest first. */
+  async _retryPending() {
+    let items = [];
+    try {
+      items = await pendingAll();
+    } catch {
+      return;
+    }
+    this._pendingList = items;
+    if (!items.length) return;
+    let sent = 0;
+    for (const item of items.sort((a, b) => a.id.localeCompare(b.id))) if (!(await this._sendPending(item))) sent++;
+    if (sent) this._showMessage(`✓ ${this.t("shotPendingSent", { count: sent })}`);
+    if (!this._shot) this._render();
+  }
+
+  _pendingFor(id) {
+    return (this._pendingList || []).filter((p) => p.item === id);
   }
 
   /** The open photo-round task that still waits for this zone or plant, if any. */
@@ -10699,6 +10774,27 @@ function today() {
 
 /** Phone photos are several MB: send a JPEG of at most `maxPx` per side, as base64. */
 /** A small JPEG copy of a picture, for the lists and the history grid. */
+// Photos of the round kept on the phone until the server has them (an upload cut off by the network or sleep).
+function pendingStore(mode, use) {
+  return new Promise((resolve, reject) => {
+    const open = indexedDB.open("homestead-photos", 1);
+    open.onupgradeneeded = () => open.result.createObjectStore("pending", { keyPath: "id" });
+    open.onerror = () => reject(open.error);
+    open.onsuccess = () => {
+      const tx = open.result.transaction("pending", mode);
+      const request = use(tx.objectStore("pending"));
+      tx.oncomplete = () => {
+        open.result.close();
+        resolve(request.result);
+      };
+      tx.onerror = () => reject(tx.error);
+    };
+  });
+}
+const pendingAll = () => pendingStore("readonly", (store) => store.getAll());
+const pendingPut = (item) => pendingStore("readwrite", (store) => store.put(item));
+const pendingDelete = (id) => pendingStore("readwrite", (store) => store.delete(id));
+
 async function thumbnail(blob, maxPx) {
   const bitmap = await createImageBitmap(blob, { imageOrientation: "from-image" });
   const scale = Math.min(1, maxPx / Math.max(bitmap.width, bitmap.height));

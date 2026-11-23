@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import logging
 import shutil
+from datetime import date
 from http import HTTPStatus
 from pathlib import Path
 
@@ -15,8 +16,9 @@ from homeassistant.components.http import HomeAssistantView
 from homeassistant.core import HomeAssistant
 
 from .const import CONF_PHOTO_MEDIA, DOMAIN
-from .models import Photo
+from .models import Event, EventKind, Photo
 from .store import get_store
+from .weather import schedule_weather
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -131,6 +133,8 @@ class PhotoUploadView(HomeAssistantView):
     """`POST /api/homestead/photo/upload`: an original, as it came from the phone, for a diary event.
 
     Multipart fields: ``event_id``, ``file`` (the original) and ``thumb`` (a small JPEG the panel made).
+    Without ``event_id``, ``zone_id`` or ``planting_id`` and ``done_on``: the photo event is created here,
+    only once the file is safely written (a phone that loses the network halfway leaves nothing behind).
     Streamed: a 50 MB picture never sits in a websocket message.
     """
 
@@ -156,7 +160,13 @@ class PhotoUploadView(HomeAssistantView):
                     _LOGGER.warning("Photo upload refused: %s larger than %d MB", part.name, limit // 2**20)
                     return web.Response(status=HTTPStatus.REQUEST_ENTITY_TOO_LARGE)
             fields[part.name or ""] = bytes(content)
-        event = store.data.events.get(fields.get("event_id", b"").decode(errors="ignore"))
+        text = {
+            k: fields.get(k, b"").decode(errors="ignore").strip()
+            for k in ("event_id", "zone_id", "planting_id", "done_on")
+        }
+        event = store.data.events.get(text["event_id"])
+        if event is None and not text["event_id"]:
+            event = _new_photo_event(store, text)
         kind = image_type(fields.get("file", b""))
         if event is None or kind is None:
             _LOGGER.warning(
@@ -185,6 +195,26 @@ class PhotoUploadView(HomeAssistantView):
             # A NAS that is not mounted, a full disk: say where it failed.
             _LOGGER.error("Photo not written to %s/%s: %s", photo_dir(self.hass, root), photo.file, err)
             return web.Response(status=HTTPStatus.INSUFFICIENT_STORAGE, text=f"not written: {err}")
+        created = event.id not in store.data.events
+        if created:
+            store.data.events[event.id] = event  # created by this upload, now that its picture is on disk
         store.data.photos[photo.id] = photo
         await store.async_save()
-        return self.json({"id": photo.id})
+        if created:
+            schedule_weather(self.hass, store, event.id)
+        return self.json({"id": photo.id, "event_id": event.id})
+
+
+def _new_photo_event(store, fields: dict[str, str]) -> Event | None:
+    """A photo event for a zone or a plant that exist, on a valid day (not saved yet)."""
+    zone_id = fields["zone_id"] if fields["zone_id"] in store.data.zones else None
+    planting_id = fields["planting_id"] if fields["planting_id"] in store.data.plantings else None
+    if not (zone_id or planting_id):
+        return None
+    try:
+        day = date.fromisoformat(fields["done_on"]).isoformat()
+    except ValueError:
+        return None
+    return Event(
+        kind=EventKind.PHOTO, done_on=day, zone_id=zone_id, planting_id=None if zone_id else planting_id
+    )
