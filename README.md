@@ -99,6 +99,9 @@ ChatGPT, Claude, Gemini or Perplexity can help you install and configure HA Home
 | Status | Green = active, red = dead, grey = removed |
 | New zone | *Zones* tab → *+ New zone* → click the corners → *Done* → name and type |
 | Zone of a plant | Proposed automatically when the plant falls inside a polygon (the smallest zone) |
+| Shortcuts | 📌 *Pin to the top* on a zone's card (or *More → 🧩 Modules and shortcuts*): a row of chips under the tabs opens the zone's own page (quick buttons, today, to-do, plants by bed, diary). Kept per device |
+| Modules | *More → 🧩 Modules and shortcuts*: switch off what your home does not use (backyard animals, bees, water and fish, woodland, houseplants, compost); it leaves the zone and event menus, the data stays. For the whole home (service `set_modules`) |
+| Photo round options | Same page, per device: keep a copy of each picture on the phone (Download folder on Android), send on Wi-Fi only (on mobile data pictures wait ⏳; iPhone browsers do not tell the network, so they are always sent) |
 | Backup | In *More*: *💾 Export JSON* downloads all the data and the links to the photos (not the photo files); *🗜️ Export with photos (.zip)* adds every photo file, originals included (it can be large); *📂 Restore* (admins only) takes either file and replaces all data, after confirmation. From a .zip the photos come back too, into the local media folder if the original one (a NAS) is not there |
 
 Species: plants only (kingdom Plantae); species already imported are found without internet too; online searches are kept in memory for 24 h. Home Assistant must be able to reach `api.gbif.org` and `www.wikidata.org` (open data, no account).

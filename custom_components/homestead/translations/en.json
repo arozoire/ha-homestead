@@ -349,6 +349,16 @@
         "fish": "Fish",
         "other": "Other"
       }
+    },
+    "module": {
+      "options": {
+        "coop": "Farmyard animals",
+        "bees": "Bees",
+        "water": "Water and fish",
+        "woodland": "Woodland and firewood",
+        "indoor": "Houseplants",
+        "compost": "Compost"
+      }
     }
   },
   "services": {
@@ -1707,6 +1717,16 @@
         "sort": {
           "name": "Sort",
           "description": "manual = the order above, zone = each zone followed by its plants."
+        }
+      }
+    },
+    "set_modules": {
+      "name": "Modules",
+      "description": "Choose the parts of the garden used in this house; the others leave the zone and event menus.",
+      "fields": {
+        "modules": {
+          "name": "Modules on",
+          "description": "The modules to keep."
         }
       }
     }

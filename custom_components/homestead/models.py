@@ -767,6 +767,8 @@ class HomesteadData:
     seeds: dict[str, SeedLot] = field(default_factory=dict)
     crops: dict[str, CropProfile] = field(default_factory=dict)
     photo_plans: dict[str, PhotoPlan] = field(default_factory=dict)
+    # Choices for the whole house: {"modules": [...]} (absent = every module on)
+    settings: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
     def from_dict(cls, raw: dict[str, Any]) -> HomesteadData:
@@ -776,10 +778,15 @@ class HomesteadData:
             for item in raw.get(name, []):
                 record = record_cls.from_dict(item)
                 target[record.id] = record  # type: ignore[attr-defined]
+        data.settings = clean_settings(raw.get("settings"))
         return data
 
-    def to_dict(self) -> dict[str, list[dict[str, Any]]]:
-        return {name: [r.to_dict() for r in getattr(self, name).values()] for name in _COLLECTIONS}
+    def to_dict(self) -> dict[str, Any]:
+        out: dict[str, Any] = {
+            name: [r.to_dict() for r in getattr(self, name).values()] for name in _COLLECTIONS
+        }
+        out["settings"] = dict(self.settings)
+        return out
 
     def zone_descendants(self, zone_id: str) -> set[str]:
         children = {z.id for z in self.zones.values() if z.parent_id == zone_id}
@@ -818,6 +825,18 @@ class HomesteadData:
             if t.status != ToolStatus.OK
             or (t.next_service_on is not None and date.fromisoformat(t.next_service_on) <= today)
         ]
+
+
+# Parts of the garden a household may not have: switched off, they leave the zone and event menus.
+MODULES = ("coop", "bees", "water", "woodland", "indoor", "compost")
+
+
+def clean_settings(raw: Any) -> dict[str, Any]:
+    """Only known settings: the modules switched on (a list; absent = all of them)."""
+    out: dict[str, Any] = {}
+    if isinstance(raw, dict) and isinstance(raw.get("modules"), list):
+        out["modules"] = [m for m in MODULES if m in raw["modules"]]
+    return out
 
 
 def animals(data: HomesteadData, zone_id: str, until: str | None = None) -> dict[str, int]:

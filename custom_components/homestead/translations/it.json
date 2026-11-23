@@ -349,6 +349,16 @@
         "fish": "Pesci",
         "other": "Altro"
       }
+    },
+    "module": {
+      "options": {
+        "coop": "Animali da cortile",
+        "bees": "Api",
+        "water": "Acqua e pesci",
+        "woodland": "Bosco e legna",
+        "indoor": "Piante da interno",
+        "compost": "Compost"
+      }
     }
   },
   "services": {
@@ -1707,6 +1717,16 @@
         "sort": {
           "name": "Criterio",
           "description": "manual = l'ordine sopra, zone = ogni zona seguita dalle sue piante."
+        }
+      }
+    },
+    "set_modules": {
+      "name": "Moduli",
+      "description": "Scegli le parti del giardino usate in questa casa; le altre spariscono dai menu di zone ed eventi.",
+      "fields": {
+        "modules": {
+          "name": "Moduli attivi",
+          "description": "I moduli da tenere."
         }
       }
     }

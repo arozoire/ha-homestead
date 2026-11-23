@@ -19,6 +19,7 @@ from .crops import normalize
 from .geo import validate_polygon
 from .models import (
     EVENT_COST_CATEGORY,
+    MODULES,
     PHOTO_PARTS,
     SOIL_SENSOR_FIELDS,
     WATER_READINGS,
@@ -51,6 +52,7 @@ from .models import (
     Worked,
     Zone,
     ZoneKind,
+    clean_settings,
     merge_plantings,
     new_id,
 )
@@ -261,6 +263,8 @@ SET_PHOTO_PLAN_SCHEMA = vol.Schema(
         vol.Optional("every_weeks"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=1, max=52))),
     }
 )
+
+SET_MODULES_SCHEMA = vol.Schema({vol.Required("modules"): vol.All(cv.ensure_list, [vol.In(MODULES)])})
 
 SET_PHOTO_ORDER_SCHEMA = vol.Schema(
     {
@@ -897,6 +901,13 @@ def async_register_services(hass: HomeAssistant) -> None:
         )
         return {"id": events[-1].id if events else None, "ids": [e.id for e in events]}
 
+    async def set_modules(call: ServiceCall) -> ServiceResponse:
+        """The parts of the garden switched on for the whole house (the others leave the menus)."""
+        store = _store(hass)
+        store.data.settings = clean_settings({**store.data.settings, "modules": call.data["modules"]})
+        await store.async_save()
+        return {"modules": store.data.settings["modules"]}
+
     async def set_photo_order(call: ServiceCall) -> ServiceResponse:
         """The order of the photo round: by hand (the ids in order) or zone by zone."""
         store = _store(hass)
@@ -1108,6 +1119,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         ("set_hose", set_hose, SET_HOSE_SCHEMA, SupportsResponse.OPTIONAL),
         ("set_growth", set_growth, SET_GROWTH_SCHEMA, SupportsResponse.OPTIONAL),
         ("set_photo_order", set_photo_order, SET_PHOTO_ORDER_SCHEMA, SupportsResponse.OPTIONAL),
+        ("set_modules", set_modules, SET_MODULES_SCHEMA, SupportsResponse.OPTIONAL),
         ("merge_plantings", merge_plantings_service, MERGE_PLANTINGS_SCHEMA, SupportsResponse.OPTIONAL),
         ("update_event", update_event, UPDATE_EVENT_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_event", delete_event, ID_SCHEMA, SupportsResponse.OPTIONAL),
