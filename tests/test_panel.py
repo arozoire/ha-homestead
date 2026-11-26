@@ -60,8 +60,15 @@ async def test_websocket_subscribe_pushes_updates(hass: HomeAssistant, hass_ws_c
     await hass.services.async_call(
         DOMAIN, "update_planting", {"id": planting_id, "latitude": 45.1, "longitude": 7.2}, blocking=True
     )
-    update = await ws.receive_json()
-    assert update["event"]["plantings"][0]["latitude"] == 45.1
+    update = (await ws.receive_json())["event"]
+    # Only what changed: the moved planting, nothing about the other collections
+    assert "full" not in update and list(update["changed"]) == ["plantings"]
+    assert update["changed"]["plantings"][0]["latitude"] == 45.1
+    assert update["removed"] == {} and planting_id in update["growth"]
+
+    await hass.services.async_call(DOMAIN, "delete_planting", {"id": planting_id}, blocking=True)
+    gone = (await ws.receive_json())["event"]
+    assert gone["removed"] == {"plantings": [planting_id]}
 
 
 async def test_update_planting(hass: HomeAssistant) -> None:

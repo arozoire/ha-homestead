@@ -24,7 +24,7 @@ from .const import (
     CONF_SOIL_EC,
     CONF_SOIL_TEMP,
     DOMAIN,
-    SIGNAL_DATA_UPDATED,
+    SIGNAL_DATA_CHANGES,
     SIGNAL_OUTLOOK_UPDATED,
 )
 from .crops import GENUS_TYPES
@@ -134,22 +134,26 @@ async def ws_outlook_refresh(
 def ws_subscribe(
     hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]
 ) -> None:
-    """Send all data now and again after every change."""
+    """Send all data now, then only the records that change (``changed`` / ``removed`` by collection)."""
     msg_id = msg["id"]
 
-    @callback
-    def send() -> None:
-        store = get_store(hass)
-        data = store.data.to_dict() if store else {}
-        if store:
-            # Today's growth stage of every planting (1-10), for the 3D plan
-            today = dt_util.now().date()
-            data["growth"] = {pid: growth_stage(p, today) for pid, p in store.data.plantings.items()}
-        connection.send_message(websocket_api.event_message(msg_id, data))
+    def growth(store: Any) -> dict[str, float]:
+        # Today's growth stage of every planting (1-10), for the plan
+        today = dt_util.now().date()
+        return {pid: growth_stage(p, today) for pid, p in store.data.plantings.items()}
 
-    connection.subscriptions[msg_id] = async_dispatcher_connect(hass, SIGNAL_DATA_UPDATED, send)
+    @callback
+    def send_changes(changes: dict[str, Any]) -> None:
+        if store := get_store(hass):
+            connection.send_message(websocket_api.event_message(msg_id, {**changes, "growth": growth(store)}))
+
+    connection.subscriptions[msg_id] = async_dispatcher_connect(hass, SIGNAL_DATA_CHANGES, send_changes)
     connection.send_result(msg_id)
-    send()
+    store = get_store(hass)
+    data: dict[str, Any] = (
+        {"full": True, **store.snapshot(), "growth": growth(store)} if store else {"full": True}
+    )
+    connection.send_message(websocket_api.event_message(msg_id, data))
 
 
 @websocket_api.websocket_command(
