@@ -171,6 +171,8 @@ In Home Assistant (`.storage/homestead.data`, nei backup di HA), foto nella cart
 
 ## Sviluppo
 
+I contributi sono benvenuti: leggi [CONTRIBUTING.md](CONTRIBUTING.md) (regole, mappa del progetto, checklist delle PR, in inglese) e, per gli agenti IA, [AGENTS.md](AGENTS.md).
+
 ```bash
 pip install -r requirements_test.txt ruff
 ruff check custom_components tests

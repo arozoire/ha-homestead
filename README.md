@@ -171,6 +171,8 @@ In Home Assistant: `.storage/homestead.data` (part of the normal HA backups), ph
 
 ## Development
 
+Contributions are welcome: read [CONTRIBUTING.md](CONTRIBUTING.md) (rules, project map, PR checklist) and, for AI agents, [AGENTS.md](AGENTS.md).
+
 ```bash
 pip install -r requirements_test.txt ruff
 ruff check custom_components tests
