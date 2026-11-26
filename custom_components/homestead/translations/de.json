@@ -242,7 +242,9 @@
         "m3": "Kubikmeter",
         "lb": "Pfund (lb)",
         "oz": "Unzen (oz)",
-        "gal": "Gallonen (gal)"
+        "gal": "Gallonen (gal)",
+        "g": "g",
+        "ml": "ml"
       }
     },
     "abundance": {
@@ -358,6 +360,17 @@
         "woodland": "Wald und Brennholz",
         "indoor": "Zimmerpflanzen",
         "compost": "Kompost"
+      }
+    },
+    "supply_kind": {
+      "options": {
+        "feed": "Futter",
+        "fertilizer": "Dünger",
+        "treatment": "Pflanzenschutz",
+        "bee_feed": "Bienenfutter",
+        "fish_feed": "Fischfutter",
+        "bedding": "Einstreu",
+        "other": "Sonstiges"
       }
     }
   },
@@ -1169,6 +1182,10 @@
         "lot_id": {
           "name": "Fischcharge",
           "description": "Zugänge, Abgänge und Wiegungen von Fischen: die Charge, zu der sie gehören (bleibt beim Umsetzen in ein anderes Becken)."
+        },
+        "product_id": {
+          "name": "Produkt",
+          "description": "Produkt aus dem Katalog."
         }
       }
     },
@@ -1263,6 +1280,10 @@
         "lot_id": {
           "name": "Fischcharge",
           "description": "Zugänge, Abgänge und Wiegungen von Fischen: die Charge, zu der sie gehören (bleibt beim Umsetzen in ein anderes Becken)."
+        },
+        "product_id": {
+          "name": "Produkt",
+          "description": "Produkt aus dem Katalog."
         }
       }
     },
@@ -1883,6 +1904,250 @@
         "id": {
           "name": "ID",
           "description": "Datensatz-ID."
+        }
+      }
+    },
+    "add_supply": {
+      "name": "Vorrat hinzufügen",
+      "description": "Fügt einen Sack oder eine Packung Futter, Dünger oder Pflanzenschutz hinzu.",
+      "fields": {
+        "name": {
+          "name": "Name",
+          "description": "Produktname, z. B. Legehennenfutter."
+        },
+        "kind": {
+          "name": "Art",
+          "description": "Was es ist."
+        },
+        "quantity": {
+          "name": "Menge",
+          "description": "Inhalt des Sacks oder der Packung."
+        },
+        "unit": {
+          "name": "Einheit",
+          "description": "kg, g, l, ml oder Stück."
+        },
+        "bought_on": {
+          "name": "Gekauft am",
+          "description": "Kaufdatum."
+        },
+        "price": {
+          "name": "Preis",
+          "description": "Wird eine verknüpfte Ausgabe."
+        },
+        "supplier": {
+          "name": "Lieferant",
+          "description": "Wo es gekauft wurde."
+        },
+        "opened_on": {
+          "name": "Geöffnet am",
+          "description": "Angebrochen am."
+        },
+        "finished_on": {
+          "name": "Aufgebraucht am",
+          "description": "Leer; der Verbrauch wird von geöffnet bis leer berechnet."
+        },
+        "expires_on": {
+          "name": "Läuft ab am",
+          "description": "Ablaufdatum auf dem Etikett."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "Wer es nutzt: Stall, Bienenstand, Becken, Gemüsegarten."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        },
+        "animal": {
+          "name": "Tiere",
+          "description": "Bei gemischtem Hof die Tiere, die es fressen; leer = alle."
+        },
+        "product_id": {
+          "name": "Produkt",
+          "description": "Produkt aus dem Katalog."
+        }
+      }
+    },
+    "update_supply": {
+      "name": "Vorrat ändern",
+      "description": "Ändert die angegebenen Felder eines Vorrats.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID des Vorrats."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Produktname, z. B. Legehennenfutter."
+        },
+        "kind": {
+          "name": "Art",
+          "description": "Was es ist."
+        },
+        "quantity": {
+          "name": "Menge",
+          "description": "Inhalt des Sacks oder der Packung."
+        },
+        "unit": {
+          "name": "Einheit",
+          "description": "kg, g, l, ml oder Stück."
+        },
+        "bought_on": {
+          "name": "Gekauft am",
+          "description": "Kaufdatum."
+        },
+        "price": {
+          "name": "Preis",
+          "description": "Wird eine verknüpfte Ausgabe."
+        },
+        "supplier": {
+          "name": "Lieferant",
+          "description": "Wo es gekauft wurde."
+        },
+        "opened_on": {
+          "name": "Geöffnet am",
+          "description": "Angebrochen am."
+        },
+        "finished_on": {
+          "name": "Aufgebraucht am",
+          "description": "Leer; der Verbrauch wird von geöffnet bis leer berechnet."
+        },
+        "expires_on": {
+          "name": "Läuft ab am",
+          "description": "Ablaufdatum auf dem Etikett."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "Wer es nutzt: Stall, Bienenstand, Becken, Gemüsegarten."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        },
+        "animal": {
+          "name": "Tiere",
+          "description": "Bei gemischtem Hof die Tiere, die es fressen; leer = alle."
+        },
+        "product_id": {
+          "name": "Produkt",
+          "description": "Produkt aus dem Katalog."
+        }
+      }
+    },
+    "delete_supply": {
+      "name": "Vorrat löschen",
+      "description": "Löscht einen Vorrat; die Ausgabe bleibt.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID des Vorrats."
+        }
+      }
+    },
+    "add_product": {
+      "name": "Produkt hinzufügen",
+      "description": "Fügt Dünger, Pflanzenschutz oder Futter zum Katalog hinzu.",
+      "fields": {
+        "name": {
+          "name": "Name",
+          "description": "Produktname."
+        },
+        "brand": {
+          "name": "Marke",
+          "description": "Marke oder Hersteller."
+        },
+        "kind": {
+          "name": "Art",
+          "description": "Was es ist."
+        },
+        "npk": {
+          "name": "NPK",
+          "description": "Stickstoff, Phosphor, Kalium in %, als Liste von drei Zahlen."
+        },
+        "organic": {
+          "name": "Bio",
+          "description": "Im Ökolandbau zugelassen."
+        },
+        "dose": {
+          "name": "Dosis",
+          "description": "Wie auf dem Etikett."
+        },
+        "active_ingredient": {
+          "name": "Wirkstoff",
+          "description": "Für Pflanzenschutz."
+        },
+        "copper_percent": {
+          "name": "Kupfer %",
+          "description": "Kupfergehalt, für die Jahresmenge."
+        },
+        "pre_harvest_days": {
+          "name": "Wartezeit",
+          "description": "Tage zwischen Behandlung und Ernte, laut Etikett."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        }
+      }
+    },
+    "update_product": {
+      "name": "Produkt ändern",
+      "description": "Ändert die angegebenen Felder eines Produkts.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Produkt-ID."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Produktname."
+        },
+        "brand": {
+          "name": "Marke",
+          "description": "Marke oder Hersteller."
+        },
+        "kind": {
+          "name": "Art",
+          "description": "Was es ist."
+        },
+        "npk": {
+          "name": "NPK",
+          "description": "Stickstoff, Phosphor, Kalium in %, als Liste von drei Zahlen."
+        },
+        "organic": {
+          "name": "Bio",
+          "description": "Im Ökolandbau zugelassen."
+        },
+        "dose": {
+          "name": "Dosis",
+          "description": "Wie auf dem Etikett."
+        },
+        "active_ingredient": {
+          "name": "Wirkstoff",
+          "description": "Für Pflanzenschutz."
+        },
+        "copper_percent": {
+          "name": "Kupfer %",
+          "description": "Kupfergehalt, für die Jahresmenge."
+        },
+        "pre_harvest_days": {
+          "name": "Wartezeit",
+          "description": "Tage zwischen Behandlung und Ernte, laut Etikett."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        }
+      }
+    },
+    "delete_product": {
+      "name": "Produkt löschen",
+      "description": "Löscht ein Produkt; Säcke und Tagebucheinträge bleiben.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Produkt-ID."
         }
       }
     }

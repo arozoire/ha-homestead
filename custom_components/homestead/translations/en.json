@@ -242,7 +242,9 @@
         "m3": "Cubic metres",
         "lb": "Pounds (lb)",
         "oz": "Ounces (oz)",
-        "gal": "Gallons (gal)"
+        "gal": "Gallons (gal)",
+        "g": "g",
+        "ml": "ml"
       }
     },
     "abundance": {
@@ -358,6 +360,17 @@
         "woodland": "Woodland and firewood",
         "indoor": "Houseplants",
         "compost": "Compost"
+      }
+    },
+    "supply_kind": {
+      "options": {
+        "feed": "Feed",
+        "fertilizer": "Fertiliser",
+        "treatment": "Treatment",
+        "bee_feed": "Bee feed",
+        "fish_feed": "Fish feed",
+        "bedding": "Bedding",
+        "other": "Other"
       }
     }
   },
@@ -1169,6 +1182,10 @@
         "lot_id": {
           "name": "Fish lot",
           "description": "Arrivals, departures and weighings of fish: the lot they belong to (kept when fish move between tanks)."
+        },
+        "product_id": {
+          "name": "Product",
+          "description": "Product from the catalogue."
         }
       }
     },
@@ -1263,6 +1280,10 @@
         "lot_id": {
           "name": "Fish lot",
           "description": "Arrivals, departures and weighings of fish: the lot they belong to (kept when fish move between tanks)."
+        },
+        "product_id": {
+          "name": "Product",
+          "description": "Product from the catalogue."
         }
       }
     },
@@ -1883,6 +1904,250 @@
         "id": {
           "name": "ID",
           "description": "Record id."
+        }
+      }
+    },
+    "add_supply": {
+      "name": "Add supply",
+      "description": "Adds a bag or box of feed, fertiliser or treatment.",
+      "fields": {
+        "name": {
+          "name": "Name",
+          "description": "Product name, e.g. layer feed."
+        },
+        "kind": {
+          "name": "Kind",
+          "description": "What it is."
+        },
+        "quantity": {
+          "name": "Quantity",
+          "description": "How much the bag or box holds."
+        },
+        "unit": {
+          "name": "Unit",
+          "description": "kg, g, l, ml or pieces."
+        },
+        "bought_on": {
+          "name": "Bought on",
+          "description": "Purchase date."
+        },
+        "price": {
+          "name": "Price",
+          "description": "Becomes an expense linked to it."
+        },
+        "supplier": {
+          "name": "Supplier",
+          "description": "Where it was bought."
+        },
+        "opened_on": {
+          "name": "Opened on",
+          "description": "Started using it."
+        },
+        "finished_on": {
+          "name": "Finished on",
+          "description": "Used up; consumption is computed from opened to finished."
+        },
+        "expires_on": {
+          "name": "Expires on",
+          "description": "Expiry date on the label."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "Who uses it: a coop, an apiary, a tank, a vegetable zone."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        },
+        "animal": {
+          "name": "Animals",
+          "description": "In a mixed yard, the animals that eat it; empty = all of them."
+        },
+        "product_id": {
+          "name": "Product",
+          "description": "Product from the catalogue."
+        }
+      }
+    },
+    "update_supply": {
+      "name": "Update supply",
+      "description": "Changes the given fields of a supply.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Supply id."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Product name, e.g. layer feed."
+        },
+        "kind": {
+          "name": "Kind",
+          "description": "What it is."
+        },
+        "quantity": {
+          "name": "Quantity",
+          "description": "How much the bag or box holds."
+        },
+        "unit": {
+          "name": "Unit",
+          "description": "kg, g, l, ml or pieces."
+        },
+        "bought_on": {
+          "name": "Bought on",
+          "description": "Purchase date."
+        },
+        "price": {
+          "name": "Price",
+          "description": "Becomes an expense linked to it."
+        },
+        "supplier": {
+          "name": "Supplier",
+          "description": "Where it was bought."
+        },
+        "opened_on": {
+          "name": "Opened on",
+          "description": "Started using it."
+        },
+        "finished_on": {
+          "name": "Finished on",
+          "description": "Used up; consumption is computed from opened to finished."
+        },
+        "expires_on": {
+          "name": "Expires on",
+          "description": "Expiry date on the label."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "Who uses it: a coop, an apiary, a tank, a vegetable zone."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        },
+        "animal": {
+          "name": "Animals",
+          "description": "In a mixed yard, the animals that eat it; empty = all of them."
+        },
+        "product_id": {
+          "name": "Product",
+          "description": "Product from the catalogue."
+        }
+      }
+    },
+    "delete_supply": {
+      "name": "Delete supply",
+      "description": "Deletes a supply; its expense stays.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Supply id."
+        }
+      }
+    },
+    "add_product": {
+      "name": "Add product",
+      "description": "Adds a fertiliser, treatment or feed to the catalogue.",
+      "fields": {
+        "name": {
+          "name": "Name",
+          "description": "Product name."
+        },
+        "brand": {
+          "name": "Brand",
+          "description": "Brand or maker."
+        },
+        "kind": {
+          "name": "Kind",
+          "description": "What it is."
+        },
+        "npk": {
+          "name": "NPK",
+          "description": "Nitrogen, phosphorus, potassium in %, as a list of three numbers."
+        },
+        "organic": {
+          "name": "Organic",
+          "description": "Allowed in organic gardening."
+        },
+        "dose": {
+          "name": "Dose",
+          "description": "As on the label."
+        },
+        "active_ingredient": {
+          "name": "Active ingredient",
+          "description": "For treatments."
+        },
+        "copper_percent": {
+          "name": "Copper %",
+          "description": "Copper content, to count copper per year."
+        },
+        "pre_harvest_days": {
+          "name": "Pre-harvest interval",
+          "description": "Days from treatment to harvest, from the label."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "update_product": {
+      "name": "Update product",
+      "description": "Changes the given fields of a product.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Product id."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Product name."
+        },
+        "brand": {
+          "name": "Brand",
+          "description": "Brand or maker."
+        },
+        "kind": {
+          "name": "Kind",
+          "description": "What it is."
+        },
+        "npk": {
+          "name": "NPK",
+          "description": "Nitrogen, phosphorus, potassium in %, as a list of three numbers."
+        },
+        "organic": {
+          "name": "Organic",
+          "description": "Allowed in organic gardening."
+        },
+        "dose": {
+          "name": "Dose",
+          "description": "As on the label."
+        },
+        "active_ingredient": {
+          "name": "Active ingredient",
+          "description": "For treatments."
+        },
+        "copper_percent": {
+          "name": "Copper %",
+          "description": "Copper content, to count copper per year."
+        },
+        "pre_harvest_days": {
+          "name": "Pre-harvest interval",
+          "description": "Days from treatment to harvest, from the label."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "delete_product": {
+      "name": "Delete product",
+      "description": "Deletes a product; its bags and diary entries stay.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Product id."
         }
       }
     }

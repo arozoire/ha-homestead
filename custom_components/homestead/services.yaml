@@ -958,6 +958,8 @@ add_event:
             - lb
             - oz
             - gal
+            - g
+            - ml
     rating:
       selector:
         number:
@@ -1065,6 +1067,9 @@ add_event:
     lot_id:
       selector:
         text:
+    product_id:
+      selector:
+        text:
 
 update_event:
   fields:
@@ -1152,6 +1157,8 @@ update_event:
             - lb
             - oz
             - gal
+            - g
+            - ml
     rating:
       selector:
         number:
@@ -1242,6 +1249,9 @@ update_event:
       selector:
         object:
     lot_id:
+      selector:
+        text:
+    product_id:
       selector:
         text:
 
@@ -1903,6 +1913,236 @@ update_fish_lot:
           multiline: true
 
 delete_fish_lot:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+
+add_supply:
+  fields:
+    name:
+      required: true
+      example: "Layer feed"
+      selector:
+        text:
+    kind:
+      selector:
+        select:
+          translation_key: supply_kind
+          options: [feed, fertilizer, treatment, bee_feed, fish_feed, bedding, other]
+    quantity:
+      selector:
+        number:
+          min: 0
+          step: any
+          mode: box
+    unit:
+      selector:
+        select:
+          options: [kg, g, l, ml, pieces]
+    bought_on:
+      selector:
+        date:
+    price:
+      selector:
+        number:
+          min: 0
+          step: any
+          mode: box
+    supplier:
+      selector:
+        text:
+    opened_on:
+      selector:
+        date:
+    finished_on:
+      selector:
+        date:
+    expires_on:
+      selector:
+        date:
+    zone_id:
+      selector:
+        text:
+    animal:
+      selector:
+        select:
+          translation_key: animal
+          options: [hens, quails, ducks, geese, turkeys, rabbits, fish, other]
+    notes:
+      selector:
+        text:
+          multiline: true
+    product_id:
+      selector:
+        text:
+
+update_supply:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+    name:
+      selector:
+        text:
+    kind:
+      selector:
+        select:
+          translation_key: supply_kind
+          options: [feed, fertilizer, treatment, bee_feed, fish_feed, bedding, other]
+    quantity:
+      selector:
+        number:
+          min: 0
+          step: any
+          mode: box
+    unit:
+      selector:
+        select:
+          options: [kg, g, l, ml, pieces]
+    bought_on:
+      selector:
+        date:
+    price:
+      selector:
+        number:
+          min: 0
+          step: any
+          mode: box
+    supplier:
+      selector:
+        text:
+    opened_on:
+      selector:
+        date:
+    finished_on:
+      selector:
+        date:
+    expires_on:
+      selector:
+        date:
+    zone_id:
+      selector:
+        text:
+    animal:
+      selector:
+        select:
+          translation_key: animal
+          options: [hens, quails, ducks, geese, turkeys, rabbits, fish, other]
+    notes:
+      selector:
+        text:
+          multiline: true
+    product_id:
+      selector:
+        text:
+
+delete_supply:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+
+add_product:
+  fields:
+    name:
+      required: true
+      example: "Copper oxychloride 20%"
+      selector:
+        text:
+    brand:
+      selector:
+        text:
+    kind:
+      selector:
+        select:
+          translation_key: supply_kind
+          options: [feed, fertilizer, treatment, bee_feed, fish_feed, bedding, other]
+    npk:
+      example: "[6, 4, 12]"
+      selector:
+        object:
+    organic:
+      selector:
+        boolean:
+    dose:
+      example: "30 g/10 L"
+      selector:
+        text:
+    active_ingredient:
+      selector:
+        text:
+    copper_percent:
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: any
+          mode: box
+    pre_harvest_days:
+      selector:
+        number:
+          min: 0
+          max: 365
+          mode: box
+    notes:
+      selector:
+        text:
+          multiline: true
+
+update_product:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+    name:
+      selector:
+        text:
+    brand:
+      selector:
+        text:
+    kind:
+      selector:
+        select:
+          translation_key: supply_kind
+          options: [feed, fertilizer, treatment, bee_feed, fish_feed, bedding, other]
+    npk:
+      example: "[6, 4, 12]"
+      selector:
+        object:
+    organic:
+      selector:
+        boolean:
+    dose:
+      example: "30 g/10 L"
+      selector:
+        text:
+    active_ingredient:
+      selector:
+        text:
+    copper_percent:
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: any
+          mode: box
+    pre_harvest_days:
+      selector:
+        number:
+          min: 0
+          max: 365
+          mode: box
+    notes:
+      selector:
+        text:
+          multiline: true
+
+delete_product:
   fields:
     id:
       required: true

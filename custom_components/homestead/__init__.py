@@ -24,6 +24,7 @@ from .panel import async_register_panel, async_unregister_panel
 from .photos import PhotoThumbView, PhotoUploadView, PhotoView
 from .reminders import async_setup_reminders
 from .services import async_register_services
+from .shopping import async_shop_supplies
 from .store import HomesteadStore
 from .tasks import sync_photo_tasks
 from .weather import async_refresh
@@ -70,6 +71,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: HomesteadConfigEntry) ->
         # A new period of the photo plan opens its task just after midnight (and at start, if missed).
         if sync_photo_tasks(store, dt_util.now().date()):
             await store.async_save()
+        # Supplies finished or running out go on the shopping list (once each)
+        await async_shop_supplies(hass, store, dt_util.now().date())
 
     await photo_periods()
     entry.async_on_unload(async_track_time_change(hass, photo_periods, hour=0, minute=5, second=0))

@@ -242,7 +242,9 @@
         "m3": "Metros cúbicos",
         "lb": "Libras (lb)",
         "oz": "Onzas (oz)",
-        "gal": "Galones (gal)"
+        "gal": "Galones (gal)",
+        "g": "g",
+        "ml": "ml"
       }
     },
     "abundance": {
@@ -358,6 +360,17 @@
         "woodland": "Bosque y leña",
         "indoor": "Plantas de interior",
         "compost": "Compost"
+      }
+    },
+    "supply_kind": {
+      "options": {
+        "feed": "Pienso",
+        "fertilizer": "Abono",
+        "treatment": "Tratamiento",
+        "bee_feed": "Alimento abejas",
+        "fish_feed": "Pienso peces",
+        "bedding": "Cama",
+        "other": "Otro"
       }
     }
   },
@@ -1169,6 +1182,10 @@
         "lot_id": {
           "name": "Lote de peces",
           "description": "Llegadas, salidas y pesajes de peces: el lote al que pertenecen (se mantiene al cambiar de tanque)."
+        },
+        "product_id": {
+          "name": "Producto",
+          "description": "Producto del catálogo."
         }
       }
     },
@@ -1263,6 +1280,10 @@
         "lot_id": {
           "name": "Lote de peces",
           "description": "Llegadas, salidas y pesajes de peces: el lote al que pertenecen (se mantiene al cambiar de tanque)."
+        },
+        "product_id": {
+          "name": "Producto",
+          "description": "Producto del catálogo."
         }
       }
     },
@@ -1883,6 +1904,250 @@
         "id": {
           "name": "ID",
           "description": "Id del registro."
+        }
+      }
+    },
+    "add_supply": {
+      "name": "Añadir existencia",
+      "description": "Añade un saco o caja de pienso, abono o tratamiento.",
+      "fields": {
+        "name": {
+          "name": "Nombre",
+          "description": "Nombre del producto, p. ej. pienso de ponedoras."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Qué es."
+        },
+        "quantity": {
+          "name": "Cantidad",
+          "description": "Lo que contiene el saco o la caja."
+        },
+        "unit": {
+          "name": "Unidad",
+          "description": "kg, g, l, ml o piezas."
+        },
+        "bought_on": {
+          "name": "Comprado el",
+          "description": "Fecha de compra."
+        },
+        "price": {
+          "name": "Precio",
+          "description": "Se convierte en un gasto vinculado."
+        },
+        "supplier": {
+          "name": "Proveedor",
+          "description": "Dónde se compró."
+        },
+        "opened_on": {
+          "name": "Abierto el",
+          "description": "Empezado a usar."
+        },
+        "finished_on": {
+          "name": "Terminado el",
+          "description": "Agotado; el consumo se calcula de abierto a terminado."
+        },
+        "expires_on": {
+          "name": "Caduca el",
+          "description": "Fecha de caducidad de la etiqueta."
+        },
+        "zone_id": {
+          "name": "Zona",
+          "description": "Quién lo usa: gallinero, colmenar, tanque, huerto."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        },
+        "animal": {
+          "name": "Animales",
+          "description": "En un corral mixto, los animales que lo comen; vacío = todos."
+        },
+        "product_id": {
+          "name": "Producto",
+          "description": "Producto del catálogo."
+        }
+      }
+    },
+    "update_supply": {
+      "name": "Modificar existencia",
+      "description": "Cambia los campos indicados de una existencia.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id de la existencia."
+        },
+        "name": {
+          "name": "Nombre",
+          "description": "Nombre del producto, p. ej. pienso de ponedoras."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Qué es."
+        },
+        "quantity": {
+          "name": "Cantidad",
+          "description": "Lo que contiene el saco o la caja."
+        },
+        "unit": {
+          "name": "Unidad",
+          "description": "kg, g, l, ml o piezas."
+        },
+        "bought_on": {
+          "name": "Comprado el",
+          "description": "Fecha de compra."
+        },
+        "price": {
+          "name": "Precio",
+          "description": "Se convierte en un gasto vinculado."
+        },
+        "supplier": {
+          "name": "Proveedor",
+          "description": "Dónde se compró."
+        },
+        "opened_on": {
+          "name": "Abierto el",
+          "description": "Empezado a usar."
+        },
+        "finished_on": {
+          "name": "Terminado el",
+          "description": "Agotado; el consumo se calcula de abierto a terminado."
+        },
+        "expires_on": {
+          "name": "Caduca el",
+          "description": "Fecha de caducidad de la etiqueta."
+        },
+        "zone_id": {
+          "name": "Zona",
+          "description": "Quién lo usa: gallinero, colmenar, tanque, huerto."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        },
+        "animal": {
+          "name": "Animales",
+          "description": "En un corral mixto, los animales que lo comen; vacío = todos."
+        },
+        "product_id": {
+          "name": "Producto",
+          "description": "Producto del catálogo."
+        }
+      }
+    },
+    "delete_supply": {
+      "name": "Eliminar existencia",
+      "description": "Elimina una existencia; su gasto se queda.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id de la existencia."
+        }
+      }
+    },
+    "add_product": {
+      "name": "Añadir producto",
+      "description": "Añade un abono, tratamiento o pienso al catálogo.",
+      "fields": {
+        "name": {
+          "name": "Nombre",
+          "description": "Nombre del producto."
+        },
+        "brand": {
+          "name": "Marca",
+          "description": "Marca o fabricante."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Qué es."
+        },
+        "npk": {
+          "name": "NPK",
+          "description": "Nitrógeno, fósforo, potasio en %, lista de tres números."
+        },
+        "organic": {
+          "name": "Ecológico",
+          "description": "Permitido en agricultura ecológica."
+        },
+        "dose": {
+          "name": "Dosis",
+          "description": "Como en la etiqueta."
+        },
+        "active_ingredient": {
+          "name": "Materia activa",
+          "description": "Para tratamientos."
+        },
+        "copper_percent": {
+          "name": "Cobre %",
+          "description": "Contenido de cobre, para el total anual."
+        },
+        "pre_harvest_days": {
+          "name": "Plazo de seguridad",
+          "description": "Días entre tratamiento y cosecha, según la etiqueta."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        }
+      }
+    },
+    "update_product": {
+      "name": "Modificar producto",
+      "description": "Cambia los campos indicados de un producto.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id del producto."
+        },
+        "name": {
+          "name": "Nombre",
+          "description": "Nombre del producto."
+        },
+        "brand": {
+          "name": "Marca",
+          "description": "Marca o fabricante."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Qué es."
+        },
+        "npk": {
+          "name": "NPK",
+          "description": "Nitrógeno, fósforo, potasio en %, lista de tres números."
+        },
+        "organic": {
+          "name": "Ecológico",
+          "description": "Permitido en agricultura ecológica."
+        },
+        "dose": {
+          "name": "Dosis",
+          "description": "Como en la etiqueta."
+        },
+        "active_ingredient": {
+          "name": "Materia activa",
+          "description": "Para tratamientos."
+        },
+        "copper_percent": {
+          "name": "Cobre %",
+          "description": "Contenido de cobre, para el total anual."
+        },
+        "pre_harvest_days": {
+          "name": "Plazo de seguridad",
+          "description": "Días entre tratamiento y cosecha, según la etiqueta."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        }
+      }
+    },
+    "delete_product": {
+      "name": "Eliminar producto",
+      "description": "Elimina un producto; sacos y entradas del diario se quedan.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id del producto."
         }
       }
     }

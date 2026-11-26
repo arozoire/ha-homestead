@@ -242,7 +242,9 @@
         "m3": "Kubieke meter",
         "lb": "Pond (lb)",
         "oz": "Ounce (oz)",
-        "gal": "Gallon (gal)"
+        "gal": "Gallon (gal)",
+        "g": "g",
+        "ml": "ml"
       }
     },
     "abundance": {
@@ -358,6 +360,17 @@
         "woodland": "Bos en brandhout",
         "indoor": "Kamerplanten",
         "compost": "Compost"
+      }
+    },
+    "supply_kind": {
+      "options": {
+        "feed": "Voer",
+        "fertilizer": "Mest",
+        "treatment": "Gewasbescherming",
+        "bee_feed": "Bijenvoer",
+        "fish_feed": "Visvoer",
+        "bedding": "Strooisel",
+        "other": "Overig"
       }
     }
   },
@@ -1169,6 +1182,10 @@
         "lot_id": {
           "name": "Vispartij",
           "description": "Aankomsten, vertrek en wegingen van vissen: de partij waartoe ze horen (blijft bij verplaatsen naar een andere bak)."
+        },
+        "product_id": {
+          "name": "Product",
+          "description": "Product uit de catalogus."
         }
       }
     },
@@ -1263,6 +1280,10 @@
         "lot_id": {
           "name": "Vispartij",
           "description": "Aankomsten, vertrek en wegingen van vissen: de partij waartoe ze horen (blijft bij verplaatsen naar een andere bak)."
+        },
+        "product_id": {
+          "name": "Product",
+          "description": "Product uit de catalogus."
         }
       }
     },
@@ -1883,6 +1904,250 @@
         "id": {
           "name": "ID",
           "description": "Id van het record."
+        }
+      }
+    },
+    "add_supply": {
+      "name": "Voorraad toevoegen",
+      "description": "Voegt een zak of doos voer, mest of middel toe.",
+      "fields": {
+        "name": {
+          "name": "Naam",
+          "description": "Productnaam, bijv. legmeel."
+        },
+        "kind": {
+          "name": "Soort",
+          "description": "Wat het is."
+        },
+        "quantity": {
+          "name": "Hoeveelheid",
+          "description": "Inhoud van de zak of doos."
+        },
+        "unit": {
+          "name": "Eenheid",
+          "description": "kg, g, l, ml of stuks."
+        },
+        "bought_on": {
+          "name": "Gekocht op",
+          "description": "Aankoopdatum."
+        },
+        "price": {
+          "name": "Prijs",
+          "description": "Wordt een gekoppelde uitgave."
+        },
+        "supplier": {
+          "name": "Leverancier",
+          "description": "Waar het gekocht is."
+        },
+        "opened_on": {
+          "name": "Geopend op",
+          "description": "In gebruik genomen."
+        },
+        "finished_on": {
+          "name": "Op op",
+          "description": "Op; het verbruik wordt berekend van geopend tot op."
+        },
+        "expires_on": {
+          "name": "Vervalt op",
+          "description": "Vervaldatum op het etiket."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "Wie het gebruikt: hok, bijenstand, bak, moestuin."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        },
+        "animal": {
+          "name": "Dieren",
+          "description": "Bij een gemengd erf de dieren die het eten; leeg = allemaal."
+        },
+        "product_id": {
+          "name": "Product",
+          "description": "Product uit de catalogus."
+        }
+      }
+    },
+    "update_supply": {
+      "name": "Voorraad wijzigen",
+      "description": "Wijzigt de opgegeven velden van een voorraad.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id van de voorraad."
+        },
+        "name": {
+          "name": "Naam",
+          "description": "Productnaam, bijv. legmeel."
+        },
+        "kind": {
+          "name": "Soort",
+          "description": "Wat het is."
+        },
+        "quantity": {
+          "name": "Hoeveelheid",
+          "description": "Inhoud van de zak of doos."
+        },
+        "unit": {
+          "name": "Eenheid",
+          "description": "kg, g, l, ml of stuks."
+        },
+        "bought_on": {
+          "name": "Gekocht op",
+          "description": "Aankoopdatum."
+        },
+        "price": {
+          "name": "Prijs",
+          "description": "Wordt een gekoppelde uitgave."
+        },
+        "supplier": {
+          "name": "Leverancier",
+          "description": "Waar het gekocht is."
+        },
+        "opened_on": {
+          "name": "Geopend op",
+          "description": "In gebruik genomen."
+        },
+        "finished_on": {
+          "name": "Op op",
+          "description": "Op; het verbruik wordt berekend van geopend tot op."
+        },
+        "expires_on": {
+          "name": "Vervalt op",
+          "description": "Vervaldatum op het etiket."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "Wie het gebruikt: hok, bijenstand, bak, moestuin."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        },
+        "animal": {
+          "name": "Dieren",
+          "description": "Bij een gemengd erf de dieren die het eten; leeg = allemaal."
+        },
+        "product_id": {
+          "name": "Product",
+          "description": "Product uit de catalogus."
+        }
+      }
+    },
+    "delete_supply": {
+      "name": "Voorraad verwijderen",
+      "description": "Verwijdert een voorraad; de uitgave blijft.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id van de voorraad."
+        }
+      }
+    },
+    "add_product": {
+      "name": "Product toevoegen",
+      "description": "Voegt mest, middel of voer toe aan de catalogus.",
+      "fields": {
+        "name": {
+          "name": "Naam",
+          "description": "Productnaam."
+        },
+        "brand": {
+          "name": "Merk",
+          "description": "Merk of fabrikant."
+        },
+        "kind": {
+          "name": "Soort",
+          "description": "Wat het is."
+        },
+        "npk": {
+          "name": "NPK",
+          "description": "Stikstof, fosfor, kalium in %, als lijst van drie getallen."
+        },
+        "organic": {
+          "name": "Biologisch",
+          "description": "Toegestaan in biologische teelt."
+        },
+        "dose": {
+          "name": "Dosis",
+          "description": "Zoals op het etiket."
+        },
+        "active_ingredient": {
+          "name": "Werkzame stof",
+          "description": "Voor gewasbescherming."
+        },
+        "copper_percent": {
+          "name": "Koper %",
+          "description": "Kopergehalte, voor het jaartotaal."
+        },
+        "pre_harvest_days": {
+          "name": "Veiligheidstermijn",
+          "description": "Dagen tussen behandeling en oogst, volgens het etiket."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        }
+      }
+    },
+    "update_product": {
+      "name": "Product wijzigen",
+      "description": "Wijzigt de opgegeven velden van een product.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Product-id."
+        },
+        "name": {
+          "name": "Naam",
+          "description": "Productnaam."
+        },
+        "brand": {
+          "name": "Merk",
+          "description": "Merk of fabrikant."
+        },
+        "kind": {
+          "name": "Soort",
+          "description": "Wat het is."
+        },
+        "npk": {
+          "name": "NPK",
+          "description": "Stikstof, fosfor, kalium in %, als lijst van drie getallen."
+        },
+        "organic": {
+          "name": "Biologisch",
+          "description": "Toegestaan in biologische teelt."
+        },
+        "dose": {
+          "name": "Dosis",
+          "description": "Zoals op het etiket."
+        },
+        "active_ingredient": {
+          "name": "Werkzame stof",
+          "description": "Voor gewasbescherming."
+        },
+        "copper_percent": {
+          "name": "Koper %",
+          "description": "Kopergehalte, voor het jaartotaal."
+        },
+        "pre_harvest_days": {
+          "name": "Veiligheidstermijn",
+          "description": "Dagen tussen behandeling en oogst, volgens het etiket."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        }
+      }
+    },
+    "delete_product": {
+      "name": "Product verwijderen",
+      "description": "Verwijdert een product; zakken en dagboekregels blijven.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Product-id."
         }
       }
     }

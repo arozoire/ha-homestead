@@ -24,6 +24,8 @@ REQUIRED = {
     "crops": ("species",),
     "fish_species": ("name",),
     "fish_lots": ("name",),
+    "supplies": ("name",),
+    "products": ("name",),
 }
 
 # (collection, field, referenced collection): dangling references are cleared.
@@ -48,6 +50,10 @@ REFERENCES = (
     ("seeds", "from_planting_id", "plantings"),
     ("fish_lots", "species_id", "fish_species"),
     ("events", "lot_id", "fish_lots"),
+    ("supplies", "zone_id", "zones"),
+    ("expenses", "supply_id", "supplies"),
+    ("supplies", "product_id", "products"),
+    ("events", "product_id", "products"),
 )
 
 
