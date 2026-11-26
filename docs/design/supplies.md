@@ -1,6 +1,6 @@
 # Supplies: feed, fertiliser, treatments
 
-Design agreed with the maintainer; nothing is built yet. Read it before working on stocks, products or the shopping list. It can be built in three steps, each one a separate PR.
+Design agreed with the maintainer; nothing is built yet. **Built by the maintainer**: not open to contributors unless an issue says so. Read it before working on stocks, products or the shopping list. It can be built in three steps, each one a separate PR.
 
 ## Principle
 
