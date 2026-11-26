@@ -124,3 +124,50 @@ def test_mixed_yard_counts_only_the_animals_that_eat_it() -> None:
     hens_only = period(data, _bag(data, coop, "2026-08-01", "2026-11-26", animal="hens"))
     assert round(hens_only.per_animal * 1000) == 36  # 6 hens, the rabbits do not count
     assert round(everyone.per_animal * 1000) == 13  # 16 animals together
+
+
+def _garden() -> tuple[HomesteadData, str, str]:
+    from custom_components.homestead.models import Planting, Product
+
+    data = HomesteadData()
+    vines = Zone(name="Vigna", kind="orchard")
+    vines.area_m2 = 2500  # a quarter of a hectare (normally from the drawn polygon)
+    data.zones[vines.id] = vines
+    grape = Planting(name="Vite", species="Vitis vinifera", zone_id=vines.id)
+    data.plantings[grape.id] = grape
+    copper = Product(name="Ossicloruro di rame", kind="treatment", copper_percent=20, pre_harvest_days=7)
+    data.products[copper.id] = copper
+    return data, vines.id, grape.id
+
+
+def test_pre_harvest_interval_on_the_zone_reaches_its_plants() -> None:
+    from custom_components.homestead.supplies import harvest_wait
+
+    data, vines, grape = _garden()
+    copper = next(iter(data.products))
+    spray = Event(
+        kind="treatment", done_on="2026-06-10", zone_id=vines, product_id=copper, quantity=500, unit="g"
+    )
+    data.events[spray.id] = spray
+    assert harvest_wait(data, grape, date(2026, 6, 9)) is None  # before
+    until, event, product = harvest_wait(data, grape, date(2026, 6, 16))
+    assert until == date(2026, 6, 17) and event is spray and product.pre_harvest_days == 7
+    assert harvest_wait(data, grape, date(2026, 6, 17)) is None  # from the 17th it can be picked
+
+
+def test_copper_per_hectare_and_seven_year_average() -> None:
+    from custom_components.homestead.supplies import copper_by_year, copper_check
+
+    data, vines, grape = _garden()
+    copper = next(iter(data.products))
+    for day, grams in (("2026-05-10", 2500), ("2026-06-10", 2500), ("2025-06-01", 0.5)):
+        unit = "kg" if grams < 1 else "g"
+        e = Event(
+            kind="treatment", done_on=day, planting_id=grape, product_id=copper, quantity=grams, unit=unit
+        )
+        data.events[e.id] = e
+    by_year = copper_by_year(data, vines)
+    assert by_year == {2025: 0.4, 2026: 4.0}  # 5 kg of product × 20 % on 0.25 ha
+    check = copper_check(by_year, 2026)
+    assert check["year"] == 4.0 and check["average"] == 0.63 and not check["near"]
+    assert copper_check({y: 4.5 for y in range(2020, 2027)}, 2026)["over"]

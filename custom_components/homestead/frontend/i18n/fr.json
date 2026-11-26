@@ -1141,5 +1141,21 @@
  "su_pieces": "pièces",
  "supplyAllAnimals": "Tous les animaux",
  "supplyAnimals": "Mangé par",
- "supplyOverdue": "devait finir vers le {date} · {rate}/jour"
+ "supplyOverdue": "devait finir vers le {date} · {rate}/jour",
+ "copperLine": "Cuivre : {year} kg/ha cette année · moyenne 7 ans {average} (limite bio 4)",
+ "productActive": "Substance active",
+ "productBrand": "Marque",
+ "productCopper": "cuivre",
+ "productFromList": "Du catalogue",
+ "productNew": "Produit",
+ "productOrganic": "bio",
+ "productOrganicLong": "Autorisé en agriculture biologique",
+ "productWait": "délai {days} j",
+ "productWaitDays": "Délai avant récolte (jours)",
+ "productWaitLine": "{plant} : traité le {date} avec {product}, récolte à partir du {until}",
+ "products": "Produits",
+ "productsHint": "Les engrais et traitements que vous utilisez : NPK, dose, délai avant récolte et cuivre. Choisissez-les dans le journal et le panneau vous prévient si vous récoltez trop tôt.",
+ "quantityUsed": "Quantité utilisée",
+ "u_g": "g",
+ "u_ml": "ml"
 }

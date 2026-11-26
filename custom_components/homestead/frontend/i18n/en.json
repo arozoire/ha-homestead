@@ -1141,5 +1141,21 @@
  "su_pieces": "pieces",
  "supplyAllAnimals": "All animals",
  "supplyAnimals": "Eaten by",
- "supplyOverdue": "expected to run out around {date} · {rate}/day"
+ "supplyOverdue": "expected to run out around {date} · {rate}/day",
+ "copperLine": "Copper: {year} kg/ha this year · 7-year average {average} (organic limit 4)",
+ "productActive": "Active ingredient",
+ "productBrand": "Brand",
+ "productCopper": "copper",
+ "productFromList": "From the catalogue",
+ "productNew": "Product",
+ "productOrganic": "organic",
+ "productOrganicLong": "Allowed in organic gardening",
+ "productWait": "harvest after {days} d",
+ "productWaitDays": "Pre-harvest interval (days)",
+ "productWaitLine": "{plant}: treated on {date} with {product}, harvest from {until}",
+ "products": "Products",
+ "productsHint": "The fertilisers and treatments you use: NPK, dose, pre-harvest interval and copper. Pick them in the diary and the panel warns you if you harvest too early.",
+ "quantityUsed": "Amount used",
+ "u_g": "g",
+ "u_ml": "ml"
 }

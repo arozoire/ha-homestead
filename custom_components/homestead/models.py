@@ -285,6 +285,8 @@ class HarvestUnit(StrEnum):
     POUND = "lb"
     OUNCE = "oz"
     GALLON = "gal"
+    GRAM = "g"  # products used by a treatment or a fertilising
+    MILLILITRE = "ml"
 
 
 class WateringMode(StrEnum):
@@ -559,6 +561,7 @@ class Event(_Record):
     queen: bool | None = None  # hive_inspection: queen (or fresh eggs) seen
     readings: dict[str, float] = field(default_factory=dict)  # water_test: WATER_READINGS
     lot_id: str | None = None  # flock_in, flock_out, fish_weighing: the fish lot (kept through moves)
+    product_id: str | None = None  # fertilizing, treatment: the product from the catalogue
 
     def __post_init__(self) -> None:
         if not self.moon_phase:
@@ -717,7 +720,29 @@ class SupplyLot(_Record):
     zone_id: str | None = None  # who uses it: a coop, an apiary, a tank, a vegetable zone
     animal: str | None = None  # in a mixed yard, the animals that eat it (Animal); none = all of them
     shopping_on: str | None = None  # when it was put on the shopping list (once)
+    product_id: str | None = None
     notes: str | None = None
+
+
+@dataclass(kw_only=True)
+class Product(_Record):
+    """What a product is, shared by its bags: NPK, organic, dose, copper, pre-harvest interval."""
+
+    name: str
+    id: str = field(default_factory=new_id)
+    brand: str | None = None
+    kind: str = SupplyKind.OTHER
+    npk: list[float] = field(default_factory=list)  # [N, P, K] in %
+    organic: bool = False  # allowed in organic gardening
+    dose: str | None = None  # as on the label: "50 g/m²", "30 g/10 L"
+    active_ingredient: str | None = None
+    copper_percent: float | None = None  # copper content in % (treatments)
+    pre_harvest_days: int | None = None  # days from treatment to harvest (label)
+    notes: str | None = None
+
+    def __post_init__(self) -> None:
+        values = [float(v) for v in self.npk or [] if isinstance(v, int | float) and not isinstance(v, bool)]
+        self.npk = values[:3] if len(values) >= 3 else []
 
 
 @dataclass(kw_only=True)
@@ -855,6 +880,7 @@ _COLLECTIONS: dict[str, type[_Record]] = {
     "fish_species": FishSpecies,
     "fish_lots": FishLot,
     "supplies": SupplyLot,
+    "products": Product,
 }
 
 
@@ -874,6 +900,7 @@ class HomesteadData:
     fish_species: dict[str, FishSpecies] = field(default_factory=dict)
     fish_lots: dict[str, FishLot] = field(default_factory=dict)
     supplies: dict[str, SupplyLot] = field(default_factory=dict)
+    products: dict[str, Product] = field(default_factory=dict)
     # Choices for the whole house: {"modules": [...]} (absent = every module on)
     settings: dict[str, Any] = field(default_factory=dict)
 

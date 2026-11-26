@@ -1141,5 +1141,21 @@
  "su_pieces": "pezzi",
  "supplyAllAnimals": "Tutti gli animali",
  "supplyAnimals": "Lo mangiano",
- "supplyOverdue": "doveva finire verso il {date} · {rate}/giorno"
+ "supplyOverdue": "doveva finire verso il {date} · {rate}/giorno",
+ "copperLine": "Rame: {year} kg/ha quest'anno · media 7 anni {average} (limite bio 4)",
+ "productActive": "Principio attivo",
+ "productBrand": "Marca",
+ "productCopper": "rame",
+ "productFromList": "Dal catalogo",
+ "productNew": "Prodotto",
+ "productOrganic": "bio",
+ "productOrganicLong": "Ammesso in agricoltura biologica",
+ "productWait": "carenza {days} gg",
+ "productWaitDays": "Tempo di carenza (giorni)",
+ "productWaitLine": "{plant}: trattato il {date} con {product}, raccogli dal {until}",
+ "products": "Prodotti",
+ "productsHint": "Concimi e trattamenti che usi: NPK, dose, tempo di carenza e rame. Poi li scegli nel diario e il pannello ti avvisa se raccogli troppo presto.",
+ "quantityUsed": "Quantità usata",
+ "u_g": "g",
+ "u_ml": "ml"
 }

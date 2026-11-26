@@ -1,6 +1,6 @@
 # Supplies: feed, fertiliser, treatments
 
-Design agreed with the maintainer. **Built by the maintainer**: not open to contributors unless an issue says so. Steps 1 and 2 are built (`SupplyLot` in `models.py`, `supplies.py`, `shopping.py`); step 3 (products) is not yet. Read it before working on stocks, products or the shopping list. It can be built in three steps, each one a separate PR.
+Design agreed with the maintainer. **Built by the maintainer**: not open to contributors unless an issue says so. All three steps are built (0.25.0): `SupplyLot` and `Product` in `models.py`, `supplies.py`, `shopping.py`. Not done from step 3: estimating how much of an open fertiliser bag each fertilising used. Read it before working on stocks, products or the shopping list. It can be built in three steps, each one a separate PR.
 
 ## Principle
 

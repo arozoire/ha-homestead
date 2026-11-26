@@ -242,7 +242,9 @@
         "m3": "Metri cubi",
         "lb": "Libbre (lb)",
         "oz": "Once (oz)",
-        "gal": "Galloni (gal)"
+        "gal": "Galloni (gal)",
+        "g": "g",
+        "ml": "ml"
       }
     },
     "abundance": {
@@ -1180,6 +1182,10 @@
         "lot_id": {
           "name": "Lotto di pesci",
           "description": "Arrivi, uscite e pesate di pesci: il lotto a cui appartengono (resta lo stesso quando i pesci cambiano vasca)."
+        },
+        "product_id": {
+          "name": "Prodotto",
+          "description": "Prodotto del catalogo."
         }
       }
     },
@@ -1274,6 +1280,10 @@
         "lot_id": {
           "name": "Lotto di pesci",
           "description": "Arrivi, uscite e pesate di pesci: il lotto a cui appartengono (resta lo stesso quando i pesci cambiano vasca)."
+        },
+        "product_id": {
+          "name": "Prodotto",
+          "description": "Prodotto del catalogo."
         }
       }
     },
@@ -1952,6 +1962,10 @@
         "animal": {
           "name": "Animali",
           "description": "In un cortile misto, gli animali che lo mangiano; vuoto = tutti."
+        },
+        "product_id": {
+          "name": "Prodotto",
+          "description": "Prodotto del catalogo."
         }
       }
     },
@@ -2014,6 +2028,10 @@
         "animal": {
           "name": "Animali",
           "description": "In un cortile misto, gli animali che lo mangiano; vuoto = tutti."
+        },
+        "product_id": {
+          "name": "Prodotto",
+          "description": "Prodotto del catalogo."
         }
       }
     },
@@ -2024,6 +2042,112 @@
         "id": {
           "name": "ID",
           "description": "Id della scorta."
+        }
+      }
+    },
+    "add_product": {
+      "name": "Aggiungi prodotto",
+      "description": "Aggiunge un concime, trattamento o mangime al catalogo.",
+      "fields": {
+        "name": {
+          "name": "Nome",
+          "description": "Nome del prodotto."
+        },
+        "brand": {
+          "name": "Marca",
+          "description": "Marca o produttore."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Che cos'è."
+        },
+        "npk": {
+          "name": "NPK",
+          "description": "Azoto, fosforo, potassio in %, come lista di tre numeri."
+        },
+        "organic": {
+          "name": "Bio",
+          "description": "Ammesso in agricoltura biologica."
+        },
+        "dose": {
+          "name": "Dose",
+          "description": "Come in etichetta."
+        },
+        "active_ingredient": {
+          "name": "Principio attivo",
+          "description": "Per i trattamenti."
+        },
+        "copper_percent": {
+          "name": "Rame %",
+          "description": "Contenuto di rame, per contare il rame per anno."
+        },
+        "pre_harvest_days": {
+          "name": "Tempo di carenza",
+          "description": "Giorni tra trattamento e raccolta, dall'etichetta."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "update_product": {
+      "name": "Modifica prodotto",
+      "description": "Cambia i campi indicati di un prodotto.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id del prodotto."
+        },
+        "name": {
+          "name": "Nome",
+          "description": "Nome del prodotto."
+        },
+        "brand": {
+          "name": "Marca",
+          "description": "Marca o produttore."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Che cos'è."
+        },
+        "npk": {
+          "name": "NPK",
+          "description": "Azoto, fosforo, potassio in %, come lista di tre numeri."
+        },
+        "organic": {
+          "name": "Bio",
+          "description": "Ammesso in agricoltura biologica."
+        },
+        "dose": {
+          "name": "Dose",
+          "description": "Come in etichetta."
+        },
+        "active_ingredient": {
+          "name": "Principio attivo",
+          "description": "Per i trattamenti."
+        },
+        "copper_percent": {
+          "name": "Rame %",
+          "description": "Contenuto di rame, per contare il rame per anno."
+        },
+        "pre_harvest_days": {
+          "name": "Tempo di carenza",
+          "description": "Giorni tra trattamento e raccolta, dall'etichetta."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        }
+      }
+    },
+    "delete_product": {
+      "name": "Elimina prodotto",
+      "description": "Elimina un prodotto; sacchi e voci del diario restano.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id del prodotto."
         }
       }
     }

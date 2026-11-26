@@ -103,6 +103,7 @@ async def test_export_and_import_over_websocket(hass: HomeAssistant, hass_ws_cli
         "fish_species": 0,
         "fish_lots": 0,
         "supplies": 0,
+        "products": 0,
     }
     assert [t.name for t in entry.runtime_data.data.tools.values()] == ["Seghetto"]
     assert len(hass_storage[f"{DOMAIN}.data"]["data"]["tools"]) == 1

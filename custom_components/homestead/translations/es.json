@@ -242,7 +242,9 @@
         "m3": "Metros cúbicos",
         "lb": "Libras (lb)",
         "oz": "Onzas (oz)",
-        "gal": "Galones (gal)"
+        "gal": "Galones (gal)",
+        "g": "g",
+        "ml": "ml"
       }
     },
     "abundance": {
@@ -1180,6 +1182,10 @@
         "lot_id": {
           "name": "Lote de peces",
           "description": "Llegadas, salidas y pesajes de peces: el lote al que pertenecen (se mantiene al cambiar de tanque)."
+        },
+        "product_id": {
+          "name": "Producto",
+          "description": "Producto del catálogo."
         }
       }
     },
@@ -1274,6 +1280,10 @@
         "lot_id": {
           "name": "Lote de peces",
           "description": "Llegadas, salidas y pesajes de peces: el lote al que pertenecen (se mantiene al cambiar de tanque)."
+        },
+        "product_id": {
+          "name": "Producto",
+          "description": "Producto del catálogo."
         }
       }
     },
@@ -1952,6 +1962,10 @@
         "animal": {
           "name": "Animales",
           "description": "En un corral mixto, los animales que lo comen; vacío = todos."
+        },
+        "product_id": {
+          "name": "Producto",
+          "description": "Producto del catálogo."
         }
       }
     },
@@ -2014,6 +2028,10 @@
         "animal": {
           "name": "Animales",
           "description": "En un corral mixto, los animales que lo comen; vacío = todos."
+        },
+        "product_id": {
+          "name": "Producto",
+          "description": "Producto del catálogo."
         }
       }
     },
@@ -2024,6 +2042,112 @@
         "id": {
           "name": "ID",
           "description": "Id de la existencia."
+        }
+      }
+    },
+    "add_product": {
+      "name": "Añadir producto",
+      "description": "Añade un abono, tratamiento o pienso al catálogo.",
+      "fields": {
+        "name": {
+          "name": "Nombre",
+          "description": "Nombre del producto."
+        },
+        "brand": {
+          "name": "Marca",
+          "description": "Marca o fabricante."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Qué es."
+        },
+        "npk": {
+          "name": "NPK",
+          "description": "Nitrógeno, fósforo, potasio en %, lista de tres números."
+        },
+        "organic": {
+          "name": "Ecológico",
+          "description": "Permitido en agricultura ecológica."
+        },
+        "dose": {
+          "name": "Dosis",
+          "description": "Como en la etiqueta."
+        },
+        "active_ingredient": {
+          "name": "Materia activa",
+          "description": "Para tratamientos."
+        },
+        "copper_percent": {
+          "name": "Cobre %",
+          "description": "Contenido de cobre, para el total anual."
+        },
+        "pre_harvest_days": {
+          "name": "Plazo de seguridad",
+          "description": "Días entre tratamiento y cosecha, según la etiqueta."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        }
+      }
+    },
+    "update_product": {
+      "name": "Modificar producto",
+      "description": "Cambia los campos indicados de un producto.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id del producto."
+        },
+        "name": {
+          "name": "Nombre",
+          "description": "Nombre del producto."
+        },
+        "brand": {
+          "name": "Marca",
+          "description": "Marca o fabricante."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Qué es."
+        },
+        "npk": {
+          "name": "NPK",
+          "description": "Nitrógeno, fósforo, potasio en %, lista de tres números."
+        },
+        "organic": {
+          "name": "Ecológico",
+          "description": "Permitido en agricultura ecológica."
+        },
+        "dose": {
+          "name": "Dosis",
+          "description": "Como en la etiqueta."
+        },
+        "active_ingredient": {
+          "name": "Materia activa",
+          "description": "Para tratamientos."
+        },
+        "copper_percent": {
+          "name": "Cobre %",
+          "description": "Contenido de cobre, para el total anual."
+        },
+        "pre_harvest_days": {
+          "name": "Plazo de seguridad",
+          "description": "Días entre tratamiento y cosecha, según la etiqueta."
+        },
+        "notes": {
+          "name": "Notas",
+          "description": "Notas libres."
+        }
+      }
+    },
+    "delete_product": {
+      "name": "Eliminar producto",
+      "description": "Elimina un producto; sacos y entradas del diario se quedan.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id del producto."
         }
       }
     }

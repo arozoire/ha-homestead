@@ -1141,5 +1141,21 @@
  "su_pieces": "piezas",
  "supplyAllAnimals": "Todos los animales",
  "supplyAnimals": "Lo comen",
- "supplyOverdue": "debía acabarse hacia el {date} · {rate}/día"
+ "supplyOverdue": "debía acabarse hacia el {date} · {rate}/día",
+ "copperLine": "Cobre: {year} kg/ha este año · media 7 años {average} (límite ecológico 4)",
+ "productActive": "Materia activa",
+ "productBrand": "Marca",
+ "productCopper": "cobre",
+ "productFromList": "Del catálogo",
+ "productNew": "Producto",
+ "productOrganic": "ecológico",
+ "productOrganicLong": "Permitido en agricultura ecológica",
+ "productWait": "plazo {days} d",
+ "productWaitDays": "Plazo de seguridad (días)",
+ "productWaitLine": "{plant}: tratado el {date} con {product}, cosecha desde el {until}",
+ "products": "Productos",
+ "productsHint": "Los abonos y tratamientos que usas: NPK, dosis, plazo de seguridad y cobre. Elígelos en el diario y el panel te avisa si cosechas demasiado pronto.",
+ "quantityUsed": "Cantidad usada",
+ "u_g": "g",
+ "u_ml": "ml"
 }

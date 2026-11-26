@@ -46,6 +46,7 @@ from .models import (
     PlantingOrigin,
     PlantingStatus,
     PlantType,
+    Product,
     SeedLot,
     Severity,
     SupplyKind,
@@ -370,8 +371,31 @@ ADD_SUPPLY_SCHEMA = vol.Schema(
         vol.Optional("expires_on"): vol.Any(None, cv.date),
         vol.Optional("zone_id"): _opt_str,
         vol.Optional("animal"): vol.Any(None, vol.In([a.value for a in Animal])),
+        vol.Optional("product_id"): _opt_str,
         vol.Optional("notes"): _opt_str,
     }
+)
+ADD_PRODUCT_SCHEMA = vol.Schema(
+    {
+        vol.Required("name"): cv.string,
+        vol.Optional("brand"): _opt_str,
+        vol.Optional("kind"): vol.In([k.value for k in SupplyKind]),
+        vol.Optional("npk"): vol.Any(
+            None,
+            vol.All(
+                cv.ensure_list, [vol.All(vol.Coerce(float), vol.Range(min=0, max=100))], vol.Length(max=3)
+            ),
+        ),
+        vol.Optional("organic"): cv.boolean,
+        vol.Optional("dose"): _opt_str,
+        vol.Optional("active_ingredient"): _opt_str,
+        vol.Optional("copper_percent"): vol.Any(None, vol.All(vol.Coerce(float), vol.Range(min=0, max=100))),
+        vol.Optional("pre_harvest_days"): vol.Any(None, vol.All(vol.Coerce(int), vol.Range(min=0, max=365))),
+        vol.Optional("notes"): _opt_str,
+    }
+)
+UPDATE_PRODUCT_SCHEMA = vol.Schema(
+    {vol.Required("id"): cv.string, **{vol.Optional(str(k)): v for k, v in ADD_PRODUCT_SCHEMA.schema.items()}}
 )
 UPDATE_SUPPLY_SCHEMA = vol.Schema(
     {vol.Required("id"): cv.string, **{vol.Optional(str(k)): v for k, v in ADD_SUPPLY_SCHEMA.schema.items()}}
@@ -408,6 +432,7 @@ _EVENT_FIELDS = {
     vol.Optional("queen"): vol.Any(None, cv.boolean),
     vol.Optional("readings"): vol.Any(None, {vol.In(WATER_READINGS): vol.Coerce(float)}),
     vol.Optional("lot_id"): _opt_str,
+    vol.Optional("product_id"): _opt_str,
 }
 
 TRANSPLANT_SCHEMA = vol.Schema(
@@ -884,6 +909,7 @@ def async_register_services(hass: HomeAssistant) -> None:
 
     def _supply_args(store: HomesteadStore, args: dict[str, Any]) -> dict[str, Any]:
         _check_ref(store.data.zones, args.get("zone_id"), "zone_id")
+        _check_ref(store.data.products, args.get("product_id"), "product_id")
         for key in ("bought_on", "opened_on", "finished_on", "expires_on"):
             if key in args:
                 args[key] = _iso(args[key])
@@ -937,6 +963,36 @@ def async_register_services(hass: HomeAssistant) -> None:
                 expense.supply_id = None
         await store.async_save()
         return {"id": lot_id}
+
+    async def add_product(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        product = Product(**dict(call.data))
+        store.data.products[product.id] = product
+        await store.async_save()
+        return {"id": product.id}
+
+    async def update_product(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        args: dict[str, Any] = dict(call.data)
+        product_id = args.pop("id")
+        _check_ref(store.data.products, product_id, "id")
+        if "npk" in args and args["npk"] is None:
+            args["npk"] = []
+        store.data.products[product_id] = replace(store.data.products[product_id], **args)
+        await store.async_save()
+        return {"id": product_id}
+
+    async def delete_product(call: ServiceCall) -> ServiceResponse:
+        """Its bags and diary entries stay, without the product (the name stays in the entry)."""
+        store = _store(hass)
+        product_id = call.data["id"]
+        _check_ref(store.data.products, product_id, "id")
+        del store.data.products[product_id]
+        for record in [*store.data.events.values(), *store.data.supplies.values()]:
+            if record.product_id == product_id:
+                record.product_id = None
+        await store.async_save()
+        return {"id": product_id}
 
     async def set_crop_profile(call: ServiceCall) -> ServiceResponse:
         """Replace the user's crop data for a species (one record per species)."""
@@ -1020,6 +1076,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         task_id = args.pop("task_id", None)
         _check_ref(store.data.tasks, task_id, "task_id")
         _check_ref(store.data.fish_lots, args.get("lot_id"), "lot_id")
+        _check_ref(store.data.products, args.get("product_id"), "product_id")
         _check_ref(store.data.plantings, args.get("planting_id"), "planting_id")
         _check_ref(store.data.zones, args.get("zone_id"), "zone_id")
         args["done_on"] = _iso(args.get("done_on")) or dt_util.now().date().isoformat()
@@ -1176,6 +1233,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         _check_ref(store.data.plantings, args.get("planting_id"), "planting_id")
         _check_ref(store.data.zones, args.get("zone_id"), "zone_id")
         _check_ref(store.data.fish_lots, args.get("lot_id"), "lot_id")
+        _check_ref(store.data.products, args.get("product_id"), "product_id")
         if args.get("planting_id"):
             args["zone_id"] = None
         if args.get("zone_id"):
@@ -1318,6 +1376,9 @@ def async_register_services(hass: HomeAssistant) -> None:
         ("set_photo_order", set_photo_order, SET_PHOTO_ORDER_SCHEMA, SupportsResponse.OPTIONAL),
         ("set_modules", set_modules, SET_MODULES_SCHEMA, SupportsResponse.OPTIONAL),
         ("add_supply", add_supply, ADD_SUPPLY_SCHEMA, SupportsResponse.OPTIONAL),
+        ("add_product", add_product, ADD_PRODUCT_SCHEMA, SupportsResponse.OPTIONAL),
+        ("update_product", update_product, UPDATE_PRODUCT_SCHEMA, SupportsResponse.OPTIONAL),
+        ("delete_product", delete_product, ID_SCHEMA, SupportsResponse.OPTIONAL),
         ("update_supply", update_supply, UPDATE_SUPPLY_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_supply", delete_supply, ID_SCHEMA, SupportsResponse.OPTIONAL),
         ("add_fish_species", add_fish_species, ADD_FISH_SPECIES_SCHEMA, SupportsResponse.OPTIONAL),

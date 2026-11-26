@@ -1141,5 +1141,21 @@
  "su_pieces": "stuks",
  "supplyAllAnimals": "Alle dieren",
  "supplyAnimals": "Gegeten door",
- "supplyOverdue": "zou rond {date} op zijn · {rate}/dag"
+ "supplyOverdue": "zou rond {date} op zijn · {rate}/dag",
+ "copperLine": "Koper: {year} kg/ha dit jaar · 7-jaarsgemiddelde {average} (biolimiet 4)",
+ "productActive": "Werkzame stof",
+ "productBrand": "Merk",
+ "productCopper": "koper",
+ "productFromList": "Uit de catalogus",
+ "productNew": "Product",
+ "productOrganic": "biologisch",
+ "productOrganicLong": "Toegestaan in biologische teelt",
+ "productWait": "wachttijd {days} d",
+ "productWaitDays": "Veiligheidstermijn (dagen)",
+ "productWaitLine": "{plant}: op {date} behandeld met {product}, oogsten vanaf {until}",
+ "products": "Producten",
+ "productsHint": "De mest en middelen die u gebruikt: NPK, dosis, veiligheidstermijn en koper. Kies ze in het dagboek en het paneel waarschuwt als u te vroeg oogst.",
+ "quantityUsed": "Gebruikte hoeveelheid",
+ "u_g": "g",
+ "u_ml": "ml"
 }

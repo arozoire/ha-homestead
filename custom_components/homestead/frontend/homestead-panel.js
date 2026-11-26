@@ -96,7 +96,7 @@ const DEATH_CAUSES = { frost: "❄️", drought: "🏜️", disease: "🦠", pes
 const READY_DAYS = 21;
 const LEAVE_ICONS = { predator: "🦊", illness: "🤒", age: "⌛", sold: "🤝", slaughtered: "🔪", moved: "↔️", other: "❔" };
 // Quantity label when it is not a harvest.
-const QUANTITY_LABEL = { eggs: "eggCount", flock_in: "henCount", flock_out: "henCount" };
+const QUANTITY_LABEL = { eggs: "eggCount", flock_in: "henCount", flock_out: "henCount", fertilizing: "quantityUsed", treatment: "quantityUsed" };
 const QUANTITY_UNITS = {
   harvest: ["kg", "pieces", "l"],
   foraging: ["kg", "pieces", "l"],
@@ -107,6 +107,8 @@ const QUANTITY_UNITS = {
   flock_in: ["pieces"],
   flock_out: ["pieces"],
   honey_harvest: ["kg"],
+  fertilizing: ["g", "kg", "ml", "l"],
+  treatment: ["g", "ml", "kg", "l"],
 };
 // The same in imperial units first; the metric ones stay for older entries.
 const IMPERIAL_UNITS = { harvest: ["lb", "oz", "pieces", "gal", "kg", "l"], foraging: ["lb", "oz", "pieces", "gal", "kg", "l"] };
@@ -860,7 +862,7 @@ const STYLE = `
 class HomesteadPanel extends HTMLElement {
   constructor() {
     super();
-    this._data = { plantings: [], zones: [], taxa: [], expenses: [], tools: [], photos: [], events: [], tasks: [], seeds: [], crops: [], settings: {}, fish_species: [], fish_lots: [], supplies: [] };
+    this._data = { plantings: [], zones: [], taxa: [], expenses: [], tools: [], photos: [], events: [], tasks: [], seeds: [], crops: [], settings: {}, fish_species: [], fish_lots: [], supplies: [], products: [] };
     this._cropDefaults = {};
     this._diaryFilter = { kind: "", zone: "", year: "" };
     this._photoUrls = new Map();
@@ -1079,6 +1081,7 @@ class HomesteadPanel extends HTMLElement {
           fish_species: data.fish_species || [],
           fish_lots: data.fish_lots || [],
           supplies: data.supplies || [],
+          products: data.products || [],
         };
         if (data.full || !this._loaded) this._loaded = !!data.plantings;
         this._syncMap();
@@ -3845,6 +3848,7 @@ class HomesteadPanel extends HTMLElement {
       ...group(this.t("supplyInUse"), open),
       ...group(this.t("supplyStock"), closed),
       ...group(this.t("supplyDone"), done.slice(0, 15)),
+      ...this._renderProducts(),
     ];
   }
 
@@ -3897,9 +3901,18 @@ class HomesteadPanel extends HTMLElement {
       finished_on: input(s.finished_on, { type: "date" }),
       expires_on: input(s.expires_on, { type: "date" }),
       zone_id: h("select", {}, this._zoneOptions().map(([v, t]) => h("option", { value: v, selected: v === (s.zone_id || "") }, t))),
+      product: h("select", {}, h("option", { value: "" }, "—"), ...this._data.products.map((p) => h("option", { value: p.id, selected: p.id === s.product_id }, p.name))),
       animal: h("select", {}, h("option", { value: "" }, this.t("supplyAllAnimals")), ...Object.entries(ANIMALS).map(([a, icon]) => h("option", { value: a, selected: a === s.animal }, `${icon} ${this.t(`animal_${a}`)}`))),
       notes: h("textarea", { rows: 2, value: s.notes || "" }),
     };
+    // A product from the catalogue gives the name and the kind.
+    f.product.addEventListener("change", () => {
+      const p = this._product(f.product.value);
+      if (!p) return;
+      if (!f.name.value.trim()) f.name.value = p.name;
+      f.kind.value = p.kind;
+    });
+    const productLabel = this._data.products.length ? h("label", {}, this.t("productFromList"), f.product) : null;
     // Who eats it: only for a yard (a mixed one counts only those animals per head).
     const animalLabel = h("label", {}, this.t("supplyAnimals"), f.animal);
     const showAnimal = () => (animalLabel.hidden = this._zone(f.zone_id.value)?.kind !== "coop");
@@ -3933,6 +3946,7 @@ class HomesteadPanel extends HTMLElement {
         expires_on: v(f.expires_on),
         zone_id: v(f.zone_id),
         animal: animalLabel.hidden ? null : v(f.animal),
+        product_id: v(f.product),
         notes: f.notes.value.trim() || null,
       };
       if (!s.id && !data.price) delete data.price;
@@ -3945,6 +3959,7 @@ class HomesteadPanel extends HTMLElement {
     const close = this._sheet(
       `🧺 ${s.id ? s.name : this.t("supplyNew")}`,
       h("datalist", { id: "homestead-supply-names" }, names.map((n) => h("option", { value: n }))),
+      productLabel,
       label("name", f.name),
       h("div", { className: "row" }, label("supplyKind", f.kind), label("zone_id", f.zone_id)),
       animalLabel,
@@ -3964,6 +3979,161 @@ class HomesteadPanel extends HTMLElement {
           ? h("button", { type: "button", onclick: () => (close(), this._supplySheet(null, { name: s.name, kind: s.kind, quantity: s.quantity, unit: s.unit, supplier: s.supplier, zone_id: s.zone_id, animal: s.animal, price: s.price })) }, `↻ ${this.t("supplyAgain")}`)
           : null,
         s.id ? h("button", { type: "button", className: "danger", onclick: async () => confirm(this.t("confirmDelete", { name: s.name })) && (await this._call("delete_supply", { id: s.id })) && close() }, this.t("delete")) : null,
+      ),
+    );
+  }
+
+  // ----- products: NPK, dose, pre-harvest interval, copper (as supplies.py) -----
+
+  _product(id) {
+    return this._data.products.find((p) => p.id === id);
+  }
+
+  _productText(p) {
+    return [p.brand, p.npk?.length === 3 ? `NPK ${p.npk.map((v) => String(v).replace(".", UNITS.comma ? "," : ".")).join("-")}` : null, p.organic ? this.t("productOrganic") : null, p.copper_percent ? `${this.t("productCopper")} ${p.copper_percent}%` : null, p.pre_harvest_days != null ? this.t("productWait", { days: p.pre_harvest_days }) : null]
+      .filter(Boolean)
+      .join(" · ");
+  }
+
+  /** The pre-harvest interval still running on a planting that day: {until, event, product} or null. */
+  _harvestWait(plantingId, day = today()) {
+    const planting = this._planting(plantingId);
+    if (!planting) return null;
+    const zones = new Set();
+    for (let z = this._zone(planting.zone_id), guard = 0; z && guard < 20; z = this._zone(z.parent_id), guard++) zones.add(z.id);
+    let found = null;
+    for (const e of this._data.events) {
+      const product = e.kind === "treatment" && this._product(e.product_id);
+      if (!product?.pre_harvest_days) continue;
+      if (!(e.planting_id === plantingId || (!e.planting_id && zones.has(e.zone_id)))) continue;
+      const until = addDays(e.done_on, product.pre_harvest_days);
+      if (e.done_on <= day && day < until && (!found || until > found.until)) found = { until, event: e, product };
+    }
+    return found;
+  }
+
+  _waitText(planting, wait) {
+    return `⏳ ${this.t("productWaitLine", { plant: planting.name, date: this._date(wait.event.done_on, false), product: wait.product.name, until: this._date(wait.until, false) })}`;
+  }
+
+  /** Plantings still within a pre-harvest interval today. */
+  _waitLines() {
+    const now = today();
+    // One line per treatment: a whole zone treated is one line with the zone's name.
+    const byEvent = new Map();
+    for (const p of this._data.plantings.filter((x) => x.status === "active")) {
+      const w = this._harvestWait(p.id, now);
+      if (w) byEvent.set(w.event.id, { w, plants: [...(byEvent.get(w.event.id)?.plants || []), p] });
+    }
+    return [...byEvent.values()].map(({ w, plants }) => {
+      const zone = !w.event.planting_id && this._zone(w.event.zone_id);
+      const name = zone && plants.length > 1 ? `${zone.name} (${this._plural("homePlants", plants.length)})` : plants[0].name;
+      return h("div", { className: "alert-line" }, this._waitText({ name }, w));
+    });
+  }
+
+  /** Copper in kg per hectare per year on a zone, and the 7-year average against 4 kg/ha. */
+  _copperLine(zone) {
+    const area = zone.area_m2 ?? polygonArea(zone.geometry);
+    if (!area) return null;
+    const inside = new Set([zone.id, ...this._zoneDescendants(zone.id)]);
+    const toKg = { kg: 1, g: 0.001, l: 1, ml: 0.001 };
+    const byYear = {};
+    for (const e of this._data.events) {
+      const product = e.kind === "treatment" && this._product(e.product_id);
+      if (!product?.copper_percent || !e.quantity || !toKg[e.unit || "g"]) continue;
+      const zid = e.zone_id || this._planting(e.planting_id)?.zone_id;
+      if (!inside.has(zid)) continue;
+      const year = Number(e.done_on.slice(0, 4));
+      byYear[year] = (byYear[year] || 0) + (e.quantity * toKg[e.unit || "g"] * product.copper_percent) / 100 / (area / 10000);
+    }
+    if (!Object.keys(byYear).length) return null;
+    const year = new Date().getFullYear();
+    let sum = 0;
+    for (let y = year - 6; y <= year; y++) sum += byYear[y] || 0;
+    const average = sum / 7;
+    const fmt = (v) => new Intl.NumberFormat(this._lang(), { maximumFractionDigits: 1 }).format(v);
+    const cls = average > 4 ? "warn" : average >= 3.4 ? "warn soft" : "";
+    return h("div", { className: `alert-line ${cls}` }, `🟢 ${this.t("copperLine", { year: fmt(byYear[year] || 0), average: fmt(average) })}`);
+  }
+
+  _renderProducts() {
+    return [
+      h("div", { className: "row header" }, h("h3", {}, `🏷️ ${this.t("products")}`), h("button", { type: "button", onclick: () => this._productSheet(null) }, `+ ${this.t("productNew")}`)),
+      this._data.products.length ? null : h("p", { className: "hint", style: "white-space:normal" }, this.t("productsHint")),
+      ...[...this._data.products]
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((p) =>
+          h(
+            "button",
+            { type: "button", className: "hive-row", onclick: () => this._productSheet(p) },
+            h("span", { className: "hive-name" }, h("strong", {}, `${SUPPLY_ICONS[p.kind] || "📦"} ${p.name}`), h("span", { className: "sub", style: "white-space:normal" }, this._productText(p))),
+          ),
+        ),
+    ];
+  }
+
+  _productSheet(product, onSaved = null) {
+    const p = product || { name: "", kind: "fertilizer", npk: [] };
+    const input = (value, attrs = {}) => h("input", { value: value ?? "", ...attrs });
+    const num = (value, attrs = {}) => input(value, { type: "number", step: "any", min: 0, inputMode: "decimal", ...attrs });
+    const f = {
+      name: input(p.name, { required: true }),
+      brand: input(p.brand),
+      kind: h("select", {}, SUPPLY_KINDS.map((k) => h("option", { value: k, selected: k === p.kind }, `${SUPPLY_ICONS[k]} ${this.t(`sk_${k}`)}`))),
+      npk: [0, 1, 2].map((i) => num(p.npk?.[i], { max: 100, placeholder: "NPK"[i] })),
+      organic: h("input", { type: "checkbox", checked: !!p.organic }),
+      dose: input(p.dose, { placeholder: "30 g / 10 L" }),
+      active: input(p.active_ingredient),
+      copper: num(p.copper_percent, { max: 100 }),
+      wait: num(p.pre_harvest_days, { step: 1 }),
+      notes: h("textarea", { rows: 2, value: p.notes || "" }),
+    };
+    const treatment = h("div", {}, h("div", { className: "row" }, h("label", {}, this.t("productActive"), f.active), h("label", {}, `${this.t("productCopper")} %`, f.copper)), h("label", {}, this.t("productWaitDays"), f.wait));
+    const fertilizer = h("label", {}, "NPK", h("div", { className: "row" }, ...f.npk));
+    const toggle = () => {
+      treatment.hidden = f.kind.value !== "treatment";
+      fertilizer.hidden = f.kind.value !== "fertilizer";
+    };
+    f.kind.addEventListener("change", toggle);
+    toggle();
+    const save = async () => {
+      if (!f.name.value.trim()) return f.name.focus();
+      const n = (el) => (el.value === "" ? null : Number(el.value));
+      const npk = f.npk.map(n);
+      const data = {
+        name: f.name.value.trim(),
+        brand: f.brand.value.trim() || null,
+        kind: f.kind.value,
+        npk: npk.every((v) => v != null) ? npk : [],
+        organic: f.organic.checked,
+        dose: f.dose.value.trim() || null,
+        active_ingredient: f.active.value.trim() || null,
+        copper_percent: n(f.copper),
+        pre_harvest_days: n(f.wait),
+        notes: f.notes.value.trim() || null,
+      };
+      const result = await this._call(p.id ? "update_product" : "add_product", p.id ? { id: p.id, ...data } : data);
+      if (!result) return;
+      close();
+      this._showMessage(`✓ ${this.t("saved", { name: data.name })}`);
+      onSaved?.(result.id);
+    };
+    const close = this._sheet(
+      `🏷️ ${p.id ? p.name : this.t("productNew")}`,
+      h("label", {}, this.t("name"), f.name),
+      h("div", { className: "row" }, h("label", {}, this.t("productBrand"), f.brand), h("label", {}, this.t("supplyKind"), f.kind)),
+      fertilizer,
+      h("label", { className: "check" }, f.organic, this.t("productOrganicLong")),
+      h("label", {}, this.t("dose"), f.dose),
+      treatment,
+      h("label", {}, this.t("notes"), f.notes),
+      h(
+        "div",
+        { className: "row" },
+        h("button", { type: "button", className: "primary", onclick: save }, this.t("save")),
+        h("button", { type: "button", onclick: () => close() }, this.t("cancel")),
+        p.id ? h("button", { type: "button", className: "danger", onclick: async () => confirm(this.t("confirmDelete", { name: p.name })) && (await this._call("delete_product", { id: p.id })) && close() }, this.t("delete")) : null,
       ),
     );
   }
@@ -5850,7 +6020,7 @@ class HomesteadPanel extends HTMLElement {
     const young = (water.young || []).map((t) => ({ t, p: this._planting(t.planting_id) })).filter((x) => x.p);
     const youngIds = new Set(young.map((x) => x.p.id));
     const pots = (water.plants || []).map((t) => ({ t, p: this._planting(t.planting_id) })).filter((x) => x.p && !youngIds.has(x.p.id));
-    const parts = [...this._climateLines(), ...this._pestLines()];
+    const parts = [...this._climateLines(), ...this._pestLines(), ...this._waitLines()];
     if (!zones.length && !young.length && !pots.length && !parts.length) return null;
     const chip = (verdict) => h("span", { className: `water-chip ${verdict}` }, this.t(`water_${verdict}`));
     const thirsty = young.filter((x) => x.t.verdict === "water");
@@ -7584,6 +7754,8 @@ class HomesteadPanel extends HTMLElement {
       shopButton.hidden = doseLabel.hidden;
       productInput.setAttribute("list", kind === "wood_cutting" ? "homestead-essences" : kind === "problem" ? "homestead-pests" : "");
       extras.harvest.hidden = !QUANTITY_UNITS[kind] && !QUANTITY_ONLY[kind];
+      fillProducts(kind);
+      updateWait();
       if (QUANTITY_UNITS[kind]) {
         const units = UNITS.imperial && IMPERIAL_UNITS[kind] ? IMPERIAL_UNITS[kind] : QUANTITY_UNITS[kind];
         const previous = unitSelect.value || f.unit;
@@ -7622,13 +7794,41 @@ class HomesteadPanel extends HTMLElement {
       oninput: (ev) => {
         updateMoon(ev.target.value);
         updateLast();
+        updateWait();
       },
     });
     targetSelect.querySelector("select").addEventListener("change", () => {
       updateLast();
       filterKinds();
+      updateWait();
     });
     const productInput = h("input", { name: "product", value: f.product ?? "" });
+    // A product from the catalogue fills the name and the dose; the harvest warns during a pre-harvest interval.
+    const productSelect = h("select", { name: "product_id" });
+    const productPick = h("label", {}, this.t("productFromList"), productSelect);
+    const fillProducts = (kind) => {
+      const wanted = kind === "fertilizing" ? "fertilizer" : "treatment";
+      const list = this._data.products.filter((p) => p.kind === wanted || p.id === f.product_id);
+      productSelect.replaceChildren(h("option", { value: "" }, "—"), ...list.map((p) => h("option", { value: p.id, selected: p.id === (productSelect.dataset.value ?? f.product_id) }, p.name)));
+      productPick.hidden = !list.length || !["fertilizing", "treatment"].includes(kind);
+    };
+    productSelect.addEventListener("change", () => {
+      productSelect.dataset.value = productSelect.value;
+      const p = this._product(productSelect.value);
+      if (!p) return;
+      productInput.value = p.name;
+      const dose = form?.elements.dose;
+      if (dose && !dose.value && p.dose) dose.value = p.dose;
+    });
+    const waitEl = h("div", { className: "alert-line warn" });
+    const updateWait = () => {
+      const target = currentTarget();
+      const plants = target.planting_id ? [this._planting(target.planting_id)] : this._data.plantings.filter((p) => p.status === "active" && target.zone_id && this._inZone(p, target.zone_id));
+      const day = form?.elements.done_on?.value || f.done_on || today();
+      const waits = kindInput.value === "harvest" ? plants.filter(Boolean).map((p) => [p, this._harvestWait(p.id, day)]).filter(([, w]) => w) : [];
+      waitEl.hidden = !waits.length;
+      waitEl.replaceChildren(...waits.slice(0, 3).map(([p, w]) => h("div", {}, this._waitText(p, w))));
+    };
     const productLabel = h("label", {}, this.t("product"), productInput);
     const doseLabel = this._field(f, "dose", { placeholder: "30 g / 10 L" });
     const essences = [...new Set(this._data.zones.flatMap((z) => (z.species || []).map((e) => e.name)))];
@@ -7644,7 +7844,8 @@ class HomesteadPanel extends HTMLElement {
     );
     extras.product = h(
       "div",
-      { className: "row" },
+      { className: "row", style: "flex-wrap:wrap" },
+      productPick,
       productLabel,
       doseLabel,
       shopButton,
@@ -7686,6 +7887,7 @@ class HomesteadPanel extends HTMLElement {
       targetSelect,
       h("div", { className: "row date-moon" }, date, moonEl),
       lastEl,
+      waitEl,
       extras.product,
       extras.harvest,
       extras.pest,
@@ -7747,6 +7949,7 @@ class HomesteadPanel extends HTMLElement {
       rating: ["review", "compost_harvest", "hive_inspection"].includes(v.kind) && v.rating ? Number(v.rating) : null,
       reason: v.kind === "flock_out" ? v.reason || null : v.kind === "flock_in" ? v.arrival || null : v.kind === "removal" ? v.end_reason || null : null,
       animal: ["eggs", "flock_in", "flock_out"].includes(v.kind) ? v.animal || null : null,
+      product_id: ["fertilizing", "treatment"].includes(v.kind) ? v.product_id || null : null,
       lot_id: v.kind === "fish_weighing" || (["flock_in", "flock_out"].includes(v.kind) && v.animal === "fish") ? v.lot_id || null : null,
       queen: v.kind === "hive_inspection" ? v.queen === "on" : null,
       readings: v.kind === "water_test" ? Object.fromEntries(WATER_READINGS.filter((k) => v[`r_${k}`] !== "" && v[`r_${k}`] != null).map((k) => [k, Number(v[`r_${k}`])])) : null,
@@ -11725,6 +11928,7 @@ class HomesteadPanel extends HTMLElement {
       first ? null : box,
       z.id && ["vegetable_garden", "greenhouse"].includes(z.kind) && !z.parent_id ? this._nextYearBox(z) : null,
       z.id && !["woodland", "compost", "coop", "apiary", "hive", "melliferous", "hydroponic", "fish_tank"].includes(z.kind) ? this._rotationBox(z) : null,
+      z.id ? this._copperLine(z) : null,
       z.id && (ZONE_SUPPLY[z.kind] || this._data.supplies.some((s) => s.zone_id === z.id)) ? this._suppliesBox(z) : null,
       z.id ? this._photoHistoryBox(z.id) : null,
       z.id ? this._diaryBox({ zone_id: z.id }) : null,

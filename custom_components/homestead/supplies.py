@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from statistics import mean
 
-from .models import HomesteadData, SupplyLot, animals
+from .models import Event, HomesteadData, Product, SupplyLot, animals
 
 RECENT_LOTS = 3  # finished lots that make the forecast
 EXPIRY_SOON_DAYS = 30
@@ -147,3 +147,83 @@ def shopping_text(lot: SupplyLot) -> str:
     size = f"{lot.quantity:g} {lot.unit}" if lot.quantity else ""
     where = f"({lot.supplier})" if lot.supplier else ""
     return " ".join(filter(None, [lot.name, size, where]))
+
+
+# ----- step 3: products, pre-harvest interval, copper -----
+
+COPPER_LIMIT_KG_HA = 4.0  # organic farming, EU: 28 kg/ha over 7 years, i.e. 4 a year on average
+COPPER_YEARS = 7
+TO_KG = {"kg": 1.0, "g": 0.001, "l": 1.0, "ml": 0.001}  # liquids counted as 1 kg/l
+
+
+def _zone_ids_up(data: HomesteadData, zone_id: str | None) -> list[str]:
+    out = []
+    while zone_id and zone_id in data.zones and zone_id not in out:
+        out.append(zone_id)
+        zone_id = data.zones[zone_id].parent_id
+    return out
+
+
+def treated(data: HomesteadData, event: Event, planting_id: str) -> bool:
+    """A treatment on the planting, or on its zone or a parent zone."""
+    if event.planting_id:
+        return event.planting_id == planting_id
+    planting = data.plantings.get(planting_id)
+    return bool(planting and event.zone_id in _zone_ids_up(data, planting.zone_id))
+
+
+def harvest_wait(data: HomesteadData, planting_id: str, day: date) -> tuple[date, Event, Product] | None:
+    """The pre-harvest interval still running on a planting that day: (harvest from, treatment, product)."""
+    found = None
+    for event in data.events.values():
+        product = data.products.get(event.product_id or "")
+        if event.kind != "treatment" or not product or not product.pre_harvest_days:
+            continue
+        start = date.fromisoformat(event.done_on)
+        until = start + timedelta(days=product.pre_harvest_days)
+        if start <= day < until and treated(data, event, planting_id) and (not found or until > found[0]):
+            found = (until, event, product)
+    return found
+
+
+def copper_kg(data: HomesteadData, event: Event) -> float | None:
+    """Copper put on by a treatment: amount of product × its copper share."""
+    product = data.products.get(event.product_id or "")
+    if event.kind != "treatment" or not product or not product.copper_percent or not event.quantity:
+        return None
+    factor = TO_KG.get(event.unit or "g")
+    return event.quantity * factor * product.copper_percent / 100 if factor else None
+
+
+def copper_by_year(data: HomesteadData, zone_id: str) -> dict[int, float]:
+    """Copper in kg per hectare per year on a zone (and what is inside it)."""
+    inside = {zone_id} | data.zone_descendants(zone_id)
+    area = data.zones[zone_id].area_m2 if zone_id in data.zones else None
+    if not area:
+        return {}
+    out: dict[int, float] = {}
+    for event in data.events.values():
+        kg = copper_kg(data, event)
+        if kg is None:
+            continue
+        zid = event.zone_id or (
+            data.plantings[event.planting_id].zone_id if event.planting_id in data.plantings else None
+        )
+        if zid in inside:
+            year = int(event.done_on[:4])
+            out[year] = out.get(year, 0.0) + kg / (area / 10000)
+    return {y: round(v, 2) for y, v in sorted(out.items())}
+
+
+def copper_check(by_year: dict[int, float], year: int) -> dict[str, float | bool] | None:
+    """This year's kg/ha and the 7-year average (years without copper count as 0), against 4 kg/ha."""
+    if not by_year:
+        return None
+    window = [by_year.get(y, 0.0) for y in range(year - COPPER_YEARS + 1, year + 1)]
+    average = sum(window) / COPPER_YEARS
+    return {
+        "year": round(by_year.get(year, 0.0), 2),
+        "average": round(average, 2),
+        "near": average >= 0.85 * COPPER_LIMIT_KG_HA,
+        "over": average > COPPER_LIMIT_KG_HA,
+    }

@@ -242,7 +242,9 @@
         "m3": "Mètres cubes",
         "lb": "Livres (lb)",
         "oz": "Onces (oz)",
-        "gal": "Gallons (gal)"
+        "gal": "Gallons (gal)",
+        "g": "g",
+        "ml": "ml"
       }
     },
     "abundance": {
@@ -1180,6 +1182,10 @@
         "lot_id": {
           "name": "Lot de poissons",
           "description": "Arrivées, sorties et pesées de poissons : le lot auquel ils appartiennent (gardé quand ils changent de bassin)."
+        },
+        "product_id": {
+          "name": "Produit",
+          "description": "Produit du catalogue."
         }
       }
     },
@@ -1274,6 +1280,10 @@
         "lot_id": {
           "name": "Lot de poissons",
           "description": "Arrivées, sorties et pesées de poissons : le lot auquel ils appartiennent (gardé quand ils changent de bassin)."
+        },
+        "product_id": {
+          "name": "Produit",
+          "description": "Produit du catalogue."
         }
       }
     },
@@ -1952,6 +1962,10 @@
         "animal": {
           "name": "Animaux",
           "description": "Dans une basse-cour mixte, les animaux qui le mangent ; vide = tous."
+        },
+        "product_id": {
+          "name": "Produit",
+          "description": "Produit du catalogue."
         }
       }
     },
@@ -2014,6 +2028,10 @@
         "animal": {
           "name": "Animaux",
           "description": "Dans une basse-cour mixte, les animaux qui le mangent ; vide = tous."
+        },
+        "product_id": {
+          "name": "Produit",
+          "description": "Produit du catalogue."
         }
       }
     },
@@ -2024,6 +2042,112 @@
         "id": {
           "name": "ID",
           "description": "Id du stock."
+        }
+      }
+    },
+    "add_product": {
+      "name": "Ajouter un produit",
+      "description": "Ajoute un engrais, traitement ou aliment au catalogue.",
+      "fields": {
+        "name": {
+          "name": "Nom",
+          "description": "Nom du produit."
+        },
+        "brand": {
+          "name": "Marque",
+          "description": "Marque ou fabricant."
+        },
+        "kind": {
+          "name": "Type",
+          "description": "Ce que c'est."
+        },
+        "npk": {
+          "name": "NPK",
+          "description": "Azote, phosphore, potassium en %, liste de trois nombres."
+        },
+        "organic": {
+          "name": "Bio",
+          "description": "Autorisé en agriculture biologique."
+        },
+        "dose": {
+          "name": "Dose",
+          "description": "Comme sur l'étiquette."
+        },
+        "active_ingredient": {
+          "name": "Substance active",
+          "description": "Pour les traitements."
+        },
+        "copper_percent": {
+          "name": "Cuivre %",
+          "description": "Teneur en cuivre, pour le cumul annuel."
+        },
+        "pre_harvest_days": {
+          "name": "Délai avant récolte",
+          "description": "Jours entre traitement et récolte, d'après l'étiquette."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Notes libres."
+        }
+      }
+    },
+    "update_product": {
+      "name": "Modifier un produit",
+      "description": "Modifie les champs indiqués d'un produit.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id du produit."
+        },
+        "name": {
+          "name": "Nom",
+          "description": "Nom du produit."
+        },
+        "brand": {
+          "name": "Marque",
+          "description": "Marque ou fabricant."
+        },
+        "kind": {
+          "name": "Type",
+          "description": "Ce que c'est."
+        },
+        "npk": {
+          "name": "NPK",
+          "description": "Azote, phosphore, potassium en %, liste de trois nombres."
+        },
+        "organic": {
+          "name": "Bio",
+          "description": "Autorisé en agriculture biologique."
+        },
+        "dose": {
+          "name": "Dose",
+          "description": "Comme sur l'étiquette."
+        },
+        "active_ingredient": {
+          "name": "Substance active",
+          "description": "Pour les traitements."
+        },
+        "copper_percent": {
+          "name": "Cuivre %",
+          "description": "Teneur en cuivre, pour le cumul annuel."
+        },
+        "pre_harvest_days": {
+          "name": "Délai avant récolte",
+          "description": "Jours entre traitement et récolte, d'après l'étiquette."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Notes libres."
+        }
+      }
+    },
+    "delete_product": {
+      "name": "Supprimer un produit",
+      "description": "Supprime un produit ; sacs et entrées du journal restent.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id du produit."
         }
       }
     }

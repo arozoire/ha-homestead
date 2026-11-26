@@ -242,7 +242,9 @@
         "m3": "Cubic metres",
         "lb": "Pounds (lb)",
         "oz": "Ounces (oz)",
-        "gal": "Gallons (gal)"
+        "gal": "Gallons (gal)",
+        "g": "g",
+        "ml": "ml"
       }
     },
     "abundance": {
@@ -1180,6 +1182,10 @@
         "lot_id": {
           "name": "Fish lot",
           "description": "Arrivals, departures and weighings of fish: the lot they belong to (kept when fish move between tanks)."
+        },
+        "product_id": {
+          "name": "Product",
+          "description": "Product from the catalogue."
         }
       }
     },
@@ -1274,6 +1280,10 @@
         "lot_id": {
           "name": "Fish lot",
           "description": "Arrivals, departures and weighings of fish: the lot they belong to (kept when fish move between tanks)."
+        },
+        "product_id": {
+          "name": "Product",
+          "description": "Product from the catalogue."
         }
       }
     },
@@ -1952,6 +1962,10 @@
         "animal": {
           "name": "Animals",
           "description": "In a mixed yard, the animals that eat it; empty = all of them."
+        },
+        "product_id": {
+          "name": "Product",
+          "description": "Product from the catalogue."
         }
       }
     },
@@ -2014,6 +2028,10 @@
         "animal": {
           "name": "Animals",
           "description": "In a mixed yard, the animals that eat it; empty = all of them."
+        },
+        "product_id": {
+          "name": "Product",
+          "description": "Product from the catalogue."
         }
       }
     },
@@ -2024,6 +2042,112 @@
         "id": {
           "name": "ID",
           "description": "Supply id."
+        }
+      }
+    },
+    "add_product": {
+      "name": "Add product",
+      "description": "Adds a fertiliser, treatment or feed to the catalogue.",
+      "fields": {
+        "name": {
+          "name": "Name",
+          "description": "Product name."
+        },
+        "brand": {
+          "name": "Brand",
+          "description": "Brand or maker."
+        },
+        "kind": {
+          "name": "Kind",
+          "description": "What it is."
+        },
+        "npk": {
+          "name": "NPK",
+          "description": "Nitrogen, phosphorus, potassium in %, as a list of three numbers."
+        },
+        "organic": {
+          "name": "Organic",
+          "description": "Allowed in organic gardening."
+        },
+        "dose": {
+          "name": "Dose",
+          "description": "As on the label."
+        },
+        "active_ingredient": {
+          "name": "Active ingredient",
+          "description": "For treatments."
+        },
+        "copper_percent": {
+          "name": "Copper %",
+          "description": "Copper content, to count copper per year."
+        },
+        "pre_harvest_days": {
+          "name": "Pre-harvest interval",
+          "description": "Days from treatment to harvest, from the label."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "update_product": {
+      "name": "Update product",
+      "description": "Changes the given fields of a product.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Product id."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Product name."
+        },
+        "brand": {
+          "name": "Brand",
+          "description": "Brand or maker."
+        },
+        "kind": {
+          "name": "Kind",
+          "description": "What it is."
+        },
+        "npk": {
+          "name": "NPK",
+          "description": "Nitrogen, phosphorus, potassium in %, as a list of three numbers."
+        },
+        "organic": {
+          "name": "Organic",
+          "description": "Allowed in organic gardening."
+        },
+        "dose": {
+          "name": "Dose",
+          "description": "As on the label."
+        },
+        "active_ingredient": {
+          "name": "Active ingredient",
+          "description": "For treatments."
+        },
+        "copper_percent": {
+          "name": "Copper %",
+          "description": "Copper content, to count copper per year."
+        },
+        "pre_harvest_days": {
+          "name": "Pre-harvest interval",
+          "description": "Days from treatment to harvest, from the label."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        }
+      }
+    },
+    "delete_product": {
+      "name": "Delete product",
+      "description": "Deletes a product; its bags and diary entries stay.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Product id."
         }
       }
     }

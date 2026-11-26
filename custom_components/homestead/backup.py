@@ -25,6 +25,7 @@ REQUIRED = {
     "fish_species": ("name",),
     "fish_lots": ("name",),
     "supplies": ("name",),
+    "products": ("name",),
 }
 
 # (collection, field, referenced collection): dangling references are cleared.
@@ -51,6 +52,8 @@ REFERENCES = (
     ("events", "lot_id", "fish_lots"),
     ("supplies", "zone_id", "zones"),
     ("expenses", "supply_id", "supplies"),
+    ("supplies", "product_id", "products"),
+    ("events", "product_id", "products"),
 )
 
 
