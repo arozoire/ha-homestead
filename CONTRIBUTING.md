@@ -38,6 +38,10 @@ AI assistants (Claude Code, Codex, Copilot…) are fine. Read [AGENTS.md](AGENTS
 | `docs/design/` | Agreed designs for larger areas: read the one for the area you touch |
 | `CLAUDE.md`, `SPEC.md` | The maintainer's history and decisions, in Italian. Useful background, not required |
 
+## Files that only the maintainer changes
+
+`AGENTS.md`, `CONTRIBUTING.md`, `CLAUDE.md`, `SPEC.md`, `docs/design/` and `.github/` (workflows, templates, `CODEOWNERS`) hold the project's rules and release process. Do not edit, move or delete them in a PR; if you think a rule is wrong, say so in an issue.
+
 ## Checklist for a PR
 
 1. `ruff check custom_components tests && ruff format --check custom_components tests`

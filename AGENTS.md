@@ -18,6 +18,7 @@ pytest                                      # the full suite
 ```
 
 Hard rules:
+- **Do not edit, move or delete** `AGENTS.md`, `CONTRIBUTING.md`, `CLAUDE.md`, `SPEC.md`, `docs/design/`, `.github/` (workflows, templates, `CODEOWNERS`). They belong to the maintainer: propose changes in an issue.
 - `models.py` imports nothing from Home Assistant.
 - Every user-visible text in **6 languages**, in `translations/` and `frontend/i18n/`, with the same keys and placeholders.
 - The panel stays one vanilla web component: no framework, no build step, no CDN.
