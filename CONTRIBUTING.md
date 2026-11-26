@@ -59,15 +59,25 @@ AI assistants (Claude Code, Codex, Copilot…) are fine. Read [AGENTS.md](AGENTS
 - Large changes can be merged with changes on top, or the idea taken and built differently; we will say which before you invest more time.
 - Releases group several PRs; your work is credited in the release notes.
 
+## Who works on what
+
+- Every topic open to contributors comes from a **GitHub issue**. The table below lists them with the person who took each one.
+- **A taken topic belongs to that person.** Others, and their AI agents, do not work on it. If you have an idea for it, say so in its issue.
+- **To take a free topic**, comment in its issue ("I'll take this") and wait for the maintainer's OK. Issues open to anyone carry the `help wanted` label.
+- Open a **draft PR early**, so that everyone sees the work is moving.
+- **Two weeks without a draft PR or news** and the topic becomes free again.
+- The maintainer may work on any topic, and decides when two pieces of work overlap.
+
 ## Contributions that are wanted now
 
-| Topic | Issue | Notes |
-|---|---|---|
-| Crop calendars from the garden's own climate, worldwide | #51 | Follow [docs/design/crop-calendars.md](docs/design/crop-calendars.md) |
-| Irrigation: meter lost or reset during a run, measured / estimated / incomplete volumes | #52 | Small, with regression tests. Suggested field: `Event.measure` |
-| Explain recommendations: source, freshness and reason of each advice | #52 | Start with the water balance |
-| Feed and water stocks for animals: stock, daily use, days left, low-stock alert, shopping list | — | Fits the Backyard animals module; daily use can be estimated from the number of animals |
-| Fish breeding: spawning, hatching, life stages with their own water targets | #47 | Builds on the fish lots of 0.24.0 |
+| Topic | Issue | Taken by | Notes |
+|---|---|---|---|
+| Crop calendars from the garden's own climate, worldwide | #51 | `FedgarLurch` | Follow [docs/design/crop-calendars.md](docs/design/crop-calendars.md) |
+| Irrigation: meter lost or reset during a run, measured / estimated / incomplete volumes | #52 | `vico34` | Small, with regression tests. Suggested field: `Event.measure` |
+| Explain recommendations: source, freshness and reason of each advice | #52 | `vico34` | Start with the water balance |
+| Fish breeding: spawning, hatching, life stages with their own water targets | #47 | `vico34` (invited) | Builds on the fish lots of 0.24.0 |
+
+Other plans in `docs/design/` (for example [supplies.md](docs/design/supplies.md)) are built by the maintainer unless an issue says otherwise.
 
 ## Out of scope (for now)
 
