@@ -6,6 +6,8 @@ STORAGE_KEY = f"{DOMAIN}.data"
 STORAGE_VERSION = 1
 
 SIGNAL_DATA_UPDATED = f"{DOMAIN}_data_updated"
+# Same moment, with the records that changed (for the open panels)
+SIGNAL_DATA_CHANGES = f"{DOMAIN}_data_changes"
 
 # Options: sensors for the weather recorded on diary events (all optional).
 CONF_TEMPERATURE = "temperature_sensor"

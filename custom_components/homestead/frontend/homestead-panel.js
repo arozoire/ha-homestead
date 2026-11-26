@@ -1047,7 +1047,10 @@ class HomesteadPanel extends HTMLElement {
       .catch(() => {});
     this._unsub = this._hass.connection.subscribeMessage(
       (data) => {
-        this._data = {
+        // After the first full message only the records that changed arrive: merge them.
+        if (!data.full && this._loaded) {
+          this._data = mergeChanges(this._data, data);
+        } else this._data = {
           plantings: data.plantings || [],
           zones: data.zones || [],
           taxa: data.taxa || [],
@@ -1064,7 +1067,7 @@ class HomesteadPanel extends HTMLElement {
           fish_species: data.fish_species || [],
           fish_lots: data.fish_lots || [],
         };
-        this._loaded = !!data.plantings;
+        if (data.full || !this._loaded) this._loaded = !!data.plantings;
         this._syncMap();
         this._renderCalendar();
         // A hidden map cannot be fitted: do it when it is first shown.
@@ -11477,6 +11480,23 @@ function addMonths(iso, months) {
 
 function daysBetween(from, to) {
   return Math.round((Date.parse(`${to}T12:00:00`) - Date.parse(`${from}T12:00:00`)) / 86400000);
+}
+
+/** The data with the changed records replaced (new ones at the end) and the removed ones gone. */
+function mergeChanges(current, message) {
+  const next = { ...current, growth: message.growth || current.growth, settings: message.settings || current.settings };
+  const names = new Set([...Object.keys(message.changed || {}), ...Object.keys(message.removed || {})]);
+  for (const name of names) {
+    const changed = new Map((message.changed?.[name] || []).map((r) => [r.id, r]));
+    const removed = new Set(message.removed?.[name] || []);
+    const list = (current[name] || []).filter((r) => !removed.has(r.id)).map((r) => {
+      const fresh = changed.get(r.id);
+      if (fresh) changed.delete(r.id);
+      return fresh || r;
+    });
+    next[name] = [...list, ...changed.values()];
+  }
+  return next;
 }
 
 /** The common part of [low, high] ranges (null = no limit); null when they do not meet. As models._overlap. */
