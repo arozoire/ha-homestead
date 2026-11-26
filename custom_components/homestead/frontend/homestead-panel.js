@@ -193,6 +193,12 @@ const SEED_VIABILITY = {
   Malvaceae: 3,
 };
 const ROTATION_YEARS = 3;
+// Supplies (bags, boxes): kinds, units, what a zone usually uses; a period this much above the usual is pointed out.
+const SUPPLY_KINDS = ["feed", "fertilizer", "treatment", "bee_feed", "fish_feed", "bedding", "other"];
+const SUPPLY_ICONS = { feed: "🌾", fertilizer: "🧪", treatment: "💊", bee_feed: "🍯", fish_feed: "🐟", bedding: "🛏️", other: "📦" };
+const SUPPLY_UNITS = ["kg", "g", "l", "ml", "pieces"];
+const ZONE_SUPPLY = { coop: "feed", apiary: "bee_feed", hive: "bee_feed", fish_tank: "fish_feed", hydroponic: "fish_feed", vegetable_garden: "fertilizer", orchard: "fertilizer", greenhouse: "fertilizer" };
+const SUPPLY_UNUSUAL = 1.3;
 const ZONE_ICONS = { vegetable_garden: "🥕", orchard: "🍎", flower_bed: "🌸", greenhouse: "🏠", pots: "🪴", lawn: "🌾", woodland: "🌲", compost: "♻️", coop: "🐔", nursery: "🌱", indoor: "🛋️", apiary: "🐝", hive: "🍯", melliferous: "🌼", hydroponic: "💧", fish_tank: "🐟", other: "📍" };
 // Farmyard animals (and fish): who an arrival, a departure or eggs are about; none = hens (before 0.22).
 const ANIMALS = { hens: "🐔", quails: "🐦", ducks: "🦆", geese: "🪿", turkeys: "🦃", rabbits: "🐇", fish: "🐟", other: "🐾" };
@@ -266,7 +272,7 @@ const h = (tag, attrs = {}, ...children) => {
   for (const [key, value] of Object.entries(attrs)) {
     if (value === undefined || value === null || value === false) continue;
     if (key.startsWith("on")) el.addEventListener(key.slice(2), value);
-    else if (key in el) el[key] = value;
+    else if (key in el && key !== "list") el[key] = value;
     else el.setAttribute(key, value === true ? "" : value);
   }
   el.append(...children.flat().filter((c) => c !== null && c !== undefined && c !== false));
@@ -761,6 +767,12 @@ const STYLE = `
     background: var(--secondary-background-color); border: none; border-radius: 8px; padding: 6px 8px; font-size: 13px; }
   .trust-past b { min-width: 52px; }
   .trust-past .off { color: #a3341a; font-weight: 600; }
+  .supply-row { display: flex; gap: 8px; align-items: center; border-top: 1px solid var(--divider-color); padding: 6px 0; }
+  .supply-main { flex: 1; min-width: 0; display: grid; gap: 2px; text-align: left; border: none; background: none; padding: 4px 0; color: inherit; }
+  .supply-act { flex: none; min-height: 40px; }
+  .supply-history { display: grid; gap: 2px; margin-top: 8px; }
+  .supply-period { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 6px; font-size: 13px; border-top: 1px solid var(--divider-color); padding: 4px 0; }
+  .supply-period.warn { color: var(--warning-color, #b26a00); }
   .fish-sheet { gap: 8px; }
   .fish-sheet label { display: grid; gap: 2px; }
   .fish-sheet label.check { display: flex; align-items: center; gap: 8px; }
@@ -848,7 +860,7 @@ const STYLE = `
 class HomesteadPanel extends HTMLElement {
   constructor() {
     super();
-    this._data = { plantings: [], zones: [], taxa: [], expenses: [], tools: [], photos: [], events: [], tasks: [], seeds: [], crops: [], settings: {}, fish_species: [], fish_lots: [] };
+    this._data = { plantings: [], zones: [], taxa: [], expenses: [], tools: [], photos: [], events: [], tasks: [], seeds: [], crops: [], settings: {}, fish_species: [], fish_lots: [], supplies: [] };
     this._cropDefaults = {};
     this._diaryFilter = { kind: "", zone: "", year: "" };
     this._photoUrls = new Map();
@@ -1066,6 +1078,7 @@ class HomesteadPanel extends HTMLElement {
           settings: data.settings || {},
           fish_species: data.fish_species || [],
           fish_lots: data.fish_lots || [],
+          supplies: data.supplies || [],
         };
         if (data.full || !this._loaded) this._loaded = !!data.plantings;
         this._syncMap();
@@ -1726,6 +1739,7 @@ class HomesteadPanel extends HTMLElement {
         report: () => this._renderReport(),
         more: () => this._renderMore(),
         modules: () => [back, ...this._renderModules()],
+        supplies: () => [back, ...this._renderSupplies()],
         home: () => this._renderHome(),
       };
       content = (lists[this._tab] || lists.diary)();
@@ -1753,7 +1767,7 @@ class HomesteadPanel extends HTMLElement {
 
   /** Main menu section of a page. */
   _section(tab = this._tab) {
-    return { plantings: "map", zones: "map", seeds: "more", expenses: "more", tools: "more", photos: "more", modules: "more" }[tab] || tab;
+    return { plantings: "map", zones: "map", seeds: "more", expenses: "more", tools: "more", photos: "more", modules: "more", supplies: "more" }[tab] || tab;
   }
 
   _mapSwitch() {
@@ -1786,6 +1800,7 @@ class HomesteadPanel extends HTMLElement {
         item("expenses", "💶", this.t("tabExpenses"), `${year}: −${this._money(spent)} · +${this._money(earned)}`),
         item("tools", "🔧", this.t("tabTools"), toolsDue ? this.t("moreToolsDue", { count: toolsDue }) : this.t("moreTools", { count: this._data.tools.length }), !!toolsDue),
         item("photos", "📸", this.t("tabPhotos"), this._photoPlanSummary()),
+        item("supplies", "🧺", this.t("supplies"), this._suppliesSummary(), this._data.supplies.some((s) => this._supplyExpiry(s) || (this._supplyEnd(s)?.on || "9999") <= addDays(today(), 10))),
         item("report", "📄", this.t("reportMenu"), this.t("reportMenuSub")),
         item("modules", "🧩", this.t("modulesTitle"), this.t("modulesSub")),
         h(
@@ -2092,6 +2107,7 @@ class HomesteadPanel extends HTMLElement {
               )
             : null,
         ),
+        ZONE_SUPPLY[z.kind] || this._data.supplies.some((x) => x.zone_id === z.id) ? h("div", { className: "home-card" }, this._suppliesBox(z)) : null,
         z.geometry || this._data.photos.some((ph) => inside.has(this._data.events.find((e) => e.id === ph.event_id)?.zone_id)) ? h("div", { className: "home-card span" }, this._photoHistoryBox(z.id)) : null,
       ),
     ];
@@ -3689,6 +3705,269 @@ class HomesteadPanel extends HTMLElement {
     this._showMessage(this.t("fishMoved", { count }));
   }
 
+  // ----- supplies: bought, opened, finished (consumption computed backwards, as supplies.py) -----
+
+  _supplyKey(lot) {
+    return `${lot.zone_id || ""}|${lot.name.toLowerCase().split(/\s+/).filter(Boolean).join(" ")}`;
+  }
+
+  /** Animals eating a lot on a day: its animal kind, else all the zone's animals. */
+  _herdOn(lot, day) {
+    if (!lot.zone_id) return 0;
+    if (lot.animal) return this._hensAt(new Set([lot.zone_id]), day, lot.animal);
+    return Object.values(this._animalsAt(new Set([lot.zone_id]), day)).reduce((a, b) => a + b, 0);
+  }
+
+  /** A finished lot: days, per day and per animal (average animals over the period). */
+  _supplyPeriod(lot) {
+    if (!lot.opened_on || !lot.finished_on || !lot.quantity || lot.finished_on < lot.opened_on) return null;
+    const days = Math.max(1, daysBetween(lot.opened_on, lot.finished_on));
+    const perDay = lot.quantity / days;
+    let herd = 0;
+    for (let d = 0; d < days; d++) herd += this._herdOn(lot, addDays(lot.opened_on, d));
+    herd /= days;
+    return { lot, days, perDay, perAnimal: herd ? perDay / herd : null, unusual: false };
+  }
+
+  _supplyHistory(lot) {
+    const key = this._supplyKey(lot);
+    const out = this._data.supplies
+      .filter((s) => this._supplyKey(s) === key && s.finished_on)
+      .sort((a, b) => a.finished_on.localeCompare(b.finished_on))
+      .map((s) => this._supplyPeriod(s))
+      .filter(Boolean);
+    out.forEach((p, i) => {
+      const others = out.filter((_, j) => j !== i).map((o) => o.perAnimal ?? o.perDay);
+      if (others.length >= 2) p.unusual = (p.perAnimal ?? p.perDay) > SUPPLY_UNUSUAL * (others.reduce((a, b) => a + b, 0) / others.length);
+    });
+    return out;
+  }
+
+  /** When an open lot runs out: the last 3 lots' rate, scaled to today's animals. */
+  _supplyEnd(lot) {
+    if (!lot.opened_on || lot.finished_on || !lot.quantity) return null;
+    const recent = this._supplyHistory(lot).slice(-3);
+    if (!recent.length) return null;
+    const herd = this._herdOn(lot, today());
+    const perAnimal = recent.map((p) => p.perAnimal).filter((v) => v);
+    const avg = (list) => list.reduce((a, b) => a + b, 0) / list.length;
+    const rate = herd && perAnimal.length ? herd * avg(perAnimal) : avg(recent.map((p) => p.perDay));
+    return rate > 0 ? { on: addDays(lot.opened_on, Math.round(lot.quantity / rate)), rate } : null;
+  }
+
+  _supplyExpiry(lot) {
+    if (!lot.expires_on || lot.finished_on) return null;
+    if (lot.expires_on < today()) return "expired";
+    return lot.expires_on <= addDays(today(), 30) ? "soon" : null;
+  }
+
+  /** "214 g/day · 36 g each": small quantities in g or ml. */
+  _rateText(perDay, unit) {
+    const small = { kg: ["g", 1000], l: ["ml", 1000] }[unit];
+    const fmt = (v) => new Intl.NumberFormat(this._lang(), { maximumFractionDigits: v < 10 ? 1 : 0 }).format(v);
+    return small && perDay < 1 ? `${fmt(perDay * small[1])} ${small[0]}` : `${fmt(perDay)} ${this.t(`su_${unit}`)}`;
+  }
+
+  /** Cost of the supplies of these zones that falls between two days (each lot spread over its days). */
+  _supplyCost(zones, from, to) {
+    let total = 0;
+    for (const lot of this._data.supplies) {
+      if (!lot.price || !zones.has(lot.zone_id) || !lot.opened_on) continue;
+      const end = lot.finished_on || this._supplyEnd(lot)?.on;
+      if (!end) continue;
+      const days = Math.max(1, daysBetween(lot.opened_on, end));
+      const a = lot.opened_on > from ? lot.opened_on : from;
+      const b = end < to ? end : to;
+      if (b >= a) total += (lot.price * Math.max(1, daysBetween(a, b))) / days;
+    }
+    return total;
+  }
+
+  _supplyRow(lot) {
+    const zone = this._zone(lot.zone_id);
+    const end = this._supplyEnd(lot);
+    const exp = this._supplyExpiry(lot);
+    const now = today();
+    const state = lot.finished_on
+      ? this.t("supplyFinished", { date: this._date(lot.finished_on, false) })
+      : lot.opened_on
+        ? end
+          ? this.t(end.on < now ? "supplyOverdue" : "supplyRunsOut", { date: this._date(end.on, false), rate: this._rateText(end.rate, lot.unit) })
+          : this.t("supplyOpened", { date: this._date(lot.opened_on, false) })
+        : this.t("supplyClosed");
+    const late = end && !lot.finished_on && end.on <= addDays(now, 10);
+    return h(
+      "div",
+      { className: "supply-row" },
+      h(
+        "button",
+        { type: "button", className: "supply-main", onclick: () => this._supplySheet(lot) },
+        h("strong", {}, `${SUPPLY_ICONS[lot.kind] || "📦"} ${lot.name}`),
+        h(
+          "span",
+          { className: "sub", style: "white-space:normal" },
+          [lot.quantity ? `${String(lot.quantity).replace(".", UNITS.comma ? "," : ".")} ${this.t(`su_${lot.unit}`)}` : null, zone?.name, state].filter(Boolean).join(" · "),
+        ),
+        exp ? h("span", { className: `sub ${exp === "expired" ? "warn" : ""}` }, `⚠️ ${this.t(exp === "expired" ? "supplyExpired" : "supplyExpiresSoon", { date: this._date(lot.expires_on, false) })}`) : null,
+        late ? h("span", { className: "sub warn" }, `🛒 ${this.t(lot.shopping_on ? "supplyOnList" : "supplyToBuy")}`) : null,
+      ),
+      lot.finished_on
+        ? null
+        : h(
+            "button",
+            {
+              type: "button",
+              className: "supply-act",
+              onclick: () => this._call("update_supply", lot.opened_on ? { id: lot.id, finished_on: now } : { id: lot.id, opened_on: now }),
+            },
+            this.t(lot.opened_on ? "supplyFinishToday" : "supplyOpenToday"),
+          ),
+    );
+  }
+
+  /** More → Supplies: in use, closed, then the last finished ones. */
+  _suppliesSummary() {
+    const open = this._data.supplies.filter((s) => s.opened_on && !s.finished_on);
+    const soon = open.map((s) => this._supplyEnd(s)).filter(Boolean).sort((a, b) => a.on.localeCompare(b.on))[0];
+    if (soon) return this.t("supplySummaryEnd", { count: open.length, date: this._date(soon.on, false) });
+    return this.t("supplySummary", { count: this._data.supplies.filter((s) => !s.finished_on).length });
+  }
+
+  _renderSupplies() {
+    const all = this._data.supplies;
+    const open = all.filter((s) => s.opened_on && !s.finished_on);
+    const closed = all.filter((s) => !s.opened_on && !s.finished_on);
+    const done = all.filter((s) => s.finished_on).sort((a, b) => b.finished_on.localeCompare(a.finished_on));
+    const group = (title, list) => (list.length ? [h("h3", {}, title), ...list.map((s) => this._supplyRow(s))] : []);
+    return [
+      h("div", { className: "row header" }, h("h2", {}, `🧺 ${this.t("supplies")}`), h("button", { type: "button", className: "primary", onclick: () => this._supplySheet(null) }, `+ ${this.t("supplyNew")}`)),
+      all.length ? null : h("p", { className: "hint", style: "white-space:normal" }, this.t("suppliesHint")),
+      ...group(this.t("supplyInUse"), open),
+      ...group(this.t("supplyStock"), closed),
+      ...group(this.t("supplyDone"), done.slice(0, 15)),
+    ];
+  }
+
+  /** Zone card: its supplies, with the consumption period by period. */
+  _suppliesBox(zone) {
+    const lots = this._data.supplies.filter((s) => s.zone_id === zone.id);
+    const lines = new Map();
+    for (const lot of lots) if (!lines.has(this._supplyKey(lot))) lines.set(this._supplyKey(lot), lot);
+    return h(
+      "div",
+      { className: "seasons" },
+      h("div", { className: "cal-head" }, h("h3", {}, `🧺 ${this.t("supplies")}`), h("button", { type: "button", onclick: () => this._supplySheet(null, { zone_id: zone.id, kind: ZONE_SUPPLY[zone.kind] || "other" }) }, `+ ${this.t("supplyNew")}`)),
+      lots.length ? null : h("p", { className: "hint", style: "white-space:normal" }, this.t("suppliesHint")),
+      ...lots.filter((s) => !s.finished_on).map((s) => this._supplyRow(s)),
+      ...[...lines.values()].map((lot) => {
+        const periods = this._supplyHistory(lot).slice(-6).reverse();
+        if (!periods.length) return null;
+        return h(
+          "div",
+          { className: "supply-history" },
+          h("span", { className: "sub" }, `${lot.name} · ${this.t("supplyPerPeriod")}`),
+          periods.map((p) =>
+            h(
+              "div",
+              { className: `supply-period${p.unusual ? " warn" : ""}` },
+              h("span", {}, `${this._date(p.lot.opened_on, false)} → ${this._date(p.lot.finished_on, false)}`),
+              h("span", {}, `${this._rateText(p.perDay, lot.unit)}/${this.t("dayShort")}`),
+              h("span", {}, p.perAnimal != null ? `${this._rateText(p.perAnimal, lot.unit)} ${this.t("supplyEach")}` : ""),
+              p.unusual ? h("span", { className: "sub warn", style: "grid-column:1/-1" }, `⚠️ ${this.t("supplyUnusual")}`) : null,
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  _supplySheet(lot, preset = {}) {
+    const s = lot || { name: "", kind: "feed", unit: "kg", bought_on: today(), ...preset };
+    const names = [...new Set(this._data.supplies.map((x) => x.name))];
+    const input = (value, attrs = {}) => h("input", { value: value ?? "", ...attrs });
+    const f = {
+      name: input(s.name, { required: true, list: "homestead-supply-names" }),
+      kind: h("select", {}, SUPPLY_KINDS.map((k) => h("option", { value: k, selected: k === s.kind }, `${SUPPLY_ICONS[k]} ${this.t(`sk_${k}`)}`))),
+      quantity: input(s.quantity, { type: "number", step: "any", min: 0, inputMode: "decimal" }),
+      unit: h("select", {}, SUPPLY_UNITS.map((u) => h("option", { value: u, selected: u === s.unit }, this.t(`su_${u}`)))),
+      bought_on: input(s.bought_on, { type: "date" }),
+      price: input(s.price, { type: "number", step: "any", min: 0, inputMode: "decimal" }),
+      supplier: input(s.supplier),
+      opened_on: input(s.opened_on, { type: "date" }),
+      finished_on: input(s.finished_on, { type: "date" }),
+      expires_on: input(s.expires_on, { type: "date" }),
+      zone_id: h("select", {}, this._zoneOptions().map(([v, t]) => h("option", { value: v, selected: v === (s.zone_id || "") }, t))),
+      animal: h("select", {}, h("option", { value: "" }, this.t("supplyAllAnimals")), ...Object.entries(ANIMALS).map(([a, icon]) => h("option", { value: a, selected: a === s.animal }, `${icon} ${this.t(`animal_${a}`)}`))),
+      notes: h("textarea", { rows: 2, value: s.notes || "" }),
+    };
+    // Who eats it: only for a yard (a mixed one counts only those animals per head).
+    const animalLabel = h("label", {}, this.t("supplyAnimals"), f.animal);
+    const showAnimal = () => (animalLabel.hidden = this._zone(f.zone_id.value)?.kind !== "coop");
+    f.zone_id.addEventListener("change", showAnimal);
+    showAnimal();
+    // A known product: its kind, size, unit, supplier and zone come with it.
+    f.name.addEventListener("change", () => {
+      const last = [...this._data.supplies].reverse().find((x) => x.name === f.name.value);
+      if (!last || lot) return;
+      f.kind.value = last.kind;
+      f.quantity.value = last.quantity ?? "";
+      f.unit.value = last.unit;
+      f.supplier.value = last.supplier || "";
+      if (!f.zone_id.value) f.zone_id.value = last.zone_id || "";
+      f.animal.value = last.animal || "";
+      showAnimal();
+    });
+    const save = async () => {
+      if (!f.name.value.trim()) return f.name.focus();
+      const v = (el) => el.value || null;
+      const data = {
+        name: f.name.value.trim(),
+        kind: f.kind.value,
+        quantity: f.quantity.value ? Number(f.quantity.value) : null,
+        unit: f.unit.value,
+        bought_on: v(f.bought_on),
+        price: f.price.value ? Number(f.price.value) : null,
+        supplier: f.supplier.value.trim() || null,
+        opened_on: v(f.opened_on),
+        finished_on: v(f.finished_on),
+        expires_on: v(f.expires_on),
+        zone_id: v(f.zone_id),
+        animal: animalLabel.hidden ? null : v(f.animal),
+        notes: f.notes.value.trim() || null,
+      };
+      if (!s.id && !data.price) delete data.price;
+      const result = await this._call(s.id ? "update_supply" : "add_supply", s.id ? { id: s.id, ...data } : data);
+      if (!result) return;
+      close();
+      this._showMessage(`✓ ${this.t("saved", { name: data.name })}`);
+    };
+    const label = (key, el) => h("label", {}, this.t(key), el);
+    const close = this._sheet(
+      `🧺 ${s.id ? s.name : this.t("supplyNew")}`,
+      h("datalist", { id: "homestead-supply-names" }, names.map((n) => h("option", { value: n }))),
+      label("name", f.name),
+      h("div", { className: "row" }, label("supplyKind", f.kind), label("zone_id", f.zone_id)),
+      animalLabel,
+      h("div", { className: "row" }, label("quantity", f.quantity), label("unit", f.unit)),
+      h("div", { className: "row" }, label("supplyBought", f.bought_on), label("price", f.price)),
+      label("supplier", f.supplier),
+      h("div", { className: "row" }, label("supplyOpenedOn", f.opened_on), label("supplyFinishedOn", f.finished_on)),
+      label("supplyExpiresOn", f.expires_on),
+      label("notes", f.notes),
+      s.id ? h("p", { className: "hint", style: "white-space:normal;margin:0" }, this.t("supplyPriceHint")) : null,
+      h(
+        "div",
+        { className: "row" },
+        h("button", { type: "button", className: "primary", onclick: save }, this.t("save")),
+        h("button", { type: "button", onclick: () => close() }, this.t("cancel")),
+        s.id && s.finished_on
+          ? h("button", { type: "button", onclick: () => (close(), this._supplySheet(null, { name: s.name, kind: s.kind, quantity: s.quantity, unit: s.unit, supplier: s.supplier, zone_id: s.zone_id, animal: s.animal, price: s.price })) }, `↻ ${this.t("supplyAgain")}`)
+          : null,
+        s.id ? h("button", { type: "button", className: "danger", onclick: async () => confirm(this.t("confirmDelete", { name: s.name })) && (await this._call("delete_supply", { id: s.id })) && close() }, this.t("delete")) : null,
+      ),
+    );
+  }
+
   // ----- fish lots and species (filled in by hand) -----
 
   /** Fish per lot (in a tank, or everywhere): arrivals minus departures with that lot. Same as models.lot_counts. */
@@ -4197,7 +4476,8 @@ class HomesteadPanel extends HTMLElement {
     }
     const hens = days ? henDays / days : 0;
     const ids = new Set(events.map((e) => e.id));
-    const spent = this._data.expenses.filter((x) => !x.income && ids.has(x.event_id)).reduce((sum, x) => sum + x.amount, 0);
+    // Expenses of the yard's events, plus its feed bags spread over the days they lasted.
+    const spent = this._data.expenses.filter((x) => !x.income && ids.has(x.event_id)).reduce((sum, x) => sum + x.amount, 0) + this._supplyCost(zones, from, to);
     // The cost is shared by the whole yard: per egg only when one kind of animal lays there.
     const layers = new Set(events.filter((e) => e.kind === "eggs").map((e) => e.animal || "hens"));
     return { eggs, hens, perHen: hens ? eggs / hens : null, costPerEgg: spent && eggs && layers.size <= 1 ? spent / eggs : null };
@@ -11445,6 +11725,7 @@ class HomesteadPanel extends HTMLElement {
       first ? null : box,
       z.id && ["vegetable_garden", "greenhouse"].includes(z.kind) && !z.parent_id ? this._nextYearBox(z) : null,
       z.id && !["woodland", "compost", "coop", "apiary", "hive", "melliferous", "hydroponic", "fish_tank"].includes(z.kind) ? this._rotationBox(z) : null,
+      z.id && (ZONE_SUPPLY[z.kind] || this._data.supplies.some((s) => s.zone_id === z.id)) ? this._suppliesBox(z) : null,
       z.id ? this._photoHistoryBox(z.id) : null,
       z.id ? this._diaryBox({ zone_id: z.id }) : null,
       z.id ? this._lastYearsBox(this._data.events.filter((e) => e.zone_id === z.id || this._zoneDescendants(z.id).has(e.zone_id)), { zone_id: z.id }) : null,

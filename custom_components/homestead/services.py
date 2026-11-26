@@ -22,6 +22,8 @@ from .models import (
     MODULES,
     PHOTO_PARTS,
     SOIL_SENSOR_FIELDS,
+    SUPPLY_EXPENSE,
+    SUPPLY_UNITS,
     WATER_READINGS,
     Abundance,
     Animal,
@@ -46,6 +48,8 @@ from .models import (
     PlantType,
     SeedLot,
     Severity,
+    SupplyKind,
+    SupplyLot,
     Task,
     Tool,
     ToolPower,
@@ -59,6 +63,7 @@ from .models import (
     new_id,
 )
 from .photos import delete_photo_files, photo_dir
+from .shopping import async_shop_supplies
 from .species import SourcesUnavailable, fetch_details, upsert_taxon
 from .store import HomesteadStore, get_store
 from .tasks import (
@@ -351,6 +356,27 @@ UPDATE_FISH_LOT_SCHEMA = vol.Schema(
     }
 )
 
+ADD_SUPPLY_SCHEMA = vol.Schema(
+    {
+        vol.Required("name"): cv.string,
+        vol.Optional("kind"): vol.In([k.value for k in SupplyKind]),
+        vol.Optional("quantity"): vol.Any(None, _positive),
+        vol.Optional("unit"): vol.In(SUPPLY_UNITS),
+        vol.Optional("bought_on"): vol.Any(None, cv.date),
+        vol.Optional("price"): vol.Any(None, _positive),
+        vol.Optional("supplier"): _opt_str,
+        vol.Optional("opened_on"): vol.Any(None, cv.date),
+        vol.Optional("finished_on"): vol.Any(None, cv.date),
+        vol.Optional("expires_on"): vol.Any(None, cv.date),
+        vol.Optional("zone_id"): _opt_str,
+        vol.Optional("animal"): vol.Any(None, vol.In([a.value for a in Animal])),
+        vol.Optional("notes"): _opt_str,
+    }
+)
+UPDATE_SUPPLY_SCHEMA = vol.Schema(
+    {vol.Required("id"): cv.string, **{vol.Optional(str(k)): v for k, v in ADD_SUPPLY_SCHEMA.schema.items()}}
+)
+
 UPDATE_SEED_LOT_SCHEMA = vol.Schema(
     {
         vol.Required("id"): cv.string,
@@ -559,6 +585,9 @@ def async_register_services(hass: HomeAssistant) -> None:
         for task in store.data.tasks.values():
             if task.zone_id == zone_id:
                 task.zone_id = zone.parent_id
+        for lot in store.data.supplies.values():
+            if lot.zone_id == zone_id:
+                lot.zone_id = zone.parent_id
         drop_item(store, zone_id)
         for plan in store.data.photo_plans.values():
             plan.zone_ids = [i for i in plan.zone_ids if i != zone_id]
@@ -850,6 +879,62 @@ def async_register_services(hass: HomeAssistant) -> None:
                 event.lot_id = None
         for lot in store.data.fish_lots.values():
             lot.parent_ids = [i for i in lot.parent_ids if i != lot_id]
+        await store.async_save()
+        return {"id": lot_id}
+
+    def _supply_args(store: HomesteadStore, args: dict[str, Any]) -> dict[str, Any]:
+        _check_ref(store.data.zones, args.get("zone_id"), "zone_id")
+        for key in ("bought_on", "opened_on", "finished_on", "expires_on"):
+            if key in args:
+                args[key] = _iso(args[key])
+        return args
+
+    async def add_supply(call: ServiceCall) -> ServiceResponse:
+        """A bag or box; a price becomes an expense linked to it."""
+        store = _store(hass)
+        lot = SupplyLot(**_supply_args(store, dict(call.data)))
+        store.data.supplies[lot.id] = lot
+        if lot.price:
+            _add_expense(
+                store,
+                amount=lot.price,
+                category=SUPPLY_EXPENSE.get(lot.kind, ExpenseCategory.OTHER),
+                spent_on=lot.bought_on,
+                supplier=lot.supplier,
+                supply_id=lot.id,
+                notes=lot.name,
+            )
+        await store.async_save()
+        if lot.finished_on:
+            hass.async_create_task(async_shop_supplies(hass, store, dt_util.now().date()))
+        return {"id": lot.id}
+
+    async def update_supply(call: ServiceCall) -> ServiceResponse:
+        store = _store(hass)
+        args = _supply_args(store, dict(call.data))
+        lot_id = args.pop("id")
+        _check_ref(store.data.supplies, lot_id, "id")
+        old = store.data.supplies[lot_id]
+        if "finished_on" in args and args["finished_on"] != old.finished_on:
+            args["shopping_on"] = None  # finished again or reopened: ask the list again
+        lot = store.data.supplies[lot_id] = replace(old, **args)
+        for expense in store.data.expenses.values():
+            if expense.supply_id == lot_id and "price" in args and lot.price:
+                expense.amount = lot.price
+        await store.async_save()
+        if lot.finished_on and not old.finished_on:
+            hass.async_create_task(async_shop_supplies(hass, store, dt_util.now().date()))
+        return {"id": lot_id}
+
+    async def delete_supply(call: ServiceCall) -> ServiceResponse:
+        """Its expense stays, unlinked."""
+        store = _store(hass)
+        lot_id = call.data["id"]
+        _check_ref(store.data.supplies, lot_id, "id")
+        del store.data.supplies[lot_id]
+        for expense in store.data.expenses.values():
+            if expense.supply_id == lot_id:
+                expense.supply_id = None
         await store.async_save()
         return {"id": lot_id}
 
@@ -1232,6 +1317,9 @@ def async_register_services(hass: HomeAssistant) -> None:
         ("set_growth", set_growth, SET_GROWTH_SCHEMA, SupportsResponse.OPTIONAL),
         ("set_photo_order", set_photo_order, SET_PHOTO_ORDER_SCHEMA, SupportsResponse.OPTIONAL),
         ("set_modules", set_modules, SET_MODULES_SCHEMA, SupportsResponse.OPTIONAL),
+        ("add_supply", add_supply, ADD_SUPPLY_SCHEMA, SupportsResponse.OPTIONAL),
+        ("update_supply", update_supply, UPDATE_SUPPLY_SCHEMA, SupportsResponse.OPTIONAL),
+        ("delete_supply", delete_supply, ID_SCHEMA, SupportsResponse.OPTIONAL),
         ("add_fish_species", add_fish_species, ADD_FISH_SPECIES_SCHEMA, SupportsResponse.OPTIONAL),
         ("update_fish_species", update_fish_species, UPDATE_FISH_SPECIES_SCHEMA, SupportsResponse.OPTIONAL),
         ("delete_fish_species", delete_fish_species, ID_SCHEMA, SupportsResponse.OPTIONAL),

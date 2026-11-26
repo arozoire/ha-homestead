@@ -359,6 +359,17 @@
         "indoor": "Kamerplanten",
         "compost": "Compost"
       }
+    },
+    "supply_kind": {
+      "options": {
+        "feed": "Voer",
+        "fertilizer": "Mest",
+        "treatment": "Gewasbescherming",
+        "bee_feed": "Bijenvoer",
+        "fish_feed": "Visvoer",
+        "bedding": "Strooisel",
+        "other": "Overig"
+      }
     }
   },
   "services": {
@@ -1883,6 +1894,136 @@
         "id": {
           "name": "ID",
           "description": "Id van het record."
+        }
+      }
+    },
+    "add_supply": {
+      "name": "Voorraad toevoegen",
+      "description": "Voegt een zak of doos voer, mest of middel toe.",
+      "fields": {
+        "name": {
+          "name": "Naam",
+          "description": "Productnaam, bijv. legmeel."
+        },
+        "kind": {
+          "name": "Soort",
+          "description": "Wat het is."
+        },
+        "quantity": {
+          "name": "Hoeveelheid",
+          "description": "Inhoud van de zak of doos."
+        },
+        "unit": {
+          "name": "Eenheid",
+          "description": "kg, g, l, ml of stuks."
+        },
+        "bought_on": {
+          "name": "Gekocht op",
+          "description": "Aankoopdatum."
+        },
+        "price": {
+          "name": "Prijs",
+          "description": "Wordt een gekoppelde uitgave."
+        },
+        "supplier": {
+          "name": "Leverancier",
+          "description": "Waar het gekocht is."
+        },
+        "opened_on": {
+          "name": "Geopend op",
+          "description": "In gebruik genomen."
+        },
+        "finished_on": {
+          "name": "Op op",
+          "description": "Op; het verbruik wordt berekend van geopend tot op."
+        },
+        "expires_on": {
+          "name": "Vervalt op",
+          "description": "Vervaldatum op het etiket."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "Wie het gebruikt: hok, bijenstand, bak, moestuin."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        },
+        "animal": {
+          "name": "Dieren",
+          "description": "Bij een gemengd erf de dieren die het eten; leeg = allemaal."
+        }
+      }
+    },
+    "update_supply": {
+      "name": "Voorraad wijzigen",
+      "description": "Wijzigt de opgegeven velden van een voorraad.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id van de voorraad."
+        },
+        "name": {
+          "name": "Naam",
+          "description": "Productnaam, bijv. legmeel."
+        },
+        "kind": {
+          "name": "Soort",
+          "description": "Wat het is."
+        },
+        "quantity": {
+          "name": "Hoeveelheid",
+          "description": "Inhoud van de zak of doos."
+        },
+        "unit": {
+          "name": "Eenheid",
+          "description": "kg, g, l, ml of stuks."
+        },
+        "bought_on": {
+          "name": "Gekocht op",
+          "description": "Aankoopdatum."
+        },
+        "price": {
+          "name": "Prijs",
+          "description": "Wordt een gekoppelde uitgave."
+        },
+        "supplier": {
+          "name": "Leverancier",
+          "description": "Waar het gekocht is."
+        },
+        "opened_on": {
+          "name": "Geopend op",
+          "description": "In gebruik genomen."
+        },
+        "finished_on": {
+          "name": "Op op",
+          "description": "Op; het verbruik wordt berekend van geopend tot op."
+        },
+        "expires_on": {
+          "name": "Vervalt op",
+          "description": "Vervaldatum op het etiket."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "Wie het gebruikt: hok, bijenstand, bak, moestuin."
+        },
+        "notes": {
+          "name": "Notities",
+          "description": "Vrije notities."
+        },
+        "animal": {
+          "name": "Dieren",
+          "description": "Bij een gemengd erf de dieren die het eten; leeg = allemaal."
+        }
+      }
+    },
+    "delete_supply": {
+      "name": "Voorraad verwijderen",
+      "description": "Verwijdert een voorraad; de uitgave blijft.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id van de voorraad."
         }
       }
     }

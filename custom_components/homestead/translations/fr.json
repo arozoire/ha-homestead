@@ -359,6 +359,17 @@
         "indoor": "Plantes d'intérieur",
         "compost": "Compost"
       }
+    },
+    "supply_kind": {
+      "options": {
+        "feed": "Aliment",
+        "fertilizer": "Engrais",
+        "treatment": "Traitement",
+        "bee_feed": "Nourrissement abeilles",
+        "fish_feed": "Aliment poissons",
+        "bedding": "Litière",
+        "other": "Autre"
+      }
     }
   },
   "services": {
@@ -1883,6 +1894,136 @@
         "id": {
           "name": "ID",
           "description": "Id de l'élément."
+        }
+      }
+    },
+    "add_supply": {
+      "name": "Ajouter un stock",
+      "description": "Ajoute un sac ou une boîte d'aliment, d'engrais ou de traitement.",
+      "fields": {
+        "name": {
+          "name": "Nom",
+          "description": "Nom du produit, ex. aliment pondeuses."
+        },
+        "kind": {
+          "name": "Type",
+          "description": "Ce que c'est."
+        },
+        "quantity": {
+          "name": "Quantité",
+          "description": "Contenu du sac ou de la boîte."
+        },
+        "unit": {
+          "name": "Unité",
+          "description": "kg, g, l, ml ou pièces."
+        },
+        "bought_on": {
+          "name": "Acheté le",
+          "description": "Date d'achat."
+        },
+        "price": {
+          "name": "Prix",
+          "description": "Devient une dépense liée."
+        },
+        "supplier": {
+          "name": "Fournisseur",
+          "description": "Où il a été acheté."
+        },
+        "opened_on": {
+          "name": "Ouvert le",
+          "description": "Début d'utilisation."
+        },
+        "finished_on": {
+          "name": "Terminé le",
+          "description": "Épuisé ; la consommation se calcule d'ouvert à terminé."
+        },
+        "expires_on": {
+          "name": "Expire le",
+          "description": "Date d'expiration sur l'étiquette."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "Qui l'utilise : poulailler, rucher, bassin, potager."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Notes libres."
+        },
+        "animal": {
+          "name": "Animaux",
+          "description": "Dans une basse-cour mixte, les animaux qui le mangent ; vide = tous."
+        }
+      }
+    },
+    "update_supply": {
+      "name": "Modifier un stock",
+      "description": "Modifie les champs indiqués d'un stock.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id du stock."
+        },
+        "name": {
+          "name": "Nom",
+          "description": "Nom du produit, ex. aliment pondeuses."
+        },
+        "kind": {
+          "name": "Type",
+          "description": "Ce que c'est."
+        },
+        "quantity": {
+          "name": "Quantité",
+          "description": "Contenu du sac ou de la boîte."
+        },
+        "unit": {
+          "name": "Unité",
+          "description": "kg, g, l, ml ou pièces."
+        },
+        "bought_on": {
+          "name": "Acheté le",
+          "description": "Date d'achat."
+        },
+        "price": {
+          "name": "Prix",
+          "description": "Devient une dépense liée."
+        },
+        "supplier": {
+          "name": "Fournisseur",
+          "description": "Où il a été acheté."
+        },
+        "opened_on": {
+          "name": "Ouvert le",
+          "description": "Début d'utilisation."
+        },
+        "finished_on": {
+          "name": "Terminé le",
+          "description": "Épuisé ; la consommation se calcule d'ouvert à terminé."
+        },
+        "expires_on": {
+          "name": "Expire le",
+          "description": "Date d'expiration sur l'étiquette."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "Qui l'utilise : poulailler, rucher, bassin, potager."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Notes libres."
+        },
+        "animal": {
+          "name": "Animaux",
+          "description": "Dans une basse-cour mixte, les animaux qui le mangent ; vide = tous."
+        }
+      }
+    },
+    "delete_supply": {
+      "name": "Supprimer un stock",
+      "description": "Supprime un stock ; sa dépense reste.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id du stock."
         }
       }
     }

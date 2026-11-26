@@ -359,6 +359,17 @@
         "indoor": "Zimmerpflanzen",
         "compost": "Kompost"
       }
+    },
+    "supply_kind": {
+      "options": {
+        "feed": "Futter",
+        "fertilizer": "Dünger",
+        "treatment": "Pflanzenschutz",
+        "bee_feed": "Bienenfutter",
+        "fish_feed": "Fischfutter",
+        "bedding": "Einstreu",
+        "other": "Sonstiges"
+      }
     }
   },
   "services": {
@@ -1883,6 +1894,136 @@
         "id": {
           "name": "ID",
           "description": "Datensatz-ID."
+        }
+      }
+    },
+    "add_supply": {
+      "name": "Vorrat hinzufügen",
+      "description": "Fügt einen Sack oder eine Packung Futter, Dünger oder Pflanzenschutz hinzu.",
+      "fields": {
+        "name": {
+          "name": "Name",
+          "description": "Produktname, z. B. Legehennenfutter."
+        },
+        "kind": {
+          "name": "Art",
+          "description": "Was es ist."
+        },
+        "quantity": {
+          "name": "Menge",
+          "description": "Inhalt des Sacks oder der Packung."
+        },
+        "unit": {
+          "name": "Einheit",
+          "description": "kg, g, l, ml oder Stück."
+        },
+        "bought_on": {
+          "name": "Gekauft am",
+          "description": "Kaufdatum."
+        },
+        "price": {
+          "name": "Preis",
+          "description": "Wird eine verknüpfte Ausgabe."
+        },
+        "supplier": {
+          "name": "Lieferant",
+          "description": "Wo es gekauft wurde."
+        },
+        "opened_on": {
+          "name": "Geöffnet am",
+          "description": "Angebrochen am."
+        },
+        "finished_on": {
+          "name": "Aufgebraucht am",
+          "description": "Leer; der Verbrauch wird von geöffnet bis leer berechnet."
+        },
+        "expires_on": {
+          "name": "Läuft ab am",
+          "description": "Ablaufdatum auf dem Etikett."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "Wer es nutzt: Stall, Bienenstand, Becken, Gemüsegarten."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        },
+        "animal": {
+          "name": "Tiere",
+          "description": "Bei gemischtem Hof die Tiere, die es fressen; leer = alle."
+        }
+      }
+    },
+    "update_supply": {
+      "name": "Vorrat ändern",
+      "description": "Ändert die angegebenen Felder eines Vorrats.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID des Vorrats."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Produktname, z. B. Legehennenfutter."
+        },
+        "kind": {
+          "name": "Art",
+          "description": "Was es ist."
+        },
+        "quantity": {
+          "name": "Menge",
+          "description": "Inhalt des Sacks oder der Packung."
+        },
+        "unit": {
+          "name": "Einheit",
+          "description": "kg, g, l, ml oder Stück."
+        },
+        "bought_on": {
+          "name": "Gekauft am",
+          "description": "Kaufdatum."
+        },
+        "price": {
+          "name": "Preis",
+          "description": "Wird eine verknüpfte Ausgabe."
+        },
+        "supplier": {
+          "name": "Lieferant",
+          "description": "Wo es gekauft wurde."
+        },
+        "opened_on": {
+          "name": "Geöffnet am",
+          "description": "Angebrochen am."
+        },
+        "finished_on": {
+          "name": "Aufgebraucht am",
+          "description": "Leer; der Verbrauch wird von geöffnet bis leer berechnet."
+        },
+        "expires_on": {
+          "name": "Läuft ab am",
+          "description": "Ablaufdatum auf dem Etikett."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "Wer es nutzt: Stall, Bienenstand, Becken, Gemüsegarten."
+        },
+        "notes": {
+          "name": "Notizen",
+          "description": "Freie Notizen."
+        },
+        "animal": {
+          "name": "Tiere",
+          "description": "Bei gemischtem Hof die Tiere, die es fressen; leer = alle."
+        }
+      }
+    },
+    "delete_supply": {
+      "name": "Vorrat löschen",
+      "description": "Löscht einen Vorrat; die Ausgabe bleibt.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "ID des Vorrats."
         }
       }
     }

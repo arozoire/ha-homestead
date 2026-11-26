@@ -118,6 +118,28 @@ class ExpenseCategory(StrEnum):
     OTHER = "other"
 
 
+class SupplyKind(StrEnum):
+    FEED = "feed"
+    FERTILIZER = "fertilizer"
+    TREATMENT = "treatment"
+    BEE_FEED = "bee_feed"
+    FISH_FEED = "fish_feed"
+    BEDDING = "bedding"
+    OTHER = "other"
+
+
+SUPPLY_UNITS = ("kg", "g", "l", "ml", "pieces")
+# Price of a supply → expense category
+SUPPLY_EXPENSE = {
+    "feed": "animals",
+    "bee_feed": "animals",
+    "fish_feed": "animals",
+    "bedding": "animals",
+    "fertilizer": "fertilizers",
+    "treatment": "treatments",
+}
+
+
 class EventKind(StrEnum):
     PRUNING = "pruning"
     FERTILIZING = "fertilizing"
@@ -503,6 +525,7 @@ class Expense(_Record):
     planting_id: str | None = None
     tool_id: str | None = None
     event_id: str | None = None
+    supply_id: str | None = None  # the bag or box it paid for
     income: bool = False
     notes: str | None = None
 
@@ -677,6 +700,27 @@ class SeedLot(_Record):
 
 
 @dataclass(kw_only=True)
+class SupplyLot(_Record):
+    """A bag, box or bottle: bought, opened, finished. Consumption is computed from those dates."""
+
+    name: str
+    id: str = field(default_factory=new_id)
+    kind: str = SupplyKind.OTHER
+    quantity: float | None = None
+    unit: str = "kg"
+    bought_on: str | None = None
+    price: float | None = None
+    supplier: str | None = None
+    opened_on: str | None = None
+    finished_on: str | None = None
+    expires_on: str | None = None
+    zone_id: str | None = None  # who uses it: a coop, an apiary, a tank, a vegetable zone
+    animal: str | None = None  # in a mixed yard, the animals that eat it (Animal); none = all of them
+    shopping_on: str | None = None  # when it was put on the shopping list (once)
+    notes: str | None = None
+
+
+@dataclass(kw_only=True)
 class FishSpecies(_Record):
     """A fish species as the user keeps it: the water it needs and how to feed it (filled in by hand)."""
 
@@ -810,6 +854,7 @@ _COLLECTIONS: dict[str, type[_Record]] = {
     "photo_plans": PhotoPlan,
     "fish_species": FishSpecies,
     "fish_lots": FishLot,
+    "supplies": SupplyLot,
 }
 
 
@@ -828,6 +873,7 @@ class HomesteadData:
     photo_plans: dict[str, PhotoPlan] = field(default_factory=dict)
     fish_species: dict[str, FishSpecies] = field(default_factory=dict)
     fish_lots: dict[str, FishLot] = field(default_factory=dict)
+    supplies: dict[str, SupplyLot] = field(default_factory=dict)
     # Choices for the whole house: {"modules": [...]} (absent = every module on)
     settings: dict[str, Any] = field(default_factory=dict)
 

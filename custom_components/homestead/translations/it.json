@@ -359,6 +359,17 @@
         "indoor": "Piante da interno",
         "compost": "Compost"
       }
+    },
+    "supply_kind": {
+      "options": {
+        "feed": "Mangime",
+        "fertilizer": "Concime",
+        "treatment": "Trattamento",
+        "bee_feed": "Nutrimento api",
+        "fish_feed": "Mangime pesci",
+        "bedding": "Lettiera",
+        "other": "Altro"
+      }
     }
   },
   "services": {
@@ -1883,6 +1894,136 @@
         "id": {
           "name": "ID",
           "description": "Id del record."
+        }
+      }
+    },
+    "add_supply": {
+      "name": "Aggiungi scorta",
+      "description": "Aggiunge un sacco o una confezione di mangime, concime o trattamento.",
+      "fields": {
+        "name": {
+          "name": "Nome",
+          "description": "Nome del prodotto, es. mangime ovaiole."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Che cos'è."
+        },
+        "quantity": {
+          "name": "Quantità",
+          "description": "Quanto contiene il sacco o la confezione."
+        },
+        "unit": {
+          "name": "Unità",
+          "description": "kg, g, l, ml o pezzi."
+        },
+        "bought_on": {
+          "name": "Comprato il",
+          "description": "Data d'acquisto."
+        },
+        "price": {
+          "name": "Prezzo",
+          "description": "Diventa una spesa collegata."
+        },
+        "supplier": {
+          "name": "Fornitore",
+          "description": "Dove è stato comprato."
+        },
+        "opened_on": {
+          "name": "Aperto il",
+          "description": "Iniziato a usarlo."
+        },
+        "finished_on": {
+          "name": "Finito il",
+          "description": "Esaurito; il consumo si calcola da aperto a finito."
+        },
+        "expires_on": {
+          "name": "Scade il",
+          "description": "Data di scadenza sull'etichetta."
+        },
+        "zone_id": {
+          "name": "Zona",
+          "description": "Chi lo usa: pollaio, apiario, vasca, orto."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        },
+        "animal": {
+          "name": "Animali",
+          "description": "In un cortile misto, gli animali che lo mangiano; vuoto = tutti."
+        }
+      }
+    },
+    "update_supply": {
+      "name": "Modifica scorta",
+      "description": "Cambia i campi indicati di una scorta.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id della scorta."
+        },
+        "name": {
+          "name": "Nome",
+          "description": "Nome del prodotto, es. mangime ovaiole."
+        },
+        "kind": {
+          "name": "Tipo",
+          "description": "Che cos'è."
+        },
+        "quantity": {
+          "name": "Quantità",
+          "description": "Quanto contiene il sacco o la confezione."
+        },
+        "unit": {
+          "name": "Unità",
+          "description": "kg, g, l, ml o pezzi."
+        },
+        "bought_on": {
+          "name": "Comprato il",
+          "description": "Data d'acquisto."
+        },
+        "price": {
+          "name": "Prezzo",
+          "description": "Diventa una spesa collegata."
+        },
+        "supplier": {
+          "name": "Fornitore",
+          "description": "Dove è stato comprato."
+        },
+        "opened_on": {
+          "name": "Aperto il",
+          "description": "Iniziato a usarlo."
+        },
+        "finished_on": {
+          "name": "Finito il",
+          "description": "Esaurito; il consumo si calcola da aperto a finito."
+        },
+        "expires_on": {
+          "name": "Scade il",
+          "description": "Data di scadenza sull'etichetta."
+        },
+        "zone_id": {
+          "name": "Zona",
+          "description": "Chi lo usa: pollaio, apiario, vasca, orto."
+        },
+        "notes": {
+          "name": "Note",
+          "description": "Note libere."
+        },
+        "animal": {
+          "name": "Animali",
+          "description": "In un cortile misto, gli animali che lo mangiano; vuoto = tutti."
+        }
+      }
+    },
+    "delete_supply": {
+      "name": "Elimina scorta",
+      "description": "Elimina una scorta; la sua spesa resta.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Id della scorta."
         }
       }
     }

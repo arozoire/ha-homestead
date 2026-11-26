@@ -1908,3 +1908,124 @@ delete_fish_lot:
       required: true
       selector:
         text:
+
+add_supply:
+  fields:
+    name:
+      required: true
+      example: "Layer feed"
+      selector:
+        text:
+    kind:
+      selector:
+        select:
+          translation_key: supply_kind
+          options: [feed, fertilizer, treatment, bee_feed, fish_feed, bedding, other]
+    quantity:
+      selector:
+        number:
+          min: 0
+          step: any
+          mode: box
+    unit:
+      selector:
+        select:
+          options: [kg, g, l, ml, pieces]
+    bought_on:
+      selector:
+        date:
+    price:
+      selector:
+        number:
+          min: 0
+          step: any
+          mode: box
+    supplier:
+      selector:
+        text:
+    opened_on:
+      selector:
+        date:
+    finished_on:
+      selector:
+        date:
+    expires_on:
+      selector:
+        date:
+    zone_id:
+      selector:
+        text:
+    animal:
+      selector:
+        select:
+          translation_key: animal
+          options: [hens, quails, ducks, geese, turkeys, rabbits, fish, other]
+    notes:
+      selector:
+        text:
+          multiline: true
+
+update_supply:
+  fields:
+    id:
+      required: true
+      selector:
+        text:
+    name:
+      selector:
+        text:
+    kind:
+      selector:
+        select:
+          translation_key: supply_kind
+          options: [feed, fertilizer, treatment, bee_feed, fish_feed, bedding, other]
+    quantity:
+      selector:
+        number:
+          min: 0
+          step: any
+          mode: box
+    unit:
+      selector:
+        select:
+          options: [kg, g, l, ml, pieces]
+    bought_on:
+      selector:
+        date:
+    price:
+      selector:
+        number:
+          min: 0
+          step: any
+          mode: box
+    supplier:
+      selector:
+        text:
+    opened_on:
+      selector:
+        date:
+    finished_on:
+      selector:
+        date:
+    expires_on:
+      selector:
+        date:
+    zone_id:
+      selector:
+        text:
+    animal:
+      selector:
+        select:
+          translation_key: animal
+          options: [hens, quails, ducks, geese, turkeys, rabbits, fish, other]
+    notes:
+      selector:
+        text:
+          multiline: true
+
+delete_supply:
+  fields:
+    id:
+      required: true
+      selector:
+        text:

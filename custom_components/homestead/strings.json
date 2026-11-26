@@ -359,6 +359,17 @@
         "indoor": "Houseplants",
         "compost": "Compost"
       }
+    },
+    "supply_kind": {
+      "options": {
+        "feed": "Feed",
+        "fertilizer": "Fertiliser",
+        "treatment": "Treatment",
+        "bee_feed": "Bee feed",
+        "fish_feed": "Fish feed",
+        "bedding": "Bedding",
+        "other": "Other"
+      }
     }
   },
   "services": {
@@ -1883,6 +1894,136 @@
         "id": {
           "name": "ID",
           "description": "Record id."
+        }
+      }
+    },
+    "add_supply": {
+      "name": "Add supply",
+      "description": "Adds a bag or box of feed, fertiliser or treatment.",
+      "fields": {
+        "name": {
+          "name": "Name",
+          "description": "Product name, e.g. layer feed."
+        },
+        "kind": {
+          "name": "Kind",
+          "description": "What it is."
+        },
+        "quantity": {
+          "name": "Quantity",
+          "description": "How much the bag or box holds."
+        },
+        "unit": {
+          "name": "Unit",
+          "description": "kg, g, l, ml or pieces."
+        },
+        "bought_on": {
+          "name": "Bought on",
+          "description": "Purchase date."
+        },
+        "price": {
+          "name": "Price",
+          "description": "Becomes an expense linked to it."
+        },
+        "supplier": {
+          "name": "Supplier",
+          "description": "Where it was bought."
+        },
+        "opened_on": {
+          "name": "Opened on",
+          "description": "Started using it."
+        },
+        "finished_on": {
+          "name": "Finished on",
+          "description": "Used up; consumption is computed from opened to finished."
+        },
+        "expires_on": {
+          "name": "Expires on",
+          "description": "Expiry date on the label."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "Who uses it: a coop, an apiary, a tank, a vegetable zone."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        },
+        "animal": {
+          "name": "Animals",
+          "description": "In a mixed yard, the animals that eat it; empty = all of them."
+        }
+      }
+    },
+    "update_supply": {
+      "name": "Update supply",
+      "description": "Changes the given fields of a supply.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Supply id."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Product name, e.g. layer feed."
+        },
+        "kind": {
+          "name": "Kind",
+          "description": "What it is."
+        },
+        "quantity": {
+          "name": "Quantity",
+          "description": "How much the bag or box holds."
+        },
+        "unit": {
+          "name": "Unit",
+          "description": "kg, g, l, ml or pieces."
+        },
+        "bought_on": {
+          "name": "Bought on",
+          "description": "Purchase date."
+        },
+        "price": {
+          "name": "Price",
+          "description": "Becomes an expense linked to it."
+        },
+        "supplier": {
+          "name": "Supplier",
+          "description": "Where it was bought."
+        },
+        "opened_on": {
+          "name": "Opened on",
+          "description": "Started using it."
+        },
+        "finished_on": {
+          "name": "Finished on",
+          "description": "Used up; consumption is computed from opened to finished."
+        },
+        "expires_on": {
+          "name": "Expires on",
+          "description": "Expiry date on the label."
+        },
+        "zone_id": {
+          "name": "Zone",
+          "description": "Who uses it: a coop, an apiary, a tank, a vegetable zone."
+        },
+        "notes": {
+          "name": "Notes",
+          "description": "Free notes."
+        },
+        "animal": {
+          "name": "Animals",
+          "description": "In a mixed yard, the animals that eat it; empty = all of them."
+        }
+      }
+    },
+    "delete_supply": {
+      "name": "Delete supply",
+      "description": "Deletes a supply; its expense stays.",
+      "fields": {
+        "id": {
+          "name": "ID",
+          "description": "Supply id."
         }
       }
     }

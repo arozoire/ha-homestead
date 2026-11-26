@@ -1,6 +1,6 @@
 # Supplies: feed, fertiliser, treatments
 
-Design agreed with the maintainer; nothing is built yet. **Built by the maintainer**: not open to contributors unless an issue says so. Read it before working on stocks, products or the shopping list. It can be built in three steps, each one a separate PR.
+Design agreed with the maintainer. **Built by the maintainer**: not open to contributors unless an issue says so. Steps 1 and 2 are built (`SupplyLot` in `models.py`, `supplies.py`, `shopping.py`); step 3 (products) is not yet. Read it before working on stocks, products or the shopping list. It can be built in three steps, each one a separate PR.
 
 ## Principle
 
@@ -25,6 +25,7 @@ One row per bag, box or bottle, like a seed lot.
 | `opened_on`, `finished_on` | 2026-08-01, 2026-11-26 | `finished_on` empty = in use or still closed |
 | `expires_on` | 2027-06-30 | **expiry date**, optional |
 | `zone_id` | the coop | who uses it: a coop, an apiary, a tank, a vegetable zone, or none |
+| `animal` | hens | in a mixed yard, the animals that eat it (per-head figures count only those); empty = all |
 | `notes` | | |
 
 ### `Product` (collection `products`), from step 3
