@@ -66,7 +66,7 @@ AI assistants (Claude Code, Codex, Copilot…) are fine. Read [AGENTS.md](AGENTS
 | Crop calendars from the garden's own climate, worldwide | #51 | Follow [docs/design/crop-calendars.md](docs/design/crop-calendars.md) |
 | Irrigation: meter lost or reset during a run, measured / estimated / incomplete volumes | #52 | Small, with regression tests. Suggested field: `Event.measure` |
 | Explain recommendations: source, freshness and reason of each advice | #52 | Start with the water balance |
-| Feed and water stocks for animals: stock, daily use, days left, low-stock alert, shopping list | — | Fits the Backyard animals module; daily use can be estimated from the number of animals |
+| Supplies: feed bags with consumption computed backwards, expiry, forecast and shopping list, then fertiliser and treatment products (NPK, dose, pre-harvest interval, copper per year) | — | Follow [docs/design/supplies.md](docs/design/supplies.md); three steps, one PR each |
 | Fish breeding: spawning, hatching, life stages with their own water targets | #47 | Builds on the fish lots of 0.24.0 |
 
 ## Out of scope (for now)

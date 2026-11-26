@@ -6,7 +6,8 @@ Read first:
 1. [CONTRIBUTING.md](CONTRIBUTING.md): the project's rules and why they exist. Follow them.
 2. `docs/design/` for the area you touch:
    - [ui.md](docs/design/ui.md) for any panel change;
-   - [crop-calendars.md](docs/design/crop-calendars.md) for crop data and climate.
+   - [crop-calendars.md](docs/design/crop-calendars.md) for crop data and climate;
+   - [supplies.md](docs/design/supplies.md) for stocks, products and the shopping list.
 3. `CLAUDE.md` and `SPEC.md` are the maintainer's history in Italian: background only. Do **not** edit `CLAUDE.md` in a contribution; describe your change in the PR instead.
 
 Commands:
